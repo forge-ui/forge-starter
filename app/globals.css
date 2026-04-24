@@ -1,0 +1,12 @@
+@import "tailwindcss";
+@import "@forge-ui/react/styles.css";
+
+/* Let Tailwind v4 scan the Forge dist so utility classes like bg-fg-violet,
+   tracking-fg etc. used inside @forge-ui/react components get generated. */
+@source "../node_modules/@forge-ui/react/dist";
+
+html,
+body {
+  background: #ffffff;
+  color: #000000;
+}
