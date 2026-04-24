@@ -2,7 +2,7 @@
 
 基于 [Forge UI Kit](https://forge-ui.github.io/forge) 的 Next.js 16 + Tailwind v4 项目模板。开箱包含：
 
-- 登录 / 注册页（`/login` `/register`，用 Kit 组件 + 紫色品牌分栏布局）
+- 四页 auth（`/login` `/register` `/forgot-password` `/reset-password`，用 Kit 组件 + 共享左右分栏 layout）
 - 空白后台壳（`/dashboard`，`AppLayout` + 虚线占位内容区）
 - `AGENTS.md`（给 Claude / Cursor / Codex 的 Forge 规范）
 - `.npmrc` / `.env.example`（GitHub Packages 私有包认证模板）
@@ -39,9 +39,12 @@ pnpm dev
 .
 ├── app/
 │   ├── (auth)/              # 登录态外的路由组，共享左右分栏 auth layout
-│   │   ├── layout.tsx       # 左边品牌面板 + 右边表单槽
+│   │   ├── layout.tsx       # 左边 hero + 装饰卡片，右边表单槽
+│   │   ├── _social-button.tsx
 │   │   ├── login/page.tsx
-│   │   └── register/page.tsx
+│   │   ├── register/page.tsx
+│   │   ├── forgot-password/page.tsx
+│   │   └── reset-password/page.tsx
 │   ├── (app)/               # 登录态内的路由组，共享 AppLayout
 │   │   └── dashboard/page.tsx
 │   ├── layout.tsx           # 根 layout

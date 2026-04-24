@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Button, TextField } from "@forge-ui/react";
 import { EyeLinear, EyeClosedLinear } from "solar-icon-set";
+import { SocialButton, OrDivider } from "../_social-button";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -26,6 +27,13 @@ export default function LoginPage() {
           Welcome back, please enter your details.
         </p>
       </header>
+
+      <div className="flex flex-col gap-4">
+        <SocialButton provider="google" action="Log in" />
+        <SocialButton provider="facebook" action="Log in" />
+      </div>
+
+      <OrDivider />
 
       <div className="flex flex-col gap-4">
         <TextField

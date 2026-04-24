@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useState } from "react";
 import { Button, TextField } from "@forge-ui/react";
 import { EyeLinear, EyeClosedLinear } from "solar-icon-set";
+import { SocialButton, OrDivider } from "../_social-button";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -14,27 +16,37 @@ export default function RegisterPage() {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     // TODO: 接入你自己的 auth 逻辑
-    console.log("register", { name, email, password });
+    console.log("register", { name, username, email, password });
   };
 
   return (
     <form onSubmit={handleSubmit} className="flex w-full max-w-[400px] flex-col gap-8">
       <header className="flex flex-col gap-3 text-center">
         <h1 className="font-display text-2xl font-semibold tracking-fg text-fg-black">
-          Create an Account
+          Create Account
         </h1>
         <p className="text-base text-fg-grey-700">
-          Fill in your details to get started.
+          Let&apos;s get started, please enter your details.
         </p>
       </header>
 
       <div className="flex flex-col gap-4">
-        <TextField
-          label="Full Name"
-          placeholder="Your name..."
-          value={name}
-          onChange={setName}
-        />
+        <SocialButton provider="google" action="Register" />
+        <SocialButton provider="facebook" action="Register" />
+      </div>
+
+      <OrDivider />
+
+      <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-2 gap-4">
+          <TextField label="Name" placeholder="Your name..." value={name} onChange={setName} />
+          <TextField
+            label="Username"
+            placeholder="Your username..."
+            value={username}
+            onChange={setUsername}
+          />
+        </div>
 
         <TextField
           label="Email"
