@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, TextField } from "@forge-ui/react";
 import { EyeLinear, EyeClosedLinear } from "solar-icon-set";
 import { SocialButton, OrDivider } from "../_social-button";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -14,7 +16,9 @@ export default function LoginPage() {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     // TODO: 接入你自己的 auth 逻辑（NextAuth / Clerk / Supabase / 自建 API）
+    // demo 直接跳后台首页
     console.log("login", { email, password });
+    router.push("/dashboard");
   };
 
   return (

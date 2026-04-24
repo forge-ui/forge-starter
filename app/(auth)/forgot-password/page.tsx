@@ -1,16 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, TextField } from "@forge-ui/react";
 
 export default function ForgotPasswordPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     // TODO: 调用你的 auth 后端发送重置邮件
+    // demo 直接跳到重置密码页
     console.log("forgot-password", { email });
+    router.push("/reset-password");
   };
 
   return (

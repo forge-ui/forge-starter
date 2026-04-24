@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, TextField } from "@forge-ui/react";
 import { EyeLinear, EyeClosedLinear } from "solar-icon-set";
@@ -25,6 +26,7 @@ function PasswordToggle({
 }
 
 export default function ResetPasswordPage() {
+  const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -37,7 +39,10 @@ export default function ResetPasswordPage() {
       console.warn("passwords do not match");
       return;
     }
+    // TODO: 调用你的 auth 后端重置密码
+    // demo 重置完跳回登录页
     console.log("reset-password", { password });
+    router.push("/login");
   };
 
   return (

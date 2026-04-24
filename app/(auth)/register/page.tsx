@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, TextField } from "@forge-ui/react";
 import { EyeLinear, EyeClosedLinear } from "solar-icon-set";
 import { SocialButton, OrDivider } from "../_social-button";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -16,7 +18,9 @@ export default function RegisterPage() {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     // TODO: 接入你自己的 auth 逻辑
+    // demo 直接跳后台首页
     console.log("register", { name, username, email, password });
+    router.push("/dashboard");
   };
 
   return (
