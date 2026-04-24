@@ -1,37 +1,42 @@
+/* eslint-disable @next/next/no-img-element */
+
+import { HeartBold } from "solar-icon-set";
+import { asset } from "@/lib/asset";
+
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen w-full items-stretch p-6 bg-white">
-      {/* Left brand panel — Forge 紫渐变 + 几何装饰，零图片依赖 */}
-      <div className="relative hidden h-auto w-[640px] shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-fg-violet via-violet-600 to-violet-900 lg:block">
-        {/* 抽象几何装饰 */}
-        <div className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-32 -left-24 h-96 w-96 rounded-full bg-white/15 blur-3xl" />
-        <div className="pointer-events-none absolute right-12 top-1/3 h-48 w-48 rounded-3xl border border-white/20 rotate-12" />
-        <div className="pointer-events-none absolute bottom-24 right-24 h-32 w-32 rounded-2xl bg-white/5 backdrop-blur-md" />
-
-        {/* 品牌信息 */}
-        <div className="relative flex h-full flex-col justify-between p-10 text-white">
-          <div className="flex items-center gap-2.5 text-base font-semibold tracking-fg">
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-white text-fg-violet font-bold">
-              F
-            </span>
-            Forge Starter
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <p className="max-w-sm font-display text-4xl font-bold leading-tight tracking-fg">
-              开箱即用的 ToB 后台起点
-            </p>
-            <p className="max-w-sm text-base leading-relaxed text-white/80">
-              登录/注册 + 空白后台壳 + AGENTS.md，一条 pnpm dev 就能跑。
-            </p>
-          </div>
-        </div>
+      {/* 左侧 hero 图 + 装饰卡片，Figma 原版视觉 */}
+      <div className="relative hidden h-auto w-[640px] shrink-0 overflow-hidden rounded-2xl lg:block">
+        <img
+          src={asset("/images/hero.jpg")}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        {/* 右下装饰 — chart card */}
+        <img
+          src={asset("/images/chart-card.png")}
+          alt=""
+          className="absolute right-8 bottom-32 w-[228px] h-[246px] object-cover pointer-events-none"
+        />
+        {/* 左下装饰 — stat card */}
+        <img
+          src={asset("/images/stat-card.png")}
+          alt=""
+          className="absolute left-8 bottom-12 w-[240px] h-[156px] object-cover pointer-events-none"
+        />
       </div>
 
-      {/* Right form panel */}
-      <div className="flex flex-1 items-center justify-center px-6 py-10">
+      {/* 右侧表单 */}
+      <div className="relative flex flex-1 items-center justify-center px-6 py-10">
         {children}
+
+        {/* Copyright footer 居中底部 */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1 text-sm text-fg-grey-700 whitespace-nowrap">
+          <span>© 2026 Made With</span>
+          <HeartBold size={14} color="#EF4444" />
+          <span>By Forge</span>
+        </div>
       </div>
     </div>
   );
