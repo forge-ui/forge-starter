@@ -1,12 +1,20 @@
 # Forge Starter
 
-基于 [Forge UI Kit](https://forge-ui.github.io/forge) 的 Next.js 16 + Tailwind v4 项目模板。开箱包含：
+基于 [Forge UI Kit](https://forge-mu-amber.vercel.app) 的 Next.js 16 + Tailwind v4 项目模板。开箱包含：
 
 - 四页 auth（`/login` `/register` `/forgot-password` `/reset-password`，用 Kit 组件 + 共享左右分栏 layout）
 - 空白后台壳（`/dashboard`，`AppLayout` + 虚线占位内容区）
 - `AGENTS.md`（给 Claude / Cursor / Codex 的 Forge 规范）
 - `.npmrc` / `.env.example`（GitHub Packages 私有包认证模板）
 - TypeScript + ESLint-ready
+
+> **只要免费版组件？** 直接装 [`@forge-ui-official/core`](https://www.npmjs.com/package/@forge-ui-official/core)（MIT，30+ 原子组件，无需 PAT）— 不用走下面 starter 的 Pro 流程。
+>
+> ```bash
+> pnpm add @forge-ui-official/core
+> ```
+>
+> 想要全套（DataTable Pro · Calendar · Charts · 业务 Card · case 页 · AppLayout）？继续看下面的 starter 步骤，或 [加入早鸟名单](https://forge-mu-amber.vercel.app/waitlist) 拿 $49.9 lifetime。
 
 ## 一分钟跑起来
 
@@ -65,15 +73,15 @@ pnpm dev
 
 更多说明看 Forge 文档：
 
-- [快速开始](https://forge-ui.github.io/forge/docs/quick-start)
-- [详细安装](https://forge-ui.github.io/forge/docs/installation)
-- [故障排查](https://forge-ui.github.io/forge/docs/troubleshoot)
-- [组件清单](https://forge-ui.github.io/forge/components)
+- [快速开始](https://forge-mu-amber.vercel.app/docs/quick-start)
+- [详细安装](https://forge-mu-amber.vercel.app/docs/installation)
+- [故障排查](https://forge-mu-amber.vercel.app/docs/troubleshoot)
+- [组件清单](https://forge-mu-amber.vercel.app/components)
 
 ## 下一步往哪走
 
 1. 改 `config/menu.tsx`，换成你业务的菜单和 profile
-2. 删掉 `app/(app)/dashboard/page.tsx` 里的虚线占位，换真实内容——参考 [Forge 组件清单](https://forge-ui.github.io/forge/components) 里的 `StatCard` / `ChartCard` / `DataTable` 等
+2. 删掉 `app/(app)/dashboard/page.tsx` 里的虚线占位，换真实内容——参考 [Forge 组件清单](https://forge-mu-amber.vercel.app/components) 里的 `StatCard` / `ChartCard` / `DataTable` 等
 3. 接入 auth：login / register 页里的 `handleSubmit` 换成你的 NextAuth / Clerk / Supabase / 自建 API 调用
 4. 把 `AGENTS.md` 留在根目录，你的 AI 助手会自动读它
 
