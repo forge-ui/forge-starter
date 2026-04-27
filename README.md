@@ -37,7 +37,7 @@ pnpm dev
 
 浏览器打开 <http://localhost:3000>：
 
-- `/` 自动跳转到 `/dashboard`
+- `/` 自动跳转到 `/login`（要换成进 dashboard，改 `app/page.tsx` 一行）
 - `/login` / `/register` 看登录注册
 - `/dashboard` 看空白后台壳
 
@@ -56,7 +56,7 @@ pnpm dev
 │   ├── (app)/               # 登录态内的路由组，共享 AppLayout
 │   │   └── dashboard/page.tsx
 │   ├── layout.tsx           # 根 layout
-│   ├── page.tsx             # / → 重定向到 /dashboard
+│   ├── page.tsx             # / → 重定向到 /login
 │   └── globals.css          # Tailwind v4 + @forge-ui/react styles + @source
 ├── config/
 │   └── menu.tsx             # AppLayout 的 menuItems / profile 配置，改这里
