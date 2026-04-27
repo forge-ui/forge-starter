@@ -17,7 +17,7 @@ function PasswordToggle({
     <button
       type="button"
       onClick={onToggle}
-      aria-label={shown ? "Hide password" : "Show password"}
+      aria-label={shown ? "隐藏密码" : "显示密码"}
       className="flex items-center justify-center text-fg-grey-700 hover:text-fg-black"
     >
       {shown ? <EyeLinear size={20} /> : <EyeClosedLinear size={20} />}
@@ -49,14 +49,14 @@ export default function ResetPasswordPage() {
     <form onSubmit={handleSubmit} className="flex w-full max-w-[400px] flex-col gap-8">
       <header className="flex flex-col gap-2 text-center">
         <h1 className="font-display text-2xl font-semibold tracking-fg text-fg-black">
-          Reset Password
+          重置密码
         </h1>
       </header>
 
       <div className="flex flex-col gap-4">
         <TextField
-          label="New Password"
-          placeholder="Your password..."
+          label="新密码"
+          placeholder="输入新密码..."
           value={password}
           onChange={setPassword}
           iconRight={
@@ -68,8 +68,8 @@ export default function ResetPasswordPage() {
         />
 
         <TextField
-          label="Confirm Password"
-          placeholder="Your password..."
+          label="确认密码"
+          placeholder="再次输入新密码..."
           value={confirm}
           onChange={setConfirm}
           iconRight={
@@ -81,14 +81,14 @@ export default function ResetPasswordPage() {
         />
 
         <Button type="submit" color="purple" variant="primary" size="lg" className="w-full">
-          Reset Password
+          重置密码
         </Button>
       </div>
 
       <p className="text-center text-sm text-fg-grey-700">
-        Don&apos;t have an account?{" "}
+        还没账号？{" "}
         <Link href="/register" className="font-bold text-fg-violet hover:underline">
-          Register now
+          立即注册
         </Link>
       </p>
     </form>

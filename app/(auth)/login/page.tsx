@@ -25,31 +25,31 @@ export default function LoginPage() {
     <form onSubmit={handleSubmit} className="flex w-full max-w-[400px] flex-col gap-8">
       <header className="flex flex-col gap-3 text-center">
         <h1 className="font-display text-2xl font-semibold tracking-fg text-fg-black">
-          Welcome Back!
+          欢迎回来
         </h1>
         <p className="text-base text-fg-grey-700">
-          Welcome back, please enter your details.
+          请输入账号信息登录。
         </p>
       </header>
 
       <div className="flex flex-col gap-4">
-        <SocialButton provider="google" action="Log in" />
-        <SocialButton provider="facebook" action="Log in" />
+        <SocialButton provider="google" action="登录" />
+        <SocialButton provider="facebook" action="登录" />
       </div>
 
       <OrDivider />
 
       <div className="flex flex-col gap-4">
         <TextField
-          label="Username / Email"
-          placeholder="Your username or email..."
+          label="用户名 / 邮箱"
+          placeholder="输入用户名或邮箱..."
           value={email}
           onChange={setEmail}
         />
 
         <TextField
-          label="Password"
-          placeholder="Your password..."
+          label="密码"
+          placeholder="输入密码..."
           value={password}
           onChange={setPassword}
           headerAction={
@@ -57,14 +57,14 @@ export default function LoginPage() {
               href="/forgot-password"
               className="text-sm font-bold text-fg-violet hover:underline"
             >
-              Forgot password
+              忘记密码
             </Link>
           }
           iconRight={
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-label={showPassword ? "隐藏密码" : "显示密码"}
               className="flex items-center justify-center text-fg-grey-700 hover:text-fg-black"
             >
               {showPassword ? <EyeLinear size={20} /> : <EyeClosedLinear size={20} />}
@@ -73,14 +73,14 @@ export default function LoginPage() {
         />
 
         <Button type="submit" color="purple" variant="primary" size="lg" className="w-full">
-          Log in
+          登录
         </Button>
       </div>
 
       <p className="text-center text-sm text-fg-grey-700">
-        Don&apos;t have an account?{" "}
+        还没账号？{" "}
         <Link href="/register" className="font-bold text-fg-violet hover:underline">
-          Register now
+          立即注册
         </Link>
       </p>
     </form>

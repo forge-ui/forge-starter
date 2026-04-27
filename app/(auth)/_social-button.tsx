@@ -15,7 +15,7 @@ export function SocialButton({
   onClick,
 }: {
   provider: Provider;
-  action: "Log in" | "Register";
+  action: string;
   onClick?: () => void;
 }) {
   return (
@@ -30,7 +30,7 @@ export function SocialButton({
         className="size-5 shrink-0"
       />
       <span className="whitespace-nowrap">
-        {action} with {LABELS[provider]}
+        使用 {LABELS[provider]} {action}
       </span>
     </button>
   );
@@ -40,7 +40,7 @@ export function OrDivider() {
   return (
     <div className="flex w-full items-center gap-2">
       <div className="h-px flex-1 bg-fg-grey-200" />
-      <span className="text-sm text-fg-grey-700">or</span>
+      <span className="text-sm text-fg-grey-700">或</span>
       <div className="h-px flex-1 bg-fg-grey-200" />
     </div>
   );

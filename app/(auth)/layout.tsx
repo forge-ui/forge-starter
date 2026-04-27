@@ -33,9 +33,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
         {/* Copyright footer 居中底部 */}
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1 text-sm text-fg-grey-700 whitespace-nowrap">
-          <span>© 2026 Made With</span>
+          <span>© 2026 用心打造</span>
           <HeartBold size={14} color="#EF4444" />
-          <span>By Forge</span>
+          <span>by Forge</span>
         </div>
       </div>
     </div>
