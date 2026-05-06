@@ -6,7 +6,7 @@ const isGhPages = process.env.GITHUB_PAGES === "true";
 const nextConfig: NextConfig = {
   output: isGhPages ? "export" : undefined,
   images: { unoptimized: isGhPages },
-  trailingSlash: isGhPages,
+  trailingSlash: true,
   env: {
     NEXT_PUBLIC_BASE_PATH: "",
   },
