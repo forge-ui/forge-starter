@@ -1,89 +1,89 @@
 # Forge Starter
 
-基于 [Forge UI Kit](https://forge-mu-amber.vercel.app) 的 Next.js 16 + Tailwind v4 项目模板。开箱包含：
+基于 Forge UI Kit 的 Next.js 16 + Tailwind v4 起手模板，用来快速搭建 SaaS 控制台、业务后台和 AI agent 产品壳。
 
-- 四页 auth（`/login` `/register` `/forgot-password` `/reset-password`，用 Kit 组件 + 共享左右分栏 layout）
-- 空白后台壳（`/dashboard`，`AppLayout` + 虚线占位内容区）
-- `AGENTS.md`（给 Claude / Cursor / Codex 的 Forge 规范）
-- `.npmrc` / `.env.example`（GitHub Packages 私有包认证模板）
-- TypeScript + ESLint-ready
+**目标：让新项目从第一天就使用 Forge 的组件、布局、设计 token 和 AI 编码规范，而不是从空白页面重新拼后台。**
 
-> **只要免费版组件？** 直接装 [`@forge-ui-official/core`](https://www.npmjs.com/package/@forge-ui-official/core)（MIT，30+ 原子组件，无需 PAT）— 不用走下面 starter 的 Pro 流程。
->
-> ```bash
-> pnpm add @forge-ui-official/core
-> ```
->
-> 想要全套（DataTable Pro · Calendar · Charts · 业务 Card · case 页 · AppLayout）？继续看下面的 starter 步骤，或 [加入早鸟名单](https://forge-mu-amber.vercel.app/waitlist) 拿 $49.9 lifetime。
+## 内置内容
 
-## 一分钟跑起来
+- **登录流程**：`/login`、`/register`、`/forgot-password`、`/reset-password`
+- **后台壳**：`/dashboard` 已接入 `AppLayout`、菜单、用户信息、通知和基础 dashboard 区块
+- **Forge 样式接入**：Tailwind v4 已导入 `@forge-ui-official/core/styles.css` 和必要的 `@source`
+- **AI 规范**：根目录 `AGENTS.md` 会约束 Codex、Claude Code、Cursor 等工具优先使用 Forge 组件
+- **公开依赖**：组件库来自 npm 包 `@forge-ui-official/core`，不需要私有 registry 或 npm token
+
+## 快速开始
 
 ```bash
-# 1. 从这个模板创建项目
 gh repo create my-app --template forge-ui/forge-starter --clone
-# 或：npx degit forge-ui/forge-starter my-app
 cd my-app
 
-# 2. 拿一个 GitHub PAT（需要 read:packages scope）
-# https://github.com/settings/tokens
-
-# 3. export 到 shell
-export GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxx
-
-# 4. 装依赖 + 跑起来
 pnpm install
 pnpm dev
 ```
 
-浏览器打开 <http://localhost:3000>：
+打开 <http://localhost:3000>：
 
-- `/` 自动跳转到 `/login`（要换成进 dashboard，改 `app/page.tsx` 一行）
-- `/login` / `/register` 看登录注册
-- `/dashboard` 看空白后台壳
+- `/` 默认跳转到 `/login`
+- `/login` 查看登录页
+- `/register` 查看注册页
+- `/dashboard` 查看后台首页
 
 ## 目录结构
 
-```
+```txt
 .
 ├── app/
-│   ├── (auth)/              # 登录态外的路由组，共享左右分栏 auth layout
-│   │   ├── layout.tsx       # 左边 hero + 装饰卡片，右边表单槽
-│   │   ├── _social-button.tsx
-│   │   ├── login/page.tsx
-│   │   ├── register/page.tsx
-│   │   ├── forgot-password/page.tsx
-│   │   └── reset-password/page.tsx
-│   ├── (app)/               # 登录态内的路由组，共享 AppLayout
-│   │   └── dashboard/page.tsx
-│   ├── layout.tsx           # 根 layout
-│   ├── page.tsx             # / → 重定向到 /login
-│   └── globals.css          # Tailwind v4 + @forge-ui/react styles + @source
+│   ├── (auth)/              # 登录态外页面，共享 auth layout
+│   ├── (app)/               # 登录态内页面，共享 AppLayout 使用方式
+│   ├── globals.css          # Tailwind v4 + Forge styles + @source
+│   ├── layout.tsx
+│   └── page.tsx             # / -> /login
 ├── config/
-│   └── menu.tsx             # AppLayout 的 menuItems / profile 配置，改这里
-├── AGENTS.md                # 给 AI 的 Forge 规范
-├── .npmrc                   # GitHub Packages scope 指向
-└── .env.example             # GITHUB_TOKEN 模板
+│   └── menu.tsx             # AppLayout 菜单、收藏、profile 配置
+├── lib/
+│   └── asset.ts             # basePath 友好的静态资源 helper
+├── public/
+│   └── images/              # 登录页和品牌图标资源
+├── AGENTS.md                # AI coding agent 规范
+└── package.json
 ```
 
-## 常见问题
+## 常用命令
 
-**装包时 `401 Unauthorized`**：token 没 `read:packages` scope，或没 export 到当前 shell。跑 `echo $GITHUB_TOKEN` 确认。
+```bash
+pnpm dev        # 本地开发
+pnpm build      # 生产构建
+pnpm start      # 启动生产构建
+pnpm typecheck  # TypeScript 检查
+```
 
-**样式全灰，按钮没颜色**：`globals.css` 里 `@source` 的相对路径不对。从 `app/globals.css` 出发，monorepo 场景可能要写成 `../../node_modules/...`。
+## 接入真实业务
 
-更多说明看 Forge 文档：
+1. 修改 `config/menu.tsx`，替换菜单、收藏项和用户信息。
+2. 在 `app/(app)` 下新增业务页面，统一用 `AppLayout` 承载。
+3. 复用 `@forge-ui-official/core` 的 `Button`、`TextField`、`DataTable`、`StatCard`、`ChartCard` 等组件。
+4. 把 auth 页面里的 `handleSubmit` 替换成你的 NextAuth、Clerk、Supabase 或自建 API 调用。
+5. 保留 `AGENTS.md`，让 AI 助手按 Forge 规范生成页面。
 
-- [快速开始](https://forge-mu-amber.vercel.app/docs/quick-start)
-- [详细安装](https://forge-mu-amber.vercel.app/docs/installation)
-- [故障排查](https://forge-mu-amber.vercel.app/docs/troubleshoot)
-- [组件清单](https://forge-mu-amber.vercel.app/components)
+## 样式接入
 
-## 下一步往哪走
+`app/globals.css` 已包含：
 
-1. 改 `config/menu.tsx`，换成你业务的菜单和 profile
-2. 删掉 `app/(app)/dashboard/page.tsx` 里的虚线占位，换真实内容——参考 [Forge 组件清单](https://forge-mu-amber.vercel.app/components) 里的 `StatCard` / `ChartCard` / `DataTable` 等
-3. 接入 auth：login / register 页里的 `handleSubmit` 换成你的 NextAuth / Clerk / Supabase / 自建 API 调用
-4. 把 `AGENTS.md` 留在根目录，你的 AI 助手会自动读它
+```css
+@import "tailwindcss";
+@import "@forge-ui-official/core/styles.css";
+@source "../node_modules/@forge-ui-official/core/dist";
+```
+
+如果你移动了 CSS 文件位置，记得同步调整 `@source` 的相对路径，否则 Forge 组件内部用到的 Tailwind class 可能不会生成。
+
+## 相关链接
+
+- [Forge 文档](https://forge-mu-amber.vercel.app/docs)
+- [Forge 组件](https://forge-mu-amber.vercel.app/components)
+- [Forge 主仓库](https://github.com/forge-ui/forge)
+- [@forge-ui-official/core](https://www.npmjs.com/package/@forge-ui-official/core)
 
 ## License
 

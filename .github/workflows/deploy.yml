@@ -9,7 +9,6 @@ permissions:
   contents: read
   pages: write
   id-token: write
-  packages: read
 
 concurrency:
   group: pages
@@ -31,10 +30,6 @@ jobs:
           cache: pnpm
 
       - name: Install deps
-        env:
-          # 默认 GITHUB_TOKEN 对跨仓库的 private packages 没访问权。
-          # PACKAGES_TOKEN 是一个有 read:packages scope 的 PAT，配在 repo secrets 里。
-          GITHUB_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
         run: pnpm install --frozen-lockfile
 
       - name: Build (static export)

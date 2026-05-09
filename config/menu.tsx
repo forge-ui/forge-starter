@@ -9,7 +9,7 @@ import {
   FolderBoldDuotone,
   StarBoldDuotone,
 } from "solar-icon-set";
-import type { AppLayoutMenuItem, AppLayoutProfile } from "@forge-ui/react";
+import type { AppLayoutMenuItem, AppLayoutProfile } from "@forge-ui-official/core";
 
 export const menuItems: AppLayoutMenuItem[] = [
   { icon: <HomeSmileBoldDuotone size={20} />, label: "工作台", href: "/dashboard/" },

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button, TextField } from "@forge-ui/react";
+import { Button, TextField } from "@forge-ui-official/core";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();

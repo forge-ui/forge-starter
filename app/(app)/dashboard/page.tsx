@@ -1,4 +1,4 @@
-import { AppLayout } from "@forge-ui/react";
+import { AppLayout } from "@forge-ui-official/core";
 import { menuItems, favoriteItems, profile } from "@/config/menu";
 
 export default function DashboardPage() {
