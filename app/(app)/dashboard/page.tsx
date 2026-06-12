@@ -3,7 +3,6 @@
 import {
   AppLayout,
   Button,
-  CellActions,
   CellLink,
   CellMuted,
   CellNumber,
@@ -13,90 +12,102 @@ import {
   DataTable,
   Label,
   ListGroup,
+  NotificationItem,
+  PageTitleToolbar,
   ProgressBar,
   StatCard,
   SurfaceCard,
-  ActivityCard,
   Toolbar,
   ToolbarActions,
   ToolbarDatepicker,
+  ToolbarSearchInput,
   ToolbarSelectDropdown,
   type ColumnDef,
 } from "@forge-ui-official/core";
 import {
   BoxMinimalisticBoldDuotone,
-  ChefHatMinimalisticLinear,
   ClipboardListLinear,
   DangerCircleLinear,
+  Pills3Linear,
 } from "solar-icon-set";
-import { menuItems, favoriteItems, profile } from "@/config/menu";
+import { favoriteItems, menuItems, profile } from "@/config/menu";
 
-type StoreRow = {
+type RefillRow = {
   store: string;
-  area: string;
-  status: "正常" | "压单" | "缺货";
-  orders: string;
-  revenue: string;
-  fulfillment: number;
+  district: string;
+  status: "正常" | "预警" | "断货";
+  sku: string;
+  stockoutRisk: number;
+  dailySales: string;
   owner: string;
   nextAction: string;
 };
 
-const storeRows: StoreRow[] = [
+const refillRows: RefillRow[] = [
   {
-    store: "静安寺旗舰店",
-    area: "堂食 + 外卖 / 上海静安",
-    status: "压单",
-    orders: "286",
-    revenue: "¥48,920",
-    fulfillment: 76,
-    owner: "李娜",
-    nextAction: "调度骑手",
+    store: "南京西路旗舰药房",
+    district: "慢病专区 / 上海静安",
+    status: "断货",
+    sku: "二甲双胍缓释片",
+    stockoutRisk: 91,
+    dailySales: "¥42,860",
+    owner: "周晨",
+    nextAction: "生成调拨",
   },
   {
-    store: "五角场大学路店",
-    area: "学生客群 / 上海杨浦",
+    store: "古北社区店",
+    district: "家庭常备药 / 上海长宁",
+    status: "预警",
+    sku: "布洛芬混悬液",
+    stockoutRisk: 73,
+    dailySales: "¥28,140",
+    owner: "沈岚",
+    nextAction: "补货确认",
+  },
+  {
+    store: "徐家汇地铁店",
+    district: "OTC 高频品 / 上海徐汇",
     status: "正常",
-    orders: "214",
-    revenue: "¥35,640",
-    fulfillment: 92,
-    owner: "周启",
-    nextAction: "查看复购",
+    sku: "氯雷他定片",
+    stockoutRisk: 42,
+    dailySales: "¥31,520",
+    owner: "林嘉",
+    nextAction: "查看趋势",
   },
   {
-    store: "陆家嘴中心店",
-    area: "办公午高峰 / 上海浦东",
-    status: "缺货",
-    orders: "179",
-    revenue: "¥31,870",
-    fulfillment: 68,
-    owner: "王璐",
-    nextAction: "补货审核",
+    store: "联洋社区店",
+    district: "儿科用药 / 上海浦东",
+    status: "预警",
+    sku: "小儿豉翘清热颗粒",
+    stockoutRisk: 68,
+    dailySales: "¥19,760",
+    owner: "唐睿",
+    nextAction: "供应商跟进",
   },
   {
-    store: "徐汇日月光店",
-    area: "商场客流 / 上海徐汇",
+    store: "大宁国际店",
+    district: "医保药品 / 上海静安",
     status: "正常",
-    orders: "158",
-    revenue: "¥27,430",
-    fulfillment: 88,
-    owner: "陈卓",
-    nextAction: "排班确认",
+    sku: "阿托伐他汀钙片",
+    stockoutRisk: 36,
+    dailySales: "¥24,330",
+    owner: "何曼",
+    nextAction: "复核库存",
   },
 ];
 
 const statusColor = {
   正常: "green",
-  压单: "yellow",
-  缺货: "red",
+  预警: "yellow",
+  断货: "red",
 } as const;
 
-const columns: ColumnDef<StoreRow>[] = [
+const columns: ColumnDef<RefillRow>[] = [
   {
     key: "store",
     header: "门店",
     flex: true,
-    render: (row) => <CellTextSubtitle title={row.store} subtitle={row.area} />,
+    render: (row) => <CellTextSubtitle title={row.store} subtitle={row.district} />,
   },
   {
     key: "status",
@@ -105,33 +116,33 @@ const columns: ColumnDef<StoreRow>[] = [
     render: (row) => <CellStatusDot label={row.status} color={statusColor[row.status]} />,
   },
   {
-    key: "orders",
-    header: "订单",
-    width: "w-24",
-    render: (row) => <CellNumber value={row.orders} />,
-  },
-  {
-    key: "revenue",
-    header: "营业额",
-    width: "w-32",
-    render: (row) => <CellNumber value={row.revenue} trend={row.status === "缺货" ? "down" : "up"} />,
-  },
-  {
-    key: "fulfillment",
-    header: "履约",
+    key: "sku",
+    header: "重点 SKU",
     width: "w-44",
+    render: (row) => <CellMuted>{row.sku}</CellMuted>,
+  },
+  {
+    key: "risk",
+    header: "断货风险",
+    width: "w-40",
     render: (row) => (
       <CellProgressBar
-        value={`${row.fulfillment}%`}
-        percent={row.fulfillment}
-        color={row.fulfillment < 75 ? "red" : row.fulfillment < 85 ? "yellow" : "green"}
+        value={`${row.stockoutRisk}%`}
+        percent={row.stockoutRisk}
+        color={row.stockoutRisk > 85 ? "red" : row.stockoutRisk > 60 ? "yellow" : "green"}
       />
     ),
   },
   {
+    key: "dailySales",
+    header: "昨日销售",
+    width: "w-28",
+    render: (row) => <CellNumber value={row.dailySales} trend={row.status === "断货" ? "down" : "up"} />,
+  },
+  {
     key: "owner",
     header: "负责人",
-    width: "w-28",
+    width: "w-24",
     render: (row) => <CellMuted>{row.owner}</CellMuted>,
   },
   {
@@ -142,18 +153,26 @@ const columns: ColumnDef<StoreRow>[] = [
   },
 ];
 
-const actionItems = [
-  ["压单预警", "静安寺旗舰店外卖待出餐 19 单，预计超 SLA 8 分钟", "red"],
-  ["库存风险", "陆家嘴中心店牛肉饭主料剩余 14 份，晚高峰不足", "yellow"],
-  ["排班缺口", "徐汇日月光店 17:00-19:00 少 1 名打包员", "purple"],
-  ["活动复盘", "大学路店套餐券核销率 31%，可追加 300 张", "green"],
-] as const;
-
-const channelMix = [
-  ["堂食", 58, "green"],
-  ["外卖", 78, "purple"],
-  ["自提", 42, "blue"],
-] as const;
+const alerts = [
+  {
+    tag: "断货",
+    time: "6 min",
+    title: "南京西路旗舰药房缺 18 盒二甲双胍",
+    body: "调拨单需要在 14:00 前确认，否则明早慢病处方会受影响。",
+  },
+  {
+    tag: "供应商",
+    time: "18 min",
+    title: "布洛芬混悬液到货批次延后",
+    body: "华东仓预计延迟 5 小时，建议先从周边 3 家门店调拨。",
+  },
+  {
+    tag: "医保",
+    time: "31 min",
+    title: "阿托伐他汀库存周转偏慢",
+    body: "大宁国际店可转出 24 盒给古北社区店。",
+  },
+];
 
 export default function DashboardPage() {
   return (
@@ -161,181 +180,145 @@ export default function DashboardPage() {
       mode="light"
       profilePosition="topbar"
       accent="purple"
-      teamName="花禾餐饮集团"
-      teamMemberCount={42}
+      teamName="仁康连锁药房"
+      teamMemberCount={68}
       menuItems={menuItems}
       favoriteItems={favoriteItems}
       profile={profile}
-      notifications={5}
-      messages={2}
-      searchPlaceholder="搜索门店 / 商圈"
-      primaryAction={{ label: "新建活动" }}
+      notifications={7}
+      messages={3}
+      searchPlaceholder="搜索门店 / SKU / 调拨单"
+      primaryAction={{ label: "新建调拨" }}
     >
-      <div className="flex flex-col gap-6">
-        <Toolbar
-          className="items-center gap-3"
-          left={
-            <div className="min-w-0">
-              <p className="text-sm text-fg-grey-500">
-                今日 10:30 更新 · 覆盖 24 家直营门店
-              </p>
-              <h1 className="mt-1 text-2xl font-semibold leading-8 tracking-fg text-fg-black">
-                午高峰履约与门店异常
-              </h1>
-            </div>
-          }
-          right={
-            <ToolbarActions className="shrink-0 items-center">
-              <ToolbarSelectDropdown value="上海大区" options={[{ label: "上海大区", value: "上海大区" }]} />
+      <div className="flex flex-col gap-5">
+        <PageTitleToolbar
+          title="补货运营控制台"
+          subtitle="监控门店库存、断货风险和跨店调拨闭环"
+          actions={
+            <ToolbarActions>
+              <ToolbarSelectDropdown value="上海区域" options={[{ label: "上海区域", value: "上海区域" }]} />
               <ToolbarDatepicker label="今日" />
             </ToolbarActions>
           }
         />
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <StatCard title="今日营业额" value="¥186,420" trend="+12.4%" subtitle="较上周同日" theme="white" width="full" />
-          <StatCard title="订单完成率" value="91.8%" trend="+3.1%" subtitle="外卖履约拉动" theme="green" width="full" />
-          <StatCard title="异常门店" value="3" trend="-2" trendDirection="down" subtitle="需 30 分钟内处理" theme="red" width="full" />
-          <StatCard title="会员复购" value="36.5%" trend="+5.8%" subtitle="套餐券贡献 42%" theme="purple" width="full" />
+          <StatCard title="待补货门店" value="18" trend="+4" subtitle="较昨日" theme="white" width="full" />
+          <StatCard title="高风险 SKU" value="42" trend="-6" trendDirection="down" subtitle="断货风险下降" theme="purple" width="full" />
+          <StatCard title="调拨完成率" value="86.7%" trend="+8.2%" subtitle="48 小时内闭环" theme="green" width="full" />
+          <StatCard title="预计损失销售" value="¥21.8k" trend="-12%" trendDirection="down" subtitle="已被调拨抵消" theme="red" width="full" />
         </div>
+
+        <Toolbar
+          left={<ToolbarSearchInput placeholder="搜索门店、SKU 或负责人" />}
+          right={
+            <ToolbarActions>
+              <ToolbarSelectDropdown value="全部状态" options={[{ label: "全部状态", value: "全部状态" }]} />
+              <ToolbarSelectDropdown value="慢病优先" options={[{ label: "慢病优先", value: "慢病优先" }]} />
+              <Button color="purple" size="sm" variant="secondary">批量生成</Button>
+            </ToolbarActions>
+          }
+        />
 
         <div className="grid grid-cols-1 gap-5 2xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="flex min-w-0 flex-col gap-5">
             <DataTable
-              title="门店异常队列"
-              subtitle="优先处理压单、缺货和履约波动门店"
-              rows={storeRows}
+              title="门店补货队列"
+              subtitle="按断货风险、销售影响和调拨时效排序"
+              rows={refillRows}
               columns={columns}
               color="purple"
-              headerActions={
-                <div className="flex items-center gap-2">
-                  <Label color="red" size="sm">3 个风险</Label>
-                  <Button size="sm" color="purple" variant="secondary">批量派单</Button>
-                </div>
-              }
-              paginationLabel="显示 1-4 / 24 家门店"
+              headerActions={<Label color="red" size="sm">2 个必须今日处理</Label>}
+              paginationLabel="显示 1-5 / 42 个补货任务"
               showPagination
               currentPage={1}
-              totalPages={6}
+              totalPages={9}
             />
 
             <SurfaceCard
-              title="运营节奏"
-              subtitle="午高峰订单、产能和渠道占比"
-              action={<Label color="green">进行中</Label>}
+              title="调拨准备度"
+              subtitle="总部仓、周边门店和供应商三路库存"
+              action={<Label color="green">自动刷新</Label>}
               padding="md"
             >
               <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
-                <div className="flex min-h-64 flex-col justify-between rounded-card bg-fg-grey-50 p-5 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
-                  <div className="flex items-start justify-between gap-4">
+                <div className="rounded-card bg-fg-grey-50 p-5 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+                  <div className="mb-5 flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-fg-grey-500">
-                        11:00-14:00 订单曲线
-                      </p>
-                      <p className="mt-1 text-lg font-semibold leading-7 tracking-fg text-fg-black">
-                        当前峰值 12:20，预计 13:10 回落
-                      </p>
+                      <p className="text-sm font-semibold leading-5 tracking-fg text-fg-black">库存覆盖趋势</p>
+                      <p className="mt-1 text-xs font-medium leading-4.5 tracking-fg text-fg-grey-700">未来 7 天核心 SKU 覆盖率</p>
                     </div>
-                    <Button size="sm" color="grey" variant="secondary">
-                      查看预测
-                    </Button>
+                    <Button color="grey" size="sm" variant="secondary">查看明细</Button>
                   </div>
-                  <div className="mt-8 flex h-28 items-end gap-2">
-                    {[36, 48, 64, 82, 74, 68, 59, 52, 44, 38, 31, 26].map((value, index) => (
+                  <div className="flex h-28 items-end gap-2">
+                    {[48, 56, 62, 74, 69, 78, 84, 76, 88, 91].map((value, index) => (
                       <div key={index} className="flex flex-1 items-end">
                         <div
                           className="w-full rounded-t-xl bg-fg-violet"
-                          style={{ height: `${value}%`, opacity: index === 3 ? 1 : 0.42 }}
+                          style={{ height: `${value}%`, opacity: index > 6 ? 0.85 : 0.42 }}
                         />
                       </div>
                     ))}
                   </div>
-                  <div className="mt-5 grid grid-cols-3 gap-3">
-                    {channelMix.map(([label, value, color]) => (
-                      <div key={label} className="rounded-2xl bg-white p-3 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
-                        <div className="mb-2 flex items-center justify-between">
-                          <span className="text-sm font-semibold leading-5 tracking-fg text-fg-black">{label}</span>
-                          <span className="text-xs font-medium leading-4 tracking-fg text-fg-grey-500">{value}%</span>
-                        </div>
-                        <ProgressBar value={value} color={color} size="sm" />
-                      </div>
-                    ))}
-                  </div>
                 </div>
 
-                <div className="flex flex-col gap-3">
-                  {[
-                    ["平均出餐", "8.6 分钟", "目标 9 分钟内"],
-                    ["骑手到店", "4.2 分钟", "较昨日慢 0.8"],
-                    ["差评风险", "12 单", "集中在缺货替换"],
-                  ].map(([label, value, detail]) => (
-                    <div key={label} className="rounded-card bg-white p-4 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
-                      <p className="text-sm text-fg-grey-500">{label}</p>
-                      <p className="mt-2 text-xl font-semibold leading-7 tracking-fg text-fg-black">{value}</p>
-                      <p className="mt-1 text-xs font-medium leading-4 tracking-fg text-fg-grey-500">{detail}</p>
-                    </div>
-                  ))}
+                <div className="flex flex-col gap-4">
+                  <ProgressBar label="总部仓可用" value={78} color="green" showPercentage />
+                  <ProgressBar label="周边可调拨" value={64} color="purple" showPercentage />
+                  <ProgressBar label="供应商准时率" value={71} color="yellow" showPercentage />
                 </div>
               </div>
             </SurfaceCard>
-
           </div>
 
           <div className="flex min-w-0 flex-col gap-5">
             <ListGroup
-              title="待处理动作"
-              subtitle="按业务影响排序"
+              title="今日风险流"
+              subtitle="只显示需要运营确认的事件"
+              badge={<Label color="red" size="sm">3</Label>}
               items={
-                <div className="flex flex-col gap-4">
-                  {actionItems.map(([title, detail, color], index) => (
-                    <ActivityCard
-                      key={title}
-                      icon={
-                        index === 0 ? (
-                          <DangerCircleLinear size={16} />
-                        ) : index === 1 ? (
-                          <BoxMinimalisticBoldDuotone size={16} />
-                        ) : index === 2 ? (
-                          <ChefHatMinimalisticLinear size={16} />
-                        ) : (
-                          <ClipboardListLinear size={16} />
-                        )
-                      }
-                      headerText={title}
-                      datetime={index === 0 ? "8 min ago" : index === 1 ? "12 min ago" : index === 2 ? "25 min ago" : "40 min ago"}
-                      avatar={`https://i.pravatar.cc/40?u=restaurant-action-${index}`}
-                      title={title}
-                      description={detail}
-                      metadata={[{ label: "Priority", value: <Label color={color} size="sm">{title}</Label> }]}
-                    />
+                <div className="flex flex-col divide-y divide-fg-grey-200">
+                  {alerts.map((item) => (
+                    <NotificationItem key={item.title} {...item} color="purple" />
                   ))}
                 </div>
               }
             />
 
-            <SurfaceCard title="区域负责人" subtitle="今日关键 owner" padding="md">
+            <SurfaceCard title="任务闭环" subtitle="调拨动作状态" padding="md">
               <div className="flex flex-col gap-4">
                 {[
-                  ["张晨", "上海大区运营", "24 店 / 3 异常"],
-                  ["刘青", "供应链值班", "2 个补货单待审"],
-                  ["马越", "会员增长", "套餐券追加中"],
-                ].map(([name, role, state]) => (
-                  <div key={name} className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold leading-5 tracking-fg text-fg-black">{name}</p>
-                      <p className="text-xs font-medium leading-4 tracking-fg text-fg-grey-500">{role}</p>
+                  ["待仓库确认", "8 单", <BoxMinimalisticBoldDuotone key="warehouse" size={18} />],
+                  ["待门店接收", "11 单", <Pills3Linear key="store" size={18} />],
+                  ["需人工复核", "3 单", <DangerCircleLinear key="risk" size={18} />],
+                ].map(([label, value, icon]) => (
+                  <div key={label as string} className="flex items-center justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-fg-grey-100 text-fg-grey-700">
+                        {icon}
+                      </span>
+                      <span className="truncate text-sm font-medium leading-5 tracking-fg text-fg-grey-700">{label}</span>
                     </div>
-                    <span className="shrink-0 text-xs font-medium leading-4 tracking-fg text-fg-grey-700">{state}</span>
+                    <span className="text-sm font-semibold leading-5 tracking-fg text-fg-black">{value}</span>
                   </div>
                 ))}
               </div>
             </SurfaceCard>
 
-            <SurfaceCard title="晚高峰准备度" subtitle="17:00 前必须闭环" padding="md">
-              <div className="flex flex-col gap-4">
-                <ProgressBar label="主料库存" value={72} color="yellow" showPercentage />
-                <ProgressBar label="打包人力" value={84} color="green" showPercentage />
-                <ProgressBar label="活动券库存" value={61} color="purple" showPercentage />
+            <SurfaceCard title="下一步工作流" subtitle="建议 30 分钟内处理" padding="md">
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-fg-violet-100 text-fg-violet">
+                  <ClipboardListLinear size={18} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold leading-5 tracking-fg text-fg-black">生成跨店调拨批次</p>
+                  <p className="mt-1 text-xs font-medium leading-4.5 tracking-fg text-fg-grey-700">
+                    优先合并慢病药品和儿科用药，减少配送拆单。
+                  </p>
+                  <div className="mt-4">
+                    <Button color="purple" size="sm">进入调拨工作流</Button>
+                  </div>
+                </div>
               </div>
             </SurfaceCard>
           </div>

@@ -15,8 +15,8 @@ importers:
         specifier: ^5.2.8
         version: 5.2.8
       '@forge-ui-official/core':
-        specifier: ^0.1.3
-        version: 0.1.3(next@16.2.4(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(solar-icon-set@2.0.1(react@19.2.5))(tailwindcss@4.2.4)
+        specifier: ^0.1.4
+        version: 0.1.4(next@16.2.4(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(solar-icon-set@2.0.1(react@19.2.5))(tailwindcss@4.2.4)
       next:
         specifier: ^16.0.0
         version: 16.2.4(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -64,8 +64,8 @@ packages:
   '@fontsource-variable/plus-jakarta-sans@5.2.8':
     resolution: {integrity: sha512-iQecBizIdZxezODNHzOn4SvvRMrZL/S8k4MEXGDynCmUrImVW0VmX+tIAMqnADwH4haXlHSXqMgU6+kcfBQJdw==}
 
-  '@forge-ui-official/core@0.1.3':
-    resolution: {integrity: sha512-6UbK4NkcnLKOpaiIqk6OMG/qj5553PfsrRWh/szwlmO+F7P3R3n/sJQ/SPpSoW5N85utzDCR9O8ToZ5OCVMCtA==}
+  '@forge-ui-official/core@0.1.4':
+    resolution: {integrity: sha512-V96nReB50MCUzSV2USCOxjgkBVpPBpaY32KCuURr7VIt09ISm467ZnE+BdaDagV/z0ghgiamAFL8fm4NMqWelA==}
     peerDependencies:
       next: '>=15'
       react: '>=19'
@@ -623,7 +623,7 @@ snapshots:
 
   '@fontsource-variable/plus-jakarta-sans@5.2.8': {}
 
-  '@forge-ui-official/core@0.1.3(next@16.2.4(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(solar-icon-set@2.0.1(react@19.2.5))(tailwindcss@4.2.4)':
+  '@forge-ui-official/core@0.1.4(next@16.2.4(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(solar-icon-set@2.0.1(react@19.2.5))(tailwindcss@4.2.4)':
     dependencies:
       react: 19.2.5
       react-dom: 19.2.5(react@19.2.5)
