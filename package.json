@@ -11,7 +11,7 @@
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.8",
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
-    "@forge-ui-official/core": "^0.1.4",
+    "@forge-ui-official/core": "^0.1.6",
     "next": "^16.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

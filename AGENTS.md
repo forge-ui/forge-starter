@@ -6,7 +6,7 @@
 
 1. 组件优先从 `@forge-ui-official/core` 导入。
 2. 颜色只使用 Forge 的 `fg-*` token，例如 `text-fg-grey-700`、`bg-fg-violet-500`、`border-fg-grey-200`。
-3. 图标使用 `solar-icon-set`，颜色通过 `color="#HEX"` 或 `color="var(--fg-violet)"` 传入。
+3. 图标使用 `solar-icon-set`，菜单图标默认选择 `Bold` 实心版本；颜色通过 `color="#HEX"` 或 `color="var(--fg-violet)"` 传入。
 4. 登录态内页面使用 `AppLayout`，菜单和 profile 配置放在 `config/menu.tsx`。
 5. 不确定组件用法时，先查 Forge 文档和主仓库 case，再写页面。
 
