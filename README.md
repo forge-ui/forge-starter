@@ -8,6 +8,7 @@
 
 - **登录流程**：`/login`、`/register`、`/forgot-password`、`/reset-password`
 - **后台壳**：`/dashboard` 已接入 `AppLayout`、菜单、用户信息、通知和基础 dashboard 区块
+- **稳定默认设计**：左侧主菜单使用 `BoldDuotone` 图标，默认不生成收藏分组；认证页默认保留 Starter 的结构和视觉
 - **Forge 样式接入**：Tailwind v4 已导入 `@forge-ui-official/core/styles.css` 和必要的 `@source`
 - **AI 规范**：根目录 `AGENTS.md` 会约束 Codex、Claude Code、Cursor 等工具优先使用 Forge 组件
 - **公开依赖**：组件库来自 npm 包 `@forge-ui-official/core`，不需要私有 registry 或 npm token
@@ -40,7 +41,7 @@ pnpm dev
 │   ├── layout.tsx
 │   └── page.tsx             # / -> /login
 ├── config/
-│   └── menu.tsx             # AppLayout 菜单、收藏、profile 配置
+│   └── menu.tsx             # AppLayout 主菜单、profile 配置
 ├── lib/
 │   └── asset.ts             # basePath 友好的静态资源 helper
 ├── public/
@@ -60,10 +61,10 @@ pnpm typecheck  # TypeScript 检查
 
 ## 接入真实业务
 
-1. 修改 `config/menu.tsx`，替换菜单、收藏项和用户信息。
+1. 修改 `config/menu.tsx`，按业务页面地图替换主菜单和用户信息；不要默认添加收藏分组。
 2. 在 `app/(app)` 下新增业务页面，统一用 `AppLayout` 承载。
 3. 复用 `@forge-ui-official/core` 的 `Button`、`TextField`、`DataTable`、`StatCard`、`ChartCard` 等组件。
-4. 把 auth 页面里的 `handleSubmit` 替换成你的 NextAuth、Clerk、Supabase 或自建 API 调用。
+4. 默认保留 auth 页面的结构与视觉，把 `handleSubmit` 替换成你的 NextAuth、Clerk、Supabase 或自建 API 调用；只有明确需求才改版或关闭认证页。
 5. 保留 `AGENTS.md`，让 AI 助手按 Forge 规范生成页面。
 
 ## 样式接入

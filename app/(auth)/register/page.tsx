@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button, TextField } from "@forge-ui-official/core";
+import { Button, IconButton, StyledLink, TextField } from "@forge-ui-official/core";
 import { EyeLinear, EyeClosedLinear } from "solar-icon-set";
 import { SocialButton, OrDivider } from "../_social-button";
 
@@ -19,7 +18,6 @@ export default function RegisterPage() {
     event.preventDefault();
     // TODO: 接入你自己的 auth 逻辑
     // demo 直接跳后台首页
-    console.log("register", { name, username, email, password });
     router.push("/dashboard");
   };
 
@@ -64,15 +62,23 @@ export default function RegisterPage() {
           placeholder="设置一个强密码..."
           value={password}
           onChange={setPassword}
+          className={showPassword ? "" : "forge-password-field"}
           iconRight={
-            <button
+            <IconButton
               type="button"
+              color="grey"
+              variant="ghost"
+              size="sm"
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? "隐藏密码" : "显示密码"}
-              className="flex items-center justify-center text-fg-grey-700 hover:text-fg-black"
+              className="!h-5 !w-5 !p-0"
             >
-              {showPassword ? <EyeLinear size={20} /> : <EyeClosedLinear size={20} />}
-            </button>
+              {showPassword ? (
+                <EyeLinear size={20} color="var(--fg-grey-700)" />
+              ) : (
+                <EyeClosedLinear size={20} color="var(--fg-grey-700)" />
+              )}
+            </IconButton>
           }
         />
 
@@ -83,9 +89,7 @@ export default function RegisterPage() {
 
       <p className="text-center text-sm text-fg-grey-700">
         已有账号？{" "}
-        <Link href="/login" className="font-bold text-fg-violet hover:underline">
-          去登录
-        </Link>
+        <StyledLink href="/login">去登录</StyledLink>
       </p>
     </form>
   );

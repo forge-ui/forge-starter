@@ -9,7 +9,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       {/* 左侧 hero 图 + 装饰卡片，Figma 原版视觉 */}
       <div className="relative hidden h-auto w-[640px] shrink-0 overflow-hidden rounded-2xl lg:block">
         <img
-          src={asset("/images/hero.jpg")}
+          src={asset("/images/hero.png")}
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />

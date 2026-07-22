@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button, TextField } from "@forge-ui-official/core";
+import { Button, IconButton, StyledLink, TextField } from "@forge-ui-official/core";
 import { EyeLinear, EyeClosedLinear } from "solar-icon-set";
 
 function PasswordToggle({
@@ -14,14 +13,21 @@ function PasswordToggle({
   onToggle: () => void;
 }) {
   return (
-    <button
+    <IconButton
       type="button"
+      color="grey"
+      variant="ghost"
+      size="sm"
       onClick={onToggle}
       aria-label={shown ? "隐藏密码" : "显示密码"}
-      className="flex items-center justify-center text-fg-grey-700 hover:text-fg-black"
+      className="!h-5 !w-5 !p-0"
     >
-      {shown ? <EyeLinear size={20} /> : <EyeClosedLinear size={20} />}
-    </button>
+      {shown ? (
+        <EyeLinear size={20} color="var(--fg-grey-700)" />
+      ) : (
+        <EyeClosedLinear size={20} color="var(--fg-grey-700)" />
+      )}
+    </IconButton>
   );
 }
 
@@ -31,17 +37,17 @@ export default function ResetPasswordPage() {
   const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmError, setConfirmError] = useState("");
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     if (password !== confirm) {
-      // TODO: 做你自己的错误展示（TextField 支持 state="error" + errorMessage）
-      console.warn("passwords do not match");
+      setConfirmError("两次输入的密码不一致");
       return;
     }
+    setConfirmError("");
     // TODO: 调用你的 auth 后端重置密码
     // demo 重置完跳回登录页
-    console.log("reset-password", { password });
     router.push("/login");
   };
 
@@ -58,7 +64,11 @@ export default function ResetPasswordPage() {
           label="新密码"
           placeholder="输入新密码..."
           value={password}
-          onChange={setPassword}
+          onChange={(value) => {
+            setPassword(value);
+            if (confirmError) setConfirmError("");
+          }}
+          className={showPassword ? "" : "forge-password-field"}
           iconRight={
             <PasswordToggle
               shown={showPassword}
@@ -71,7 +81,13 @@ export default function ResetPasswordPage() {
           label="确认密码"
           placeholder="再次输入新密码..."
           value={confirm}
-          onChange={setConfirm}
+          onChange={(value) => {
+            setConfirm(value);
+            if (confirmError) setConfirmError("");
+          }}
+          state={confirmError ? "error" : "idle"}
+          errorMessage={confirmError}
+          className={showConfirm ? "" : "forge-password-field"}
           iconRight={
             <PasswordToggle
               shown={showConfirm}
@@ -87,9 +103,7 @@ export default function ResetPasswordPage() {
 
       <p className="text-center text-sm text-fg-grey-700">
         还没账号？{" "}
-        <Link href="/register" className="font-bold text-fg-violet hover:underline">
-          立即注册
-        </Link>
+        <StyledLink href="/register">立即注册</StyledLink>
       </p>
     </form>
   );

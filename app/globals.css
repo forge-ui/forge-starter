@@ -10,3 +10,9 @@ body {
   background: #ffffff;
   color: #000000;
 }
+
+/* Core 0.1.6 does not expose the input type yet. Keep the starter password
+   experience masked until the next Core release can use type="password". */
+.forge-password-field input {
+  -webkit-text-security: disc;
+}

@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button, TextField } from "@forge-ui-official/core";
+import { Button, StyledLink, TextField } from "@forge-ui-official/core";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -13,7 +12,6 @@ export default function ForgotPasswordPage() {
     event.preventDefault();
     // TODO: 调用你的 auth 后端发送重置邮件
     // demo 直接跳到重置密码页
-    console.log("forgot-password", { email });
     router.push("/reset-password");
   };
 
@@ -43,9 +41,7 @@ export default function ForgotPasswordPage() {
 
       <p className="text-center text-sm text-fg-grey-700">
         想起来了？{" "}
-        <Link href="/login" className="font-bold text-fg-violet hover:underline">
-          返回登录
-        </Link>
+        <StyledLink href="/login">返回登录</StyledLink>
       </p>
     </form>
   );

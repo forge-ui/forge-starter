@@ -1,27 +1,22 @@
 "use client";
 
 import {
-  HomeSmileBold,
-  ChartSquareBold,
-  UsersGroupTwoRoundedBold,
-  InboxBold,
-  CalendarBold,
-  FolderBold,
-  StarBold,
+  HomeSmileBoldDuotone,
+  ChartSquareBoldDuotone,
+  UsersGroupTwoRoundedBoldDuotone,
+  InboxBoldDuotone,
+  CalendarBoldDuotone,
+  FolderBoldDuotone,
 } from "solar-icon-set";
 import type { AppLayoutMenuItem, AppLayoutProfile } from "@forge-ui-official/core";
 
 export const menuItems: AppLayoutMenuItem[] = [
-  { icon: <HomeSmileBold size={20} />, label: "工作台", href: "/dashboard/" },
-  { icon: <InboxBold size={20} />, label: "收件箱", href: "/inbox/", badge: 3 },
-  { icon: <CalendarBold size={20} />, label: "日历", href: "/calendar/" },
-  { icon: <ChartSquareBold size={20} />, label: "数据分析", href: "/analytics/" },
-  { icon: <UsersGroupTwoRoundedBold size={20} />, label: "团队", href: "/team/" },
-];
-
-export const favoriteItems: AppLayoutMenuItem[] = [
-  { icon: <FolderBold size={20} />, label: "项目", href: "/projects/" },
-  { icon: <StarBold size={20} />, label: "收藏", href: "/starred/" },
+  { icon: <HomeSmileBoldDuotone size={20} />, label: "工作台", href: "/dashboard/" },
+  { icon: <FolderBoldDuotone size={20} />, label: "项目", href: "/projects/" },
+  { icon: <InboxBoldDuotone size={20} />, label: "收件箱", href: "/inbox/", badge: 3 },
+  { icon: <CalendarBoldDuotone size={20} />, label: "日历", href: "/calendar/" },
+  { icon: <ChartSquareBoldDuotone size={20} />, label: "数据分析", href: "/analytics/" },
+  { icon: <UsersGroupTwoRoundedBoldDuotone size={20} />, label: "团队", href: "/team/" },
 ];
 
 export const profile: AppLayoutProfile = {

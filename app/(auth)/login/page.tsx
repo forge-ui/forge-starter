@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button, TextField } from "@forge-ui-official/core";
+import { Button, IconButton, StyledLink, TextField } from "@forge-ui-official/core";
 import { EyeLinear, EyeClosedLinear } from "solar-icon-set";
 import { SocialButton, OrDivider } from "../_social-button";
 
@@ -17,7 +16,6 @@ export default function LoginPage() {
     event.preventDefault();
     // TODO: 接入你自己的 auth 逻辑（NextAuth / Clerk / Supabase / 自建 API）
     // demo 直接跳后台首页
-    console.log("login", { email, password });
     router.push("/dashboard");
   };
 
@@ -52,23 +50,28 @@ export default function LoginPage() {
           placeholder="输入密码..."
           value={password}
           onChange={setPassword}
+          className={showPassword ? "" : "forge-password-field"}
           headerAction={
-            <Link
-              href="/forgot-password"
-              className="text-sm font-bold text-fg-violet hover:underline"
-            >
+            <StyledLink href="/forgot-password">
               忘记密码
-            </Link>
+            </StyledLink>
           }
           iconRight={
-            <button
+            <IconButton
               type="button"
+              color="grey"
+              variant="ghost"
+              size="sm"
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? "隐藏密码" : "显示密码"}
-              className="flex items-center justify-center text-fg-grey-700 hover:text-fg-black"
+              className="!h-5 !w-5 !p-0"
             >
-              {showPassword ? <EyeLinear size={20} /> : <EyeClosedLinear size={20} />}
-            </button>
+              {showPassword ? (
+                <EyeLinear size={20} color="var(--fg-grey-700)" />
+              ) : (
+                <EyeClosedLinear size={20} color="var(--fg-grey-700)" />
+              )}
+            </IconButton>
           }
         />
 
@@ -79,9 +82,7 @@ export default function LoginPage() {
 
       <p className="text-center text-sm text-fg-grey-700">
         还没账号？{" "}
-        <Link href="/register" className="font-bold text-fg-violet hover:underline">
-          立即注册
-        </Link>
+        <StyledLink href="/register">立即注册</StyledLink>
       </p>
     </form>
   );

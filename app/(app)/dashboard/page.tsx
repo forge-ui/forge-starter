@@ -1,5 +1,5 @@
 import { AppLayout } from "@forge-ui-official/core";
-import { menuItems, favoriteItems, profile } from "@/config/menu";
+import { menuItems, profile } from "@/config/menu";
 
 export default function DashboardPage() {
   return (
@@ -10,7 +10,6 @@ export default function DashboardPage() {
       teamName="你的团队"
       teamMemberCount={12}
       menuItems={menuItems}
-      favoriteItems={favoriteItems}
       profile={profile}
       notifications={5}
       messages={2}

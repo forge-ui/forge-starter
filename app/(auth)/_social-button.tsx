@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 
+import { Button } from "@forge-ui-official/core";
 import { asset } from "@/lib/asset";
 
 type Provider = "google" | "facebook";
@@ -19,20 +20,23 @@ export function SocialButton({
   onClick?: () => void;
 }) {
   return (
-    <button
+    <Button
       type="button"
+      color="grey"
+      variant="tertiary"
+      size="lg"
       onClick={onClick}
-      className="flex w-full items-center justify-center gap-2 rounded-full border border-fg-grey-200 bg-white py-3.5 pl-3.5 pr-4 text-sm font-bold text-fg-grey-700 tracking-fg transition-colors hover:bg-fg-grey-50"
+      className="w-full gap-2 bg-white text-fg-grey-700 outline-fg-grey-200 transition-colors hover:bg-fg-grey-50"
+      iconLeft={
+        <img
+          src={asset(`/images/brands/${provider}.svg`)}
+          alt=""
+          className="size-5 shrink-0"
+        />
+      }
     >
-      <img
-        src={asset(`/images/brands/${provider}.svg`)}
-        alt=""
-        className="size-5 shrink-0"
-      />
-      <span className="whitespace-nowrap">
-        使用 {LABELS[provider]} {action}
-      </span>
-    </button>
+      使用 {LABELS[provider]} {action}
+    </Button>
   );
 }
 
