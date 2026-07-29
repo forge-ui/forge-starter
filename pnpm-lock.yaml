@@ -15,8 +15,8 @@ importers:
         specifier: ^5.2.8
         version: 5.2.8
       '@forge-ui-official/core':
-        specifier: ^0.1.6
-        version: 0.1.6(next@16.2.4(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(solar-icon-set@2.0.1(react@19.2.5))(tailwindcss@4.2.4)
+        specifier: ^0.1.7
+        version: 0.1.7(next@16.2.4(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(solar-icon-set@2.0.1(react@19.2.5))(tailwindcss@4.2.4)
       next:
         specifier: ^16.0.0
         version: 16.2.4(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -64,17 +64,14 @@ packages:
   '@fontsource-variable/plus-jakarta-sans@5.2.8':
     resolution: {integrity: sha512-iQecBizIdZxezODNHzOn4SvvRMrZL/S8k4MEXGDynCmUrImVW0VmX+tIAMqnADwH4haXlHSXqMgU6+kcfBQJdw==}
 
-  '@forge-ui-official/core@0.1.6':
-    resolution: {integrity: sha512-mCw1LCXnra+vYV+3uz+f2WkeUn3NoJbuBkAqh2Kpw3w9LS85OBNvruGWrBQVd4LtyX8EQsZTqPyS2iOSrJjj0w==}
+  '@forge-ui-official/core@0.1.7':
+    resolution: {integrity: sha512-NCx6SoiDxoQ2i6j/6O8u3J1rHIp5uWvJBeoChm8Fr57anH2WItT2NvbwoZI2ZVYTGOXY2cUykWL2h1XF8JDwbw==}
     peerDependencies:
       next: '>=15'
       react: '>=19'
       react-dom: '>=19'
       solar-icon-set: ^2
       tailwindcss: ^4
-    peerDependenciesMeta:
-      next:
-        optional: true
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -623,14 +620,13 @@ snapshots:
 
   '@fontsource-variable/plus-jakarta-sans@5.2.8': {}
 
-  '@forge-ui-official/core@0.1.6(next@16.2.4(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(solar-icon-set@2.0.1(react@19.2.5))(tailwindcss@4.2.4)':
+  '@forge-ui-official/core@0.1.7(next@16.2.4(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(solar-icon-set@2.0.1(react@19.2.5))(tailwindcss@4.2.4)':
     dependencies:
+      next: 16.2.4(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       react: 19.2.5
       react-dom: 19.2.5(react@19.2.5)
       solar-icon-set: 2.0.1(react@19.2.5)
       tailwindcss: 4.2.4
-    optionalDependencies:
-      next: 16.2.4(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
 
   '@img/colour@1.1.0':
     optional: true

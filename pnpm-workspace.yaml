@@ -3,3 +3,4 @@ allowBuilds:
 minimumReleaseAgeExclude:
   - '@forge-ui-official/core@0.1.3'
   - '@forge-ui-official/core@0.1.4'
+  - '@forge-ui-official/core@0.1.7'
