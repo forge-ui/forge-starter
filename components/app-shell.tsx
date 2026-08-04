@@ -79,8 +79,16 @@ export function AppShell({ children }: { children: ReactNode }) {
       notifications={0}
       messages={0}
       pageTitle={shell.title}
-      pageHeaderVariant={pathname.includes("/examples/form") ? "detail" : "home"}
-      onBack={pathname.includes("/examples/form") ? () => router.push("/examples/list/") : undefined}
+      pageHeaderVariant={
+        pathname.includes("/examples/form") || pathname.includes("/examples/detail")
+          ? "detail"
+          : "home"
+      }
+      onBack={
+        pathname.includes("/examples/form") || pathname.includes("/examples/detail")
+          ? () => router.push("/examples/list/")
+          : undefined
+      }
       primaryAction={
         shell.primaryAction
           ? {

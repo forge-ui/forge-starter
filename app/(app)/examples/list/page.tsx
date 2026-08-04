@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useMemo, useState, type Key } from "react";
+import { useMemo, useState, type Key } from "react";
 import { useRouter } from "next/navigation";
 import {
   DownloadMinimalisticLinear,
+  EyeLinear,
   PenLinear,
   TrashBinMinimalisticLinear,
 } from "solar-icon-set";
@@ -23,22 +24,14 @@ import {
   ToolbarDatepicker,
   ToolbarFilterButton,
   type ColumnDef,
-  type StatusBadgeColor,
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
-
-type RecordItem = {
-  id: string;
-  code: string;
-  name: string;
-  subtitle: string;
-  category: string;
-  owner: string;
-  status: "active" | "draft" | "done" | "blocked";
-  updatedDate: string;
-  updatedTime: string;
-  imageUrl: string;
-};
+import { useDemoStore } from "@/components/demo-store";
+import {
+  RECORD_STATUS_META,
+  type BusinessRecord,
+  type RecordStatus,
+} from "@/lib/demo/records";
 
 const filterTabs = [
   { label: "全部" },
@@ -50,117 +43,11 @@ const filterTabs = [
 
 const filterValues = ["all", "active", "draft", "done", "blocked"] as const;
 
-const seed: RecordItem[] = [
-  {
-    id: "1",
-    code: "POL-2012",
-    name: "设备准入策略",
-    subtitle: "3 条规则",
-    category: "策略",
-    owner: "张敏",
-    status: "active",
-    updatedDate: "29 Dec 2025",
-    updatedTime: "10:00",
-    imageUrl: "https://placehold.co/36x36/dbeafe/1d4ed8?text=P",
-  },
-  {
-    id: "2",
-    code: "ALT-2011",
-    name: "告警处置流程",
-    subtitle: "2 个阶段",
-    category: "流程",
-    owner: "李强",
-    status: "draft",
-    updatedDate: "24 Dec 2025",
-    updatedTime: "10:00",
-    imageUrl: "https://placehold.co/36x36/dbeafe/1d4ed8?text=A",
-  },
-  {
-    id: "3",
-    code: "AUD-2002",
-    name: "审计导出任务",
-    subtitle: "周报",
-    category: "审计",
-    owner: "王芳",
-    status: "done",
-    updatedDate: "12 Dec 2025",
-    updatedTime: "10:00",
-    imageUrl: "https://placehold.co/36x36/dbeafe/1d4ed8?text=R",
-  },
-  {
-    id: "4",
-    code: "CHK-1901",
-    name: "终端基线检查",
-    subtitle: "1 个批次",
-    category: "检查",
-    owner: "赵磊",
-    status: "active",
-    updatedDate: "21 Oct 2025",
-    updatedTime: "10:00",
-    imageUrl: "https://placehold.co/36x36/dbeafe/1d4ed8?text=C",
-  },
-  {
-    id: "5",
-    code: "POL-1900",
-    name: "零信任网络分段",
-    subtitle: "5 条规则",
-    category: "策略",
-    owner: "张敏",
-    status: "blocked",
-    updatedDate: "21 Oct 2025",
-    updatedTime: "10:00",
-    imageUrl: "https://placehold.co/36x36/dbeafe/1d4ed8?text=Z",
-  },
-  {
-    id: "6",
-    code: "ALT-1881",
-    name: "高危登录复核",
-    subtitle: "人工复核",
-    category: "流程",
-    owner: "李强",
-    status: "done",
-    updatedDate: "19 Sep 2025",
-    updatedTime: "10:00",
-    imageUrl: "https://placehold.co/36x36/dbeafe/1d4ed8?text=H",
-  },
-  {
-    id: "7",
-    code: "AUD-1643",
-    name: "权限变更台账",
-    subtitle: "月报",
-    category: "审计",
-    owner: "王芳",
-    status: "draft",
-    updatedDate: "19 Sep 2025",
-    updatedTime: "10:00",
-    imageUrl: "https://placehold.co/36x36/dbeafe/1d4ed8?text=P",
-  },
-  {
-    id: "8",
-    code: "CHK-1600",
-    name: "补丁合规扫描",
-    subtitle: "全量",
-    category: "检查",
-    owner: "赵磊",
-    status: "active",
-    updatedDate: "19 Sep 2025",
-    updatedTime: "10:00",
-    imageUrl: "https://placehold.co/36x36/dbeafe/1d4ed8?text=S",
-  },
-];
-
-const statusMap: Record<RecordItem["status"], { label: string; color: StatusBadgeColor }> = {
-  active: { label: "进行中", color: "blue" },
-  draft: { label: "草稿", color: "grey" },
-  done: { label: "已完成", color: "green" },
-  blocked: { label: "已阻断", color: "red" },
-};
-
 function FilterPanel({ close }: { close: () => void }) {
   return (
     <div className="flex w-72 flex-col gap-4 p-4">
       <p className="text-sm font-semibold text-fg-black">筛选条件</p>
-      <p className="text-sm text-fg-grey-700">示例面板：可按负责人、分类等扩展真实筛选。</p>
+      <p className="text-sm text-fg-grey-700">示例：可扩展负责人、分类等真实筛选字段。</p>
       <div className="flex justify-end gap-2">
         <Button color={siteConfig.accent} variant="tertiary" size="sm" onClick={close}>
           取消
@@ -175,12 +62,12 @@ function FilterPanel({ close }: { close: () => void }) {
 
 export default function ExampleListPage() {
   const router = useRouter();
-  const [records, setRecords] = useState(seed);
+  const { records, deleteRecord, countsByStatus } = useDemoStore();
   const [activeFilterIndex, setActiveFilterIndex] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(8);
   const [selectedRowKeys, setSelectedRowKeys] = useState<Set<Key>>(new Set());
-  const [deleteTarget, setDeleteTarget] = useState<RecordItem | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<BusinessRecord | null>(null);
 
   const filteredList = useMemo(() => {
     const filterValue = filterValues[activeFilterIndex];
@@ -194,16 +81,7 @@ export default function ExampleListPage() {
     return filteredList.slice(start, start + pageSize);
   }, [filteredList, currentPage, pageSize]);
 
-  const handleDelete = useCallback((id: string) => {
-    setRecords((prev) => prev.filter((item) => item.id !== id));
-    setSelectedRowKeys((prev) => {
-      const next = new Set(prev);
-      next.delete(id);
-      return next;
-    });
-  }, []);
-
-  const columns: ColumnDef<RecordItem>[] = useMemo(
+  const columns: ColumnDef<BusinessRecord>[] = useMemo(
     () => [
       {
         key: "code",
@@ -218,7 +96,13 @@ export default function ExampleListPage() {
         sortable: true,
         width: "w-60",
         render: (row) => (
-          <CellImageText src={row.imageUrl} title={row.name} subtitle={row.subtitle} />
+          <button
+            type="button"
+            className="text-left"
+            onClick={() => router.push(`/examples/detail/?id=${row.id}`)}
+          >
+            <CellImageText src={row.imageUrl} title={row.name} subtitle={row.subtitle} />
+          </button>
         ),
       },
       {
@@ -241,7 +125,7 @@ export default function ExampleListPage() {
         sortable: true,
         width: "w-28",
         render: (row) => {
-          const meta = statusMap[row.status];
+          const meta = RECORD_STATUS_META[row.status as RecordStatus];
           return <StatusBadge label={meta.label} color={meta.color} />;
         },
       },
@@ -257,15 +141,24 @@ export default function ExampleListPage() {
       {
         key: "actions",
         header: "",
-        width: "w-16",
+        width: "w-24",
         render: (row) => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <IconButton
+              variant="ghost"
+              shape="square"
+              size="sm"
+              aria-label="查看"
+              onClick={() => router.push(`/examples/detail/?id=${row.id}`)}
+            >
+              <EyeLinear size={16} />
+            </IconButton>
             <IconButton
               variant="ghost"
               shape="square"
               size="sm"
               aria-label="编辑"
-              onClick={() => router.push("/examples/form/")}
+              onClick={() => router.push(`/examples/form/?id=${row.id}`)}
             >
               <PenLinear size={16} />
             </IconButton>
@@ -285,26 +178,32 @@ export default function ExampleListPage() {
     [router],
   );
 
+  const empty = filteredList.length === 0;
+
   return (
     <div className="flex flex-col gap-6">
       {deleteTarget ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <ConfirmationDialog
             title={`删除「${deleteTarget.name}」？`}
-            description="删除后无法恢复，仅影响本页示例数据。"
+            description="将从演示数据中移除，可重新新建。此操作会影响工作台统计。"
             confirmLabel="删除"
             cancelLabel="取消"
             color="red"
             onConfirm={() => {
-              handleDelete(deleteTarget.id);
+              deleteRecord(deleteTarget.id);
               setDeleteTarget(null);
+              setSelectedRowKeys((prev) => {
+                const next = new Set(prev);
+                next.delete(deleteTarget.id);
+                return next;
+              });
             }}
             onCancel={() => setDeleteTarget(null)}
           />
         </div>
       ) : null}
 
-      {/* Page header — mirrors ecommerce products template */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-display-l font-semibold leading-9 tracking-fg text-fg-black">
@@ -337,11 +236,15 @@ export default function ExampleListPage() {
         </div>
       </div>
 
-      {/* Filter tabs + toolbar controls */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <ButtonGroup
           color={siteConfig.accent}
-          items={filterTabs}
+          items={filterTabs.map((tab, index) => ({
+            label:
+              index === 0
+                ? `全部 ${countsByStatus.all}`
+                : `${tab.label} ${countsByStatus[filterValues[index]] ?? 0}`,
+          }))}
           activeIndex={activeFilterIndex}
           shape="pill"
           onChange={(index) => {
@@ -355,21 +258,33 @@ export default function ExampleListPage() {
         </div>
       </div>
 
-      <DataTable<RecordItem>
-        color={siteConfig.accent}
-        columns={columns}
-        rows={pageRows}
-        showCheckbox
-        checkboxColor={siteConfig.accent}
-        getRowKey={(row) => row.id}
-        selectedRowKeys={selectedRowKeys}
-        onSelectedRowKeysChange={setSelectedRowKeys}
-        showPagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-        paginationLabel={`显示 ${pageRows.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filteredList.length)} / 共 ${filteredList.length} 条`}
-      />
+      {empty ? (
+        <div className="flex flex-col items-center justify-center gap-4 rounded-[28px] border border-dashed border-fg-grey-200 bg-white px-6 py-16 text-center">
+          <p className="text-lg font-semibold text-fg-black">暂无记录</p>
+          <p className="max-w-md text-sm text-fg-grey-700">
+            当前筛选条件下没有数据。可以切换状态 Tab，或新建一条业务记录。
+          </p>
+          <Button color={siteConfig.accent} onClick={() => router.push("/examples/form/")}>
+            新建记录
+          </Button>
+        </div>
+      ) : (
+        <DataTable<BusinessRecord>
+          color={siteConfig.accent}
+          columns={columns}
+          rows={pageRows}
+          showCheckbox
+          checkboxColor={siteConfig.accent}
+          getRowKey={(row) => row.id}
+          selectedRowKeys={selectedRowKeys}
+          onSelectedRowKeysChange={setSelectedRowKeys}
+          showPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          paginationLabel={`显示 ${pageRows.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filteredList.length)} / 共 ${filteredList.length} 条`}
+        />
+      )}
     </div>
   );
 }

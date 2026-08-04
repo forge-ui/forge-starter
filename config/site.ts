@@ -13,13 +13,14 @@ export type RouteShell = {
 
 /** Keys without trailing slash */
 export const routeShells: Record<string, RouteShell> = {
-  "/dashboard": { title: "工作台" },
+  "/dashboard": { title: "工作台", hideHeader: true },
   "/examples/list": {
     title: "业务记录",
     hideHeader: true,
   },
-  "/examples/form": { title: "新建记录" },
-  "/settings": { title: "设置" },
+  "/examples/form": { title: "记录表单", hideHeader: true },
+  "/examples/detail": { title: "记录详情", hideHeader: true },
+  "/settings": { title: "设置", hideHeader: true },
 };
 
 export function shellForPath(pathname: string): RouteShell {
