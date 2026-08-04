@@ -66,13 +66,10 @@ const emptyDraft = (): Draft => ({
   modules: ["dashboard"],
 });
 
-function toggleModule(list: AppModuleId[], id: AppModuleId): AppModuleId[] {
-  if (list.includes(id)) {
-    const next = list.filter((m) => m !== id);
-    return next.length > 0 ? next : list;
-  }
-  return [...list, id];
-}
+const moduleOptions = (Object.keys(APP_MODULE_META) as AppModuleId[]).map((value) => ({
+  value,
+  label: APP_MODULE_META[value].label,
+}));
 
 type Props = {
   open: boolean;
@@ -279,35 +276,21 @@ export function AppFormDialog({ open, onClose, appId, onSaved }: Props) {
                 }
               />
               {draft.menuPreset === "custom" ? (
-                <div>
-                  <p className="mb-2 text-sm font-medium text-fg-grey-700">选择模块</p>
-                  <div className="flex flex-col gap-2">
-                    {(Object.keys(APP_MODULE_META) as AppModuleId[]).map((id) => {
-                      const checked = draft.modules.includes(id);
-                      return (
-                        <label
-                          key={id}
-                          className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-fg-grey-200 px-4 py-3"
-                        >
-                          <span className="text-sm font-medium text-fg-black">
-                            {APP_MODULE_META[id].label}
-                          </span>
-                          <input
-                            type="checkbox"
-                            className="h-4 w-4"
-                            checked={checked}
-                            onChange={() =>
-                              setDraft((d) => ({
-                                ...d,
-                                modules: toggleModule(d.modules, id),
-                              }))
-                            }
-                          />
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
+                <SelectOption
+                  type="multiple"
+                  color={siteConfig.accent}
+                  label="选择模块"
+                  width="100%"
+                  placeholder="请选择菜单模块"
+                  options={moduleOptions}
+                  value={draft.modules}
+                  onChange={(values) =>
+                    setDraft((d) => ({
+                      ...d,
+                      modules: values as AppModuleId[],
+                    }))
+                  }
+                />
               ) : (
                 <p className="text-xs text-fg-grey-500">
                   将包含：
