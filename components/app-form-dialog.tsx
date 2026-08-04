@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button, SelectOption, StatusBadge, TextField } from "@forge-ui-official/core";
+import { Button, SelectOption, TextField } from "@forge-ui-official/core";
+import { Modal } from "@/components/ui/modal";
 import { siteConfig } from "@/config/site";
 import {
   APP_AUTH_META,
@@ -65,10 +66,6 @@ const emptyDraft = (): Draft => ({
   modules: ["dashboard"],
 });
 
-function kindLabel(kind: AppKind) {
-  return APP_KIND_META[kind]?.label ?? kind;
-}
-
 function toggleModule(list: AppModuleId[], id: AppModuleId): AppModuleId[] {
   if (list.includes(id)) {
     const next = list.filter((m) => m !== id);
@@ -77,69 +74,60 @@ function toggleModule(list: AppModuleId[], id: AppModuleId): AppModuleId[] {
   return [...list, id];
 }
 
-export function SettingsAppsPanel() {
-  const [apps, setApps] = useState<AppEntry[]>([]);
+type Props = {
+  open: boolean;
+  onClose: () => void;
+  /** null = create */
+  appId: string | null;
+  onSaved?: () => void;
+};
+
+export function AppFormDialog({ open, onClose, appId, onSaved }: Props) {
+  const mode = appId ? "edit" : "create";
   const [draft, setDraft] = useState<Draft>(emptyDraft);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setApps(loadAppRegistry());
-  }, []);
-
-  function persist(next: AppEntry[], okMsg: string) {
-    const normalized = next.map((a) => normalizeAppEntry(a));
-    setApps(normalized);
-    saveAppRegistry(normalized);
-    setMessage(okMsg);
+    if (!open) return;
     setError(null);
-  }
-
-  function startEdit(app: AppEntry) {
-    if (app.isCurrentProduct) {
-      setError("当前宿主产品不在此列表维护");
-      return;
+    if (mode === "edit" && appId) {
+      const app = loadAppRegistry().find((a) => a.id === appId);
+      if (!app || app.isCurrentProduct) {
+        setError("应用不存在或不可编辑");
+        setDraft(emptyDraft());
+        return;
+      }
+      setDraft({
+        name: app.name,
+        subtitle: app.subtitle,
+        kind: app.kind,
+        href: app.href ?? "",
+        openMode: app.openMode,
+        authMode: app.authMode,
+        menuPreset: app.menuPreset,
+        modules: app.modules.length ? app.modules : ["dashboard"],
+      });
+    } else {
+      setDraft(emptyDraft());
     }
-    setEditingId(app.id);
-    setDraft({
-      name: app.name,
-      subtitle: app.subtitle,
-      kind: app.kind,
-      href: app.href ?? "",
-      openMode: app.openMode,
-      authMode: app.authMode,
-      menuPreset: app.menuPreset,
-      modules: app.modules.length ? app.modules : ["dashboard"],
-    });
-    setMessage(null);
+  }, [open, mode, appId]);
+
+  function handleClose() {
     setError(null);
+    onClose();
   }
 
-  function cancelEdit() {
-    setEditingId(null);
-    setDraft(emptyDraft());
+  function submit() {
     setError(null);
-  }
-
-  function submit(event: React.FormEvent) {
-    event.preventDefault();
-    setMessage(null);
-    setError(null);
-
     const name = draft.name.trim();
     if (!name) {
       setError("请填写应用名称");
       return;
     }
-
-    if (draft.kind === "link" || draft.kind === "external") {
-      if (!draft.href.trim()) {
-        setError("请填写入口地址");
-        return;
-      }
+    if ((draft.kind === "link" || draft.kind === "external") && !draft.href.trim()) {
+      setError("请填写入口地址");
+      return;
     }
-
     if (draft.kind === "internal" && draft.menuPreset === "custom" && draft.modules.length === 0) {
       setError("请至少选择一个菜单模块");
       return;
@@ -153,7 +141,7 @@ export function SettingsAppsPanel() {
           ? "外部系统"
           : "外部链接");
 
-    const base: Omit<AppEntry, "id" | "isCurrentProduct"> = {
+    const payload: Omit<AppEntry, "id" | "isCurrentProduct"> = {
       name,
       subtitle,
       kind: draft.kind,
@@ -172,111 +160,37 @@ export function SettingsAppsPanel() {
           : [],
     };
 
-    if (editingId) {
-      const existing = apps.find((a) => a.id === editingId);
+    const list = loadAppRegistry();
+    if (mode === "edit" && appId) {
+      const existing = list.find((a) => a.id === appId);
       if (!existing || existing.isCurrentProduct) {
         setError("无法编辑该应用");
         return;
       }
-      const next = apps.map((app) =>
-        app.id === editingId
-          ? normalizeAppEntry({ ...app, ...base, id: editingId })
-          : app,
+      saveAppRegistry(
+        list.map((a) =>
+          a.id === appId ? normalizeAppEntry({ ...a, ...payload, id: appId }) : a,
+        ),
       );
-      persist(next, "应用已更新，侧栏将同步菜单与入口");
-      cancelEdit();
-      return;
+    } else {
+      saveAppRegistry([
+        ...list,
+        normalizeAppEntry({ id: createAppId(), ...payload }),
+      ]);
     }
-
-    const next: AppEntry[] = [
-      ...apps,
-      normalizeAppEntry({
-        id: createAppId(),
-        ...base,
-      }),
-    ];
-    persist(next, "应用已添加");
-    setDraft(emptyDraft());
+    onSaved?.();
+    handleClose();
   }
-
-  function removeApp(id: string) {
-    const target = apps.find((a) => a.id === id);
-    if (!target || target.isCurrentProduct) {
-      setError("内置当前应用不可删除");
-      return;
-    }
-    persist(
-      apps.filter((a) => a.id !== id),
-      "应用已移除",
-    );
-    if (editingId === id) cancelEdit();
-  }
-
-  // Managed list = switcher catalog without the built-in "this product" row.
-  // Current product is fixed as host shell; only other apps are administered here.
-  const managedApps = apps.filter((app) => !app.isCurrentProduct);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
-        <h2 className="text-lg font-semibold text-fg-black">应用列表</h2>
-        <p className="mt-1 text-sm text-fg-grey-700">
-          管理侧栏可切换的<strong className="font-medium text-fg-black">其它应用</strong>
-          （外部链接 / 外部系统 / 内部模块）。当前宿主产品不在此列表中展示。
-        </p>
-
-        {managedApps.length === 0 ? (
-          <p className="mt-5 rounded-2xl border border-dashed border-fg-grey-200 px-4 py-8 text-center text-sm text-fg-grey-500">
-            暂无其它应用。在下方新建后会出现在侧栏应用切换器中。
-          </p>
-        ) : (
-          <ul className="mt-5 flex flex-col gap-3">
-            {managedApps.map((app) => (
-              <li
-                key={app.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-fg-grey-200 px-4 py-3"
-              >
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-semibold text-fg-black">{app.name}</span>
-                    <StatusBadge label={kindLabel(app.kind)} color="blue" />
-                  </div>
-                  <p className="mt-0.5 text-xs text-fg-grey-500">
-                    {app.subtitle || "—"}
-                    {app.kind !== "internal"
-                      ? ` · ${app.href ?? "无 URL"} · ${APP_AUTH_META[app.authMode].label}`
-                      : ` · 菜单 ${MENU_PRESET_META[app.menuPreset]?.label ?? app.menuPreset}`}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    color={siteConfig.accent}
-                    variant="tertiary"
-                    size="sm"
-                    onClick={() => startEdit(app)}
-                  >
-                    编辑
-                  </Button>
-                  <Button color="red" variant="tertiary" size="sm" onClick={() => removeApp(app.id)}>
-                    删除
-                  </Button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
-        <h3 className="text-base font-semibold text-fg-black">
-          {editingId ? "编辑应用" : "新建应用"}
-        </h3>
-        <p className="mt-1 text-sm text-fg-grey-500">
-          此处维护的是应用切换器中的<strong className="text-fg-black">其它应用</strong>
-          ，不是当前这套账号管理后台本身。
-        </p>
-
-        <form onSubmit={submit} className="mt-4 flex max-w-xl flex-col gap-4">
+    <Modal
+      open={open}
+      onClose={handleClose}
+      title={mode === "edit" ? "编辑应用" : "新建应用"}
+      width="w-[560px]"
+    >
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+        <div className="flex flex-col gap-4">
           <TextField
             color={siteConfig.accent}
             label="名称"
@@ -289,9 +203,8 @@ export function SettingsAppsPanel() {
             label="副标题"
             value={draft.subtitle}
             onChange={(v) => setDraft((d) => ({ ...d, subtitle: v }))}
-            placeholder="显示在侧栏当前应用下"
+            placeholder="显示在侧栏应用名称下"
           />
-
           <SelectOption
             color={siteConfig.accent}
             label="应用类型"
@@ -307,9 +220,7 @@ export function SettingsAppsPanel() {
               }))
             }
           />
-          <p className="text-xs text-fg-grey-500">
-            {APP_KIND_META[draft.kind].description}
-          </p>
+          <p className="text-xs text-fg-grey-500">{APP_KIND_META[draft.kind].description}</p>
 
           {(draft.kind === "link" || draft.kind === "external") ? (
             <>
@@ -344,7 +255,7 @@ export function SettingsAppsPanel() {
 
           {draft.kind === "external" && draft.authMode === "oidc" ? (
             <p className="rounded-xl border border-dashed border-fg-grey-200 px-3 py-2 text-xs text-fg-grey-500">
-              OIDC Client ID / Issuer 等配置将在后续版本接入，当前仅保存认证类型。
+              OIDC 明细配置后续接入，当前仅保存认证类型。
             </p>
           ) : null}
 
@@ -416,19 +327,16 @@ export function SettingsAppsPanel() {
           ) : null}
 
           {error ? <p className="text-sm text-fg-red">{error}</p> : null}
-          {message ? <p className="text-sm text-fg-green-500">{message}</p> : null}
-          <div className="flex flex-wrap gap-2">
-            <Button type="submit" color={siteConfig.accent}>
-              {editingId ? "保存应用" : "添加应用"}
-            </Button>
-            {editingId ? (
-              <Button type="button" color={siteConfig.accent} variant="tertiary" onClick={cancelEdit}>
-                取消编辑
-              </Button>
-            ) : null}
-          </div>
-        </form>
+        </div>
       </div>
-    </div>
+      <div className="flex items-center justify-between border-t border-fg-grey-100 px-6 py-4">
+        <Button color={siteConfig.accent} variant="tertiary" onClick={handleClose}>
+          取消
+        </Button>
+        <Button color={siteConfig.accent} onClick={submit}>
+          {mode === "edit" ? "保存" : "创建"}
+        </Button>
+      </div>
+    </Modal>
   );
 }

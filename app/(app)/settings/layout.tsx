@@ -8,7 +8,6 @@ import { siteConfig } from "@/config/site";
 const titles: Record<string, string> = {
   "/settings/profile": "个人资料",
   "/settings/security": "修改密码",
-  "/settings/apps": "应用管理",
   "/settings/notifications": "系统设置",
 };
 
@@ -17,6 +16,12 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
   const normalized = pathname.endsWith("/") && pathname.length > 1
     ? pathname.slice(0, -1)
     : pathname;
+
+  // 应用管理自带 list page header（新建 action），不套通用设置头
+  if (normalized === "/settings/apps" || normalized.startsWith("/settings/apps/")) {
+    return <>{children}</>;
+  }
+
   const pageTitle = titles[normalized] ?? "设置";
 
   return (
@@ -29,7 +34,6 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
           color={siteConfig.accent}
           items={[
             { label: "工作台", href: "/dashboard/" },
-            { label: "设置", href: "/settings/profile/" },
             { label: pageTitle },
           ]}
         />
