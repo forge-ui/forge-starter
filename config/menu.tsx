@@ -2,12 +2,8 @@
 
 import {
   HomeSmileBoldDuotone,
-  KeyMinimalisticBoldDuotone,
-  SettingsBoldDuotone,
-  UserCircleBoldDuotone,
   UsersGroupTwoRoundedBoldDuotone,
   WidgetBoldDuotone,
-  BellBoldDuotone,
 } from "solar-icon-set";
 import type { AppLayoutMenuItem, AppLayoutProfile } from "@forge-ui-official/core";
 import {
@@ -16,29 +12,8 @@ import {
   type AppModuleId,
 } from "@/config/apps";
 
-const SETTINGS_CHILDREN: AppLayoutMenuItem[] = [
-  {
-    icon: <UserCircleBoldDuotone size={20} />,
-    label: "个人资料",
-    href: "/settings/profile/",
-  },
-  {
-    icon: <KeyMinimalisticBoldDuotone size={20} />,
-    label: "修改密码",
-    href: "/settings/security/",
-  },
-  {
-    icon: <WidgetBoldDuotone size={20} />,
-    label: "应用管理",
-    href: "/settings/apps/",
-  },
-  {
-    icon: <BellBoldDuotone size={20} />,
-    label: "系统设置",
-    href: "/settings/notifications/",
-  },
-];
-
+// 个人资料 / 改密 / 系统偏好走侧栏 profile 菜单，不占主菜单。
+// 主菜单仅保留「应用管理」类后台配置入口。
 const MODULE_MENU: Record<AppModuleId, AppLayoutMenuItem> = {
   dashboard: {
     icon: <HomeSmileBoldDuotone size={20} />,
@@ -51,9 +26,9 @@ const MODULE_MENU: Record<AppModuleId, AppLayoutMenuItem> = {
     href: "/accounts/",
   },
   settings: {
-    icon: <SettingsBoldDuotone size={20} />,
-    label: "设置",
-    children: SETTINGS_CHILDREN,
+    icon: <WidgetBoldDuotone size={20} />,
+    label: "应用管理",
+    href: "/settings/apps/",
   },
 };
 

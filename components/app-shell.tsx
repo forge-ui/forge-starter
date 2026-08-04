@@ -208,7 +208,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           return;
         }
         if (label.includes("系统设置")) {
-          router.push("/settings/apps/");
+          router.push("/settings/notifications/");
         }
         return;
       }
