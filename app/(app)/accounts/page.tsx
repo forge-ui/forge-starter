@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState, type Key } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState, type Key } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ChatRoundLinear,
   DownloadMinimalisticLinear,
@@ -26,6 +26,7 @@ import {
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
 import { useDemoStore } from "@/components/demo-store";
+import { AccountCreateDialog } from "@/components/account-create-dialog";
 import {
   ACCOUNT_STATUS_META,
   type AccountStatus,
@@ -41,14 +42,24 @@ const filterTabs = [
 ];
 const filterValues = ["all", "active", "disabled", "pending", "locked"] as const;
 
-export default function AccountsPage() {
+function AccountsPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { accounts, deleteAccount, countsByStatus } = useDemoStore();
   const [activeFilterIndex, setActiveFilterIndex] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 8;
   const [selectedRowKeys, setSelectedRowKeys] = useState<Set<Key>>(new Set());
   const [deleteTarget, setDeleteTarget] = useState<AdminAccount | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+
+  // Support /accounts/?create=1 from dashboard or deep links
+  useEffect(() => {
+    if (searchParams.get("create") === "1") {
+      setCreateOpen(true);
+      router.replace("/accounts/", { scroll: false });
+    }
+  }, [searchParams, router]);
 
   const filtered = useMemo(() => {
     const key = filterValues[activeFilterIndex];
@@ -168,6 +179,8 @@ export default function AccountsPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <AccountCreateDialog open={createOpen} onClose={() => setCreateOpen(false)} />
+
       {deleteTarget ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <ConfirmationDialog
@@ -210,7 +223,7 @@ export default function AccountsPage() {
           <Button
             color={siteConfig.accent}
             iconLeft={<PlusIcon size={16} />}
-            onClick={() => router.push("/accounts/new/")}
+            onClick={() => setCreateOpen(true)}
           >
             新建账号
           </Button>
@@ -238,7 +251,7 @@ export default function AccountsPage() {
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-4 rounded-[28px] border border-dashed border-fg-grey-200 bg-white py-16">
           <p className="text-lg font-semibold text-fg-black">暂无账号</p>
-          <Button color={siteConfig.accent} onClick={() => router.push("/accounts/new/")}>
+          <Button color={siteConfig.accent} onClick={() => setCreateOpen(true)}>
             新建账号
           </Button>
         </div>
@@ -260,5 +273,13 @@ export default function AccountsPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function AccountsPage() {
+  return (
+    <Suspense fallback={<div className="py-10 text-sm text-fg-grey-500">加载账号列表…</div>}>
+      <AccountsPageContent />
+    </Suspense>
   );
 }

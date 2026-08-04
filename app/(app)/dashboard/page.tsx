@@ -349,7 +349,7 @@ export default function DashboardPage() {
               color={siteConfig.accent}
               size="sm"
               iconLeft={<PlusIcon size={14} />}
-              onClick={() => router.push("/accounts/new/")}
+              onClick={() => router.push("/accounts/?create=1")}
             >
               新建账号
             </Button>

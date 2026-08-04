@@ -1,7 +1,6 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { AccountForm } from "@/components/account-form";
-
+/** Create is a list-page modal (ShipAny / customers pattern). Keep route for bookmarks. */
 export default function NewAccountPage() {
-  return <AccountForm mode="create" />;
+  redirect("/accounts/?create=1");
 }
