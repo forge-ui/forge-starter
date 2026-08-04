@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * Account create/edit form — IA aligned with ShipAny admin FormCard
+ * (single narrow column, stacked fields) rather than ecommerce product dual-rail.
+ *
+ * Reference: shipany-template-two admin/users/[id]/edit → FormCard className="md:max-w-xl"
+ */
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeftLinear } from "solar-icon-set";
@@ -11,7 +18,6 @@ import {
   ConfirmationDialog,
   IconButton,
   SelectOption,
-  StatusBadge,
   TextArea,
   TextField,
 } from "@forge-ui-official/core";
@@ -113,8 +119,6 @@ export function AccountForm({ mode, accountId }: Props) {
     }
   }
 
-  const statusMeta = ACCOUNT_STATUS_META[status];
-
   return (
     <div className="flex flex-col gap-6">
       {confirmSave ? (
@@ -131,6 +135,7 @@ export function AccountForm({ mode, accountId }: Props) {
         </div>
       ) : null}
 
+      {/* Page chrome — keep Forge header actions; form body follows ShipAny width */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-3">
@@ -155,121 +160,110 @@ export function AccountForm({ mode, accountId }: Props) {
             ]}
           />
         </div>
-        <div className="flex items-center gap-3">
-          <Button
-            color={siteConfig.accent}
-            variant="tertiary"
-            iconLeft={<CloseIcon size={16} />}
-            onClick={() => router.push("/accounts/")}
-          >
-            取消
-          </Button>
-          <Button
-            color={siteConfig.accent}
-            iconLeft={<CheckIcon size={16} />}
-            onClick={() => setConfirmSave(true)}
-          >
-            保存
-          </Button>
-        </div>
       </div>
 
-      {/* Main form + status rail (products/new Status pattern, no fake preview) */}
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
-        <div className="flex min-w-0 flex-1 flex-col gap-3">
-          <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
-            <h3 className="mb-4 text-lg font-semibold text-fg-black">基本信息</h3>
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <TextField
-                color={siteConfig.accent}
-                label="姓名"
-                value={name}
-                onChange={setName}
-                placeholder="真实姓名"
-              />
-              <TextField
-                color={siteConfig.accent}
-                label="用户名"
-                value={username}
-                onChange={setUsername}
-                placeholder="登录名，小写字母数字下划线"
-              />
-              <TextField
-                color={siteConfig.accent}
-                label="邮箱"
-                value={email}
-                onChange={setEmail}
-                type="email"
-                placeholder="name@example.com"
-              />
-              <TextField
-                color={siteConfig.accent}
-                label="手机"
-                value={phone}
-                onChange={setPhone}
-                placeholder="联系手机号"
-              />
-            </div>
+      {/*
+        ShipAny admin user form pattern:
+        single FormCard, md:max-w-xl, vertical field stack, submit at bottom.
+      */}
+      <div className="w-full max-w-xl">
+        <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-fg-black">
+              {mode === "edit" ? "账号信息" : "填写账号信息"}
+            </h2>
+            <p className="mt-1 text-sm text-fg-grey-500">
+              {mode === "create"
+                ? "创建后可在详情页调整权限；默认状态为待激活。"
+                : "修改后点击底部保存，用户名不可随意变更业务含义时请谨慎。"}
+            </p>
           </div>
 
-          <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
-            <h3 className="mb-4 text-lg font-semibold text-fg-black">权限与组织</h3>
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <SelectOption
-                color={siteConfig.accent}
-                label="角色"
-                width="100%"
-                options={roleOptions}
-                value={role}
-                onChange={setRole}
-              />
-              <SelectOption
-                color={siteConfig.accent}
-                label="部门"
-                width="100%"
-                options={deptOptions}
-                value={department}
-                onChange={setDepartment}
-              />
-            </div>
-          </div>
-
-          <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
-            <h3 className="mb-4 text-lg font-semibold text-fg-black">备注</h3>
-            <TextArea
+          <div className="flex flex-col gap-4">
+            <TextField
               color={siteConfig.accent}
-              label="说明"
-              rows={4}
-              value={notes}
-              onChange={setNotes}
-              placeholder="账号用途、审批备注、特殊权限说明…"
+              label="姓名"
+              value={name}
+              onChange={setName}
+              placeholder="真实姓名"
             />
-          </div>
-
-          {error ? <p className="text-sm text-fg-red">{error}</p> : null}
-        </div>
-
-        <aside className="flex w-full flex-col gap-3 lg:w-[280px] lg:shrink-0">
-          <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
-            <div className="mb-4 flex items-center justify-between gap-2">
-              <h3 className="text-lg font-semibold text-fg-black">状态</h3>
-              <StatusBadge label={statusMeta.label} color={statusMeta.color} />
-            </div>
+            <TextField
+              color={siteConfig.accent}
+              label="用户名"
+              value={username}
+              onChange={setUsername}
+              placeholder="登录名（小写字母、数字、下划线）"
+              disabled={mode === "edit"}
+            />
+            <TextField
+              color={siteConfig.accent}
+              label="邮箱"
+              value={email}
+              onChange={setEmail}
+              type="email"
+              placeholder="name@example.com"
+            />
+            <TextField
+              color={siteConfig.accent}
+              label="手机"
+              value={phone}
+              onChange={setPhone}
+              placeholder="联系手机号"
+            />
             <SelectOption
               color={siteConfig.accent}
-              label="账号状态"
+              label="角色"
+              width="100%"
+              options={roleOptions}
+              value={role}
+              onChange={setRole}
+            />
+            <SelectOption
+              color={siteConfig.accent}
+              label="部门"
+              width="100%"
+              options={deptOptions}
+              value={department}
+              onChange={setDepartment}
+            />
+            <SelectOption
+              color={siteConfig.accent}
+              label="状态"
               width="100%"
               options={statusOptions}
               value={status}
               onChange={(v) => setStatus(v as AccountStatus)}
             />
-            <p className="mt-3 text-xs leading-5 text-fg-grey-500">
-              {mode === "create"
-                ? "新建默认「待激活」；启用后即可登录后台。"
-                : "停用 / 锁定后该账号无法登录（演示数据）。"}
-            </p>
+            <TextArea
+              color={siteConfig.accent}
+              label="备注"
+              rows={3}
+              value={notes}
+              onChange={setNotes}
+              placeholder="可选：账号用途、审批说明…"
+            />
           </div>
-        </aside>
+
+          {error ? <p className="mt-4 text-sm text-fg-red">{error}</p> : null}
+
+          <div className="mt-6 flex flex-wrap items-center justify-end gap-3 border-t border-fg-grey-100 pt-5">
+            <Button
+              color={siteConfig.accent}
+              variant="tertiary"
+              iconLeft={<CloseIcon size={16} />}
+              onClick={() => router.push("/accounts/")}
+            >
+              取消
+            </Button>
+            <Button
+              color={siteConfig.accent}
+              iconLeft={<CheckIcon size={16} />}
+              onClick={() => setConfirmSave(true)}
+            >
+              {mode === "edit" ? "保存" : "创建账号"}
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
