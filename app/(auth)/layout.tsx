@@ -1,41 +1,36 @@
 /* eslint-disable @next/next/no-img-element */
 
-import { HeartBold } from "solar-icon-set";
 import { asset } from "@/lib/asset";
+import { siteConfig } from "@/config/site";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
+  const year = new Date().getFullYear();
+
   return (
-    <div className="flex min-h-screen w-full items-stretch p-6 bg-white">
-      {/* 左侧 hero 图 + 装饰卡片，Figma 原版视觉 */}
+    <div className="flex min-h-screen w-full items-stretch bg-white p-6">
       <div className="relative hidden h-auto w-[640px] shrink-0 overflow-hidden rounded-2xl lg:block">
         <img
           src={asset("/images/hero.png")}
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
-        {/* 右下装饰 — chart card */}
         <img
           src={asset("/images/chart-card.png")}
           alt=""
-          className="absolute right-8 bottom-32 w-[228px] h-[246px] object-cover pointer-events-none"
+          className="pointer-events-none absolute bottom-32 right-8 h-[246px] w-[228px] object-cover"
         />
-        {/* 左下装饰 — stat card */}
         <img
           src={asset("/images/stat-card.png")}
           alt=""
-          className="absolute left-8 bottom-12 w-[240px] h-[156px] object-cover pointer-events-none"
+          className="pointer-events-none absolute bottom-12 left-8 h-[156px] w-[240px] object-cover"
         />
       </div>
 
-      {/* 右侧表单 */}
       <div className="relative flex flex-1 items-center justify-center px-6 py-10">
         {children}
 
-        {/* Copyright footer 居中底部 */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1 text-sm text-fg-grey-700 whitespace-nowrap">
-          <span>© 2026 用心打造</span>
-          <HeartBold size={14} color="#EF4444" />
-          <span>by Forge</span>
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-center text-xs leading-5 tracking-fg text-fg-grey-500 whitespace-nowrap">
+          © {year} {siteConfig.teamName}
         </div>
       </div>
     </div>
