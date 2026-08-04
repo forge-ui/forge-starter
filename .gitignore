@@ -1,11 +1,19 @@
+# dependencies
 node_modules
+.pnpm-store
+
+# next
 .next
 out
-dist
-*.log
-.DS_Store
+
+# env
 .env
 .env.local
 .env.*.local
-next-env.d.ts
-tsconfig.tsbuildinfo
+
+# drizzle
+drizzle/meta
+
+# misc
+.DS_Store
+*.tsbuildinfo

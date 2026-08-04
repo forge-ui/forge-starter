@@ -2,25 +2,21 @@
 
 import {
   HomeSmileBoldDuotone,
-  ChartSquareBoldDuotone,
-  UsersGroupTwoRoundedBoldDuotone,
-  InboxBoldDuotone,
-  CalendarBoldDuotone,
-  FolderBoldDuotone,
+  ClipboardListBoldDuotone,
+  DocumentAddBoldDuotone,
+  SettingsBoldDuotone,
 } from "solar-icon-set";
 import type { AppLayoutMenuItem, AppLayoutProfile } from "@forge-ui-official/core";
 
 export const menuItems: AppLayoutMenuItem[] = [
   { icon: <HomeSmileBoldDuotone size={20} />, label: "工作台", href: "/dashboard/" },
-  { icon: <FolderBoldDuotone size={20} />, label: "项目", href: "/projects/" },
-  { icon: <InboxBoldDuotone size={20} />, label: "收件箱", href: "/inbox/", badge: 3 },
-  { icon: <CalendarBoldDuotone size={20} />, label: "日历", href: "/calendar/" },
-  { icon: <ChartSquareBoldDuotone size={20} />, label: "数据分析", href: "/analytics/" },
-  { icon: <UsersGroupTwoRoundedBoldDuotone size={20} />, label: "团队", href: "/team/" },
+  { icon: <ClipboardListBoldDuotone size={20} />, label: "示例列表", href: "/examples/list/" },
+  { icon: <DocumentAddBoldDuotone size={20} />, label: "示例表单", href: "/examples/form/" },
+  { icon: <SettingsBoldDuotone size={20} />, label: "设置", href: "/settings/" },
 ];
 
-export const profile: AppLayoutProfile = {
-  avatar: "https://i.pravatar.cc/150?u=forge-starter",
-  name: "陈晓",
-  role: "产品经理",
+export const defaultProfile: AppLayoutProfile = {
+  avatar: "",
+  name: "未登录",
+  role: "访客",
 };

@@ -1,23 +1,42 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button, IconButton, StyledLink, TextField } from "@forge-ui-official/core";
 import { EyeLinear, EyeClosedLinear } from "solar-icon-set";
 import { SocialButton, OrDivider } from "../_social-button";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (event: React.FormEvent) => {
+  async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    // TODO: 接入你自己的 auth 逻辑（NextAuth / Clerk / Supabase / 自建 API）
-    // demo 直接跳后台首页
-    router.push("/dashboard");
-  };
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/auth/login/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ login, password }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        setError(data.error ?? "登录失败");
+        return;
+      }
+      router.replace(data.redirectTo ?? "/dashboard/");
+      router.refresh();
+    } catch {
+      setError("网络错误，请重试");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <form onSubmit={handleSubmit} className="flex w-full max-w-[400px] flex-col gap-8">
@@ -26,7 +45,7 @@ export default function LoginPage() {
           欢迎回来
         </h1>
         <p className="text-base text-fg-grey-700">
-          请输入账号信息登录。
+          使用用户名或邮箱登录。演示模式任意账号可进入。
         </p>
       </header>
 
@@ -41,18 +60,20 @@ export default function LoginPage() {
         <TextField
           label="用户名 / 邮箱"
           placeholder="输入用户名或邮箱..."
-          value={email}
-          onChange={setEmail}
+          value={login}
+          onChange={setLogin}
+          autoComplete="username"
         />
 
         <TextField
           label="密码"
+          type={showPassword ? "text" : "password"}
           placeholder="输入密码..."
           value={password}
           onChange={setPassword}
-          className={showPassword ? "" : "forge-password-field"}
+          autoComplete="current-password"
           headerAction={
-            <StyledLink href="/forgot-password">
+            <StyledLink href="/forgot-password/">
               忘记密码
             </StyledLink>
           }
@@ -75,14 +96,16 @@ export default function LoginPage() {
           }
         />
 
-        <Button type="submit" color="purple" variant="primary" size="lg" className="w-full">
-          登录
+        {error ? <p className="text-sm text-fg-red">{error}</p> : null}
+
+        <Button type="submit" color="purple" variant="primary" size="lg" className="w-full" disabled={loading}>
+          {loading ? "登录中…" : "登录"}
         </Button>
       </div>
 
       <p className="text-center text-sm text-fg-grey-700">
         还没账号？{" "}
-        <StyledLink href="/register">立即注册</StyledLink>
+        <StyledLink href="/register/">立即注册</StyledLink>
       </p>
     </form>
   );

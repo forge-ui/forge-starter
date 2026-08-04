@@ -1,18 +1,11 @@
 @import "tailwindcss";
 @import "@forge-ui-official/core/styles.css";
 
-/* Let Tailwind v4 scan the Forge dist so utility classes like bg-fg-violet,
-   tracking-fg etc. used inside @forge-ui-official/core components get generated. */
+/* Let Tailwind v4 scan the Forge dist so utility classes used inside core get generated. */
 @source "../node_modules/@forge-ui-official/core/dist";
 
 html,
 body {
   background: #ffffff;
   color: #000000;
-}
-
-/* Core 0.1.6 does not expose the input type yet. Keep the starter password
-   experience masked until the next Core release can use type="password". */
-.forge-password-field input {
-  -webkit-text-security: disc;
 }
