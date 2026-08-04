@@ -15,7 +15,7 @@
 | **模式** | `AUTH_MODE=demo` 任意账号可进；`local` 走真库 + 路由守卫 |
 | **应用壳** | 统一 `AppLayout`；侧栏仅 **工作台 / 账号管理** |
 | **业务竖切** | 工作台 ↔ 列表（搜索/筛选）↔ **弹窗新建/编辑** ↔ 详情 |
-| **演示数据** | 账号 CRUD 走内存 `demo-store`（刷新恢复种子数据）；与登录 `users` 表无关 |
+| **账号数据** | Postgres 表 `admin_accounts`（空库即空列表，无种子）；与登录 `users` 表分离 |
 | **个人设置** | **仅** 侧栏 profile 菜单：编辑资料 / 修改密码 / 系统设置 / 退出登录 |
 
 ## 快速开始
@@ -63,7 +63,12 @@ pnpm dev
 | 数据 | 存储 | 用途 |
 |------|------|------|
 | 登录用户 | Postgres `users`（`local`）/ demo session | 认证、profile 改名改密 |
-| 运营「账号管理」列表 | 浏览器内存 demo store | 教 UI/CRUD 范式，**非生产业务库** |
+| 运营「账号管理」列表 | Postgres `admin_accounts` | 业务账号 CRUD；**需 `DATABASE_URL` + `pnpm db:push`**；无数据则为空 |
+
+侧栏顶部「账号管理后台」是 **单应用品牌区**（Forge team switcher 壳），**不是多租户**：
+- 「新建账号」→ 打开账号创建弹窗  
+- 「系统设置」→ 个人设置  
+- 「新建团队」→ 未启用（本脚手架不做多团队） |
 
 ## 环境变量
 
@@ -104,12 +109,12 @@ lib/
   auth/
   db/
   mail/
-  demo/accounts.ts        # 业务演示域模型（非登录用户表）
+  accounts/               # 业务账号类型 + DB service
 components/
   app-shell.tsx
-  demo-store.tsx
-  account-form-dialog.tsx # 新建/编辑共用弹窗
-  ui/modal.tsx            # 宿主 Modal（core 无通用弹窗）
+  accounts-store.tsx      # 客户端缓存 + 调 /api/accounts
+  account-form-dialog.tsx
+  ui/modal.tsx
 middleware.ts
 docker-compose.yml
 PRODUCT.md                # 产品边界与路线图

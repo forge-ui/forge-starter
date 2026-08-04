@@ -35,11 +35,11 @@ import {
   type MapRegion,
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
-import { useDemoStore } from "@/components/demo-store";
+import { useAccountsStore } from "@/components/accounts-store";
 import {
   ACCOUNT_STATUS_META,
   type AdminAccount,
-} from "@/lib/demo/accounts";
+} from "@/lib/accounts/types";
 
 const months = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
 
@@ -51,7 +51,7 @@ const regionsForMap: MapRegion[] = [
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { accounts, countsByStatus } = useDemoStore();
+  const { accounts, countsByStatus } = useAccountsStore();
 
   const total = countsByStatus.all ?? 0;
   const active = countsByStatus.active ?? 0;

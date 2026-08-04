@@ -23,16 +23,19 @@
 - `app/(app)/dashboard`：工作台（ecommerce-2 布局）
 - `app/(app)/accounts`：账号列表（弹窗新建）/ 详情 / 编辑
 - `app/(app)/settings`：个人设置（仅 profile 菜单进入）
-- `components/demo-store.tsx` + `lib/demo/accounts.ts`：**业务演示数据**（内存，非登录 users 表）
+- `lib/accounts/*` + `app/api/accounts`：业务账号（Postgres `admin_accounts`）
+- `components/accounts-store.tsx`：客户端列表缓存
 - `components/ui/modal.tsx`：宿主弹窗壳（core 无通用 Modal）
 - `config/menu.tsx`：仅工作台、账号管理
 - `PRODUCT.md` / `README.md`：产品边界与数据边界
 
-## 演示数据约定
+## 数据约定
 
-- 登录用户（auth）与「账号管理」演示列表是两套数据，不要混为一谈。
-- 账号新建/编辑都用弹窗（`AccountFormDialog`），不要再做独立整页表单，也不要加一级菜单「新建账号」。
-- 不要做无行为的装饰按钮（导出/邮件/电话等）；要么实现，要么不渲染。
+- 登录用户（`users`）与业务账号（`admin_accounts`）分表，不要混为一谈。
+- 账号列表默认空；不要再加浏览器内存种子数据。
+- 账号新建/编辑都用弹窗（`AccountFormDialog`）。
+- 侧栏 team 区是单应用品牌，不要实现多租户/多团队，除非产品明确要求。
+- 不要做无行为的装饰按钮；要么实现，要么不渲染。
 
 ## 样式接入
 

@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
 import { AppShell } from "@/components/app-shell";
-import { DemoStoreProvider } from "@/components/demo-store";
+import { AccountsStoreProvider } from "@/components/accounts-store";
 
 export default function AppSectionLayout({ children }: { children: ReactNode }) {
   return (
-    <DemoStoreProvider>
+    <AccountsStoreProvider>
       <AppShell>{children}</AppShell>
-    </DemoStoreProvider>
+    </AccountsStoreProvider>
   );
 }

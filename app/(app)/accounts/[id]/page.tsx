@@ -29,13 +29,13 @@ import {
   type ColumnDef,
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
-import { useDemoStore } from "@/components/demo-store";
+import { useAccountsStore } from "@/components/accounts-store";
 import { AccountFormDialog } from "@/components/account-form-dialog";
 import {
   ACCOUNT_STATUS_META,
   type AccountStatus,
   type AdminAccount,
-} from "@/lib/demo/accounts";
+} from "@/lib/accounts/types";
 
 const tabs = ["概览", "登录记录", "权限", "备注"] as const;
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -123,12 +123,13 @@ export default function AccountDetailPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
-  const { getById, deleteAccount, accounts } = useDemoStore();
+  const { getById, deleteAccount, accounts, loading } = useAccountsStore();
   const account = getById(id);
   const [tabIndex, setTabIndex] = useState(0);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [sessionPage, setSessionPage] = useState(1);
   const [editOpen, setEditOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const sessions = useMemo(() => (account ? buildSessions(account) : []), [account]);
   const related = useMemo(() => {
@@ -188,6 +189,12 @@ export default function AccountDetailPage({
     [],
   );
 
+  if (loading && !account) {
+    return (
+      <div className="py-20 text-center text-sm text-fg-grey-500">加载中…</div>
+    );
+  }
+
   if (!account) {
     return (
       <div className="flex flex-col items-center gap-4 py-20">
@@ -217,15 +224,20 @@ export default function AccountDetailPage({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <ConfirmationDialog
             title="删除账号？"
-            description={`确定删除「${account.name}」？此操作不可撤销（演示数据）。`}
+            description={`确定删除「${account.name}」？此操作将从数据库移除，不可撤销。`}
             color="red"
             icon={<TrashBinMinimalisticLinear size={32} color="#EA580C" />}
-            confirmLabel="删除"
+            confirmLabel={deleting ? "删除中…" : "删除"}
             cancelLabel="取消"
-            onCancel={() => setConfirmDelete(false)}
+            onCancel={() => {
+              if (!deleting) setConfirmDelete(false);
+            }}
             onConfirm={() => {
-              deleteAccount(account.id);
-              router.push("/accounts/");
+              if (deleting) return;
+              setDeleting(true);
+              void deleteAccount(account.id)
+                .then(() => router.push("/accounts/"))
+                .catch(() => setDeleting(false));
             }}
           />
         </div>

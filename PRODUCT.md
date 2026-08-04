@@ -150,12 +150,13 @@ docker-compose.yml        # 本地 Postgres
 
 业务域固定为 **管理后台账号管理**；菜单只保留 **工作台 / 账号管理**。
 
-### 5.1 演示边界（写进 README 同步）
+### 5.1 数据与入口边界
 
-- **登录用户**：`AUTH_MODE=local` 时写 Postgres；profile 改资料/改密走 `/api/auth/*`。
-- **账号管理 CRUD**：`components/demo-store.tsx` 内存状态，刷新恢复种子数据；用于范例 UI，**不要当成生产账号库**。
+- **登录用户**：`AUTH_MODE=local` 时写 Postgres `users`；profile 改资料/改密走 `/api/auth/*`。
+- **账号管理 CRUD**：Postgres `admin_accounts` + `/api/accounts`；**无种子数据**，库空即列表空；与登录用户分表。
 - **新建/编辑入口**：列表、详情、工作台 → **同一套 Modal**；`/accounts/new` → `?create=1`；`/accounts/[id]/edit` → `?edit=id`。
-- **设置入口**：侧栏 profile 四项（编辑资料 / 修改密码 / 系统设置 / 退出），**不设一级「设置」菜单**。
+- **设置入口**：侧栏 profile 四项；**不设一级「设置」菜单**。
+- **侧栏 team switcher**：单应用品牌，**不做多团队**；「新建账号 / 系统设置」有实际跳转，「新建团队」未启用。
 
 ## 6. 版本节奏建议
 
@@ -164,7 +165,7 @@ docker-compose.yml        # 本地 Postgres
 | **0.1.x** | 认证 UI + dashboard 占位 + Forge 接入；演示级跳转 |
 | **0.2.0** | 定位更名 + 模块路线图 + **认证/SMTP 产品决策** |
 | **0.3.0** | P0：共享 layout、**PostgreSQL + local 用户名/邮箱密码**、**SMTP 找回密码**、守卫、列表/表单范例 |
-| **0.4.x**（当前） | 业务域 **账号管理**；Dashboard←**`dashboards/ecommerce-2`**；列表←`ecommerce/customers`（搜索/筛选）；**新建/编辑=Modal**；详情←`customers/[id]`；`AdminAccount` 内存 demo store（与登录 `users` 分离）；设置仅 profile 入口 |
+| **0.4.x**（当前） | 业务域 **账号管理**；Dashboard←**`dashboards/ecommerce-2`**；列表/弹窗 CRUD；**`admin_accounts` 落 Postgres**（空库为空）；登录 `users` 与业务账号分表；设置仅 profile；侧栏 team 区为单应用品牌（非多租户） |
 | **0.5.0** | 可选邮箱验证、部署与 SMTP 运维说明、设置写回用户表 |
 
 ## 7. 成功标准

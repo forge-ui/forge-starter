@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import { Button, SelectOption, TextArea, TextField } from "@forge-ui-official/core";
 import { Modal } from "@/components/ui/modal";
 import { siteConfig } from "@/config/site";
-import { useDemoStore } from "@/components/demo-store";
+import { useAccountsStore } from "@/components/accounts-store";
 import {
   ACCOUNT_DEPARTMENTS,
   ACCOUNT_ROLES,
   ACCOUNT_STATUS_META,
   type AccountRole,
   type AccountStatus,
-} from "@/lib/demo/accounts";
+} from "@/lib/accounts/types";
 
 const roleOptions = ACCOUNT_ROLES.map((value) => ({ value, label: value }));
 const deptOptions = ACCOUNT_DEPARTMENTS.map((value) => ({ value, label: value }));
@@ -46,9 +46,7 @@ const emptyForm = (): FormState => ({
 type Props = {
   open: boolean;
   onClose: () => void;
-  /** Omit for create; pass id for edit */
   accountId?: string | null;
-  /** After create, go to detail (default true) */
   goToDetailOnCreate?: boolean;
 };
 
@@ -59,16 +57,18 @@ export function AccountFormDialog({
   goToDetailOnCreate = true,
 }: Props) {
   const router = useRouter();
-  const { getById, createAccount, updateAccount } = useDemoStore();
+  const { getById, createAccount, updateAccount } = useAccountsStore();
   const mode = accountId ? "edit" : "create";
   const existing = accountId ? getById(accountId) : undefined;
 
   const [form, setForm] = useState<FormState>(emptyForm);
   const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!open) return;
     setError(null);
+    setSaving(false);
     if (mode === "edit" && existing) {
       setForm({
         name: existing.name,
@@ -102,11 +102,12 @@ export function AccountFormDialog({
   }
 
   function handleClose() {
+    if (saving) return;
     setError(null);
     onClose();
   }
 
-  function submit() {
+  async function submit() {
     if (mode === "edit" && accountId && !existing) {
       setError("账号不存在或已删除");
       return;
@@ -116,6 +117,8 @@ export function AccountFormDialog({
       setError(msg);
       return;
     }
+    setSaving(true);
+    setError(null);
     const payload = {
       name: form.name,
       username: mode === "edit" && existing ? existing.username : form.username,
@@ -127,16 +130,24 @@ export function AccountFormDialog({
       notes: form.notes,
     };
 
-    if (mode === "edit" && existing) {
-      updateAccount(existing.id, payload);
-      handleClose();
-      return;
-    }
-
-    const created = createAccount(payload);
-    handleClose();
-    if (goToDetailOnCreate) {
-      router.push(`/accounts/${created.id}/`);
+    try {
+      if (mode === "edit" && existing) {
+        await updateAccount(existing.id, payload);
+        setSaving(false);
+        setError(null);
+        onClose();
+        return;
+      }
+      const created = await createAccount(payload);
+      setSaving(false);
+      setError(null);
+      onClose();
+      if (goToDetailOnCreate) {
+        router.push(`/accounts/${created.id}/`);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "保存失败");
+      setSaving(false);
     }
   }
 
@@ -232,11 +243,11 @@ export function AccountFormDialog({
         </div>
       </div>
       <div className="flex items-center justify-between border-t border-fg-grey-100 px-6 py-4">
-        <Button color={siteConfig.accent} variant="tertiary" onClick={handleClose}>
+        <Button color={siteConfig.accent} variant="tertiary" onClick={handleClose} disabled={saving}>
           取消
         </Button>
-        <Button color={siteConfig.accent} onClick={submit}>
-          {mode === "edit" ? "保存" : "创建"}
+        <Button color={siteConfig.accent} onClick={() => void submit()} disabled={saving}>
+          {saving ? "保存中…" : mode === "edit" ? "保存" : "创建"}
         </Button>
       </div>
     </Modal>

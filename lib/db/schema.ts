@@ -1,4 +1,11 @@
-import { pgTable, text, timestamp, uuid, uniqueIndex } from "drizzle-orm/pg-core";
+import {
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 
 export const users = pgTable(
   "users",
@@ -28,5 +35,32 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+/** Business domain: managed admin accounts (not login users table). */
+export const adminAccounts = pgTable(
+  "admin_accounts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: text("name").notNull(),
+    username: text("username").notNull(),
+    email: text("email").notNull(),
+    phone: text("phone").notNull().default(""),
+    role: text("role").notNull(),
+    department: text("department").notNull(),
+    status: text("status").notNull().default("pending"),
+    loginCount: integer("login_count").notNull().default(0),
+    lastLogin: text("last_login"),
+    notes: text("notes").notNull().default(""),
+    avatarUrl: text("avatar_url").notNull().default(""),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("admin_accounts_username_uidx").on(table.username),
+    uniqueIndex("admin_accounts_email_uidx").on(table.email),
+  ],
+);
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+export type AdminAccountRow = typeof adminAccounts.$inferSelect;
+export type NewAdminAccountRow = typeof adminAccounts.$inferInsert;

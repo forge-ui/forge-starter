@@ -23,13 +23,13 @@ import {
   type ColumnDef,
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
-import { useDemoStore } from "@/components/demo-store";
+import { useAccountsStore } from "@/components/accounts-store";
 import { AccountFormDialog } from "@/components/account-form-dialog";
 import {
   ACCOUNT_STATUS_META,
   type AccountStatus,
   type AdminAccount,
-} from "@/lib/demo/accounts";
+} from "@/lib/accounts/types";
 
 const filterTabs = [
   { label: "全部" },
@@ -43,12 +43,14 @@ const filterValues = ["all", "active", "disabled", "pending", "locked"] as const
 function AccountsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { accounts, deleteAccount, countsByStatus } = useDemoStore();
+  const { accounts, loading, error, deleteAccount, countsByStatus, refresh } = useAccountsStore();
   const [activeFilterIndex, setActiveFilterIndex] = useState(0);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 8;
   const [deleteTarget, setDeleteTarget] = useState<AdminAccount | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
 
@@ -225,17 +227,35 @@ function AccountsPageContent() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <ConfirmationDialog
             title="删除账号？"
-            description={`确定删除「${deleteTarget.name}」？此操作不可撤销（演示数据，刷新页面会恢复种子数据）。`}
+            description={`确定删除「${deleteTarget.name}」？此操作将从数据库移除，不可撤销。`}
             color="red"
             icon={<TrashBinMinimalisticLinear size={32} color="#EA580C" />}
-            confirmLabel="删除"
+            confirmLabel={deleting ? "删除中…" : "删除"}
             cancelLabel="取消"
-            onCancel={() => setDeleteTarget(null)}
-            onConfirm={() => {
-              deleteAccount(deleteTarget.id);
+            onCancel={() => {
+              if (deleting) return;
               setDeleteTarget(null);
+              setDeleteError(null);
+            }}
+            onConfirm={() => {
+              if (deleting) return;
+              setDeleting(true);
+              setDeleteError(null);
+              void deleteAccount(deleteTarget.id)
+                .then(() => {
+                  setDeleteTarget(null);
+                })
+                .catch((err: unknown) => {
+                  setDeleteError(err instanceof Error ? err.message : "删除失败");
+                })
+                .finally(() => setDeleting(false));
             }}
           />
+          {deleteError ? (
+            <p className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 rounded-lg bg-white px-3 py-2 text-sm text-fg-red shadow">
+              {deleteError}
+            </p>
+          ) : null}
         </div>
       ) : null}
 
@@ -251,9 +271,6 @@ function AccountsPageContent() {
               { label: "账号管理" },
             ]}
           />
-          <p className="mt-1 text-xs text-fg-grey-500">
-            演示数据：仅保存在当前浏览器内存，刷新页面会恢复初始种子账号。
-          </p>
         </div>
         <Button
           color={siteConfig.accent}
@@ -290,14 +307,26 @@ function AccountsPageContent() {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {error ? (
+        <div className="flex flex-col items-center justify-center gap-3 rounded-[28px] border border-dashed border-fg-grey-200 bg-white py-16">
+          <p className="text-lg font-semibold text-fg-black">无法加载账号</p>
+          <p className="max-w-md text-center text-sm text-fg-grey-500">{error}</p>
+          <Button color={siteConfig.accent} onClick={() => void refresh()}>
+            重试
+          </Button>
+        </div>
+      ) : loading ? (
+        <div className="rounded-[28px] border border-fg-grey-200 bg-white py-16 text-center text-sm text-fg-grey-500">
+          加载中…
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-4 rounded-[28px] border border-dashed border-fg-grey-200 bg-white py-16">
           <p className="text-lg font-semibold text-fg-black">
             {accounts.length === 0 ? "暂无账号" : "无匹配结果"}
           </p>
           <p className="text-sm text-fg-grey-500">
             {accounts.length === 0
-              ? "点击下方按钮创建第一个演示账号。"
+              ? "数据库中还没有账号，点击下方创建第一条。"
               : "试试清空搜索或切换状态筛选。"}
           </p>
           {accounts.length === 0 ? (

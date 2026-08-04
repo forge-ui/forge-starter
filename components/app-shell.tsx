@@ -79,34 +79,55 @@ export function AppShell({ children }: { children: ReactNode }) {
     router.refresh();
   }, [router]);
 
-  // Core ProfileDropdown is presentational — wire the four menu actions here.
+  // Profile + team popovers are presentational in core — wire actions here.
   useEffect(() => {
     function onDocumentClick(event: MouseEvent) {
       const target = event.target as HTMLElement | null;
-      const item = target?.closest?.(
+
+      const profileItem = target?.closest?.(
         '[data-popover="profile"] [role="menuitem"]',
       ) as HTMLElement | null;
-      if (!item) return;
+      if (profileItem) {
+        const label = (profileItem.textContent ?? "").replace(/\s+/g, "");
+        event.preventDefault();
+        event.stopPropagation();
+        if (label.includes("退出登录")) {
+          void logout();
+          return;
+        }
+        if (label.includes("编辑资料")) {
+          router.push("/settings/?tab=profile");
+          return;
+        }
+        if (label.includes("修改密码")) {
+          router.push("/settings/?tab=security");
+          return;
+        }
+        if (label.includes("系统设置")) {
+          router.push("/settings/?tab=notifications");
+        }
+        return;
+      }
 
-      const label = (item.textContent ?? "").replace(/\s+/g, "");
+      const teamItem = target?.closest?.(
+        '[data-popover="team"] [role="menuitem"]',
+      ) as HTMLElement | null;
+      if (!teamItem) return;
+
+      const label = (teamItem.textContent ?? "").replace(/\s+/g, "");
       event.preventDefault();
       event.stopPropagation();
 
-      if (label.includes("退出登录")) {
-        void logout();
-        return;
-      }
-      if (label.includes("编辑资料")) {
-        router.push("/settings/?tab=profile");
-        return;
-      }
-      if (label.includes("修改密码")) {
-        router.push("/settings/?tab=security");
-        return;
-      }
-      if (label.includes("系统设置")) {
+      // Single-app starter: team switcher is branding, not multi-tenant.
+      // Map meaningful items; ignore multi-team create.
+      if (label.includes("设置")) {
         router.push("/settings/?tab=notifications");
+        return;
       }
+      if (label.includes("邀请") || label.includes("新建账号")) {
+        router.push("/accounts/?create=1");
+      }
+      // 「新建团队」intentionally no-op — not multi-workspace product
     }
 
     document.addEventListener("click", onDocumentClick, true);
@@ -119,7 +140,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       profilePosition="sidebar"
       accent={siteConfig.accent}
       teamName={siteConfig.teamName}
-      teamMemberCount={1}
+      teamSubtitle="单应用 · 账号管理"
+      teamLabels={{
+        invite: "新建账号",
+        settings: "系统设置",
+        createNew: "新建团队（未启用）",
+      }}
       menuItems={menuItems}
       profile={profile}
       notifications={0}
