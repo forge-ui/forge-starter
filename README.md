@@ -20,14 +20,18 @@
 
 ## 当前已有
 
-- **认证页**：`/login`、`/register`、`/forgot-password`、`/reset-password`（演示级提交，需替换为真实 auth）
+- **认证页**：`/login`、`/register`、`/forgot-password`、`/reset-password`
 - **后台壳**：`/dashboard` 接入 `AppLayout`、菜单、profile、通知占位
 - **默认设计**：侧栏 `BoldDuotone` 图标；默认无收藏分组
 - **Forge 样式**：Tailwind v4 + `core/styles.css` + `@source`
 - **AI 规范**：根目录 `AGENTS.md`（Codex / Claude / Cursor 等）
 - **公开依赖**：`@forge-ui-official/core` 来自 npm，无需私有 registry
 
-> 演示模式：登录不校验账号，且无路由守卫。上线前必须接入真实鉴权与 middleware（见 PRODUCT 路线图）。
+**认证目标（0.3 落地，见 [PRODUCT.md](./PRODUCT.md)）：**
+
+- 登录：**用户名或邮箱 + 密码**（本地账号，不强制 Clerk 等）
+- 邮件：仅 **自定义 SMTP**（主机/端口/用户名/密码），用于找回密码等；**不依赖** Resend / SendGrid 等云邮件 API
+- 当前 0.2 仍为演示跳转；上线前需 `AUTH_MODE=local` + 守卫 + SMTP
 
 ## 快速开始
 

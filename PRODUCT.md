@@ -14,94 +14,155 @@
 ## 2. 设计原则
 
 1. **Forge-first**：布局与业务控件优先 `@forge-ui-official/core` + `fg-*` token + `solar-icon-set`。
-2. **轻默认、可删除**：每个模块可摘掉；不绑死 Stripe / 某家 ORM / 某家云。
-3. **演示与生产边界清晰**：demo 可一键进后台；生产必须显式接 auth。
+2. **轻默认、可删除**：每个模块可摘掉；不绑死 Stripe、Clerk、某家云邮件 SaaS。
+3. **演示与生产边界清晰**：`AUTH_MODE=demo` 可一键进后台；生产用本地账号 + 自建 SMTP。
 4. **范例即文档**：用真列表/表单页教用法，不用五个菜单指向同一占位页。
 5. **不做中台**：无代码生成、无 BPM、无复杂多租户权限引擎。
+6. **邮件可自建**：发信只依赖 **标准 SMTP**（主机 / 端口 / 账号 / 密码 / TLS），不强制 Resend、SendGrid、Mailgun 等在线邮件云。
 
-## 3. 模块规划
+## 3. 认证与邮件（已拍板）
 
-### 3.1 必做（P0）— 达到「轻量 ShipAny」下限
+### 3.1 登录方式
+
+| 能力 | 约定 |
+|------|------|
+| 主路径 | **用户名 + 密码**，或 **邮箱 + 密码**（同一登录框可接受「用户名或邮箱」） |
+| 注册 | 至少收集：用户名、邮箱、密码（密码哈希存储，不明文落库） |
+| 会话 | 服务端 session（httpOnly cookie）；支持退出登录 |
+| 守卫 | 未登录不可进 `app/(app)`；可用 env 在纯 UI 开发时关闭 |
+| 默认不做 | Google / GitHub 等 OAuth（P2 可选，非默认） |
+| 默认不做 | 强制绑定 Clerk / Auth0 / Supabase Auth 等托管身份云 |
+
+实现倾向（实现阶段可微调，产品语义不变）：
+
+- 本地用户表（SQLite 默认，便于单机；可换 Postgres）
+- 密码：`bcrypt` / `argon2` 一类单向哈希
+- 会话：Auth.js（Credentials）或等价自建 session，**不把云 IdP 当硬依赖**
+
+### 3.2 邮件：仅 SMTP，可自定义服务器
+
+用于：**注册验证（若开启）、找回密码、重置密码链接** 等事务邮件。
+
+| 配置项（env 示例名） | 含义 |
+|----------------------|------|
+| `SMTP_HOST` | 邮件服务器主机（如 `mail.example.com`、内网 Postfix、企业邮箱 SMTP） |
+| `SMTP_PORT` | 端口（常见 465 / 587） |
+| `SMTP_SECURE` | 是否隐式 TLS（465 常为 true） |
+| `SMTP_USER` | SMTP 登录用户名 |
+| `SMTP_PASS` | SMTP 登录密码 |
+| `SMTP_FROM` | 发件人展示地址（如 `noreply@example.com`） |
+| `APP_URL` | 重置链接等回跳的应用根 URL |
+
+原则：
+
+1. **只实现 SMTP 传输**（如 nodemailer 直连），配置进 `.env`，文档给自建 / 企业邮箱示例。  
+2. **禁止**把 Resend / SendGrid / Mailgun / Amazon SES SDK 等作为默认或必选依赖。  
+3. 用户若自己用「兼容 SMTP 的云邮箱」当 `SMTP_HOST`，那是用户选择，产品不内置其 API。  
+4. `AUTH_MODE=demo` 或未配置 SMTP 时：找回密码可提示「未配置邮件」，开发环境可把重置链打印到服务端日志，**不得假装已发送成功到真实邮箱**。  
+5. 重置令牌：一次性、短时有效、哈希存储。
+
+### 3.3 运行模式
+
+| `AUTH_MODE` | 行为 |
+|-------------|------|
+| `demo` | 任意/固定演示账号可进后台；可不连库、不发信（当前 0.2 行为，保留作 UI 开发） |
+| `local`（生产默认目标） | 用户名或邮箱 + 密码校验；注册写入本地用户；邮件走 SMTP |
+
+## 4. 模块规划
+
+### 4.1 必做（P0）— 达到「轻量 ShipAny」下限
 
 | 模块 | 做什么 | 不做 |
 |------|--------|------|
 | **应用壳 App Shell** | 统一 `(app)/layout` + `AppLayout`；`config/menu` 唯一菜单源；Header 主/次动作可配置 | 收藏夹默认开启、第二套导航 |
-| **认证 Auth（可插拔）** | 保留现有登录/注册/找回 UI；`demo` 模式可进后台；文档化接 Clerk / Auth.js / 自建 | 自研完整账号中台 |
-| **路由守卫** | `middleware` 示例：未登录不可进 `(app)`；可用 env 关闭便于纯 UI 开发 | 细粒度 RBAC 引擎 |
-| **工作台 Dashboard** | 真 Forge 指标卡/区块（可 mock 数据），Header 动作有行为或去掉 | 空虚线框充数 |
+| **认证 Auth（本地账号）** | 用户名或邮箱 + 密码登录；注册；session；退出；`demo` / `local` 双模式 | 默认 OAuth、托管 IdP 硬依赖 |
+| **邮件 Mail（SMTP）** | 可配置自定义 SMTP；找回/重置密码邮件 | 云邮件 API 必选、营销群发 |
+| **路由守卫** | 未登录不可进 `(app)`；env 可关 | 细粒度 RBAC 引擎 |
+| **工作台 Dashboard** | 真 Forge 指标卡/区块（可 mock），Header 动作有效或去掉 | 空虚线框充数 |
 | **列表范式 Collection** | 一页：`Toolbar` + `DataTable` + 行操作 + 空态 | 五个路由 re-export 同一页 |
 | **表单范式 Form** | 一页：新建/编辑 + 校验 + 提交反馈 | 无校验的假表单 |
-| **工程基线** | `AGENTS.md`、env 示例、typecheck/build 绿、core 版本说明 | 私有 registry |
+| **工程基线** | `AGENTS.md`、`.env.example`、typecheck/build 绿、core 版本说明 | 私有 registry |
 
-### 3.2 应做（P1）— 好完像正经产品模板
+### 4.2 应做（P1）— 补完像正经产品模板
 
 | 模块 | 做什么 | 不做 |
 |------|--------|------|
 | **详情范式 Detail** | 只读字段 + 返回/面包屑 + 状态下一步 | 复杂审批流引擎 |
-| **设置 Settings** | 简易资料/偏好页（mock） | 组织级配置中心 |
-| **会话模型** | 简单 session / cookie 或 demo user；退出登录可用 | 完整 OAuth 自建 |
+| **设置 Settings** | 资料（改显示名等）；可选改密 | 组织级配置中心 |
+| **邮箱验证（可选开关）** | 注册后 SMTP 发验证链 | 强制手机验证码 |
 | **状态范例** | loading / empty / error 各一处示范 | 全站状态机框架 |
 | **主题配置** | accent / 团队名 / logo 集中配置 | 多主题市场 |
-| **部署说明** | Vercel / Node 启动；GitHub Pages 仅可选 | 默认绑死一家云 |
+| **部署说明** | Vercel / Node；SMTP 在 Serverless 下的注意点（长连接/端口） | 默认绑死一家云 |
 
-### 3.3 可选（P2）— 有明确需求再加
+### 4.3 可选（P2）— 有明确需求再加
 
 | 模块 | 说明 |
 |------|------|
-| **简易 RBAC mock** | 2～3 角色切换看菜单差异（仍 mock） |
-| **i18n** | 中英切换；默认可不出 |
-| **API 层约定** | `lib/api` fetch 封装 + 错误 toast 范例 |
-| **与 Readdy 衔接** | 文档说明：Readdy 出原型 → 迁入本脚手架手写 |
+| **简易 RBAC** | 2～3 角色与菜单差异 |
+| **OAuth** | Google 等，仍非默认 |
+| **i18n** | 中英切换 |
+| **API 层约定** | `lib/api` + 错误提示范例 |
+| **与 Readdy 衔接** | 原型迁入本脚手架的说明 |
 
-### 3.4 明确不做（Non-goals）
+### 4.4 明确不做（Non-goals）
 
-- 营销落地页 / 博客 / 文档站（ShipAny 重内容侧）
-- 支付、订阅、发票（Stripe 等）
-- 广告、邮件营销扩展
-- 代码生成、工作流 BPM、多租户中台
-- 复刻芋道模块清单
-- 把 Readdy 生成器塞进本仓
+- 营销落地页 / 博客 / 文档站  
+- 支付、订阅、发票  
+- 广告、邮件营销  
+- **默认依赖在线云邮件服务商 API**  
+- 代码生成、工作流 BPM、多租户中台  
+- 复刻芋道模块清单  
+- 把 Readdy 生成器塞进本仓  
 
-## 4. 建议目录演进（相对现状）
+## 5. 建议目录演进
 
 ```txt
 app/
-  (auth)/                 # 已有：认证 UI
+  (auth)/                 # 登录 / 注册 / 找回 / 重置（Forge UI）
   (app)/
-    layout.tsx            # P0：统一 AppLayout
-    dashboard/            # P0：工作台
+    layout.tsx            # 统一 AppLayout
+    dashboard/
     examples/
-      list/               # P0：列表范式
-      form/               # P0：表单范式
-      detail/             # P1：详情范式
+      list/
+      form/
+      detail/             # P1
     settings/             # P1
-  middleware 或 proxy     # P0：守卫（Next 版本惯例为准）
+  api/auth/               # 登录注册 session、重置密码 API
+middleware.ts             # 守卫
 config/
-  menu.tsx                # 已有
-  site.ts                 # P1：产品名、logo、accent
+  menu.tsx
+  site.ts
 lib/
-  auth/                   # P0：demo | 适配器接口
-  session.ts              # P1
+  auth/
+    password.ts           # hash / verify
+    session.ts
+    users.ts              # 本地用户读写
+  mail/
+    smtp.ts               # 仅 SMTP 发送
+    templates/            # 重置密码等纯文本/简单 HTML
+  db/                     # SQLite 默认，可换
+.env.example              # AUTH_MODE、SMTP_*、DATABASE_URL、APP_URL
 ```
 
-菜单只保留 **真实存在且内容不同** 的路由；示范页可用「示例」分组，避免假装已有日历/收件箱业务。
+菜单只保留 **真实存在且内容不同** 的路由；示范页可用「示例」分组。
 
-## 5. 版本节奏建议
+## 6. 版本节奏建议
 
 | 版本 | 目标 |
 |------|------|
-| **0.1.x**（当前） | 认证 UI + dashboard 占位 + Forge 接入；**演示级 auth** |
-| **0.2.0**（本版文档） | 定位更名与模块路线图；对外称「后台脚手架」 |
-| **0.3.0** | P0 落地：共享 layout、守卫、列表/表单真范例、去掉假多页 |
-| **0.4.0** | P1：详情、设置、会话/退出、env 与部署文档 |
+| **0.1.x** | 认证 UI + dashboard 占位 + Forge 接入；演示级跳转 |
+| **0.2.0** | 定位更名 + 模块路线图 + **认证/SMTP 产品决策**（本文档） |
+| **0.3.0** | P0 落地：共享 layout、**local 用户名/邮箱密码**、**SMTP 找回密码**、守卫、列表/表单范例、去掉假多页 |
+| **0.4.0** | P1：详情、设置、可选邮箱验证、部署与 SMTP 运维说明 |
 
-## 6. 成功标准
+## 7. 成功标准
 
-clone 后 10 分钟内应能：
+clone 后应能：
 
-1. 跑起登录页与后台壳，视觉明显是 Forge；
-2. 看懂「列表 / 表单怎么写」并复制出业务页；
-3. 按文档把 demo 登录换成真实 auth，并打开路由守卫；
-4. AI 在 `AGENTS.md` 约束下不引入第二套 UI 库。
+1. 跑起登录页与后台壳，视觉明显是 Forge；  
+2. `AUTH_MODE=local` 下用 **用户名或邮箱 + 密码** 注册/登录，session 可退出；  
+3. 配置 **自建或企业 SMTP** 后完成找回密码邮件（不依赖云邮件 SaaS SDK）；  
+4. 看懂列表/表单范例并复制出业务页；  
+5. AI 在 `AGENTS.md` 约束下不引入第二套 UI 库。  
 
-做不到 1～2，就还只是展厅；做满 1～3，才算轻量 ShipAny 意义上的脚手架。
+做不到 1，仍是展厅；做满 2～3，认证才算达到你要求的「可自建邮件的本地账号体系」。
