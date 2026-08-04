@@ -68,7 +68,7 @@ pnpm dev
 侧栏 **应用切换器**（`showTeamActions={false}`）+ 设置 → **应用管理**（P0/P1）：
 - 类型：外部链接 | 外部系统（认证枚举占位）| 内部应用（菜单预设 / 自定义模块）
 - 切换内部应用会替换侧栏 `menuItems`；外链/外部系统按打开方式跳转
-- 内置「基础后台」不可删；注册表 localStorage |
+- 内置「Forge Starter 基础后台」不可删；注册表 localStorage |
 
 ## 环境变量
 

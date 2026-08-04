@@ -82,7 +82,7 @@ export const MENU_PRESET_META: Record<
   { label: string; modules: AppModuleId[] }
 > = {
   "accounts-admin": {
-    label: "基础后台（完整）",
+    label: "Forge Starter 基础后台（完整）",
     modules: ["dashboard", "accounts", "settings"],
   },
   "dashboard-only": {
@@ -102,7 +102,7 @@ export const MENU_PRESET_META: Record<
 export const DEFAULT_APP_ENTRIES: AppEntry[] = [
   {
     id: "accounts-admin",
-    name: "基础后台",
+    name: "Forge Starter 基础后台",
     subtitle: "当前产品",
     kind: "internal",
     href: "/dashboard/",
