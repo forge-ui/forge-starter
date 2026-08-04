@@ -29,7 +29,7 @@ import { siteConfig } from "@/config/site";
 import {
   APP_AUTH_META,
   APP_KIND_META,
-  MENU_PRESET_META,
+  modulesLabel,
   type AppEntry,
   type AppKind,
 } from "@/config/apps";
@@ -139,9 +139,7 @@ export default function SettingsAppsPage() {
         width: "w-56",
         render: (row) => (
           <CellMuted>
-            {row.kind === "internal"
-              ? MENU_PRESET_META[row.menuPreset]?.label ?? row.menuPreset
-              : row.href || "—"}
+            {row.kind === "internal" ? modulesLabel(row) : row.href || "—"}
           </CellMuted>
         ),
       },

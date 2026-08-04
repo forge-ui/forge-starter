@@ -107,8 +107,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         href: "/dashboard/",
         openMode: "same_tab" as const,
         authMode: "platform" as const,
-        menuPreset: "accounts-admin" as const,
-        modules: ["dashboard", "accounts", "settings"] as const,
+        modules: ["dashboard", "accounts", "settings"],
         isCurrentProduct: true,
       }
     );

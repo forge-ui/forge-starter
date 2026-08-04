@@ -9,13 +9,12 @@ import {
   APP_KIND_META,
   APP_MODULE_META,
   APP_OPEN_META,
-  MENU_PRESET_META,
+  modulesForApp,
   type AppAuthMode,
   type AppEntry,
   type AppKind,
   type AppModuleId,
   type AppOpenMode,
-  type MenuPresetId,
 } from "@/config/apps";
 import {
   createAppId,
@@ -39,9 +38,9 @@ const authOptions = (Object.keys(APP_AUTH_META) as AppAuthMode[]).map((value) =>
   label: APP_AUTH_META[value].label,
 }));
 
-const presetOptions = (Object.keys(MENU_PRESET_META) as MenuPresetId[]).map((value) => ({
+const moduleOptions = (Object.keys(APP_MODULE_META) as AppModuleId[]).map((value) => ({
   value,
-  label: MENU_PRESET_META[value].label,
+  label: APP_MODULE_META[value].label,
 }));
 
 type Draft = {
@@ -51,7 +50,6 @@ type Draft = {
   href: string;
   openMode: AppOpenMode;
   authMode: AppAuthMode;
-  menuPreset: MenuPresetId;
   modules: AppModuleId[];
 };
 
@@ -62,19 +60,12 @@ const emptyDraft = (): Draft => ({
   href: "",
   openMode: "new_tab",
   authMode: "none",
-  menuPreset: "dashboard-only",
   modules: ["dashboard"],
 });
-
-const moduleOptions = (Object.keys(APP_MODULE_META) as AppModuleId[]).map((value) => ({
-  value,
-  label: APP_MODULE_META[value].label,
-}));
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  /** null = create */
   appId: string | null;
   onSaved?: () => void;
 };
@@ -101,8 +92,7 @@ export function AppFormDialog({ open, onClose, appId, onSaved }: Props) {
         href: app.href ?? "",
         openMode: app.openMode,
         authMode: app.authMode,
-        menuPreset: app.menuPreset,
-        modules: app.modules.length ? app.modules : ["dashboard"],
+        modules: modulesForApp(app),
       });
     } else {
       setDraft(emptyDraft());
@@ -125,8 +115,8 @@ export function AppFormDialog({ open, onClose, appId, onSaved }: Props) {
       setError("请填写入口地址");
       return;
     }
-    if (draft.kind === "internal" && draft.menuPreset === "custom" && draft.modules.length === 0) {
-      setError("请至少选择一个菜单模块");
+    if (draft.kind === "internal" && draft.modules.length === 0) {
+      setError("请至少选择一个菜单");
       return;
     }
 
@@ -144,17 +134,11 @@ export function AppFormDialog({ open, onClose, appId, onSaved }: Props) {
       kind: draft.kind,
       href:
         draft.kind === "internal"
-          ? draft.href.trim() || "/dashboard/"
+          ? draft.href.trim() || APP_MODULE_META[draft.modules[0] ?? "dashboard"].href
           : draft.href.trim(),
       openMode: draft.openMode,
       authMode: draft.kind === "link" ? "none" : draft.authMode,
-      menuPreset: draft.kind === "internal" ? draft.menuPreset : "accounts-admin",
-      modules:
-        draft.kind === "internal"
-          ? draft.menuPreset === "custom"
-            ? draft.modules
-            : MENU_PRESET_META[draft.menuPreset].modules
-          : [],
+      modules: draft.kind === "internal" ? draft.modules : [],
     };
 
     const list = loadAppRegistry();
@@ -214,6 +198,7 @@ export function AppFormDialog({ open, onClose, appId, onSaved }: Props) {
                 kind: v as AppKind,
                 authMode: v === "link" ? "none" : d.authMode,
                 openMode: v === "internal" ? "same_tab" : d.openMode || "new_tab",
+                modules: v === "internal" && d.modules.length === 0 ? ["dashboard"] : d.modules,
               }))
             }
           />
@@ -259,46 +244,20 @@ export function AppFormDialog({ open, onClose, appId, onSaved }: Props) {
           {draft.kind === "internal" ? (
             <>
               <SelectOption
+                type="multiple"
                 color={siteConfig.accent}
-                label="菜单预设"
+                label="菜单选择"
                 width="100%"
-                options={presetOptions}
-                value={draft.menuPreset}
-                onChange={(v) =>
+                placeholder="请选择侧栏菜单"
+                options={moduleOptions}
+                value={draft.modules}
+                onChange={(values) =>
                   setDraft((d) => ({
                     ...d,
-                    menuPreset: v as MenuPresetId,
-                    modules:
-                      v === "custom"
-                        ? d.modules
-                        : MENU_PRESET_META[v as MenuPresetId].modules,
+                    modules: values as AppModuleId[],
                   }))
                 }
               />
-              {draft.menuPreset === "custom" ? (
-                <SelectOption
-                  type="multiple"
-                  color={siteConfig.accent}
-                  label="选择模块"
-                  width="100%"
-                  placeholder="请选择菜单模块"
-                  options={moduleOptions}
-                  value={draft.modules}
-                  onChange={(values) =>
-                    setDraft((d) => ({
-                      ...d,
-                      modules: values as AppModuleId[],
-                    }))
-                  }
-                />
-              ) : (
-                <p className="text-xs text-fg-grey-500">
-                  将包含：
-                  {MENU_PRESET_META[draft.menuPreset].modules
-                    .map((m) => APP_MODULE_META[m].label)
-                    .join("、")}
-                </p>
-              )}
               <TextField
                 color={siteConfig.accent}
                 label="默认首页路径（可选）"

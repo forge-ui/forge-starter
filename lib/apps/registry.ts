@@ -4,6 +4,7 @@ import {
   APPS_UPDATED_EVENT,
   DEFAULT_APP_ENTRIES,
   DEFAULT_APP_ID,
+  MENU_PRESET_META,
   type AppAuthMode,
   type AppEntry,
   type AppKind,
@@ -79,6 +80,15 @@ export function normalizeAppEntry(raw: Partial<AppEntry> & { id?: string; name?:
         ? "/dashboard/"
         : null;
 
+  let modules = asModules(raw.modules);
+  if (kind === "internal" && modules.length === 0 && raw.menuPreset) {
+    const fromPreset = MENU_PRESET_META[asPreset(raw.menuPreset)]?.modules;
+    if (fromPreset?.length) modules = [...fromPreset];
+  }
+  if (kind === "internal" && modules.length === 0) {
+    modules = ["dashboard"];
+  }
+
   return {
     id,
     name,
@@ -88,8 +98,7 @@ export function normalizeAppEntry(raw: Partial<AppEntry> & { id?: string; name?:
     href,
     openMode: asOpen(raw.openMode),
     authMode: asAuth(raw.authMode),
-    menuPreset: asPreset(raw.menuPreset),
-    modules: asModules(raw.modules),
+    modules,
     isCurrentProduct: false,
   };
 }

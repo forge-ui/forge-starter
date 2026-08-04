@@ -1,27 +1,24 @@
 /**
- * App registry model (P0+P1):
+ * App registry model:
  * - link: external bookmark URL
  * - external: URL + auth mode placeholder
- * - internal: platform modules / menu preset (same shell, filtered nav)
+ * - internal: selected nav modules (same shell, filtered menu)
  */
 
 export type AppKind = "link" | "external" | "internal";
 
-/** How to open external / link targets */
 export type AppOpenMode = "same_tab" | "new_tab";
 
 /**
  * Auth strategy (placeholder for real SSO later).
- * - none: open as-is
- * - passthrough: same-site / token handoff (reserved)
- * - oidc: OIDC client config later
- * - platform: must be logged into this starter first
+ * - none | passthrough | oidc | platform
  */
 export type AppAuthMode = "none" | "passthrough" | "oidc" | "platform";
 
 /** Built-in nav modules for internal apps */
 export type AppModuleId = "dashboard" | "accounts" | "settings";
 
+/** @deprecated kept for localStorage migration only */
 export type MenuPresetId = "accounts-admin" | "dashboard-only" | "accounts-only" | "custom";
 
 export type AppEntry = {
@@ -30,15 +27,13 @@ export type AppEntry = {
   subtitle: string;
   avatar?: string;
   kind: AppKind;
-  /** Entry URL or internal path; required for link/external */
   href: string | null;
   openMode: AppOpenMode;
   authMode: AppAuthMode;
-  /** internal: which menu preset */
-  menuPreset: MenuPresetId;
-  /** internal + custom: selected modules */
+  /** @deprecated use modules */
+  menuPreset?: MenuPresetId;
+  /** internal: selected sidebar menus */
   modules: AppModuleId[];
-  /** Built-in product of this starter — cannot be deleted */
   isCurrentProduct?: boolean;
 };
 
@@ -78,9 +73,10 @@ export const APP_MODULE_META: Record<
 > = {
   dashboard: { label: "工作台", href: "/dashboard/" },
   accounts: { label: "账号管理", href: "/accounts/" },
-  settings: { label: "设置", href: "/settings/" },
+  settings: { label: "应用管理", href: "/settings/apps/" },
 };
 
+/** Legacy presets → modules (migration) */
 export const MENU_PRESET_META: Record<
   MenuPresetId,
   { label: string; modules: AppModuleId[] }
@@ -89,7 +85,6 @@ export const MENU_PRESET_META: Record<
     label: "基础后台（完整）",
     modules: ["dashboard", "accounts", "settings"],
   },
-  // settings 模块在 menu 里展开为四个子路由
   "dashboard-only": {
     label: "仅工作台",
     modules: ["dashboard"],
@@ -99,7 +94,7 @@ export const MENU_PRESET_META: Record<
     modules: ["accounts"],
   },
   custom: {
-    label: "自定义模块",
+    label: "自定义",
     modules: [],
   },
 };
@@ -113,7 +108,6 @@ export const DEFAULT_APP_ENTRIES: AppEntry[] = [
     href: "/dashboard/",
     openMode: "same_tab",
     authMode: "platform",
-    menuPreset: "accounts-admin",
     modules: ["dashboard", "accounts", "settings"],
     isCurrentProduct: true,
   },
@@ -127,15 +121,22 @@ export const APPS_STORAGE_KEY = "forge-starter:app-registry";
 export const ACTIVE_APP_STORAGE_KEY = "forge-starter:active-app-id";
 export const APPS_UPDATED_EVENT = "forge-starter:apps-updated";
 
-/** @deprecated */
 export const APP_ENTRIES = DEFAULT_APP_ENTRIES;
 
 export function modulesForApp(app: AppEntry): AppModuleId[] {
   if (app.kind !== "internal") return [];
-  if (app.menuPreset === "custom") {
-    return app.modules.length > 0 ? app.modules : ["dashboard"];
+  if (app.modules?.length) return app.modules;
+  if (app.menuPreset && MENU_PRESET_META[app.menuPreset]) {
+    const fromPreset = MENU_PRESET_META[app.menuPreset].modules;
+    if (fromPreset.length) return fromPreset;
   }
-  return MENU_PRESET_META[app.menuPreset]?.modules ?? ["dashboard"];
+  return ["dashboard"];
+}
+
+export function modulesLabel(app: AppEntry): string {
+  return modulesForApp(app)
+    .map((m) => APP_MODULE_META[m]?.label ?? m)
+    .join("、") || "—";
 }
 
 export function homePathForApp(app: AppEntry): string {
