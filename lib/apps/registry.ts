@@ -61,10 +61,12 @@ export function normalizeAppEntry(raw: Partial<AppEntry> & { id?: string; name?:
   const isCurrent = id === DEFAULT_APP_ID || Boolean(raw.isCurrentProduct);
 
   if (isCurrent) {
+    // Always pin host product naming from defaults (ignore stale localStorage name)
+    const builtin = DEFAULT_APP_ENTRIES[0]!;
     return {
-      ...DEFAULT_APP_ENTRIES[0]!,
-      name: name || DEFAULT_APP_ENTRIES[0]!.name,
-      subtitle: (raw.subtitle ?? "当前产品").trim() || "当前产品",
+      ...builtin,
+      name: builtin.name,
+      subtitle: builtin.subtitle,
     };
   }
 

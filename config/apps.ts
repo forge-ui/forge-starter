@@ -86,7 +86,7 @@ export const MENU_PRESET_META: Record<
   { label: string; modules: AppModuleId[] }
 > = {
   "accounts-admin": {
-    label: "账号管理后台（完整）",
+    label: "基础后台（完整）",
     modules: ["dashboard", "accounts", "settings"],
   },
   // settings 模块在 menu 里展开为四个子路由
@@ -107,7 +107,7 @@ export const MENU_PRESET_META: Record<
 export const DEFAULT_APP_ENTRIES: AppEntry[] = [
   {
     id: "accounts-admin",
-    name: "账号管理后台",
+    name: "基础后台",
     subtitle: "当前产品",
     kind: "internal",
     href: "/dashboard/",

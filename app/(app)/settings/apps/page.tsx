@@ -65,7 +65,7 @@ export default function SettingsAppsPage() {
   const [deleteTarget, setDeleteTarget] = useState<AppEntry | null>(null);
 
   const refresh = useCallback(() => {
-    // Include host product (账号管理后台) as default row; other apps from registry.
+    // Include host product (基础后台) as default row; other apps from registry.
     setApps(loadAppRegistry());
   }, []);
 
