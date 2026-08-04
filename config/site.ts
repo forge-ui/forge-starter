@@ -1,6 +1,6 @@
 export const siteConfig = {
   name: "Forge Starter",
-  teamName: "基础后台",
+  teamName: "Forge Starter 基础后台",
   accent: "blue" as const,
 };
 
