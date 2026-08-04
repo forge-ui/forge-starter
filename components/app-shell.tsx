@@ -89,6 +89,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             }
           : undefined
       }
+      hideHeader={shell.hideHeader === true}
       showDatePicker={false}
       showKebab={false}
     >

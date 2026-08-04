@@ -7,14 +7,16 @@ export const siteConfig = {
 export type RouteShell = {
   title: string;
   primaryAction?: { label: string; href: string };
+  /** When true, page body owns the collection header (template Product List pattern). */
+  hideHeader?: boolean;
 };
 
 /** Keys without trailing slash */
 export const routeShells: Record<string, RouteShell> = {
   "/dashboard": { title: "工作台" },
   "/examples/list": {
-    title: "示例列表",
-    primaryAction: { label: "新建记录", href: "/examples/form/" },
+    title: "业务记录",
+    hideHeader: true,
   },
   "/examples/form": { title: "新建记录" },
   "/settings": { title: "设置" },
