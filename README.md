@@ -84,7 +84,7 @@ pnpm typecheck  # TypeScript 检查
 1. 改 `config/menu.tsx`：按业务换菜单与用户信息；默认不要加收藏分组。
 2. 在 `app/(app)` 下加业务页，统一用 `AppLayout`（后续将收到共享 layout）。
 3. 优先用 `@forge-ui-official/core`：`Button`、`TextField`、`DataTable`、`StatCard` 等。
-4. 保留认证页结构与视觉，把 `handleSubmit` 换成 NextAuth / Clerk / Supabase / 自建 API。
+4. 认证按 PRODUCT：本地用户名/邮箱密码 + 自建 SMTP；不要默认改成云 IdP / 云邮件 API。
 5. 保留 `AGENTS.md`，让 AI 按 Forge 规范生成页面。
 
 ## 样式接入
