@@ -65,7 +65,8 @@ export default function SettingsAppsPage() {
   const [deleteTarget, setDeleteTarget] = useState<AppEntry | null>(null);
 
   const refresh = useCallback(() => {
-    setApps(loadAppRegistry().filter((a) => !a.isCurrentProduct));
+    // Include host product (账号管理后台) as default row; other apps from registry.
+    setApps(loadAppRegistry());
   }, []);
 
   useEffect(() => {
@@ -110,8 +111,13 @@ export default function SettingsAppsPage() {
         sortable: true,
         flex: true,
         render: (row) => (
-          <div>
-            <CellText>{row.name}</CellText>
+          <div className="flex flex-col gap-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <CellText>{row.name}</CellText>
+              {row.isCurrentProduct ? (
+                <StatusBadge label="当前后台" color="green" />
+              ) : null}
+            </div>
             <div className="text-xs text-fg-grey-500">{row.subtitle || "—"}</div>
           </div>
         ),
@@ -121,7 +127,10 @@ export default function SettingsAppsPage() {
         header: "类型",
         width: "w-28",
         render: (row) => (
-          <StatusBadge label={kindLabel(row.kind)} color={kindColor(row.kind)} />
+          <StatusBadge
+            label={row.isCurrentProduct ? "宿主应用" : kindLabel(row.kind)}
+            color={row.isCurrentProduct ? "green" : kindColor(row.kind)}
+          />
         ),
       },
       {
@@ -156,27 +165,33 @@ export default function SettingsAppsPage() {
         width: "w-24",
         render: (row) => (
           <div className="flex h-10 items-center justify-end gap-2">
-            <IconButton
-              variant="ghost"
-              shape="square"
-              size="sm"
-              aria-label="编辑"
-              onClick={() => {
-                setEditId(row.id);
-                setFormOpen(true);
-              }}
-            >
-              <PenLinear size={16} />
-            </IconButton>
-            <IconButton
-              variant="ghost"
-              shape="square"
-              size="sm"
-              aria-label="删除"
-              onClick={() => setDeleteTarget(row)}
-            >
-              <TrashBinMinimalisticLinear size={16} />
-            </IconButton>
+            {row.isCurrentProduct ? (
+              <CellMuted>—</CellMuted>
+            ) : (
+              <>
+                <IconButton
+                  variant="ghost"
+                  shape="square"
+                  size="sm"
+                  aria-label="编辑"
+                  onClick={() => {
+                    setEditId(row.id);
+                    setFormOpen(true);
+                  }}
+                >
+                  <PenLinear size={16} />
+                </IconButton>
+                <IconButton
+                  variant="ghost"
+                  shape="square"
+                  size="sm"
+                  aria-label="删除"
+                  onClick={() => setDeleteTarget(row)}
+                >
+                  <TrashBinMinimalisticLinear size={16} />
+                </IconButton>
+              </>
+            )}
           </div>
         ),
       },
@@ -185,7 +200,7 @@ export default function SettingsAppsPage() {
   );
 
   function confirmDelete() {
-    if (!deleteTarget) return;
+    if (!deleteTarget || deleteTarget.isCurrentProduct) return;
     const all = loadAppRegistry().filter((a) => a.id !== deleteTarget.id);
     saveAppRegistry(all);
     setDeleteTarget(null);
@@ -277,7 +292,7 @@ export default function SettingsAppsPage() {
           </p>
           <p className="text-sm text-fg-grey-500">
             {apps.length === 0
-              ? "点击「新建应用」添加外链、外部系统或内部模块应用。"
+              ? "默认应包含本超管后台；若列表为空请刷新页面。也可新建其它应用。"
               : "试试清空搜索或切换类型筛选。"}
           </p>
           {apps.length === 0 ? (
