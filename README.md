@@ -30,8 +30,9 @@
 **认证目标（0.3 落地，见 [PRODUCT.md](./PRODUCT.md)）：**
 
 - 登录：**用户名或邮箱 + 密码**（本地账号，不强制 Clerk 等）
+- 数据：**PostgreSQL**（`DATABASE_URL`），不用 SQLite
 - 邮件：仅 **自定义 SMTP**（主机/端口/用户名/密码），用于找回密码等；**不依赖** Resend / SendGrid 等云邮件 API
-- 当前 0.2 仍为演示跳转；上线前需 `AUTH_MODE=local` + 守卫 + SMTP
+- 当前 0.2 仍为演示跳转；上线前需 `AUTH_MODE=local` + Postgres + 守卫 + SMTP
 
 ## 快速开始
 

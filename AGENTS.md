@@ -15,7 +15,7 @@
 6. 默认不创建 `favoriteItems` 或“收藏 / 常用项目”菜单分组；只有明确的业务需求才能增加收藏能力。
 7. 登录、注册、忘记密码和重置密码默认直接使用 `app/(auth)` 的结构与视觉；只有用户明确要求时才修改或关闭。
 8. 不要引入第二套 UI 库（MUI、Ant、shadcn 全量等）替代 Forge；缺口先说明 `FORGE-GAP`。
-9. 认证产品约定：默认 **用户名或邮箱 + 密码** 的本地账号；邮件发送只用 **可配置 SMTP**（自定义服务器与用户名密码），不要把 Resend/SendGrid/Mailgun/SES SDK 等云邮件服务做成默认依赖；也不要默认绑死 Clerk/Auth0。OAuth 仅在用户明确要求时再加。
+9. 认证产品约定：默认 **用户名或邮箱 + 密码** 的本地账号；数据库默认 **PostgreSQL**（`DATABASE_URL`），不要用 SQLite 当默认或双轨存储；邮件发送只用 **可配置 SMTP**（自定义服务器与用户名密码），不要把 Resend/SendGrid/Mailgun/SES SDK 等云邮件服务做成默认依赖；也不要默认绑死 Clerk/Auth0。OAuth 仅在用户明确要求时再加。
 
 ## 当前仓库结构
 

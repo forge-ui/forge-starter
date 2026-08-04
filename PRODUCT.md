@@ -35,9 +35,10 @@
 
 实现倾向（实现阶段可微调，产品语义不变）：
 
-- 本地用户表（SQLite 默认，便于单机；可换 Postgres）
+- 本地用户表：**PostgreSQL**（`DATABASE_URL`），主流部署默认，不做 SQLite 双轨
 - 密码：`bcrypt` / `argon2` 一类单向哈希
 - 会话：Auth.js（Credentials）或等价自建 session，**不把云 IdP 当硬依赖**
+- 本地开发：Docker Compose 起一个 Postgres，或连已有实例；`.env.example` 给标准连接串
 
 ### 3.2 邮件：仅 SMTP，可自定义服务器
 
@@ -75,7 +76,7 @@
 | 模块 | 做什么 | 不做 |
 |------|--------|------|
 | **应用壳 App Shell** | 统一 `(app)/layout` + `AppLayout`；`config/menu` 唯一菜单源；Header 主/次动作可配置 | 收藏夹默认开启、第二套导航 |
-| **认证 Auth（本地账号）** | 用户名或邮箱 + 密码登录；注册；session；退出；`demo` / `local` 双模式 | 默认 OAuth、托管 IdP 硬依赖 |
+| **认证 Auth（本地账号）** | 用户名或邮箱 + 密码登录；注册；session；退出；**PostgreSQL** 用户表；`demo` / `local` 双模式 | 默认 OAuth、托管 IdP、SQLite 双轨 |
 | **邮件 Mail（SMTP）** | 可配置自定义 SMTP；找回/重置密码邮件 | 云邮件 API 必选、营销群发 |
 | **路由守卫** | 未登录不可进 `(app)`；env 可关 | 细粒度 RBAC 引擎 |
 | **工作台 Dashboard** | 真 Forge 指标卡/区块（可 mock），Header 动作有效或去掉 | 空虚线框充数 |
@@ -140,8 +141,9 @@ lib/
   mail/
     smtp.ts               # 仅 SMTP 发送
     templates/            # 重置密码等纯文本/简单 HTML
-  db/                     # SQLite 默认，可换
+  db/                     # PostgreSQL（drizzle/prisma 等，实现时选定一种）
 .env.example              # AUTH_MODE、SMTP_*、DATABASE_URL、APP_URL
+docker-compose.yml        # 可选：本地 Postgres 一键起
 ```
 
 菜单只保留 **真实存在且内容不同** 的路由；示范页可用「示例」分组。
@@ -160,7 +162,7 @@ lib/
 clone 后应能：
 
 1. 跑起登录页与后台壳，视觉明显是 Forge；  
-2. `AUTH_MODE=local` 下用 **用户名或邮箱 + 密码** 注册/登录，session 可退出；  
+2. 配置 **PostgreSQL**（`DATABASE_URL`）后，`AUTH_MODE=local` 下用 **用户名或邮箱 + 密码** 注册/登录，session 可退出；  
 3. 配置 **自建或企业 SMTP** 后完成找回密码邮件（不依赖云邮件 SaaS SDK）；  
 4. 看懂列表/表单范例并复制出业务页；  
 5. AI 在 `AGENTS.md` 约束下不引入第二套 UI 库。  
