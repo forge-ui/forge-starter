@@ -65,10 +65,9 @@ pnpm dev
 | 登录用户 | Postgres `users`（`local`）/ demo session | 认证、profile 改名改密 |
 | 运营「账号管理」列表 | Postgres `admin_accounts` | 业务账号 CRUD；**需 `DATABASE_URL` + `pnpm db:push`**；无数据则为空 |
 
-侧栏顶部是 **应用切换器**（Forge `teams` 槽位），配置在 `config/apps.ts`：
-- 列表项：当前产品 + 占位应用（可改 `href` 接独立部署）
-- 「新建账号」→ 创建弹窗；「系统设置」→ 设置页
-- 「新建应用」→ 未启用；**不必改 core** 即可做应用列表 + 点击切换骨架 |
+侧栏顶部是 **应用切换器**（`teams` + `showTeamActions={false}`），配置在 `config/apps.ts`：
+- 仅应用列表（无邀请 / 设置 / 新建）；新建应用应放设置页而非此处
+- 列表项可配 `href` 接独立部署；当前高亮与 localStorage 记忆 |
 
 ## 环境变量
 

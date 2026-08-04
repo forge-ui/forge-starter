@@ -181,37 +181,22 @@ export function AppShell({ children }: { children: ReactNode }) {
         return;
       }
 
+      // App list only (showTeamActions=false) — rows are menuitemradio
       const teamTarget = target?.closest?.(
-        '[data-popover="team"] [role="menuitem"], [data-popover="team"] [role="menuitemradio"]',
+        '[data-popover="team"] [role="menuitemradio"]',
       ) as HTMLElement | null;
       if (!teamTarget) return;
 
-      const label = (teamTarget.textContent ?? "").replace(/\s+/g, "");
       event.preventDefault();
       event.stopPropagation();
 
-      // App list rows (menuitemradio) — match by app name
-      if (teamTarget.getAttribute("role") === "menuitemradio") {
-        const name = (teamTarget.textContent ?? "").replace(/\s+/g, " ").trim();
-        const app = APP_ENTRIES.find(
-          (entry) => entry.name.replace(/\s+/g, " ").trim() === name || name.includes(entry.name),
-        );
-        if (app) selectApp(app);
-        return;
-      }
-
-      if (label.includes("设置")) {
-        router.push("/settings/?tab=notifications");
-        return;
-      }
-      if (label.includes("邀请") || label.includes("新建账号")) {
-        router.push("/accounts/?create=1");
-        return;
-      }
-      if (label.includes("新建应用") || label.includes("新建团队")) {
-        // Scaffold only — multi-app registry not implemented
-        return;
-      }
+      const name = (teamTarget.textContent ?? "").replace(/\s+/g, " ").trim();
+      const app = APP_ENTRIES.find(
+        (entry) =>
+          entry.name.replace(/\s+/g, " ").trim() === name
+          || name.includes(entry.name),
+      );
+      if (app) selectApp(app);
     }
 
     document.addEventListener("click", onDocumentClick, true);
@@ -227,11 +212,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       teamName={activeApp.name}
       teamSubtitle={activeApp.subtitle}
       teams={teams}
-      teamLabels={{
-        invite: "新建账号",
-        settings: "系统设置",
-        createNew: "新建应用（未启用）",
-      }}
+      showTeamActions={false}
       menuItems={menuItems}
       profile={profile}
       notifications={0}
