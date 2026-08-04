@@ -245,8 +245,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       showTeamActions={false}
       menuItems={shellMenuItems}
       profile={profile}
-      notifications={0}
-      messages={0}
+      hideSidebarWidgets
       pageTitle={shell.title}
       pageHeaderVariant={
         /\/accounts\/[^/]+\/?$/.test(pathname) && !pathname.endsWith("/accounts/")
