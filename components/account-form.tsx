@@ -11,6 +11,7 @@ import {
   ConfirmationDialog,
   IconButton,
   SelectOption,
+  StatusBadge,
   TextArea,
   TextField,
 } from "@forge-ui-official/core";
@@ -112,6 +113,8 @@ export function AccountForm({ mode, accountId }: Props) {
     }
   }
 
+  const statusMeta = ACCOUNT_STATUS_META[status];
+
   return (
     <div className="flex flex-col gap-6">
       {confirmSave ? (
@@ -128,7 +131,6 @@ export function AccountForm({ mode, accountId }: Props) {
         </div>
       ) : null}
 
-      {/* products/new header pattern */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-3">
@@ -172,15 +174,41 @@ export function AccountForm({ mode, accountId }: Props) {
         </div>
       </div>
 
+      {/* Main form + status rail (products/new Status pattern, no fake preview) */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
             <h3 className="mb-4 text-lg font-semibold text-fg-black">基本信息</h3>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <TextField color={siteConfig.accent} label="姓名" value={name} onChange={setName} placeholder="真实姓名" />
-              <TextField color={siteConfig.accent} label="用户名" value={username} onChange={setUsername} placeholder="登录名" />
-              <TextField color={siteConfig.accent} label="邮箱" value={email} onChange={setEmail} type="email" />
-              <TextField color={siteConfig.accent} label="手机" value={phone} onChange={setPhone} />
+              <TextField
+                color={siteConfig.accent}
+                label="姓名"
+                value={name}
+                onChange={setName}
+                placeholder="真实姓名"
+              />
+              <TextField
+                color={siteConfig.accent}
+                label="用户名"
+                value={username}
+                onChange={setUsername}
+                placeholder="登录名，小写字母数字下划线"
+              />
+              <TextField
+                color={siteConfig.accent}
+                label="邮箱"
+                value={email}
+                onChange={setEmail}
+                type="email"
+                placeholder="name@example.com"
+              />
+              <TextField
+                color={siteConfig.accent}
+                label="手机"
+                value={phone}
+                onChange={setPhone}
+                placeholder="联系手机号"
+              />
             </div>
           </div>
 
@@ -203,67 +231,45 @@ export function AccountForm({ mode, accountId }: Props) {
                 value={department}
                 onChange={setDepartment}
               />
-              <SelectOption
-                color={siteConfig.accent}
-                label="状态"
-                width="100%"
-                options={statusOptions}
-                value={status}
-                onChange={(v) => setStatus(v as AccountStatus)}
-              />
-            </div>
-            <div className="mt-4">
-              <TextArea
-                color={siteConfig.accent}
-                label="备注"
-                rows={4}
-                value={notes}
-                onChange={setNotes}
-                placeholder="账号用途、审批备注…"
-              />
             </div>
           </div>
+
+          <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+            <h3 className="mb-4 text-lg font-semibold text-fg-black">备注</h3>
+            <TextArea
+              color={siteConfig.accent}
+              label="说明"
+              rows={4}
+              value={notes}
+              onChange={setNotes}
+              placeholder="账号用途、审批备注、特殊权限说明…"
+            />
+          </div>
+
           {error ? <p className="text-sm text-fg-red">{error}</p> : null}
         </div>
 
-        {/* Right rail — products/new category/status pattern */}
-        <div className="flex w-full flex-col gap-3 lg:w-[280px] lg:shrink-0">
+        <aside className="flex w-full flex-col gap-3 lg:w-[280px] lg:shrink-0">
           <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
-            <h3 className="mb-4 text-lg font-semibold text-fg-black">预览</h3>
-            <div className="flex flex-col items-center text-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={`https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(username || name || "account")}`}
-                alt=""
-                className="size-20 rounded-full bg-fg-grey-100"
-              />
-              <p className="mt-3 text-base font-semibold text-fg-black">{name || "未命名账号"}</p>
-              <p className="mt-1 text-sm text-fg-grey-500">
-                {username ? `@${username}` : "填写用户名"}
-              </p>
-              <p className="mt-1 text-xs text-fg-grey-500">{email || "—"}</p>
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <h3 className="text-lg font-semibold text-fg-black">状态</h3>
+              <StatusBadge label={statusMeta.label} color={statusMeta.color} />
             </div>
+            <SelectOption
+              color={siteConfig.accent}
+              label="账号状态"
+              width="100%"
+              options={statusOptions}
+              value={status}
+              onChange={(v) => setStatus(v as AccountStatus)}
+            />
+            <p className="mt-3 text-xs leading-5 text-fg-grey-500">
+              {mode === "create"
+                ? "新建默认「待激活」；启用后即可登录后台。"
+                : "停用 / 锁定后该账号无法登录（演示数据）。"}
+            </p>
           </div>
-          <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
-            <h3 className="mb-3 text-lg font-semibold text-fg-black">摘要</h3>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between gap-3">
-                <span className="text-fg-grey-500">角色</span>
-                <span className="font-medium text-fg-black">{role}</span>
-              </div>
-              <div className="flex justify-between gap-3">
-                <span className="text-fg-grey-500">部门</span>
-                <span className="font-medium text-fg-black">{department}</span>
-              </div>
-              <div className="flex justify-between gap-3">
-                <span className="text-fg-grey-500">状态</span>
-                <span className="font-medium text-fg-black">
-                  {ACCOUNT_STATUS_META[status].label}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+        </aside>
       </div>
     </div>
   );

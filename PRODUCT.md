@@ -132,7 +132,7 @@ app/
   api/auth/               # 登录注册 session、重置密码 API
 middleware.ts             # 守卫
 config/
-  menu.tsx                # 工作台 / 账号管理 / 新建账号 / 设置
+  menu.tsx                # 工作台 / 账号管理（设置走 profile 菜单）
   site.ts
 lib/
   auth/
