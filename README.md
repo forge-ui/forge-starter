@@ -65,9 +65,10 @@ pnpm dev
 | 登录用户 | Postgres `users`（`local`）/ demo session | 认证、profile 改名改密 |
 | 运营「账号管理」列表 | Postgres `admin_accounts` | 业务账号 CRUD；**需 `DATABASE_URL` + `pnpm db:push`**；无数据则为空 |
 
-侧栏顶部是 **应用切换器**（`teams` + `showTeamActions={false}`）：
-- 仅应用列表；**新建/编辑/删除应用** 在 设置 → **应用管理**（`/settings/?tab=apps`）
-- 默认内置「账号管理后台」不可删；其它应用写 localStorage，侧栏实时同步 |
+侧栏 **应用切换器**（`showTeamActions={false}`）+ 设置 → **应用管理**（P0/P1）：
+- 类型：外部链接 | 外部系统（认证枚举占位）| 内部应用（菜单预设 / 自定义模块）
+- 切换内部应用会替换侧栏 `menuItems`；外链/外部系统按打开方式跳转
+- 内置「账号管理后台」不可删；注册表 localStorage |
 
 ## 环境变量
 

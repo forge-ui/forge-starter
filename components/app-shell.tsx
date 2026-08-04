@@ -7,10 +7,11 @@ import {
   type AppLayoutProfile,
   type Team,
 } from "@forge-ui-official/core";
-import { menuItems, defaultProfile } from "@/config/menu";
+import { defaultProfile, menuItemsForApp } from "@/config/menu";
 import {
   APPS_UPDATED_EVENT,
   DEFAULT_APP_ID,
+  homePathForApp,
   type AppEntry,
 } from "@/config/apps";
 import {
@@ -56,6 +57,20 @@ function teamsFromApps(apps: AppEntry[], activeId: string): Team[] {
   }));
 }
 
+function openAppTarget(app: AppEntry, router: ReturnType<typeof useRouter>) {
+  const href = app.href?.trim();
+  if (!href) return;
+
+  const isExternal = href.startsWith("http://") || href.startsWith("https://");
+  if (app.openMode === "new_tab" || isExternal) {
+    if (typeof window !== "undefined") {
+      window.open(href, app.openMode === "same_tab" && !isExternal ? "_self" : "_blank", "noopener,noreferrer");
+    }
+    return;
+  }
+  router.push(href);
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -80,13 +95,23 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [syncRegistry]);
 
   const activeApp: AppEntry = useMemo(() => {
-    return apps.find((a) => a.id === activeAppId) ?? apps[0] ?? {
-      id: DEFAULT_APP_ID,
-      name: siteConfig.teamName,
-      subtitle: "当前应用",
-      href: "/dashboard/",
-      isCurrentProduct: true,
-    };
+    return (
+      apps.find((a) => a.id === activeAppId)
+      ?? apps.find((a) => a.isCurrentProduct)
+      ?? apps[0]
+      ?? {
+        id: DEFAULT_APP_ID,
+        name: siteConfig.teamName,
+        subtitle: "当前产品",
+        kind: "internal" as const,
+        href: "/dashboard/",
+        openMode: "same_tab" as const,
+        authMode: "platform" as const,
+        menuPreset: "accounts-admin" as const,
+        modules: ["dashboard", "accounts", "settings"] as const,
+        isCurrentProduct: true,
+      }
+    );
   }, [apps, activeAppId]);
 
   const teams = useMemo(
@@ -94,22 +119,26 @@ export function AppShell({ children }: { children: ReactNode }) {
     [apps, activeApp, activeAppId],
   );
 
+  const shellMenuItems = useMemo(
+    () => menuItemsForApp(activeApp),
+    [activeApp],
+  );
+
   const selectApp = useCallback(
     (app: AppEntry) => {
       setActiveAppId(app.id);
       saveActiveAppId(app.id);
 
-      if (app.isCurrentProduct) {
+      if (app.kind === "internal") {
+        router.push(homePathForApp(app));
         return;
       }
 
-      if (app.href) {
-        if (app.href.startsWith("http://") || app.href.startsWith("https://")) {
-          window.location.assign(app.href);
-          return;
-        }
-        router.push(app.href);
+      // link / external
+      if (app.authMode === "platform" || app.authMode === "passthrough" || app.authMode === "oidc") {
+        // Placeholder: real SSO later; still navigate for demo
       }
+      openAppTarget(app, router);
     },
     [router],
   );
@@ -215,7 +244,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       teamSubtitle={activeApp.subtitle || "当前应用"}
       teams={teams}
       showTeamActions={false}
-      menuItems={menuItems}
+      menuItems={shellMenuItems}
       profile={profile}
       notifications={0}
       messages={0}

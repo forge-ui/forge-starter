@@ -4,56 +4,128 @@ import {
   APPS_UPDATED_EVENT,
   DEFAULT_APP_ENTRIES,
   DEFAULT_APP_ID,
+  type AppAuthMode,
   type AppEntry,
+  type AppKind,
+  type AppModuleId,
+  type AppOpenMode,
+  type MenuPresetId,
 } from "@/config/apps";
 
-function safeParse(raw: string | null): AppEntry[] | null {
+const KINDS: AppKind[] = ["link", "external", "internal"];
+const OPEN: AppOpenMode[] = ["same_tab", "new_tab"];
+const AUTH: AppAuthMode[] = ["none", "passthrough", "oidc", "platform"];
+const PRESETS: MenuPresetId[] = [
+  "accounts-admin",
+  "dashboard-only",
+  "accounts-only",
+  "custom",
+];
+const MODULES: AppModuleId[] = ["dashboard", "accounts", "settings"];
+
+function asKind(v: unknown): AppKind {
+  return typeof v === "string" && (KINDS as string[]).includes(v)
+    ? (v as AppKind)
+    : "link";
+}
+
+function asOpen(v: unknown): AppOpenMode {
+  return typeof v === "string" && (OPEN as string[]).includes(v)
+    ? (v as AppOpenMode)
+    : "same_tab";
+}
+
+function asAuth(v: unknown): AppAuthMode {
+  return typeof v === "string" && (AUTH as string[]).includes(v)
+    ? (v as AppAuthMode)
+    : "none";
+}
+
+function asPreset(v: unknown): MenuPresetId {
+  return typeof v === "string" && (PRESETS as string[]).includes(v)
+    ? (v as MenuPresetId)
+    : "accounts-admin";
+}
+
+function asModules(v: unknown): AppModuleId[] {
+  if (!Array.isArray(v)) return ["dashboard"];
+  return v.filter(
+    (m): m is AppModuleId => typeof m === "string" && (MODULES as string[]).includes(m),
+  );
+}
+
+/** Migrate legacy flat entries (name + href only) */
+export function normalizeAppEntry(raw: Partial<AppEntry> & { id?: string; name?: string }): AppEntry {
+  const id = typeof raw.id === "string" ? raw.id : createAppId();
+  const name = (raw.name ?? "未命名应用").trim() || "未命名应用";
+  const isCurrent = id === DEFAULT_APP_ID || Boolean(raw.isCurrentProduct);
+
+  if (isCurrent) {
+    return {
+      ...DEFAULT_APP_ENTRIES[0]!,
+      name: name || DEFAULT_APP_ENTRIES[0]!.name,
+      subtitle: (raw.subtitle ?? "当前产品").trim() || "当前产品",
+    };
+  }
+
+  // Legacy: no kind but had href → treat as link
+  const kind = raw.kind ? asKind(raw.kind) : raw.href ? "link" : "internal";
+  const href =
+    typeof raw.href === "string" && raw.href.trim()
+      ? raw.href.trim()
+      : kind === "internal"
+        ? "/dashboard/"
+        : null;
+
+  return {
+    id,
+    name,
+    subtitle: (raw.subtitle ?? "").trim(),
+    avatar: raw.avatar,
+    kind,
+    href,
+    openMode: asOpen(raw.openMode),
+    authMode: asAuth(raw.authMode),
+    menuPreset: asPreset(raw.menuPreset),
+    modules: asModules(raw.modules),
+    isCurrentProduct: false,
+  };
+}
+
+function safeParse(raw: string | null): unknown[] | null {
   if (!raw) return null;
   try {
     const data = JSON.parse(raw) as unknown;
-    if (!Array.isArray(data)) return null;
-    return data.filter(
-      (item): item is AppEntry =>
-        Boolean(item)
-        && typeof item === "object"
-        && typeof (item as AppEntry).id === "string"
-        && typeof (item as AppEntry).name === "string",
-    );
+    return Array.isArray(data) ? data : null;
   } catch {
     return null;
   }
 }
 
 function ensureCurrentProduct(list: AppEntry[]): AppEntry[] {
-  const builtin = DEFAULT_APP_ENTRIES.find((a) => a.isCurrentProduct);
-  if (!builtin) return list;
+  const builtin = DEFAULT_APP_ENTRIES[0]!;
   const rest = list.filter((a) => a.id !== builtin.id && !a.isCurrentProduct);
-  return [{ ...builtin }, ...rest];
+  return [normalizeAppEntry(builtin), ...rest.map(normalizeAppEntry)];
 }
 
 export function loadAppRegistry(): AppEntry[] {
-  if (typeof window === "undefined") return [...DEFAULT_APP_ENTRIES];
+  if (typeof window === "undefined") return DEFAULT_APP_ENTRIES.map(normalizeAppEntry);
   try {
     const parsed = safeParse(window.localStorage.getItem(APPS_STORAGE_KEY));
-    if (!parsed || parsed.length === 0) return [...DEFAULT_APP_ENTRIES];
+    if (!parsed || parsed.length === 0) {
+      return DEFAULT_APP_ENTRIES.map(normalizeAppEntry);
+    }
     return ensureCurrentProduct(
-      parsed.map((item) => ({
-        id: item.id,
-        name: item.name.trim() || "未命名应用",
-        subtitle: item.subtitle?.trim() || "",
-        avatar: item.avatar,
-        href: item.href?.trim() ? item.href.trim() : null,
-        isCurrentProduct: item.id === DEFAULT_APP_ID || item.isCurrentProduct,
-      })),
+      parsed.map((item) => normalizeAppEntry(item as Partial<AppEntry>)),
     );
   } catch {
-    return [...DEFAULT_APP_ENTRIES];
+    return DEFAULT_APP_ENTRIES.map(normalizeAppEntry);
   }
 }
 
 export function saveAppRegistry(apps: AppEntry[]) {
   if (typeof window === "undefined") return;
-  const next = ensureCurrentProduct(apps);
+  const next = ensureCurrentProduct(apps.map(normalizeAppEntry));
   window.localStorage.setItem(APPS_STORAGE_KEY, JSON.stringify(next));
   window.dispatchEvent(new CustomEvent(APPS_UPDATED_EVENT, { detail: { apps: next } }));
 }
