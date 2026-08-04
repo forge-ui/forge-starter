@@ -1,45 +1,78 @@
-# Forge Starter — AI 接入指南
+# Forge Starter — Agent 合约（必读）
 
-你正在协助一个基于 **Forge Starter（Forge 后台脚手架）** 的 Next.js 项目。  
-目标：用 `@forge-ui-official/core`、Forge 布局与 token 快速搭业务后台，不在业务页里重新发明 UI 系统。
+你正在 **Forge Starter** 仓库中工作：面向 Coding Agent 的 **Forge 后台 0→1 脚手架**（Next.js 16 + Tailwind v4 + `@forge-ui-official/core`）。
 
-本仓库是 **轻量后台脚手架**，不是中台框架，也不是营销型 SaaS 全家桶。
+**不是** 中台、**不是** ShipAny 全量 AI SaaS。参照 ShipAny 的是 **Agent skills 工作方式**，不是支付/积分清单。
 
-## 基本原则
+先读：`PRODUCT.md`、`docs/agent-native.md`、`docs/module-template.md`。
 
-1. 组件优先从 `@forge-ui-official/core` 导入。
-2. 颜色只使用 Forge 的 `fg-*` token，例如 `text-fg-grey-700`、`bg-fg-violet-500`、`border-fg-grey-200`。
-3. 图标使用 `solar-icon-set`。左侧主菜单固定使用 `BoldDuotone`、`size={20}`，不显式传 `color`，让 `AppLayout` 控制激活态；其他图标颜色通过 `color="#HEX"` 或 `color="var(--fg-violet)"` 传入。
-4. 登录态内页面使用 `AppLayout`，菜单和 profile 配置放在 `config/menu.tsx`。
-5. 不确定组件用法时，先查 Forge 文档和主仓库 case，再写页面。
-6. 默认不创建 `favoriteItems` 或“收藏 / 常用项目”菜单分组；只有明确的业务需求才能增加收藏能力。
-7. 登录、注册、忘记密码和重置密码默认直接使用 `app/(auth)` 的结构与视觉；只有用户明确要求时才修改或关闭。
-8. 不要引入第二套 UI 库（MUI、Ant、shadcn 全量等）替代 Forge；缺口先说明 `FORGE-GAP`。
-9. 认证产品约定：默认 **用户名或邮箱 + 密码** 的本地账号；数据库默认 **PostgreSQL**（`DATABASE_URL`），不要用 SQLite 当默认或双轨存储；邮件发送只用 **可配置 SMTP**（自定义服务器与用户名密码），不要把 Resend/SendGrid/Mailgun/SES SDK 等云邮件服务做成默认依赖；也不要默认绑死 Clerk/Auth0。OAuth 仅在用户明确要求时再加。
+## 铁律
 
-## 当前仓库结构
+1. 组件只 `import { … } from "@forge-ui-official/core"`。
+2. 颜色只用 `fg-*` token；业务控件传 `color={siteConfig.accent}`（默认 `blue`）。
+3. 图标用 `solar-icon-set`；侧栏主菜单 `BoldDuotone`、`size={20}`、不写死 color。
+4. 登录后页面在 `AppLayout` 内（`components/app-shell.tsx`）。
+5. **禁止** MUI / Ant / 全量 shadcn 替代 Forge；缺能力写 `FORGE-GAP` 并停下询问。
+6. 认证：用户名或邮箱 + 密码；库 **PostgreSQL only**；邮件 **仅 SMTP**。
+7. 登录用户表 `users` ≠ 业务样板表 `admin_accounts`，不要混接。
+8. CRUD：**列表 + 弹窗表单 + 详情 + API**；默认不要整页表单。
+9. 不做无行为的装饰按钮（导出/通知铃铛等）；要么实现要么隐藏。
+10. 交付前：`pnpm typecheck`。
 
-- `app/(auth)`：登录、注册、忘记密码、重置密码
-- `app/(app)/dashboard`：工作台（ecommerce-2 布局）
-- `app/(app)/accounts`：账号列表（弹窗新建）/ 详情 / 编辑
-- `app/(app)/settings`：个人设置（仅 profile 菜单进入）
-- `lib/accounts/*` + `app/api/accounts`：业务账号（Postgres `admin_accounts`）
-- `components/accounts-store.tsx`：客户端列表缓存
-- `components/ui/modal.tsx`：宿主弹窗壳（core 无通用 Modal）
-- `config/menu.tsx`：仅工作台、账号管理
-- `PRODUCT.md` / `README.md`：产品边界与数据边界
+## Skills（优先调用）
 
-## 数据约定
+| Skill | 何时用 |
+|-------|--------|
+| `forge-starter-quick-start` | 新项目改名、主题、菜单、env 第一遍定制 |
+| `forge-starter-new-module` | 新增业务域 CRUD（抄 accounts） |
+| `forge-starter-new-page` | 单页对照 forge 官方 template |
 
-- 登录用户（`users`）与业务账号（`admin_accounts`）分表，不要混为一谈。
-- 账号列表默认空；不要再加浏览器内存种子数据。
-- 账号新建/编辑都用弹窗（`AccountFormDialog`）。
-- 侧栏 team 区是单应用品牌，不要实现多租户/多团队，除非产品明确要求。
-- 不要做无行为的装饰按钮；要么实现，要么不渲染。
+路径：
 
-## 样式接入
+- `.agents/skills/<name>/SKILL.md`
+- `.claude/skills/<name>/SKILL.md`（与上同步，给 Claude Code）
 
-`app/globals.css` 必须保留：
+## 仓库地图
+
+```
+app/(auth)/          登录注册找回重置
+app/(app)/dashboard  工作台（ecommerce-2）
+app/(app)/accounts   ★ CRUD 样板
+app/(app)/settings   profile / security / apps / notifications
+app/api/auth         登录用户 API
+app/api/accounts     业务账号 API
+components/app-shell.tsx
+components/*-form-dialog.tsx
+components/ui/modal.tsx    宿主 Modal（core 无通用弹窗）
+config/site.ts menu.tsx apps.ts
+lib/auth lib/db lib/accounts lib/apps
+```
+
+## 官方视觉对照
+
+| 页面 | Forge 官方模板 |
+|------|----------------|
+| 工作台 | `dashboards/ecommerce-2` |
+| 列表 | `ecommerce/customers` |
+| 弹窗表单 | customers Add Modal / 窄表单 |
+| 详情 | `ecommerce/customers/[id]` |
+
+模板源码：本机 `../forge/src/app/templates/...`（若 monorepo 旁路存在）。
+
+## 扩模块最短路径
+
+1. 复制 accounts 相关文件，全局重命名资源名。  
+2. schema + `pnpm db:push`。  
+3. API + service + types。  
+4. list page + form dialog + detail。  
+5. `config/menu.tsx` 加菜单。  
+6. `pnpm typecheck`。
+
+详见 `docs/module-template.md`。
+
+## 样式接入（不可删）
+
+`app/globals.css`：
 
 ```css
 @import "tailwindcss";
@@ -47,19 +80,9 @@
 @source "../node_modules/@forge-ui-official/core/dist";
 ```
 
-如果移动 CSS 文件，必须按新位置调整 `@source`。缺少它会导致 Forge 组件内部 class 被 Tailwind v4 忽略。
+## 提交前
 
-## 开发流程
-
-1. 先读需求，列出页面、字段、状态和操作流。
-2. 后台页面从 `app/(app)/dashboard` 或 `app/(app)/accounts/*` 复制骨架，继续使用 `AppLayout`；官方视觉对照 `forge` 仓 `ecommerce` / `ecommerce-2` 模板。
-3. 登录相关页面默认保留 `app/(auth)` 的结构与视觉，只替换产品文案和真实提交逻辑。
-4. 业务区块优先使用 Forge 组件；确实缺组件时，暂停并说明缺口。
-5. 完成后运行 `pnpm typecheck`，必要时再跑 `pnpm build`。
-
-## 提交前检查
-
-- 没有引入私有 registry、npm token 或个人账号信息。
-- 没有用 Tailwind 默认色替代 Forge token。
-- 没有在业务页手搓 Forge 已提供的组件。
-- `pnpm typecheck` 通过。
+- 无密钥进库  
+- 无 Tailwind 默认色顶替 `fg-*`  
+- 无手搓已有 Forge 组件  
+- typecheck 通过  

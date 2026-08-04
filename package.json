@@ -1,8 +1,8 @@
 {
   "name": "forge-starter",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
-  "description": "Lightweight Forge admin scaffold (ShipAny-light): app shell, auth UI, and Forge-first examples.",
+  "description": "Agent-native Forge admin starter (Next.js 16 + Forge UI Kit). Skills-first scaffold for 0→1 B-side admin apps — not full SaaS.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
