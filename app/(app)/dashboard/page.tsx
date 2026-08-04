@@ -1,12 +1,9 @@
 "use client";
 
 /**
- * Dashboard layout aligned with Forge template:
+ * Dashboard layout: Forge ecommerce-2
  * https://www.forgeui.org/templates/dashboards/ecommerce-2
- * Source: forge/src/app/templates/(dashboards)/dashboards/ecommerce-2/page.tsx
- *
- * Metrics / recent table are driven by the starter demo store (business records).
- * Accent chrome uses siteConfig blue (starter brand); multi-series chart colors follow the template.
+ * Business domain: admin account management
  */
 
 import { useMemo } from "react";
@@ -37,94 +34,86 @@ import {
   StatusBadge,
   type ColumnDef,
   type MapRegion,
-  type StatusBadgeColor,
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
 import { useDemoStore } from "@/components/demo-store";
 import {
-  RECORD_STATUS_META,
-  type BusinessRecord,
-  type RecordStatus,
-} from "@/lib/demo/records";
+  ACCOUNT_STATUS_META,
+  type AdminAccount,
+} from "@/lib/demo/accounts";
 
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 const regionsForMap: MapRegion[] = [
-  { name: "United Kingdom", flag: "https://placehold.co/44x44/1e40af/fff?text=UK", salesLabel: "340 Sales", value: "$17,678" },
-  { name: "Spain", flag: "https://placehold.co/44x44/dc2626/fff?text=ES", salesLabel: "100 Sales", value: "$5,500" },
-  { name: "Indonesia", flag: "https://placehold.co/44x44/dc2626/fff?text=ID", salesLabel: "50 Sales", value: "$2,500" },
+  { name: "华东", flag: "https://placehold.co/44x44/1e40af/fff?text=E", salesLabel: "42 账号", value: "华东" },
+  { name: "华北", flag: "https://placehold.co/44x44/2563eb/fff?text=N", salesLabel: "28 账号", value: "华北" },
+  { name: "华南", flag: "https://placehold.co/44x44/0ea5e9/fff?text=S", salesLabel: "19 账号", value: "华南" },
 ];
-
-function statusColor(status: RecordStatus): StatusBadgeColor {
-  return RECORD_STATUS_META[status].color;
-}
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { records, countsByStatus } = useDemoStore();
+  const { accounts, countsByStatus } = useDemoStore();
 
   const total = countsByStatus.all ?? 0;
   const active = countsByStatus.active ?? 0;
-  const done = countsByStatus.done ?? 0;
-  const draft = countsByStatus.draft ?? 0;
-  const blocked = countsByStatus.blocked ?? 0;
+  const disabled = countsByStatus.disabled ?? 0;
+  const pending = countsByStatus.pending ?? 0;
+  const locked = countsByStatus.locked ?? 0;
 
-  const categoryRows = useMemo(() => {
+  const roleRows = useMemo(() => {
     const map = new Map<string, number>();
-    for (const r of records) map.set(r.category, (map.get(r.category) ?? 0) + 1);
-    return [...map.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .map(([name, count]) => ({ name, count }));
-  }, [records]);
+    for (const a of accounts) map.set(a.role, (map.get(a.role) ?? 0) + 1);
+    return [...map.entries()].sort((a, b) => b[1] - a[1]);
+  }, [accounts]);
 
-  const topRecords = records.slice(0, 7);
+  const topAccounts = accounts.slice(0, 7);
 
-  const tableColumns: ColumnDef<BusinessRecord>[] = useMemo(
+  const tableColumns: ColumnDef<AdminAccount>[] = useMemo(
     () => [
       {
-        key: "code",
-        header: "编号",
-        sortable: true,
-        width: "w-[120px]",
-        render: (row) => <CellText>{row.code}</CellText>,
-      },
-      {
-        key: "name",
-        header: "记录",
+        key: "user",
+        header: "账号",
         sortable: true,
         flex: true,
         render: (row) => (
-          <button
-            type="button"
-            className="text-left"
-            onClick={() => router.push(`/examples/detail/?id=${row.id}`)}
-          >
-            <CellImageText src={row.imageUrl} title={row.name} subtitle={row.subtitle} />
+          <button type="button" className="text-left" onClick={() => router.push(`/accounts/${row.id}/`)}>
+            <CellImageText src={row.avatarUrl} title={row.name} subtitle={row.email} rounded="full" />
           </button>
         ),
       },
       {
-        key: "updated",
-        header: "更新",
-        sortable: true,
+        key: "role",
+        header: "角色",
         width: "w-[120px]",
-        render: (row) => <CellMuted>{row.updatedDate}</CellMuted>,
+        render: (row) => <CellMuted>{row.role}</CellMuted>,
       },
       {
-        key: "owner",
-        header: "负责人",
-        width: "w-[160px]",
-        render: (row) => (
-          <CellTextSubtitle title={row.owner} subtitle={row.category} />
-        ),
+        key: "lastLogin",
+        header: "最近登录",
+        width: "w-[120px]",
+        render: (row) => <CellMuted>{row.lastLogin}</CellMuted>,
+      },
+      {
+        key: "dept",
+        header: "部门",
+        width: "w-[140px]",
+        render: (row) => <CellTextSubtitle title={row.department} subtitle={row.username} />,
+      },
+      {
+        key: "logins",
+        header: "登录次数",
+        width: "w-[100px]",
+        render: (row) => <CellText>{String(row.loginCount)}</CellText>,
       },
       {
         key: "status",
         header: "状态",
-        sortable: true,
-        width: "w-[120px]",
+        width: "w-[100px]",
         render: (row) => (
-          <StatusBadge label={RECORD_STATUS_META[row.status].label} color={statusColor(row.status)} />
+          <StatusBadge
+            label={ACCOUNT_STATUS_META[row.status].label}
+            color={ACCOUNT_STATUS_META[row.status].color}
+          />
         ),
       },
       {
@@ -135,8 +124,8 @@ export default function DashboardPage() {
           <KebabMenu
             accent={siteConfig.accent}
             items={[
-              { label: "查看", onSelect: () => router.push(`/examples/detail/?id=${row.id}`) },
-              { label: "编辑", onSelect: () => router.push(`/examples/form/?id=${row.id}`) },
+              { label: "查看", onSelect: () => router.push(`/accounts/${row.id}/`) },
+              { label: "编辑", onSelect: () => router.push(`/accounts/${row.id}/edit/`) },
             ]}
           />
         ),
@@ -145,92 +134,74 @@ export default function DashboardPage() {
     [router],
   );
 
-  const bubbleTotal = Math.max(total, 1);
-  const bubbles = [
-    { value: Math.round((active / bubbleTotal) * 10000) / 100 || 8, label: `${Math.round((active / bubbleTotal) * 100) || 0}%`, color: "bg-fg-blue-500" },
-    { value: Math.round((done / bubbleTotal) * 10000) / 100 || 6, label: `${Math.round((done / bubbleTotal) * 100) || 0}%`, color: "bg-yellow-400" },
-    { value: Math.round((draft / bubbleTotal) * 10000) / 100 || 4, label: `${Math.round((draft / bubbleTotal) * 100) || 0}%`, color: "bg-sky-500" },
-    { value: Math.round((blocked / bubbleTotal) * 10000) / 100 || 2, label: `${Math.round((blocked / bubbleTotal) * 100) || 0}%`, color: "bg-orange-500" },
-  ];
-
   return (
     <div className="flex flex-col gap-6">
-      {/* 3 stats — ecommerce-2 */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 [&>*]:!w-full">
         <ProgressStatCard
-          title="全部记录"
-          subtitle="Demo store"
+          title="账号总数"
+          subtitle="管理后台"
           value={String(total)}
           trend="10%"
           trendDirection="up"
           theme="white"
-          progressValue={total ? Math.min(100, total * 8) : 25}
+          progressValue={total ? Math.min(100, total * 10) : 25}
           progressColor="blue"
           size="wide"
           width="full"
         />
         <LineChartStatCard
-          title="进行中"
-          subtitle="Active records"
+          title="启用中"
+          subtitle="Active accounts"
           value={String(active)}
-          trend="10%"
+          trend="8%"
           trendDirection="up"
           size="wide"
           width="full"
-          chartColor="red"
-          chartDirection="down"
-          series={[10, 14, 12, 18, 16, 20, 18, 22, 20, 24, 22, Math.max(active * 2, 12)]}
+          chartColor="green"
+          series={[4, 5, 5, 6, 7, 6, 8, 9, 8, 10, 9, Math.max(active, 6)]}
         />
         <BarChartStatCard
-          title="已完成"
-          subtitle="Completed"
-          value={String(done)}
-          trend="10%"
-          trendDirection="up"
+          title="待激活 / 锁定"
+          subtitle="Need attention"
+          value={String(pending + locked)}
+          trend="2%"
+          trendDirection="down"
           size="wide"
           width="full"
           barColor="blue"
-          bars={[10, 30, 60, 95, 50, 40, Math.max(done * 8, 30)]}
+          bars={[4, 8, 12, 20, 14, 10, Math.max((pending + locked) * 4, 8)]}
         />
       </div>
 
-      {/* Statistic + Expenses bubbles — ecommerce-2 */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-5 rounded-3xl border border-fg-grey-200 bg-white p-6 lg:col-span-2">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h3 className="text-lg font-semibold text-fg-black">Statistic</h3>
-              <p className="text-sm text-fg-grey-500">记录状态趋势（演示序列）</p>
+              <p className="text-sm text-fg-grey-500">账号状态趋势</p>
             </div>
             <div className="inline-flex items-center gap-1 rounded-full bg-fg-grey-100 p-1 text-xs">
               <button type="button" className="px-3 py-1.5 text-fg-grey-500">Day</button>
               <button type="button" className="px-3 py-1.5 text-fg-grey-500">Week</button>
-              <button type="button" className="rounded-full bg-white px-3 py-1.5 text-fg-black shadow-sm">
-                Month
-              </button>
+              <button type="button" className="rounded-full bg-white px-3 py-1.5 text-fg-black shadow-sm">Month</button>
               <button type="button" className="px-3 py-1.5 text-fg-grey-500">Year</button>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-6">
             {[
-              { label: "进行中", value: String(active), trend: "10%", up: true, color: "#2563eb" },
-              { label: "草稿", value: String(draft), trend: "4%", up: false, color: "#fbbf24" },
-              { label: "已完成", value: String(done), trend: "8%", up: true, color: "#0ea5e9" },
+              { label: "启用", value: String(active), trend: "10%", up: true, color: "#2563eb" },
+              { label: "停用", value: String(disabled), trend: "2%", up: false, color: "#fbbf24" },
+              { label: "待激活", value: String(pending), trend: "5%", up: true, color: "#0ea5e9" },
             ].map((s) => (
               <div key={s.label} className="flex items-center gap-2">
-                <div
-                  className="flex size-9 items-center justify-center rounded-full text-white"
-                  style={{ backgroundColor: s.color }}
-                >
+                <div className="flex size-9 items-center justify-center rounded-full text-white" style={{ backgroundColor: s.color }}>
                   <ArrowRightUpLinear size={16} />
                 </div>
                 <div>
                   <div className="text-xs text-fg-grey-500">{s.label}</div>
                   <div className="flex items-center gap-2">
                     <span className="text-base font-semibold text-fg-black">{s.value}</span>
-                    <span className={`text-xs font-medium ${s.up ? "text-emerald-500" : "text-fg-red"}`}>
-                      {s.trend}
-                    </span>
+                    <span className={`text-xs font-medium ${s.up ? "text-emerald-500" : "text-fg-red"}`}>{s.trend}</span>
                   </div>
                 </div>
               </div>
@@ -246,9 +217,9 @@ export default function DashboardPage() {
             activeIndex={6}
             showTooltip
             tooltipItems={[
-              { label: "进行中", value: String(active), trend: "up", color: "#2563eb" },
-              { label: "草稿", value: String(draft), trend: "down", color: "#fbbf24" },
-              { label: "已完成", value: String(done), trend: "up", color: "#0ea5e9" },
+              { label: "启用", value: String(active), trend: "up", color: "#2563eb" },
+              { label: "停用", value: String(disabled), trend: "down", color: "#fbbf24" },
+              { label: "锁定", value: String(locked), trend: "up", color: "#ef4444" },
             ]}
             showYAxis
             yAxisLabels={["$1.2k", "$1k", "$800", "$600", "$400", "$200", "0"]}
@@ -261,103 +232,94 @@ export default function DashboardPage() {
           <div className="flex items-start justify-between">
             <div>
               <h3 className="text-lg font-semibold text-fg-black">状态占比</h3>
-              <p className="text-sm text-fg-grey-500">Based on category</p>
+              <p className="text-sm text-fg-grey-500">Based on status</p>
             </div>
             <KebabMenu
               accent={siteConfig.accent}
-              items={[{ label: "打开列表", onSelect: () => router.push("/examples/list/") }]}
+              items={[{ label: "账号列表", onSelect: () => router.push("/accounts/") }]}
             />
           </div>
-          <BubbleChart bubbles={bubbles} accent="blue" height={240} />
+          <BubbleChart
+            accent="blue"
+            height={240}
+            bubbles={[
+              { value: Math.max((active / Math.max(total, 1)) * 100, 8), label: `${Math.round((active / Math.max(total, 1)) * 100)}%`, color: "bg-fg-blue-500" },
+              { value: Math.max((disabled / Math.max(total, 1)) * 100, 6), label: `${Math.round((disabled / Math.max(total, 1)) * 100)}%`, color: "bg-yellow-400" },
+              { value: Math.max((pending / Math.max(total, 1)) * 100, 4), label: `${Math.round((pending / Math.max(total, 1)) * 100)}%`, color: "bg-sky-500" },
+              { value: Math.max((locked / Math.max(total, 1)) * 100, 2), label: `${Math.round((locked / Math.max(total, 1)) * 100)}%`, color: "bg-orange-500" },
+            ]}
+          />
           <div className="grid grid-cols-2 gap-2 text-xs text-fg-grey-700">
-            <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full" style={{ backgroundColor: "#2563eb" }} /> 进行中
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full" style={{ backgroundColor: "#fbbf24" }} /> 已完成
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full" style={{ backgroundColor: "#0ea5e9" }} /> 草稿
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full" style={{ backgroundColor: "#f97316" }} /> 已阻断
-            </span>
+            <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#2563eb]" /> 启用</span>
+            <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#fbbf24]" /> 停用</span>
+            <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#0ea5e9]" /> 待激活</span>
+            <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#f97316]" /> 锁定</span>
           </div>
         </div>
       </div>
 
-      {/* Top Region + Top Product + Top Category — ecommerce-2 */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <MapCard
-          title="Top Region"
-          subtitle="Sales by region"
+          title="区域分布"
+          subtitle="账号示意"
           color="blue"
           variant="md"
           width="full"
           regions={regionsForMap}
           highlights={["north-america", "europe", "asia", "oceania"]}
-          onMenuClick={() => undefined}
         />
 
         <ListGroup
-          title="最近记录"
+          title="最近账号"
           subtitle="Based on activity"
           action={
             <KebabMenu
               accent={siteConfig.accent}
-              items={[{ label: "查看全部", onSelect: () => router.push("/examples/list/") }]}
+              items={[{ label: "查看全部", onSelect: () => router.push("/accounts/") }]}
             />
           }
           items={
             <div className="flex flex-col">
-              {topRecords.length === 0 ? (
-                <p className="py-8 text-center text-sm text-fg-grey-500">暂无记录</p>
-              ) : (
-                topRecords.map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    className="flex items-center gap-3 py-2.5 text-left hover:opacity-90"
-                    onClick={() => router.push(`/examples/detail/?id=${p.id}`)}
-                  >
-                    <div className="flex size-10 items-center justify-center overflow-hidden rounded-lg bg-fg-grey-100">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={p.imageUrl} alt={p.name} className="size-full object-cover" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-semibold text-fg-black">{p.name}</div>
-                      <div className="text-xs text-fg-grey-500">{p.code}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-semibold text-fg-black">{p.owner}</div>
-                      <div className="text-xs text-emerald-500">{RECORD_STATUS_META[p.status].label}</div>
-                    </div>
-                  </button>
-                ))
-              )}
+              {topAccounts.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  className="flex items-center gap-3 py-2.5 text-left"
+                  onClick={() => router.push(`/accounts/${p.id}/`)}
+                >
+                  <div className="flex size-10 overflow-hidden rounded-full bg-fg-grey-100">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={p.avatarUrl} alt="" className="size-full object-cover" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-semibold text-fg-black">{p.name}</div>
+                    <div className="text-xs text-fg-grey-500">{p.email}</div>
+                  </div>
+                  <div className="text-right text-xs text-emerald-500">
+                    {ACCOUNT_STATUS_META[p.status].label}
+                  </div>
+                </button>
+              ))}
             </div>
           }
         />
 
         <ListGroup
-          title="分类排行"
-          subtitle="Based on records"
+          title="角色分布"
+          subtitle="Based on role"
           action={
-            <KebabMenu
-              accent={siteConfig.accent}
-              items={[{ label: "刷新", onSelect: () => undefined }]}
-            />
+            <KebabMenu accent={siteConfig.accent} items={[{ label: "刷新", onSelect: () => undefined }]} />
           }
           items={
             <div className="flex flex-col">
-              {(categoryRows.length ? categoryRows : [{ name: "暂无", count: 0 }]).map((c, i) => (
+              {roleRows.map(([name, count]) => (
                 <ChartListItem
-                  key={c.name + i}
+                  key={name}
                   icon={BoxBoldDuotone}
-                  accent={i === 0 ? "blue" : "blue"}
-                  title={c.name}
-                  subtitle="分类"
-                  value={`${c.count} 条`}
+                  accent="blue"
+                  title={name}
+                  subtitle="角色"
+                  value={`${count} 人`}
                 />
               ))}
             </div>
@@ -365,25 +327,21 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Recent table — ecommerce-2 Recent Orders */}
       <div className="flex flex-col gap-5 rounded-3xl border border-fg-grey-200 bg-white p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h3 className="text-lg font-semibold text-fg-black">最近业务记录</h3>
-            <p className="text-sm text-fg-grey-500">与列表页同一数据源</p>
+            <h3 className="text-lg font-semibold text-fg-black">最近账号</h3>
+            <p className="text-sm text-fg-grey-500">与账号管理列表同一数据源</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button color={siteConfig.accent} variant="tertiary" size="sm" iconLeft={<FilterLinear size={14} />}>
               Filters
-            </Button>
-            <Button color={siteConfig.accent} variant="tertiary" size="sm">
-              Show {Math.min(8, records.length)}
             </Button>
             <Button
               color={siteConfig.accent}
               size="sm"
               iconRight={<AltArrowRightLinear size={14} />}
-              onClick={() => router.push("/examples/list/")}
+              onClick={() => router.push("/accounts/")}
             >
               See More
             </Button>
@@ -391,23 +349,22 @@ export default function DashboardPage() {
               color={siteConfig.accent}
               size="sm"
               iconLeft={<PlusIcon size={14} />}
-              onClick={() => router.push("/examples/form/")}
+              onClick={() => router.push("/accounts/new/")}
             >
-              新建
+              新建账号
             </Button>
           </div>
         </div>
-        <DataTable<BusinessRecord>
+        <DataTable<AdminAccount>
           color={siteConfig.accent}
           columns={tableColumns}
-          rows={records.slice(0, 8)}
+          rows={accounts.slice(0, 8)}
           showCheckbox
           checkboxColor={siteConfig.accent}
           showPagination
           currentPage={1}
-          totalPages={Math.max(1, Math.ceil(records.length / 8))}
-          onPageChange={() => undefined}
-          paginationLabel={`Showing 1-${Math.min(8, records.length)} from ${records.length}`}
+          totalPages={Math.max(1, Math.ceil(accounts.length / 8))}
+          paginationLabel={`Showing 1-${Math.min(8, accounts.length)} from ${accounts.length}`}
           getRowKey={(row) => row.id}
         />
       </div>

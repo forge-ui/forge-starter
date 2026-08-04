@@ -41,7 +41,7 @@
 ## 开发流程
 
 1. 先读需求，列出页面、字段、状态和操作流。
-2. 后台页面从 `app/(app)/dashboard` 或后续 `examples/*` 复制骨架，继续使用 `AppLayout`。
+2. 后台页面从 `app/(app)/dashboard` 或 `app/(app)/accounts/*` 复制骨架，继续使用 `AppLayout`；官方视觉对照 `forge` 仓 `ecommerce` / `ecommerce-2` 模板。
 3. 登录相关页面默认保留 `app/(auth)` 的结构与视觉，只替换产品文案和真实提交逻辑。
 4. 业务区块优先使用 Forge 组件；确实缺组件时，暂停并说明缺口。
 5. 完成后运行 `pnpm typecheck`，必要时再跑 `pnpm build`。

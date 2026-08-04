@@ -1,25 +1,20 @@
 export const siteConfig = {
   name: "Forge Starter",
-  teamName: "你的团队",
+  teamName: "账号管理后台",
   accent: "blue" as const,
 };
 
 export type RouteShell = {
   title: string;
   primaryAction?: { label: string; href: string };
-  /** When true, page body owns the collection header (template Product List pattern). */
   hideHeader?: boolean;
 };
 
 /** Keys without trailing slash */
 export const routeShells: Record<string, RouteShell> = {
   "/dashboard": { title: "工作台", hideHeader: true },
-  "/examples/list": {
-    title: "业务记录",
-    hideHeader: true,
-  },
-  "/examples/form": { title: "记录表单", hideHeader: true },
-  "/examples/detail": { title: "记录详情", hideHeader: true },
+  "/accounts": { title: "账号管理", hideHeader: true },
+  "/accounts/new": { title: "新建账号", hideHeader: true },
   "/settings": { title: "设置", hideHeader: true },
 };
 
@@ -27,5 +22,11 @@ export function shellForPath(pathname: string): RouteShell {
   const normalized = pathname.length > 1 && pathname.endsWith("/")
     ? pathname.slice(0, -1)
     : pathname;
+  if (normalized.match(/^\/accounts\/[^/]+\/edit$/)) {
+    return { title: "编辑账号", hideHeader: true };
+  }
+  if (normalized.match(/^\/accounts\/[^/]+$/)) {
+    return { title: "账号详情", hideHeader: true };
+  }
   return routeShells[normalized] ?? { title: siteConfig.name };
 }

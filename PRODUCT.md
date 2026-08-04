@@ -121,17 +121,18 @@
 app/
   (auth)/                 # 登录 / 注册 / 找回 / 重置（Forge UI）
   (app)/
-    layout.tsx            # 统一 AppLayout
-    dashboard/
-    examples/
-      list/
-      form/
-      detail/             # P1
-    settings/             # P1
+    layout.tsx            # 统一 AppLayout + DemoStore
+    dashboard/            # ← dashboards/ecommerce-2，账号运营指标
+    accounts/
+      page.tsx            # ← ecommerce/customers 列表
+      new/                # ← ecommerce/products/new 表单
+      [id]/               # ← ecommerce/customers/[id] 详情
+      [id]/edit/          # 编辑表单
+    settings/             # 个人资料 / 安全 / 通知
   api/auth/               # 登录注册 session、重置密码 API
 middleware.ts             # 守卫
 config/
-  menu.tsx
+  menu.tsx                # 工作台 / 账号管理 / 新建账号 / 设置
   site.ts
 lib/
   auth/
@@ -140,13 +141,14 @@ lib/
     users.ts              # 本地用户读写
   mail/
     smtp.ts               # 仅 SMTP 发送
-    templates/            # 重置密码等纯文本/简单 HTML
-  db/                     # PostgreSQL（drizzle/prisma 等，实现时选定一种）
+  demo/
+    accounts.ts           # AdminAccount 演示域模型
+  db/                     # PostgreSQL + Drizzle
 .env.example              # AUTH_MODE、SMTP_*、DATABASE_URL、APP_URL
-docker-compose.yml        # 可选：本地 Postgres 一键起
+docker-compose.yml        # 本地 Postgres
 ```
 
-菜单只保留 **真实存在且内容不同** 的路由；示范页可用「示例」分组。
+业务域固定为 **管理后台账号管理**；菜单只保留真实路由，不保留空 examples。
 
 ## 6. 版本节奏建议
 
@@ -155,7 +157,7 @@ docker-compose.yml        # 可选：本地 Postgres 一键起
 | **0.1.x** | 认证 UI + dashboard 占位 + Forge 接入；演示级跳转 |
 | **0.2.0** | 定位更名 + 模块路线图 + **认证/SMTP 产品决策** |
 | **0.3.0** | P0：共享 layout、**PostgreSQL + local 用户名/邮箱密码**、**SMTP 找回密码**、守卫、列表/表单范例 |
-| **0.4.x**（当前） | Dashboard←**`dashboards/ecommerce-2`**（https://www.forgeui.org/templates/dashboards/ecommerce-2）；列表←`ecommerce/products`；表单/详情←`crm-template/leads`；共享 demo store 闭环 |
+| **0.4.x**（当前） | 业务域 **账号管理**；Dashboard←**`dashboards/ecommerce-2`**；列表←`ecommerce/customers`；表单←`ecommerce/products/new`；详情←`ecommerce/customers/[id]`；共享 `AdminAccount` demo store 闭环 |
 | **0.5.0** | 可选邮箱验证、部署与 SMTP 运维说明、设置写回用户表 |
 
 ## 7. 成功标准

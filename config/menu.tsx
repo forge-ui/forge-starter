@@ -2,16 +2,16 @@
 
 import {
   HomeSmileBoldDuotone,
-  ClipboardListBoldDuotone,
-  DocumentAddBoldDuotone,
+  UsersGroupTwoRoundedBoldDuotone,
+  UserPlusBoldDuotone,
   SettingsBoldDuotone,
 } from "solar-icon-set";
 import type { AppLayoutMenuItem, AppLayoutProfile } from "@forge-ui-official/core";
 
 export const menuItems: AppLayoutMenuItem[] = [
   { icon: <HomeSmileBoldDuotone size={20} />, label: "工作台", href: "/dashboard/" },
-  { icon: <ClipboardListBoldDuotone size={20} />, label: "业务记录", href: "/examples/list/" },
-  { icon: <DocumentAddBoldDuotone size={20} />, label: "新建记录", href: "/examples/form/" },
+  { icon: <UsersGroupTwoRoundedBoldDuotone size={20} />, label: "账号管理", href: "/accounts/" },
+  { icon: <UserPlusBoldDuotone size={20} />, label: "新建账号", href: "/accounts/new/" },
   { icon: <SettingsBoldDuotone size={20} />, label: "设置", href: "/settings/" },
 ];
 

@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import {
+  Breadcrumbs,
   Button,
   StatusBadge,
-  SurfaceCard,
   TextField,
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
@@ -92,11 +92,17 @@ export default function SettingsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
+        <div className="flex flex-col gap-1">
           <h1 className="text-display-l font-semibold leading-9 tracking-fg text-fg-black">
             设置
           </h1>
-          <p className="mt-1 text-sm text-fg-grey-700">账号、安全与通知偏好</p>
+          <Breadcrumbs
+            color={siteConfig.accent}
+            items={[
+              { label: "工作台", href: "/dashboard/" },
+              { label: "设置" },
+            ]}
+          />
         </div>
         <StatusBadge
           label={mode === "local" ? "AUTH local" : "AUTH demo"}
@@ -123,9 +129,9 @@ export default function SettingsPage() {
       </div>
 
       {tab === "profile" ? (
-        <SurfaceCard className="p-6">
+        <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
           <h2 className="text-lg font-semibold text-fg-black">个人资料</h2>
-          <p className="mt-1 text-sm text-fg-grey-700">展示名用于侧栏与列表中的责任人展示。</p>
+          <p className="mt-1 text-sm text-fg-grey-700">展示名用于侧栏与账号列表中的责任人展示。</p>
           <form onSubmit={saveProfile} className="mt-6 flex max-w-xl flex-col gap-4">
             <TextField color={siteConfig.accent} label="显示名" value={displayName} onChange={setDisplayName} />
             <TextField color={siteConfig.accent} label="用户名" value={username} onChange={setUsername} />
@@ -136,11 +142,11 @@ export default function SettingsPage() {
               保存资料
             </Button>
           </form>
-        </SurfaceCard>
+        </div>
       ) : null}
 
       {tab === "security" ? (
-        <SurfaceCard className="p-6">
+        <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
           <h2 className="text-lg font-semibold text-fg-black">安全</h2>
           <p className="mt-1 text-sm text-fg-grey-700">
             演示改密表单。`AUTH_MODE=local` 时可接到自建 API + 密码哈希校验。
@@ -167,13 +173,13 @@ export default function SettingsPage() {
               更新密码
             </Button>
           </form>
-        </SurfaceCard>
+        </div>
       ) : null}
 
       {tab === "notifications" ? (
-        <SurfaceCard className="p-6">
+        <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
           <h2 className="text-lg font-semibold text-fg-black">通知</h2>
-          <p className="mt-1 text-sm text-fg-grey-700">控制演示环境中的通知偏好。</p>
+          <p className="mt-1 text-sm text-fg-grey-700">控制演示环境中的通知偏好（账号安全相关）。</p>
           <form onSubmit={saveNotifications} className="mt-6 flex max-w-xl flex-col gap-4">
             <label className="flex items-center justify-between gap-4 rounded-2xl border border-fg-grey-200 px-4 py-3">
               <span className="text-sm font-medium text-fg-black">邮件通知</span>
@@ -185,7 +191,7 @@ export default function SettingsPage() {
               />
             </label>
             <label className="flex items-center justify-between gap-4 rounded-2xl border border-fg-grey-200 px-4 py-3">
-              <span className="text-sm font-medium text-fg-black">产品动态</span>
+              <span className="text-sm font-medium text-fg-black">账号安全提醒</span>
               <input
                 type="checkbox"
                 checked={productNotify}
@@ -198,7 +204,7 @@ export default function SettingsPage() {
               保存通知设置
             </Button>
           </form>
-        </SurfaceCard>
+        </div>
       ) : null}
     </div>
   );

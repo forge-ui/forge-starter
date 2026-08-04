@@ -80,13 +80,16 @@ export function AppShell({ children }: { children: ReactNode }) {
       messages={0}
       pageTitle={shell.title}
       pageHeaderVariant={
-        pathname.includes("/examples/form") || pathname.includes("/examples/detail")
+        pathname.includes("/accounts/new")
+        || /\/accounts\/[^/]+\/edit/.test(pathname)
+        || /\/accounts\/[^/]+\/?$/.test(pathname) && !pathname.endsWith("/accounts/")
           ? "detail"
           : "home"
       }
       onBack={
-        pathname.includes("/examples/form") || pathname.includes("/examples/detail")
-          ? () => router.push("/examples/list/")
+        pathname.includes("/accounts/new")
+        || /\/accounts\/[^/]+/.test(pathname)
+          ? () => router.push("/accounts/")
           : undefined
       }
       primaryAction={

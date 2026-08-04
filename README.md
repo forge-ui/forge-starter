@@ -43,12 +43,15 @@ pnpm db:push
 pnpm dev
 ```
 
-打开 <http://localhost:3000>：
+打开 <http://localhost:3020>（或 `pnpm dev` 默认端口）：
 
 - `/login` 登录（demo：任意用户名密码）
 - `/register` 注册（仅 `local`）
-- `/dashboard` 工作台
-- `/examples/list`、`/examples/form` 页面范式
+- `/dashboard` 工作台（← `dashboards/ecommerce-2`）
+- `/accounts` 账号列表（← `ecommerce/customers`）
+- `/accounts/new` 新建账号（← `ecommerce/products/new`）
+- `/accounts/[id]` 账号详情（← `ecommerce/customers/[id]`）
+- `/settings` 设置
 
 ## 环境变量
 
@@ -80,8 +83,8 @@ docker compose up -d   # 本地 Postgres
 app/
   (auth)/                 # 登录 / 注册 / 找回 / 重置
   (app)/                  # 登录后区域（统一 AppShell）
-    dashboard/
-    examples/list|form/
+    dashboard/            # 账号运营看板
+    accounts/             # 账号 CRUD（list / new / [id] / edit）
     settings/
   api/auth/               # 认证 API
 config/                   # 菜单、站点、路由标题
@@ -89,7 +92,11 @@ lib/
   auth/                   # session、密码、用户
   db/                     # Drizzle + schema
   mail/                   # SMTP only
-components/app-shell.tsx
+  demo/accounts.ts        # 演示账号数据模型
+components/
+  app-shell.tsx
+  demo-store.tsx
+  account-form.tsx
 middleware.ts             # 路由守卫
 docker-compose.yml
 PRODUCT.md                # 产品边界与路线图
