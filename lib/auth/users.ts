@@ -80,6 +80,72 @@ export async function authenticateUser(login: string, password: string) {
   return ok ? user : null;
 }
 
+export async function findUserById(id: string) {
+  const db = getDb();
+  const [row] = await db.select().from(users).where(eq(users.id, id)).limit(1);
+  return row ?? null;
+}
+
+export async function updateUserProfile(
+  userId: string,
+  input: { displayName: string; email?: string },
+) {
+  const db = getDb();
+  const displayName = input.displayName.trim();
+  if (!displayName) {
+    throw new Error("显示名不能为空");
+  }
+
+  const values: { displayName: string; email?: string } = { displayName };
+
+  if (input.email !== undefined) {
+    const email = normalizeEmail(input.email);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw new Error("邮箱格式不正确");
+    }
+    const [conflict] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+    if (conflict && conflict.id !== userId) {
+      throw new Error("邮箱已被注册");
+    }
+    values.email = email;
+  }
+
+  try {
+    const [row] = await db
+      .update(users)
+      .set(values)
+      .where(eq(users.id, userId))
+      .returning();
+    if (!row) throw new Error("用户不存在");
+    return row;
+  } catch (error) {
+    if (error instanceof Error && error.message !== "用户不存在") {
+      const message = error.message;
+      if (message.includes("users_email_uidx") || message.includes("email")) {
+        throw new Error("邮箱已被注册");
+      }
+    }
+    throw error;
+  }
+}
+
+export async function changeUserPassword(
+  userId: string,
+  currentPassword: string,
+  newPassword: string,
+) {
+  const user = await findUserById(userId);
+  if (!user) throw new Error("用户不存在");
+  const ok = await verifyPassword(currentPassword, user.passwordHash);
+  if (!ok) throw new Error("当前密码不正确");
+  const passwordHash = await hashPassword(newPassword);
+  await getDb().update(users).set({ passwordHash }).where(eq(users.id, userId));
+}
+
 function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
 }

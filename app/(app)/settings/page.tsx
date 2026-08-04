@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Breadcrumbs,
   Button,
@@ -8,6 +9,7 @@ import {
   TextField,
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
+import { emitProfileUpdated } from "@/lib/auth/profile-events";
 
 type MeResponse = {
   ok: boolean;
@@ -23,51 +25,133 @@ type TabId = "profile" | "security" | "notifications";
 
 const tabs: { id: TabId; label: string }[] = [
   { id: "profile", label: "个人资料" },
-  { id: "security", label: "安全" },
-  { id: "notifications", label: "通知" },
+  { id: "security", label: "修改密码" },
+  { id: "notifications", label: "系统设置" },
 ];
 
-export default function SettingsPage() {
-  const [tab, setTab] = useState<TabId>("profile");
+function parseTab(value: string | null): TabId {
+  if (value === "security" || value === "password") return "security";
+  if (value === "notifications" || value === "system") return "notifications";
+  return "profile";
+}
+
+function SettingsContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const tab = parseTab(searchParams.get("tab"));
+
   const [mode, setMode] = useState("demo");
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [emailNotify, setEmailNotify] = useState(true);
-  const [productNotify, setProductNotify] = useState(true);
+  const [securityNotify, setSecurityNotify] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/auth/me/")
-      .then((res) => res.json())
-      .then((data: MeResponse) => {
-        setMode(data.mode ?? "demo");
-        if (data.user) {
-          setDisplayName(data.user.displayName);
-          setEmail(data.user.email);
-          setUsername(data.user.username);
-        }
-      })
-      .catch(() => undefined);
+  const loadMe = useCallback(async () => {
+    try {
+      const res = await fetch("/api/auth/me/");
+      const data = (await res.json()) as MeResponse;
+      setMode(data.mode ?? "demo");
+      if (data.user) {
+        setDisplayName(data.user.displayName);
+        setEmail(data.user.email);
+        setUsername(data.user.username);
+      }
+    } catch {
+      // ignore
+    }
   }, []);
 
-  function saveProfile(event: React.FormEvent) {
+  useEffect(() => {
+    void loadMe();
+  }, [loadMe]);
+
+  useEffect(() => {
+    setMessage(null);
+    setError(null);
+  }, [tab]);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem("forge-starter:notification-prefs");
+      if (!raw) return;
+      const prefs = JSON.parse(raw) as {
+        emailNotify?: boolean;
+        securityNotify?: boolean;
+      };
+      if (typeof prefs.emailNotify === "boolean") setEmailNotify(prefs.emailNotify);
+      if (typeof prefs.securityNotify === "boolean") setSecurityNotify(prefs.securityNotify);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  function setTab(next: TabId) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", next);
+    router.replace(`/settings/?${params.toString()}`);
+  }
+
+  async function saveProfile(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
+    setMessage(null);
     if (!displayName.trim()) {
       setError("显示名不能为空");
       return;
     }
-    setMessage("资料已保存（演示：仅更新本页状态，未写回数据库）");
+    setSaving(true);
+    try {
+      const res = await fetch("/api/auth/profile/", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          displayName: displayName.trim(),
+          email: email.trim(),
+        }),
+      });
+      const data = (await res.json()) as {
+        ok: boolean;
+        error?: string;
+        message?: string;
+        user?: { displayName: string; email: string; username: string };
+      };
+      if (!res.ok || !data.ok) {
+        setError(data.error ?? "保存失败");
+        return;
+      }
+      if (data.user) {
+        setDisplayName(data.user.displayName);
+        setEmail(data.user.email);
+        setUsername(data.user.username);
+        emitProfileUpdated({
+          displayName: data.user.displayName,
+          email: data.user.email,
+          username: data.user.username,
+        });
+      }
+      setMessage(data.message ?? "资料已保存");
+    } catch {
+      setError("网络错误，请稍后重试");
+    } finally {
+      setSaving(false);
+    }
   }
 
-  function saveSecurity(event: React.FormEvent) {
+  async function saveSecurity(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
     setMessage(null);
+    if (!currentPassword) {
+      setError("请输入当前密码");
+      return;
+    }
     if (password.length < 8) {
       setError("新密码至少 8 位");
       return;
@@ -76,17 +160,50 @@ export default function SettingsPage() {
       setError("两次输入的密码不一致");
       return;
     }
-    setPassword("");
-    setPasswordConfirm("");
-    setMessage("密码修改流程已演示完成（未调用改密 API，local 模式可接 /api）");
+    setSaving(true);
+    try {
+      const res = await fetch("/api/auth/change-password/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword: password,
+        }),
+      });
+      const data = (await res.json()) as {
+        ok: boolean;
+        error?: string;
+        message?: string;
+      };
+      if (!res.ok || !data.ok) {
+        setError(data.error ?? "修改密码失败");
+        return;
+      }
+      setCurrentPassword("");
+      setPassword("");
+      setPasswordConfirm("");
+      setMessage(data.message ?? "密码已更新");
+    } catch {
+      setError("网络错误，请稍后重试");
+    } finally {
+      setSaving(false);
+    }
   }
 
   function saveNotifications(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
-    setMessage(
-      `通知偏好已保存：邮件 ${emailNotify ? "开" : "关"}，产品动态 ${productNotify ? "开" : "关"}`,
-    );
+    try {
+      window.localStorage.setItem(
+        "forge-starter:notification-prefs",
+        JSON.stringify({ emailNotify, securityNotify }),
+      );
+      setMessage(
+        `系统偏好已保存：邮件 ${emailNotify ? "开" : "关"}，安全提醒 ${securityNotify ? "开" : "关"}`,
+      );
+    } catch {
+      setError("无法写入本地偏好");
+    }
   }
 
   return (
@@ -117,11 +234,7 @@ export default function SettingsPage() {
             color={siteConfig.accent}
             variant={tab === item.id ? "primary" : "tertiary"}
             size="sm"
-            onClick={() => {
-              setTab(item.id);
-              setMessage(null);
-              setError(null);
-            }}
+            onClick={() => setTab(item.id)}
           >
             {item.label}
           </Button>
@@ -130,16 +243,35 @@ export default function SettingsPage() {
 
       {tab === "profile" ? (
         <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
-          <h2 className="text-lg font-semibold text-fg-black">个人资料</h2>
-          <p className="mt-1 text-sm text-fg-grey-700">展示名用于侧栏与账号列表中的责任人展示。</p>
+          <h2 className="text-lg font-semibold text-fg-black">编辑资料</h2>
+          <p className="mt-1 text-sm text-fg-grey-700">
+            显示名会同步到侧栏头像菜单；用户名用于登录，不可修改。
+          </p>
           <form onSubmit={saveProfile} className="mt-6 flex max-w-xl flex-col gap-4">
-            <TextField color={siteConfig.accent} label="显示名" value={displayName} onChange={setDisplayName} />
-            <TextField color={siteConfig.accent} label="用户名" value={username} onChange={setUsername} />
-            <TextField color={siteConfig.accent} label="邮箱" value={email} onChange={setEmail} />
+            <TextField
+              color={siteConfig.accent}
+              label="显示名"
+              value={displayName}
+              onChange={setDisplayName}
+            />
+            <TextField
+              color={siteConfig.accent}
+              label="用户名"
+              value={username}
+              onChange={() => undefined}
+              disabled
+            />
+            <TextField
+              color={siteConfig.accent}
+              label="邮箱"
+              value={email}
+              onChange={setEmail}
+              type="email"
+            />
             {error ? <p className="text-sm text-fg-red">{error}</p> : null}
             {message ? <p className="text-sm text-fg-green-500">{message}</p> : null}
-            <Button type="submit" color={siteConfig.accent}>
-              保存资料
+            <Button type="submit" color={siteConfig.accent} disabled={saving}>
+              {saving ? "保存中…" : "保存资料"}
             </Button>
           </form>
         </div>
@@ -147,11 +279,21 @@ export default function SettingsPage() {
 
       {tab === "security" ? (
         <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
-          <h2 className="text-lg font-semibold text-fg-black">安全</h2>
+          <h2 className="text-lg font-semibold text-fg-black">修改密码</h2>
           <p className="mt-1 text-sm text-fg-grey-700">
-            演示改密表单。`AUTH_MODE=local` 时可接到自建 API + 密码哈希校验。
+            {mode === "local"
+              ? "验证当前密码后写入新密码哈希。"
+              : "演示模式会走完整校验流程，但不写入数据库。"}
           </p>
           <form onSubmit={saveSecurity} className="mt-6 flex max-w-xl flex-col gap-4">
+            <TextField
+              color={siteConfig.accent}
+              label="当前密码"
+              type="password"
+              value={currentPassword}
+              onChange={setCurrentPassword}
+              placeholder={mode === "demo" ? "演示模式可填任意当前密码" : "当前登录密码"}
+            />
             <TextField
               color={siteConfig.accent}
               label="新密码"
@@ -169,8 +311,8 @@ export default function SettingsPage() {
             />
             {error ? <p className="text-sm text-fg-red">{error}</p> : null}
             {message ? <p className="text-sm text-fg-green-500">{message}</p> : null}
-            <Button type="submit" color={siteConfig.accent}>
-              更新密码
+            <Button type="submit" color={siteConfig.accent} disabled={saving}>
+              {saving ? "提交中…" : "更新密码"}
             </Button>
           </form>
         </div>
@@ -178,8 +320,10 @@ export default function SettingsPage() {
 
       {tab === "notifications" ? (
         <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
-          <h2 className="text-lg font-semibold text-fg-black">通知</h2>
-          <p className="mt-1 text-sm text-fg-grey-700">控制演示环境中的通知偏好（账号安全相关）。</p>
+          <h2 className="text-lg font-semibold text-fg-black">系统设置</h2>
+          <p className="mt-1 text-sm text-fg-grey-700">
+            通知与安全提醒偏好保存在本机浏览器（localStorage）。
+          </p>
           <form onSubmit={saveNotifications} className="mt-6 flex max-w-xl flex-col gap-4">
             <label className="flex items-center justify-between gap-4 rounded-2xl border border-fg-grey-200 px-4 py-3">
               <span className="text-sm font-medium text-fg-black">邮件通知</span>
@@ -194,18 +338,31 @@ export default function SettingsPage() {
               <span className="text-sm font-medium text-fg-black">账号安全提醒</span>
               <input
                 type="checkbox"
-                checked={productNotify}
-                onChange={(e) => setProductNotify(e.target.checked)}
+                checked={securityNotify}
+                onChange={(e) => setSecurityNotify(e.target.checked)}
                 className="h-4 w-4"
               />
             </label>
+            {error ? <p className="text-sm text-fg-red">{error}</p> : null}
             {message ? <p className="text-sm text-fg-green-500">{message}</p> : null}
             <Button type="submit" color={siteConfig.accent}>
-              保存通知设置
+              保存系统设置
             </Button>
           </form>
         </div>
       ) : null}
     </div>
+  );
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="py-10 text-sm text-fg-grey-500">加载设置…</div>
+      }
+    >
+      <SettingsContent />
+    </Suspense>
   );
 }
