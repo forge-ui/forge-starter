@@ -1,10 +1,11 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Breadcrumbs,
   Button,
+  SelectOption,
   StatusBadge,
   SurfaceCard,
   TextArea,
@@ -18,6 +19,13 @@ import {
   RECORD_STATUS_META,
   type RecordStatus,
 } from "@/lib/demo/records";
+
+const categoryOptions = RECORD_CATEGORIES.map((value) => ({ value, label: value }));
+const ownerOptions = RECORD_OWNERS.map((value) => ({ value, label: value }));
+const statusOptions = (Object.keys(RECORD_STATUS_META) as RecordStatus[]).map((value) => ({
+  value,
+  label: RECORD_STATUS_META[value].label,
+}));
 
 function FormBody() {
   const router = useRouter();
@@ -35,7 +43,6 @@ function FormBody() {
   const [status, setStatus] = useState<RecordStatus>("draft");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     if (!existing) {
@@ -55,43 +62,22 @@ function FormBody() {
     setStatus(existing.status);
   }, [existing]);
 
-  const statusOptions = useMemo(
-    () => (Object.keys(RECORD_STATUS_META) as RecordStatus[]),
-    [],
-  );
-
   function onSubmit(event: React.FormEvent) {
     event.preventDefault();
-    setSuccess(null);
-    if (!name.trim()) {
-      setError("请填写名称");
-      return;
-    }
-    if (!description.trim()) {
-      setError("请填写说明");
+    if (!name.trim() || !description.trim()) {
+      setError("请填写名称与说明");
       return;
     }
     setError(null);
     setSaving(true);
-    const payload = {
-      name,
-      subtitle,
-      category,
-      owner,
-      description,
-      status,
-    };
+    const payload = { name, subtitle, category, owner, description, status };
     try {
       if (isEdit && existing) {
         const updated = updateRecord(existing.id, payload);
-        setSuccess("已保存修改");
-        if (updated) {
-          window.setTimeout(() => router.push(`/examples/detail/?id=${updated.id}`), 400);
-        }
+        if (updated) router.push(`/examples/detail/?id=${updated.id}`);
       } else {
         const created = createRecord(payload);
-        setSuccess("已创建记录");
-        window.setTimeout(() => router.push(`/examples/detail/?id=${created.id}`), 400);
+        router.push(`/examples/detail/?id=${created.id}`);
       }
     } finally {
       setSaving(false);
@@ -100,9 +86,10 @@ function FormBody() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start justify-between gap-4">
+      {/* CRM Add Leads header pattern */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-display-l font-semibold leading-9 tracking-fg text-fg-black">
+          <h1 className="text-2xl font-semibold tracking-fg text-fg-black">
             {isEdit ? "编辑记录" : "新建记录"}
           </h1>
           <Breadcrumbs
@@ -114,113 +101,98 @@ function FormBody() {
             ]}
           />
         </div>
-        {isEdit && existing ? (
-          <StatusBadge
-            label={RECORD_STATUS_META[existing.status].label}
-            color={RECORD_STATUS_META[existing.status].color}
-          />
-        ) : null}
+        <div className="flex items-center gap-3">
+          {isEdit && existing ? (
+            <StatusBadge
+              label={RECORD_STATUS_META[existing.status].label}
+              color={RECORD_STATUS_META[existing.status].color}
+            />
+          ) : null}
+          <Button
+            color={siteConfig.accent}
+            variant="tertiary"
+            onClick={() => router.push("/examples/list/")}
+          >
+            取消
+          </Button>
+          <Button
+            color={siteConfig.accent}
+            disabled={saving}
+            onClick={() => {
+              const form = document.getElementById("record-form") as HTMLFormElement | null;
+              form?.requestSubmit();
+            }}
+          >
+            {saving ? "保存中…" : isEdit ? "保存" : "创建"}
+          </Button>
+        </div>
       </div>
 
       <SurfaceCard className="p-6">
-        <form onSubmit={onSubmit} className="flex max-w-2xl flex-col gap-5">
-          <TextField
-            color={siteConfig.accent}
-            label="名称"
-            placeholder="例如：设备准入策略"
-            value={name}
-            onChange={setName}
-            state={error && !name.trim() ? "error" : "idle"}
-          />
-          <TextField
-            color={siteConfig.accent}
-            label="摘要"
-            placeholder="列表副标题，如：3 条规则"
-            value={subtitle}
-            onChange={setSubtitle}
-          />
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            <label className="flex flex-col gap-2 text-sm font-medium text-fg-grey-700">
-              分类
-              <select
-                className="h-12 rounded-full border border-fg-grey-200 bg-white px-4 text-fg-black outline-none focus:border-fg-blue-500"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-              >
-                {RECORD_CATEGORIES.map((item) => (
-                  <option key={item} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="flex flex-col gap-2 text-sm font-medium text-fg-grey-700">
-              负责人
-              <select
-                className="h-12 rounded-full border border-fg-grey-200 bg-white px-4 text-fg-black outline-none focus:border-fg-blue-500"
-                value={owner}
-                onChange={(e) => setOwner(e.target.value)}
-              >
-                {RECORD_OWNERS.map((item) => (
-                  <option key={item} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <label className="flex flex-col gap-2 text-sm font-medium text-fg-grey-700">
-            状态
-            <select
-              className="h-12 rounded-full border border-fg-grey-200 bg-white px-4 text-fg-black outline-none focus:border-fg-blue-500"
+        <form id="record-form" onSubmit={onSubmit} className="flex flex-col gap-5">
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+            <TextField
+              color={siteConfig.accent}
+              label="名称"
+              placeholder="例如：设备准入策略"
+              value={name}
+              onChange={setName}
+              state={error && !name.trim() ? "error" : "idle"}
+            />
+            <TextField
+              color={siteConfig.accent}
+              label="摘要"
+              placeholder="列表副标题"
+              value={subtitle}
+              onChange={setSubtitle}
+            />
+            <SelectOption
+              color={siteConfig.accent}
+              label="分类"
+              width="100%"
+              options={categoryOptions}
+              value={category}
+              onChange={setCategory}
+            />
+            <SelectOption
+              color={siteConfig.accent}
+              label="负责人"
+              width="100%"
+              options={ownerOptions}
+              value={owner}
+              onChange={setOwner}
+            />
+            <SelectOption
+              color={siteConfig.accent}
+              label="状态"
+              width="100%"
+              options={statusOptions}
               value={status}
-              onChange={(e) => setStatus(e.target.value as RecordStatus)}
-            >
-              {statusOptions.map((item) => (
-                <option key={item} value={item}>
-                  {RECORD_STATUS_META[item].label}
-                </option>
-              ))}
-            </select>
-          </label>
-
+              onChange={(value) => setStatus(value as RecordStatus)}
+            />
+          </div>
           <TextArea
             color={siteConfig.accent}
             label="说明"
-            placeholder="补充业务说明、范围与验收标准…"
+            placeholder="业务范围、规则与验收标准…"
             value={description}
             onChange={setDescription}
             rows={5}
             state={error && !description.trim() ? "error" : "idle"}
           />
-
           {error ? <p className="text-sm text-fg-red">{error}</p> : null}
-          {success ? <p className="text-sm text-fg-green-500">{success}</p> : null}
-
-          <div className="flex flex-wrap gap-3">
-            <Button type="submit" color={siteConfig.accent} variant="primary" disabled={saving}>
-              {saving ? "保存中…" : isEdit ? "保存修改" : "创建并查看"}
-            </Button>
+          <div className="flex justify-end gap-3">
             <Button
               type="button"
               color={siteConfig.accent}
               variant="tertiary"
               onClick={() => router.push("/examples/list/")}
             >
-              返回列表
+              取消
             </Button>
-            {isEdit && existing ? (
-              <Button
-                type="button"
-                color={siteConfig.accent}
-                variant="tertiary"
-                onClick={() => router.push(`/examples/detail/?id=${existing.id}`)}
-              >
-                查看详情
-              </Button>
-            ) : null}
+            <Button type="submit" color={siteConfig.accent} disabled={saving}>
+              {saving ? "保存中…" : isEdit ? "保存记录" : "创建记录"}
+            </Button>
           </div>
         </form>
       </SurfaceCard>
