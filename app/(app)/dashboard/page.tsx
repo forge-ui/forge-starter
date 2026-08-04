@@ -12,7 +12,6 @@ import {
   AltArrowRightLinear,
   ArrowRightUpLinear,
   BoxBoldDuotone,
-  FilterLinear,
 } from "solar-icon-set";
 import {
   BarChartStatCard,
@@ -42,7 +41,7 @@ import {
   type AdminAccount,
 } from "@/lib/demo/accounts";
 
-const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const months = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
 
 const regionsForMap: MapRegion[] = [
   { name: "华东", flag: "https://placehold.co/44x44/1e40af/fff?text=E", salesLabel: "42 账号", value: "华东" },
@@ -151,7 +150,7 @@ export default function DashboardPage() {
         />
         <LineChartStatCard
           title="启用中"
-          subtitle="Active accounts"
+          subtitle="当前可登录"
           value={String(active)}
           trend="8%"
           trendDirection="up"
@@ -162,7 +161,7 @@ export default function DashboardPage() {
         />
         <BarChartStatCard
           title="待激活 / 锁定"
-          subtitle="Need attention"
+          subtitle="需关注"
           value={String(pending + locked)}
           trend="2%"
           trendDirection="down"
@@ -177,14 +176,14 @@ export default function DashboardPage() {
         <div className="flex flex-col gap-5 rounded-3xl border border-fg-grey-200 bg-white p-6 lg:col-span-2">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h3 className="text-lg font-semibold text-fg-black">Statistic</h3>
-              <p className="text-sm text-fg-grey-500">账号状态趋势</p>
+              <h3 className="text-lg font-semibold text-fg-black">状态趋势</h3>
+              <p className="text-sm text-fg-grey-500">账号状态示意（演示曲线）</p>
             </div>
             <div className="inline-flex items-center gap-1 rounded-full bg-fg-grey-100 p-1 text-xs">
-              <button type="button" className="px-3 py-1.5 text-fg-grey-500">Day</button>
-              <button type="button" className="px-3 py-1.5 text-fg-grey-500">Week</button>
-              <button type="button" className="rounded-full bg-white px-3 py-1.5 text-fg-black shadow-sm">Month</button>
-              <button type="button" className="px-3 py-1.5 text-fg-grey-500">Year</button>
+              <button type="button" className="px-3 py-1.5 text-fg-grey-500">日</button>
+              <button type="button" className="px-3 py-1.5 text-fg-grey-500">周</button>
+              <button type="button" className="rounded-full bg-white px-3 py-1.5 text-fg-black shadow-sm">月</button>
+              <button type="button" className="px-3 py-1.5 text-fg-grey-500">年</button>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-6">
@@ -222,7 +221,7 @@ export default function DashboardPage() {
               { label: "锁定", value: String(locked), trend: "up", color: "#ef4444" },
             ]}
             showYAxis
-            yAxisLabels={["$1.2k", "$1k", "$800", "$600", "$400", "$200", "0"]}
+            yAxisLabels={["1200", "1000", "800", "600", "400", "200", "0"]}
             xAxisLabels={months}
             height="h-[260px]"
           />
@@ -232,7 +231,7 @@ export default function DashboardPage() {
           <div className="flex items-start justify-between">
             <div>
               <h3 className="text-lg font-semibold text-fg-black">状态占比</h3>
-              <p className="text-sm text-fg-grey-500">Based on status</p>
+              <p className="text-sm text-fg-grey-500">按状态统计</p>
             </div>
             <KebabMenu
               accent={siteConfig.accent}
@@ -271,7 +270,7 @@ export default function DashboardPage() {
 
         <ListGroup
           title="最近账号"
-          subtitle="Based on activity"
+          subtitle="按演示列表顺序"
           action={
             <KebabMenu
               accent={siteConfig.accent}
@@ -306,9 +305,12 @@ export default function DashboardPage() {
 
         <ListGroup
           title="角色分布"
-          subtitle="Based on role"
+          subtitle="按角色汇总"
           action={
-            <KebabMenu accent={siteConfig.accent} items={[{ label: "刷新", onSelect: () => undefined }]} />
+            <KebabMenu
+              accent={siteConfig.accent}
+              items={[{ label: "账号列表", onSelect: () => router.push("/accounts/") }]}
+            />
           }
           items={
             <div className="flex flex-col">
@@ -334,16 +336,14 @@ export default function DashboardPage() {
             <p className="text-sm text-fg-grey-500">与账号管理列表同一数据源</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button color={siteConfig.accent} variant="tertiary" size="sm" iconLeft={<FilterLinear size={14} />}>
-              Filters
-            </Button>
             <Button
               color={siteConfig.accent}
               size="sm"
+              variant="tertiary"
               iconRight={<AltArrowRightLinear size={14} />}
               onClick={() => router.push("/accounts/")}
             >
-              See More
+              查看更多
             </Button>
             <Button
               color={siteConfig.accent}
@@ -359,12 +359,10 @@ export default function DashboardPage() {
           color={siteConfig.accent}
           columns={tableColumns}
           rows={accounts.slice(0, 8)}
-          showCheckbox
-          checkboxColor={siteConfig.accent}
           showPagination
           currentPage={1}
           totalPages={Math.max(1, Math.ceil(accounts.length / 8))}
-          paginationLabel={`Showing 1-${Math.min(8, accounts.length)} from ${accounts.length}`}
+          paginationLabel={`显示 1-${Math.min(8, accounts.length)} / 共 ${accounts.length} 条`}
           getRowKey={(row) => row.id}
         />
       </div>

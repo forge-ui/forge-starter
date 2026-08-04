@@ -20,11 +20,19 @@
 ## 当前仓库结构
 
 - `app/(auth)`：登录、注册、忘记密码、重置密码
-- `app/(app)/dashboard`：后台工作台（范例页）
-- `app/globals.css`：Tailwind v4、Forge 样式和 `@source`
-- `config/menu.tsx`：`AppLayout` 主菜单和 profile
-- `lib/asset.ts`：静态资源路径
-- `PRODUCT.md`：产品定位与模块路线图（改范围前先读）
+- `app/(app)/dashboard`：工作台（ecommerce-2 布局）
+- `app/(app)/accounts`：账号列表（弹窗新建）/ 详情 / 编辑
+- `app/(app)/settings`：个人设置（仅 profile 菜单进入）
+- `components/demo-store.tsx` + `lib/demo/accounts.ts`：**业务演示数据**（内存，非登录 users 表）
+- `components/ui/modal.tsx`：宿主弹窗壳（core 无通用 Modal）
+- `config/menu.tsx`：仅工作台、账号管理
+- `PRODUCT.md` / `README.md`：产品边界与数据边界
+
+## 演示数据约定
+
+- 登录用户（auth）与「账号管理」演示列表是两套数据，不要混为一谈。
+- 账号新建用列表弹窗（`AccountCreateDialog`），不要再加一级菜单「新建账号」。
+- 不要做无行为的装饰按钮（导出/邮件/电话等）；要么实现，要么不渲染。
 
 ## 样式接入
 

@@ -1,13 +1,10 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState, type Key } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  ChatRoundLinear,
-  DownloadMinimalisticLinear,
-  LetterLinear,
+  MagniferLinear,
   PenLinear,
-  PhoneCallingLinear,
   TrashBinMinimalisticLinear,
 } from "solar-icon-set";
 import {
@@ -22,6 +19,7 @@ import {
   IconButton,
   PlusIcon,
   StatusBadge,
+  TextField,
   type ColumnDef,
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
@@ -47,13 +45,12 @@ function AccountsPageContent() {
   const searchParams = useSearchParams();
   const { accounts, deleteAccount, countsByStatus } = useDemoStore();
   const [activeFilterIndex, setActiveFilterIndex] = useState(0);
+  const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 8;
-  const [selectedRowKeys, setSelectedRowKeys] = useState<Set<Key>>(new Set());
   const [deleteTarget, setDeleteTarget] = useState<AdminAccount | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
 
-  // Support /accounts/?create=1 from dashboard or deep links
   useEffect(() => {
     if (searchParams.get("create") === "1") {
       setCreateOpen(true);
@@ -62,12 +59,32 @@ function AccountsPageContent() {
   }, [searchParams, router]);
 
   const filtered = useMemo(() => {
-    const key = filterValues[activeFilterIndex];
-    if (key === "all") return accounts;
-    return accounts.filter((a) => a.status === key);
-  }, [accounts, activeFilterIndex]);
+    const statusKey = filterValues[activeFilterIndex];
+    const q = search.trim().toLowerCase();
+    return accounts.filter((a) => {
+      if (statusKey !== "all" && a.status !== statusKey) return false;
+      if (!q) return true;
+      return (
+        a.name.toLowerCase().includes(q)
+        || a.username.toLowerCase().includes(q)
+        || a.email.toLowerCase().includes(q)
+        || a.phone.replace(/\s/g, "").includes(q.replace(/\s/g, ""))
+        || a.department.toLowerCase().includes(q)
+        || a.role.toLowerCase().includes(q)
+      );
+    });
+  }, [accounts, activeFilterIndex, search]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, activeFilterIndex]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [currentPage, totalPages]);
+
   const pageRows = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
     return filtered.slice(start, start + pageSize);
@@ -139,19 +156,10 @@ function AccountsPageContent() {
       },
       {
         key: "actions",
-        header: "",
-        width: "w-36",
+        header: "操作",
+        width: "w-24",
         render: (row) => (
           <div className="flex h-10 items-center justify-end gap-2">
-            <IconButton variant="ghost" shape="square" size="sm" aria-label="邮件">
-              <LetterLinear size={16} />
-            </IconButton>
-            <IconButton variant="ghost" shape="square" size="sm" aria-label="电话">
-              <PhoneCallingLinear size={16} />
-            </IconButton>
-            <IconButton variant="ghost" shape="square" size="sm" aria-label="消息">
-              <ChatRoundLinear size={16} />
-            </IconButton>
             <IconButton
               variant="ghost"
               shape="square"
@@ -185,7 +193,7 @@ function AccountsPageContent() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <ConfirmationDialog
             title="删除账号？"
-            description={`确定删除「${deleteTarget.name}」？此操作不可撤销（演示数据）。`}
+            description={`确定删除「${deleteTarget.name}」？此操作不可撤销（演示数据，刷新页面会恢复种子数据）。`}
             color="red"
             icon={<TrashBinMinimalisticLinear size={32} color="#EA580C" />}
             confirmLabel="删除"
@@ -211,26 +219,20 @@ function AccountsPageContent() {
               { label: "账号管理" },
             ]}
           />
+          <p className="mt-1 text-xs text-fg-grey-500">
+            演示数据：仅保存在当前浏览器内存，刷新页面会恢复初始种子账号。
+          </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button
-            color={siteConfig.accent}
-            variant="tertiary"
-            iconLeft={<DownloadMinimalisticLinear size={16} />}
-          >
-            导出
-          </Button>
-          <Button
-            color={siteConfig.accent}
-            iconLeft={<PlusIcon size={16} />}
-            onClick={() => setCreateOpen(true)}
-          >
-            新建账号
-          </Button>
-        </div>
+        <Button
+          color={siteConfig.accent}
+          iconLeft={<PlusIcon size={16} />}
+          onClick={() => setCreateOpen(true)}
+        >
+          新建账号
+        </Button>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <ButtonGroup
           color={siteConfig.accent}
           shape="pill"
@@ -243,28 +245,52 @@ function AccountsPageContent() {
           activeIndex={activeFilterIndex}
           onChange={(index) => {
             setActiveFilterIndex(index);
-            setCurrentPage(1);
           }}
         />
+        <div className="w-full max-w-sm">
+          <TextField
+            color={siteConfig.accent}
+            value={search}
+            onChange={setSearch}
+            placeholder="搜索姓名、用户名、邮箱、手机…"
+            iconLeft={<MagniferLinear size={16} />}
+          />
+        </div>
       </div>
 
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-4 rounded-[28px] border border-dashed border-fg-grey-200 bg-white py-16">
-          <p className="text-lg font-semibold text-fg-black">暂无账号</p>
-          <Button color={siteConfig.accent} onClick={() => setCreateOpen(true)}>
-            新建账号
-          </Button>
+          <p className="text-lg font-semibold text-fg-black">
+            {accounts.length === 0 ? "暂无账号" : "无匹配结果"}
+          </p>
+          <p className="text-sm text-fg-grey-500">
+            {accounts.length === 0
+              ? "点击下方按钮创建第一个演示账号。"
+              : "试试清空搜索或切换状态筛选。"}
+          </p>
+          {accounts.length === 0 ? (
+            <Button color={siteConfig.accent} onClick={() => setCreateOpen(true)}>
+              新建账号
+            </Button>
+          ) : (
+            <Button
+              color={siteConfig.accent}
+              variant="tertiary"
+              onClick={() => {
+                setSearch("");
+                setActiveFilterIndex(0);
+              }}
+            >
+              清除筛选
+            </Button>
+          )}
         </div>
       ) : (
         <DataTable<AdminAccount>
           color={siteConfig.accent}
           columns={columns}
           rows={pageRows}
-          showCheckbox
-          checkboxColor={siteConfig.accent}
           getRowKey={(row) => row.id}
-          selectedRowKeys={selectedRowKeys}
-          onSelectedRowKeysChange={setSelectedRowKeys}
           showPagination
           currentPage={currentPage}
           totalPages={totalPages}

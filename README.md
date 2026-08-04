@@ -10,12 +10,13 @@
 | 模块 | 说明 |
 |------|------|
 | **认证** | 用户名或邮箱 + 密码；注册 / 登录 / 退出 / 找回与重置密码 |
-| **数据库** | **PostgreSQL only**（Drizzle ORM） |
+| **数据库** | **PostgreSQL only**（Drizzle ORM）— 用于 **登录用户**，不是业务演示账号表 |
 | **邮件** | 仅 **自定义 SMTP**；未配置时重置链接打印到服务端日志 |
 | **模式** | `AUTH_MODE=demo` 任意账号可进；`local` 走真库 + 路由守卫 |
-| **应用壳** | 统一 `AppLayout`、菜单；退出在左下角 profile |
-| **业务竖切** | 工作台 ↔ 列表 ↔ 新建/编辑 ↔ 详情，**共享 demo store** |
-| **个人设置** | 侧栏 profile：编辑资料 / 改密 / 系统设置（无侧栏一级菜单） |
+| **应用壳** | 统一 `AppLayout`；侧栏仅 **工作台 / 账号管理** |
+| **业务竖切** | 工作台 ↔ 列表（搜索/筛选）↔ **弹窗新建** ↔ 编辑页 ↔ 详情 |
+| **演示数据** | 账号 CRUD 走内存 `demo-store`（刷新恢复种子数据）；与登录 `users` 表无关 |
+| **个人设置** | **仅** 侧栏 profile 菜单：编辑资料 / 修改密码 / 系统设置 / 退出登录 |
 
 ## 快速开始
 
@@ -43,15 +44,26 @@ pnpm db:push
 pnpm dev
 ```
 
-打开 <http://localhost:3020>（或 `pnpm dev` 默认端口）：
+推荐端口：`pnpm dev --port 3020` → <http://localhost:3020>
 
-- `/login` 登录（demo：任意用户名密码）
-- `/register` 注册（仅 `local`）
-- `/dashboard` 工作台（← `dashboards/ecommerce-2`）
-- `/accounts` 账号列表（← `ecommerce/customers`）
-- `/accounts/new` 新建账号（← `ecommerce/products/new`）
-- `/accounts/[id]` 账号详情（← `ecommerce/customers/[id]`）
-- `/settings` 设置
+| 路径 | 说明 |
+|------|------|
+| `/login` | 登录（demo：任意用户名密码） |
+| `/register` | 注册（仅 `AUTH_MODE=local`） |
+| `/dashboard` | 工作台布局 ← `dashboards/ecommerce-2`，指标来自 demo 账号 |
+| `/accounts` | 账号列表 ← `ecommerce/customers`；**新建为弹窗**（非独立整页） |
+| `/accounts/?create=1` | 打开列表并自动弹出「新建账号」 |
+| `/accounts/new` | 兼容重定向到 `?create=1` |
+| `/accounts/[id]` | 详情 ← `ecommerce/customers/[id]` |
+| `/accounts/[id]/edit` | 编辑整页（ShipAny 窄栏表单） |
+| `/settings` | 个人设置（**请从 profile 进入**，侧栏无「设置」菜单） |
+
+### 数据边界（必读）
+
+| 数据 | 存储 | 用途 |
+|------|------|------|
+| 登录用户 | Postgres `users`（`local`）/ demo session | 认证、profile 改名改密 |
+| 运营「账号管理」列表 | 浏览器内存 demo store | 教 UI/CRUD 范式，**非生产业务库** |
 
 ## 环境变量
 
@@ -84,20 +96,22 @@ app/
   (auth)/                 # 登录 / 注册 / 找回 / 重置
   (app)/                  # 登录后区域（统一 AppShell）
     dashboard/            # 账号运营看板
-    accounts/             # 账号 CRUD（list / new / [id] / edit）
-    settings/
-  api/auth/               # 认证 API
-config/                   # 菜单、站点、路由标题
+    accounts/             # 列表 + 详情 + 编辑；新建弹窗
+    settings/             # profile 入口
+  api/auth/               # 登录用户认证 / 资料 / 改密
+config/                   # 菜单、站点
 lib/
-  auth/                   # session、密码、用户
-  db/                     # Drizzle + schema
-  mail/                   # SMTP only
-  demo/accounts.ts        # 演示账号数据模型
+  auth/
+  db/
+  mail/
+  demo/accounts.ts        # 业务演示域模型（非登录用户表）
 components/
   app-shell.tsx
   demo-store.tsx
-  account-form.tsx
-middleware.ts             # 路由守卫
+  account-create-dialog.tsx
+  account-form.tsx        # 编辑页表单
+  ui/modal.tsx            # 宿主 Modal（core 无通用弹窗）
+middleware.ts
 docker-compose.yml
 PRODUCT.md                # 产品边界与路线图
 ```
