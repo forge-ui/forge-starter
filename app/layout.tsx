@@ -5,8 +5,8 @@ import "@fontsource-variable/plus-jakarta-sans";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Forge 起手式",
-  description: "Next.js 16 + Tailwind v4 + @forge-ui-official/core 项目模板",
+  title: "Forge Starter",
+  description: "Forge 后台脚手架 — Next.js 16 + Tailwind v4 + @forge-ui-official/core",
 };
 
 const fontVariables = {

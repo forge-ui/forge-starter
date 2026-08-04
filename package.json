@@ -1,7 +1,8 @@
 {
   "name": "forge-starter",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
+  "description": "Lightweight Forge admin scaffold (ShipAny-light): app shell, auth UI, and Forge-first examples.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

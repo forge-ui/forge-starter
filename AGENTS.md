@@ -1,6 +1,9 @@
 # Forge Starter — AI 接入指南
 
-你正在协助一个基于 Forge UI Kit 的 Next.js 项目。目标是用现成组件、布局和 token 快速搭业务后台，不在业务页里重新发明 UI 系统。
+你正在协助一个基于 **Forge Starter（Forge 后台脚手架）** 的 Next.js 项目。  
+目标：用 `@forge-ui-official/core`、Forge 布局与 token 快速搭业务后台，不在业务页里重新发明 UI 系统。
+
+本仓库是 **轻量后台脚手架**，不是中台框架，也不是营销型 SaaS 全家桶。
 
 ## 基本原则
 
@@ -11,14 +14,16 @@
 5. 不确定组件用法时，先查 Forge 文档和主仓库 case，再写页面。
 6. 默认不创建 `favoriteItems` 或“收藏 / 常用项目”菜单分组；只有明确的业务需求才能增加收藏能力。
 7. 登录、注册、忘记密码和重置密码默认直接使用 `app/(auth)` 的结构与视觉；只有用户明确要求时才修改或关闭。
+8. 不要引入第二套 UI 库（MUI、Ant、shadcn 全量等）替代 Forge；缺口先说明 `FORGE-GAP`。
 
-## 当前模板结构
+## 当前仓库结构
 
-- `app/(auth)`：登录、注册、忘记密码、重置密码页面
-- `app/(app)/dashboard`：后台首页起手页
+- `app/(auth)`：登录、注册、忘记密码、重置密码
+- `app/(app)/dashboard`：后台工作台（范例页）
 - `app/globals.css`：Tailwind v4、Forge 样式和 `@source`
-- `config/menu.tsx`：`AppLayout` 的主菜单和 profile 配置
-- `lib/asset.ts`：处理静态资源路径
+- `config/menu.tsx`：`AppLayout` 主菜单和 profile
+- `lib/asset.ts`：静态资源路径
+- `PRODUCT.md`：产品定位与模块路线图（改范围前先读）
 
 ## 样式接入
 
@@ -35,7 +40,7 @@
 ## 开发流程
 
 1. 先读需求，列出页面、字段、状态和操作流。
-2. 后台页面从 `app/(app)/dashboard` 复制骨架，继续使用 `AppLayout`。
+2. 后台页面从 `app/(app)/dashboard` 或后续 `examples/*` 复制骨架，继续使用 `AppLayout`。
 3. 登录相关页面默认保留 `app/(auth)` 的结构与视觉，只替换产品文案和真实提交逻辑。
 4. 业务区块优先使用 Forge 组件；确实缺组件时，暂停并说明缺口。
 5. 完成后运行 `pnpm typecheck`，必要时再跑 `pnpm build`。

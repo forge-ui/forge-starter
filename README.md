@@ -1,17 +1,33 @@
 # Forge Starter
 
-基于 Forge UI Kit 的 Next.js 16 + Tailwind v4 起手模板，用来快速搭建 SaaS 控制台、业务后台和 AI agent 产品壳。
+基于 Forge UI Kit 的 **轻量后台脚手架**（Next.js 16 + Tailwind v4 + `@forge-ui-official/core`）。
 
-**目标：让新项目从第一天就使用 Forge 的组件、布局、设计 token 和 AI 编码规范，而不是从空白页面重新拼后台。**
+定位接近 **轻量版 ShipAny**：clone 即可开工的业务后台底座。  
+只做 **登录壳 + 应用壳 + 页面范例 + 可插拔鉴权**，不做芋道式中台，也不做营销站 / 订阅支付全家桶。
 
-## 内置内容
+**目标：新项目第一天就用对 Forge 的组件、布局、token 和 AI 编码规范，而不是从空白页拼后台。**
 
-- **登录流程**：`/login`、`/register`、`/forgot-password`、`/reset-password`
-- **后台壳**：`/dashboard` 已接入 `AppLayout`、菜单、用户信息、通知和基础 dashboard 区块
-- **稳定默认设计**：左侧主菜单使用 `BoldDuotone` 图标，默认不生成收藏分组；认证页默认保留 Starter 的结构和视觉
-- **Forge 样式接入**：Tailwind v4 已导入 `@forge-ui-official/core/styles.css` 和必要的 `@source`
-- **AI 规范**：根目录 `AGENTS.md` 会约束 Codex、Claude Code、Cursor 等工具优先使用 Forge 组件
-- **公开依赖**：组件库来自 npm 包 `@forge-ui-official/core`，不需要私有 registry 或 npm token
+## 和 ShipAny / 芋道的边界
+
+| | Forge Starter | 典型 ShipAny | 芋道等中台 |
+|--|---------------|--------------|------------|
+| 主战场 | 业务后台 console | AI SaaS 全栈 | 企业中台 |
+| 默认交付 | 壳 + 范例页 + 可插 auth | 落地页 + 支付 + i18n + 多扩展 | 权限/代码生成/BPM… |
+| UI | 强制 Forge core | 多套主题/区块 | 自有或第三方 UI |
+| 原则 | 轻、可删、可替换 | 开箱功能多 | 模块全、重量大 |
+
+完整能力规划见 [PRODUCT.md](./PRODUCT.md)。
+
+## 当前已有
+
+- **认证页**：`/login`、`/register`、`/forgot-password`、`/reset-password`（演示级提交，需替换为真实 auth）
+- **后台壳**：`/dashboard` 接入 `AppLayout`、菜单、profile、通知占位
+- **默认设计**：侧栏 `BoldDuotone` 图标；默认无收藏分组
+- **Forge 样式**：Tailwind v4 + `core/styles.css` + `@source`
+- **AI 规范**：根目录 `AGENTS.md`（Codex / Claude / Cursor 等）
+- **公开依赖**：`@forge-ui-official/core` 来自 npm，无需私有 registry
+
+> 演示模式：登录不校验账号，且无路由守卫。上线前必须接入真实鉴权与 middleware（见 PRODUCT 路线图）。
 
 ## 快速开始
 
@@ -25,28 +41,28 @@ pnpm dev
 
 打开 <http://localhost:3000>：
 
-- `/` 默认跳转到 `/login`
-- `/login` 查看登录页
-- `/register` 查看注册页
-- `/dashboard` 查看后台首页
+- `/` → `/login`
+- `/login` 登录页
+- `/register` 注册页
+- `/dashboard` 后台首页
 
 ## 目录结构
 
 ```txt
 .
 ├── app/
-│   ├── (auth)/              # 登录态外页面，共享 auth layout
-│   ├── (app)/               # 登录态内页面，共享 AppLayout 使用方式
-│   ├── globals.css          # Tailwind v4 + Forge styles + @source
+│   ├── (auth)/              # 未登录：登录 / 注册 / 找回密码
+│   ├── (app)/               # 已登录区（当前各页自行挂 AppLayout）
+│   ├── globals.css          # Tailwind v4 + Forge + @source
 │   ├── layout.tsx
-│   └── page.tsx             # / -> /login
+│   └── page.tsx             # / → /login
 ├── config/
-│   └── menu.tsx             # AppLayout 主菜单、profile 配置
+│   └── menu.tsx             # 侧栏菜单与 profile
 ├── lib/
-│   └── asset.ts             # basePath 友好的静态资源 helper
-├── public/
-│   └── images/              # 登录页和品牌图标资源
-├── AGENTS.md                # AI coding agent 规范
+│   └── asset.ts             # basePath 友好的静态资源
+├── public/images/           # 认证页与品牌资源
+├── AGENTS.md                # AI 编码约束
+├── PRODUCT.md               # 产品定位与模块路线图
 └── package.json
 ```
 
@@ -61,11 +77,11 @@ pnpm typecheck  # TypeScript 检查
 
 ## 接入真实业务
 
-1. 修改 `config/menu.tsx`，按业务页面地图替换主菜单和用户信息；不要默认添加收藏分组。
-2. 在 `app/(app)` 下新增业务页面，统一用 `AppLayout` 承载。
-3. 复用 `@forge-ui-official/core` 的 `Button`、`TextField`、`DataTable`、`StatCard`、`ChartCard` 等组件。
-4. 默认保留 auth 页面的结构与视觉，把 `handleSubmit` 替换成你的 NextAuth、Clerk、Supabase 或自建 API 调用；只有明确需求才改版或关闭认证页。
-5. 保留 `AGENTS.md`，让 AI 助手按 Forge 规范生成页面。
+1. 改 `config/menu.tsx`：按业务换菜单与用户信息；默认不要加收藏分组。
+2. 在 `app/(app)` 下加业务页，统一用 `AppLayout`（后续将收到共享 layout）。
+3. 优先用 `@forge-ui-official/core`：`Button`、`TextField`、`DataTable`、`StatCard` 等。
+4. 保留认证页结构与视觉，把 `handleSubmit` 换成 NextAuth / Clerk / Supabase / 自建 API。
+5. 保留 `AGENTS.md`，让 AI 按 Forge 规范生成页面。
 
 ## 样式接入
 
@@ -77,7 +93,7 @@ pnpm typecheck  # TypeScript 检查
 @source "../node_modules/@forge-ui-official/core/dist";
 ```
 
-如果你移动了 CSS 文件位置，记得同步调整 `@source` 的相对路径，否则 Forge 组件内部用到的 Tailwind class 可能不会生成。
+若移动 CSS 路径，请同步改 `@source`，否则 Forge 组件内部的 Tailwind class 可能不会生成。
 
 ## 相关链接
 
