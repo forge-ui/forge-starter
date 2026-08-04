@@ -25,6 +25,7 @@ import {
   type ColumnDef,
   type StatusBadgeColor,
 } from "@forge-ui-official/core";
+import { siteConfig } from "@/config/site";
 
 type RecordItem = {
   id: string;
@@ -161,10 +162,10 @@ function FilterPanel({ close }: { close: () => void }) {
       <p className="text-sm font-semibold text-fg-black">筛选条件</p>
       <p className="text-sm text-fg-grey-700">示例面板：可按负责人、分类等扩展真实筛选。</p>
       <div className="flex justify-end gap-2">
-        <Button variant="tertiary" size="sm" onClick={close}>
+        <Button color={siteConfig.accent} variant="tertiary" size="sm" onClick={close}>
           取消
         </Button>
-        <Button size="sm" onClick={close}>
+        <Button color={siteConfig.accent} size="sm" onClick={close}>
           应用
         </Button>
       </div>
@@ -310,6 +311,7 @@ export default function ExampleListPage() {
             业务记录
           </h1>
           <Breadcrumbs
+            color={siteConfig.accent}
             items={[
               { label: "工作台", href: "/dashboard/" },
               { label: "业务记录" },
@@ -318,6 +320,7 @@ export default function ExampleListPage() {
         </div>
         <div className="flex items-center gap-3">
           <Button
+            color={siteConfig.accent}
             variant="tertiary"
             iconLeft={<DownloadMinimalisticLinear size={16} />}
             onClick={() => undefined}
@@ -325,6 +328,7 @@ export default function ExampleListPage() {
             导出
           </Button>
           <Button
+            color={siteConfig.accent}
             iconLeft={<PlusIcon size={16} />}
             onClick={() => router.push("/examples/form/")}
           >
@@ -336,6 +340,7 @@ export default function ExampleListPage() {
       {/* Filter tabs + toolbar controls */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <ButtonGroup
+          color={siteConfig.accent}
           items={filterTabs}
           activeIndex={activeFilterIndex}
           shape="pill"
@@ -345,15 +350,17 @@ export default function ExampleListPage() {
           }}
         />
         <div className="flex items-center gap-3">
-          <ToolbarDatepicker enablePopover />
+          <ToolbarDatepicker enablePopover accentBg="bg-fg-blue-500" />
           <ToolbarFilterButton panel={(close) => <FilterPanel close={close} />} />
         </div>
       </div>
 
       <DataTable<RecordItem>
+        color={siteConfig.accent}
         columns={columns}
         rows={pageRows}
         showCheckbox
+        checkboxColor={siteConfig.accent}
         getRowKey={(row) => row.id}
         selectedRowKeys={selectedRowKeys}
         onSelectedRowKeysChange={setSelectedRowKeys}

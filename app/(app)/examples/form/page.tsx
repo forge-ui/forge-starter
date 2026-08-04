@@ -70,7 +70,7 @@ export default function ExampleFormPage() {
           </Button>
           <Button
             type="button"
-            color="grey"
+            color="blue"
             variant="tertiary"
             onClick={() => router.push("/examples/list/")}
           >
