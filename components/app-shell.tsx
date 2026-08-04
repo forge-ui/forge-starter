@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { AppLayout, type AppLayoutProfile } from "@forge-ui-official/core";
 import { menuItems, defaultProfile } from "@/config/menu";
@@ -40,11 +40,32 @@ export function AppShell({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  async function logout() {
+  const logout = useCallback(async () => {
     await fetch("/api/auth/logout/", { method: "POST" });
     router.replace("/login/");
     router.refresh();
-  }
+  }, [router]);
+
+  // Core ProfileDropdown is presentational; wire starter actions from the sidebar profile menu.
+  useEffect(() => {
+    function onDocumentClick(event: MouseEvent) {
+      const target = event.target as HTMLElement | null;
+      const item = target?.closest?.('[data-popover="profile"] [role="menuitem"]') as HTMLElement | null;
+      if (!item) return;
+      const label = (item.textContent ?? "").replace(/\s+/g, "");
+      if (label.includes("退出登录")) {
+        event.preventDefault();
+        void logout();
+        return;
+      }
+      if (label.includes("系统设置")) {
+        event.preventDefault();
+        router.push("/settings/");
+      }
+    }
+    document.addEventListener("click", onDocumentClick);
+    return () => document.removeEventListener("click", onDocumentClick);
+  }, [logout, router]);
 
   return (
     <AppLayout
@@ -68,7 +89,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             }
           : undefined
       }
-      secondaryAction={{ label: "退出登录", onClick: () => void logout() }}
+      showDatePicker={false}
+      showKebab={false}
     >
       {children}
     </AppLayout>
