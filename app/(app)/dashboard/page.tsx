@@ -124,7 +124,7 @@ export default function DashboardPage() {
             accent={siteConfig.accent}
             items={[
               { label: "查看", onSelect: () => router.push(`/accounts/${row.id}/`) },
-              { label: "编辑", onSelect: () => router.push(`/accounts/${row.id}/edit/`) },
+              { label: "编辑", onSelect: () => router.push(`/accounts/?edit=${row.id}`) },
             ]}
           />
         ),

@@ -21,9 +21,6 @@ export function shellForPath(pathname: string): RouteShell {
   const normalized = pathname.length > 1 && pathname.endsWith("/")
     ? pathname.slice(0, -1)
     : pathname;
-  if (normalized.match(/^\/accounts\/[^/]+\/edit$/)) {
-    return { title: "编辑账号", hideHeader: true };
-  }
   if (normalized.match(/^\/accounts\/[^/]+$/)) {
     return { title: "账号详情", hideHeader: true };
   }

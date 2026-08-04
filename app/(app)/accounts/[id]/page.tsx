@@ -30,6 +30,7 @@ import {
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
 import { useDemoStore } from "@/components/demo-store";
+import { AccountFormDialog } from "@/components/account-form-dialog";
 import {
   ACCOUNT_STATUS_META,
   type AccountStatus,
@@ -127,6 +128,7 @@ export default function AccountDetailPage({
   const [tabIndex, setTabIndex] = useState(0);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [sessionPage, setSessionPage] = useState(1);
+  const [editOpen, setEditOpen] = useState(false);
 
   const sessions = useMemo(() => (account ? buildSessions(account) : []), [account]);
   const related = useMemo(() => {
@@ -205,6 +207,12 @@ export default function AccountDetailPage({
 
   return (
     <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
+      <AccountFormDialog
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        accountId={account.id}
+      />
+
       {confirmDelete ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <ConfirmationDialog
@@ -244,7 +252,7 @@ export default function AccountDetailPage({
               color={siteConfig.accent}
               variant="tertiary"
               iconLeft={<PenLinear size={16} />}
-              onClick={() => router.push(`/accounts/${account.id}/edit/`)}
+              onClick={() => setEditOpen(true)}
             >
               编辑
             </Button>

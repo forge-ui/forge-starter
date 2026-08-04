@@ -126,8 +126,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       messages={0}
       pageTitle={shell.title}
       pageHeaderVariant={
-        /\/accounts\/[^/]+\/edit/.test(pathname)
-        || (/\/accounts\/[^/]+\/?$/.test(pathname) && !pathname.endsWith("/accounts/"))
+        /\/accounts\/[^/]+\/?$/.test(pathname) && !pathname.endsWith("/accounts/")
           ? "detail"
           : "home"
       }

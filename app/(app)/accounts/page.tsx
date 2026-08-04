@@ -24,7 +24,7 @@ import {
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
 import { useDemoStore } from "@/components/demo-store";
-import { AccountCreateDialog } from "@/components/account-create-dialog";
+import { AccountFormDialog } from "@/components/account-form-dialog";
 import {
   ACCOUNT_STATUS_META,
   type AccountStatus,
@@ -49,11 +49,36 @@ function AccountsPageContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 8;
   const [deleteTarget, setDeleteTarget] = useState<AdminAccount | null>(null);
-  const [createOpen, setCreateOpen] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+
+  function openCreate() {
+    setEditId(null);
+    setFormOpen(true);
+  }
+
+  function openEdit(id: string) {
+    setEditId(id);
+    setFormOpen(true);
+  }
+
+  function closeForm() {
+    setFormOpen(false);
+    setEditId(null);
+  }
 
   useEffect(() => {
-    if (searchParams.get("create") === "1") {
-      setCreateOpen(true);
+    const create = searchParams.get("create") === "1";
+    const edit = searchParams.get("edit");
+    if (create) {
+      setEditId(null);
+      setFormOpen(true);
+      router.replace("/accounts/", { scroll: false });
+      return;
+    }
+    if (edit) {
+      setEditId(edit);
+      setFormOpen(true);
       router.replace("/accounts/", { scroll: false });
     }
   }, [searchParams, router]);
@@ -165,7 +190,10 @@ function AccountsPageContent() {
               shape="square"
               size="sm"
               aria-label="编辑"
-              onClick={() => router.push(`/accounts/${row.id}/edit/`)}
+              onClick={() => {
+                setEditId(row.id);
+                setFormOpen(true);
+              }}
             >
               <PenLinear size={16} />
             </IconButton>
@@ -187,7 +215,11 @@ function AccountsPageContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <AccountCreateDialog open={createOpen} onClose={() => setCreateOpen(false)} />
+      <AccountFormDialog
+        open={formOpen}
+        onClose={closeForm}
+        accountId={editId}
+      />
 
       {deleteTarget ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
@@ -226,7 +258,7 @@ function AccountsPageContent() {
         <Button
           color={siteConfig.accent}
           iconLeft={<PlusIcon size={16} />}
-          onClick={() => setCreateOpen(true)}
+          onClick={openCreate}
         >
           新建账号
         </Button>
@@ -269,7 +301,7 @@ function AccountsPageContent() {
               : "试试清空搜索或切换状态筛选。"}
           </p>
           {accounts.length === 0 ? (
-            <Button color={siteConfig.accent} onClick={() => setCreateOpen(true)}>
+            <Button color={siteConfig.accent} onClick={openCreate}>
               新建账号
             </Button>
           ) : (

@@ -14,7 +14,7 @@
 | **邮件** | 仅 **自定义 SMTP**；未配置时重置链接打印到服务端日志 |
 | **模式** | `AUTH_MODE=demo` 任意账号可进；`local` 走真库 + 路由守卫 |
 | **应用壳** | 统一 `AppLayout`；侧栏仅 **工作台 / 账号管理** |
-| **业务竖切** | 工作台 ↔ 列表（搜索/筛选）↔ **弹窗新建** ↔ 编辑页 ↔ 详情 |
+| **业务竖切** | 工作台 ↔ 列表（搜索/筛选）↔ **弹窗新建/编辑** ↔ 详情 |
 | **演示数据** | 账号 CRUD 走内存 `demo-store`（刷新恢复种子数据）；与登录 `users` 表无关 |
 | **个人设置** | **仅** 侧栏 profile 菜单：编辑资料 / 修改密码 / 系统设置 / 退出登录 |
 
@@ -51,11 +51,11 @@ pnpm dev
 | `/login` | 登录（demo：任意用户名密码） |
 | `/register` | 注册（仅 `AUTH_MODE=local`） |
 | `/dashboard` | 工作台布局 ← `dashboards/ecommerce-2`，指标来自 demo 账号 |
-| `/accounts` | 账号列表 ← `ecommerce/customers`；**新建为弹窗**（非独立整页） |
-| `/accounts/?create=1` | 打开列表并自动弹出「新建账号」 |
-| `/accounts/new` | 兼容重定向到 `?create=1` |
-| `/accounts/[id]` | 详情 ← `ecommerce/customers/[id]` |
-| `/accounts/[id]/edit` | 编辑整页（ShipAny 窄栏表单） |
+| `/accounts` | 账号列表 ← `ecommerce/customers`；**新建/编辑均为弹窗** |
+| `/accounts/?create=1` | 打开列表并弹出「新建账号」 |
+| `/accounts/?edit=<id>` | 打开列表并弹出「编辑账号」 |
+| `/accounts/new` · `/accounts/[id]/edit` | 兼容重定向到弹窗 query |
+| `/accounts/[id]` | 详情 ← `ecommerce/customers/[id]`（页内也可弹窗编辑） |
 | `/settings` | 个人设置（**请从 profile 进入**，侧栏无「设置」菜单） |
 
 ### 数据边界（必读）
@@ -96,7 +96,7 @@ app/
   (auth)/                 # 登录 / 注册 / 找回 / 重置
   (app)/                  # 登录后区域（统一 AppShell）
     dashboard/            # 账号运营看板
-    accounts/             # 列表 + 详情 + 编辑；新建弹窗
+    accounts/             # 列表 + 详情；新建/编辑弹窗
     settings/             # profile 入口
   api/auth/               # 登录用户认证 / 资料 / 改密
 config/                   # 菜单、站点
@@ -108,8 +108,7 @@ lib/
 components/
   app-shell.tsx
   demo-store.tsx
-  account-create-dialog.tsx
-  account-form.tsx        # 编辑页表单
+  account-form-dialog.tsx # 新建/编辑共用弹窗
   ui/modal.tsx            # 宿主 Modal（core 无通用弹窗）
 middleware.ts
 docker-compose.yml

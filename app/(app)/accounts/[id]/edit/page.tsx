@@ -1,13 +1,11 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { use } from "react";
-import { AccountForm } from "@/components/account-form";
-
-export default function EditAccountPage({
+/** Edit is a modal on list/detail; keep route for bookmarks. */
+export default async function EditAccountPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = use(params);
-  return <AccountForm mode="edit" accountId={id} />;
+  const { id } = await params;
+  redirect(`/accounts/?edit=${encodeURIComponent(id)}`);
 }
