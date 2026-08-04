@@ -65,7 +65,7 @@ export default function ExampleFormPage() {
           </p>
         ) : null}
         <div className="flex flex-wrap gap-3">
-          <Button type="submit" color="purple" variant="primary">
+          <Button type="submit" color="blue" variant="primary">
             提交
           </Button>
           <Button

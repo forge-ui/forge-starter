@@ -75,7 +75,7 @@ function ResetPasswordForm() {
           }
         />
         {error ? <p className="text-sm text-fg-red">{error}</p> : null}
-        <Button type="submit" color="purple" variant="primary" size="lg" className="w-full" disabled={loading || !token}>
+        <Button type="submit" color="blue" variant="primary" size="lg" className="w-full" disabled={loading || !token}>
           {loading ? "保存中…" : "更新密码"}
         </Button>
       </div>

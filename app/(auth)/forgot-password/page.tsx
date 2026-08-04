@@ -57,14 +57,14 @@ export default function ForgotPasswordPage() {
         {error ? <p className="text-sm text-fg-red">{error}</p> : null}
         {message ? <p className="text-sm text-fg-grey-700">{message}</p> : null}
         {devResetUrl ? (
-          <p className="break-all text-sm text-fg-violet">
+          <p className="break-all text-sm text-fg-blue-500">
             开发重置链接：{" "}
             <a className="underline" href={devResetUrl}>
               {devResetUrl}
             </a>
           </p>
         ) : null}
-        <Button type="submit" color="purple" variant="primary" size="lg" className="w-full" disabled={loading}>
+        <Button type="submit" color="blue" variant="primary" size="lg" className="w-full" disabled={loading}>
           {loading ? "提交中…" : "发送重置说明"}
         </Button>
       </div>

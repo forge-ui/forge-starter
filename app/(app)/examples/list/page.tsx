@@ -30,7 +30,7 @@ const seed: ExampleRow[] = [
 function statusColor(status: ExampleRow["status"]): StatusBadgeColor {
   if (status === "done") return "green";
   if (status === "draft") return "yellow";
-  return "purple";
+  return "blue";
 }
 
 function statusLabel(status: ExampleRow["status"]) {

@@ -98,7 +98,7 @@ export default function LoginPage() {
 
         {error ? <p className="text-sm text-fg-red">{error}</p> : null}
 
-        <Button type="submit" color="purple" variant="primary" size="lg" className="w-full" disabled={loading}>
+        <Button type="submit" color="blue" variant="primary" size="lg" className="w-full" disabled={loading}>
           {loading ? "登录中…" : "登录"}
         </Button>
       </div>

@@ -26,10 +26,10 @@ export default function DashboardPage() {
         <SurfaceCard className="p-6 lg:col-span-2">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold text-fg-violet">OVERVIEW</p>
+              <p className="text-xs font-semibold text-fg-blue-500">OVERVIEW</p>
               <h2 className="mt-1 text-lg font-semibold text-fg-black">业务进度</h2>
             </div>
-            <StatusBadge label="示例数据" color="purple" />
+            <StatusBadge label="示例数据" color="blue" />
           </div>
           <p className="mt-4 text-sm leading-6 text-fg-grey-700">
             这是 Forge Starter 的工作台范例。把指标卡和区块换成你的业务数据即可；布局与 token 已对齐
@@ -49,7 +49,7 @@ export default function DashboardPage() {
         </SurfaceCard>
 
         <SurfaceCard className="p-6">
-          <p className="text-xs font-semibold text-fg-violet">NEXT STEPS</p>
+          <p className="text-xs font-semibold text-fg-blue-500">NEXT STEPS</p>
           <h2 className="mt-1 text-lg font-semibold text-fg-black">开始业务开发</h2>
           <ul className="mt-4 space-y-3 text-sm text-fg-grey-700">
             <li>1. 配置 `AUTH_MODE=local` 与 PostgreSQL</li>

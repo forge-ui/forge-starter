@@ -1,7 +1,7 @@
 export const siteConfig = {
   name: "Forge Starter",
   teamName: "你的团队",
-  accent: "purple" as const,
+  accent: "blue" as const,
 };
 
 export type RouteShell = {

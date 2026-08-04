@@ -41,7 +41,7 @@ export default function SettingsPage() {
             <h2 className="text-lg font-semibold text-fg-black">账号与模式</h2>
             <p className="mt-1 text-sm text-fg-grey-700">当前会话信息（只读示意）。</p>
           </div>
-          <StatusBadge label={mode === "local" ? "local" : "demo"} color={mode === "local" ? "green" : "purple"} />
+          <StatusBadge label={mode === "local" ? "local" : "demo"} color={mode === "local" ? "green" : "blue"} />
         </div>
         <div className="flex flex-col gap-4">
           <TextField label="显示名" value={displayName} onChange={setDisplayName} />
