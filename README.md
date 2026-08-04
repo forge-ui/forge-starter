@@ -16,7 +16,7 @@
 | **应用壳** | 统一 `AppLayout`；侧栏仅 **工作台 / 账号管理** |
 | **业务竖切** | 工作台 ↔ 列表（搜索/筛选）↔ **弹窗新建/编辑** ↔ 详情 |
 | **账号数据** | Postgres 表 `admin_accounts`（空库即空列表，无种子）；与登录 `users` 表分离 |
-| **个人设置** | **仅** 侧栏 profile 菜单：编辑资料 / 修改密码 / 系统设置 / 退出登录 |
+| **个人设置** | profile：资料 / 改密 / **应用管理** / 系统设置 / 退出 |
 
 ## 快速开始
 
@@ -65,9 +65,9 @@ pnpm dev
 | 登录用户 | Postgres `users`（`local`）/ demo session | 认证、profile 改名改密 |
 | 运营「账号管理」列表 | Postgres `admin_accounts` | 业务账号 CRUD；**需 `DATABASE_URL` + `pnpm db:push`**；无数据则为空 |
 
-侧栏顶部是 **应用切换器**（`teams` + `showTeamActions={false}`），配置在 `config/apps.ts`：
-- 仅应用列表（无邀请 / 设置 / 新建）；新建应用应放设置页而非此处
-- 列表项可配 `href` 接独立部署；当前高亮与 localStorage 记忆 |
+侧栏顶部是 **应用切换器**（`teams` + `showTeamActions={false}`）：
+- 仅应用列表；**新建/编辑/删除应用** 在 设置 → **应用管理**（`/settings/?tab=apps`）
+- 默认内置「账号管理后台」不可删；其它应用写 localStorage，侧栏实时同步 |
 
 ## 环境变量
 

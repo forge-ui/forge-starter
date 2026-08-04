@@ -1,7 +1,6 @@
 /**
- * App switcher entries for AppLayout `teams` slot.
- * Core Team type: { id, name, avatar?, active? }
- * Click handling lives in app-shell (presentational popover).
+ * Default app switcher catalog. Runtime list is managed in Settings → 应用管理
+ * and persisted in localStorage (see lib/apps/registry.ts).
  */
 
 export type AppEntry = {
@@ -12,16 +11,16 @@ export type AppEntry = {
   avatar?: string;
   /**
    * Where to go when selected:
-   * - internal path (same Next app): e.g. "/dashboard/"
+   * - internal path: e.g. "/dashboard/"
    * - external URL: e.g. "https://other.example.com"
-   * - null: placeholder (stay, mark active only for demo)
+   * - empty / null: placeholder (mark active only)
    */
   href: string | null;
-  /** This starter app (账号管理) */
+  /** Built-in product of this starter — cannot be deleted */
   isCurrentProduct?: boolean;
 };
 
-export const APP_ENTRIES: AppEntry[] = [
+export const DEFAULT_APP_ENTRIES: AppEntry[] = [
   {
     id: "accounts-admin",
     name: "账号管理后台",
@@ -29,21 +28,15 @@ export const APP_ENTRIES: AppEntry[] = [
     href: "/dashboard/",
     isCurrentProduct: true,
   },
-  {
-    id: "ops-console",
-    name: "运营工作台",
-    subtitle: "示例 · 可接独立部署",
-    href: null,
-  },
-  {
-    id: "content-hub",
-    name: "内容中心",
-    subtitle: "示例 · 可接独立部署",
-    href: null,
-  },
 ];
 
 export const DEFAULT_APP_ID =
-  APP_ENTRIES.find((a) => a.isCurrentProduct)?.id ?? APP_ENTRIES[0]!.id;
+  DEFAULT_APP_ENTRIES.find((a) => a.isCurrentProduct)?.id
+  ?? DEFAULT_APP_ENTRIES[0]!.id;
 
+export const APPS_STORAGE_KEY = "forge-starter:app-registry";
 export const ACTIVE_APP_STORAGE_KEY = "forge-starter:active-app-id";
+export const APPS_UPDATED_EVENT = "forge-starter:apps-updated";
+
+/** @deprecated use DEFAULT_APP_ENTRIES */
+export const APP_ENTRIES = DEFAULT_APP_ENTRIES;

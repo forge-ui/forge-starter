@@ -9,11 +9,15 @@ import {
 } from "@forge-ui-official/core";
 import { menuItems, defaultProfile } from "@/config/menu";
 import {
-  ACTIVE_APP_STORAGE_KEY,
-  APP_ENTRIES,
+  APPS_UPDATED_EVENT,
   DEFAULT_APP_ID,
   type AppEntry,
 } from "@/config/apps";
+import {
+  loadActiveAppId,
+  loadAppRegistry,
+  saveActiveAppId,
+} from "@/lib/apps/registry";
 import { shellForPath, siteConfig } from "@/config/site";
 import { asset } from "@/lib/asset";
 import {
@@ -43,19 +47,8 @@ function profileFromUser(user: {
   };
 }
 
-function readStoredAppId(): string {
-  if (typeof window === "undefined") return DEFAULT_APP_ID;
-  try {
-    const raw = window.localStorage.getItem(ACTIVE_APP_STORAGE_KEY);
-    if (raw && APP_ENTRIES.some((a) => a.id === raw)) return raw;
-  } catch {
-    // ignore
-  }
-  return DEFAULT_APP_ID;
-}
-
-function teamsFromApps(activeId: string): Team[] {
-  return APP_ENTRIES.map((app) => ({
+function teamsFromApps(apps: AppEntry[], activeId: string): Team[] {
+  return apps.map((app) => ({
     id: app.id,
     name: app.name,
     avatar: app.avatar,
@@ -68,30 +61,45 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const shell = useMemo(() => shellForPath(pathname), [pathname]);
   const [profile, setProfile] = useState<AppLayoutProfile>(defaultProfile);
+  const [apps, setApps] = useState<AppEntry[]>([]);
   const [activeAppId, setActiveAppId] = useState(DEFAULT_APP_ID);
 
-  useEffect(() => {
-    setActiveAppId(readStoredAppId());
+  const syncRegistry = useCallback(() => {
+    const list = loadAppRegistry();
+    setApps(list);
+    setActiveAppId(loadActiveAppId(list));
   }, []);
 
-  const activeApp: AppEntry = useMemo(
-    () => APP_ENTRIES.find((a) => a.id === activeAppId) ?? APP_ENTRIES[0]!,
-    [activeAppId],
-  );
+  useEffect(() => {
+    syncRegistry();
+    function onAppsUpdated() {
+      syncRegistry();
+    }
+    window.addEventListener(APPS_UPDATED_EVENT, onAppsUpdated);
+    return () => window.removeEventListener(APPS_UPDATED_EVENT, onAppsUpdated);
+  }, [syncRegistry]);
 
-  const teams = useMemo(() => teamsFromApps(activeAppId), [activeAppId]);
+  const activeApp: AppEntry = useMemo(() => {
+    return apps.find((a) => a.id === activeAppId) ?? apps[0] ?? {
+      id: DEFAULT_APP_ID,
+      name: siteConfig.teamName,
+      subtitle: "当前应用",
+      href: "/dashboard/",
+      isCurrentProduct: true,
+    };
+  }, [apps, activeAppId]);
+
+  const teams = useMemo(
+    () => teamsFromApps(apps.length ? apps : [activeApp], activeAppId),
+    [apps, activeApp, activeAppId],
+  );
 
   const selectApp = useCallback(
     (app: AppEntry) => {
       setActiveAppId(app.id);
-      try {
-        window.localStorage.setItem(ACTIVE_APP_STORAGE_KEY, app.id);
-      } catch {
-        // ignore
-      }
+      saveActiveAppId(app.id);
 
       if (app.isCurrentProduct) {
-        // Already in this product; keep route unless user was on settings-only deep links
         return;
       }
 
@@ -101,11 +109,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           return;
         }
         router.push(app.href);
-        return;
       }
-
-      // Placeholder app: stay in shell, user sees name change in switcher
-      // Real multi-app deploy would navigate to another origin/product.
     },
     [router],
   );
@@ -151,7 +155,6 @@ export function AppShell({ children }: { children: ReactNode }) {
     router.refresh();
   }, [router]);
 
-  // Profile + app switcher popovers are presentational in core — wire here.
   useEffect(() => {
     function onDocumentClick(event: MouseEvent) {
       const target = event.target as HTMLElement | null;
@@ -176,12 +179,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           return;
         }
         if (label.includes("系统设置")) {
-          router.push("/settings/?tab=notifications");
+          router.push("/settings/?tab=apps");
         }
         return;
       }
 
-      // App list only (showTeamActions=false) — rows are menuitemradio
       const teamTarget = target?.closest?.(
         '[data-popover="team"] [role="menuitemradio"]',
       ) as HTMLElement | null;
@@ -191,7 +193,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       event.stopPropagation();
 
       const name = (teamTarget.textContent ?? "").replace(/\s+/g, " ").trim();
-      const app = APP_ENTRIES.find(
+      const app = apps.find(
         (entry) =>
           entry.name.replace(/\s+/g, " ").trim() === name
           || name.includes(entry.name),
@@ -201,7 +203,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
     document.addEventListener("click", onDocumentClick, true);
     return () => document.removeEventListener("click", onDocumentClick, true);
-  }, [logout, router, selectApp]);
+  }, [logout, router, selectApp, apps]);
 
   return (
     <AppLayout
@@ -210,7 +212,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       profilePosition="sidebar"
       accent={siteConfig.accent}
       teamName={activeApp.name}
-      teamSubtitle={activeApp.subtitle}
+      teamSubtitle={activeApp.subtitle || "当前应用"}
       teams={teams}
       showTeamActions={false}
       menuItems={menuItems}

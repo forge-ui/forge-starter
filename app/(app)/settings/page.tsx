@@ -10,6 +10,7 @@ import {
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
 import { emitProfileUpdated } from "@/lib/auth/profile-events";
+import { SettingsAppsPanel } from "@/components/settings-apps-panel";
 
 type MeResponse = {
   ok: boolean;
@@ -21,17 +22,19 @@ type MeResponse = {
   };
 };
 
-type TabId = "profile" | "security" | "notifications";
+type TabId = "profile" | "security" | "notifications" | "apps";
 
 const tabs: { id: TabId; label: string }[] = [
   { id: "profile", label: "个人资料" },
   { id: "security", label: "修改密码" },
+  { id: "apps", label: "应用管理" },
   { id: "notifications", label: "系统设置" },
 ];
 
 function parseTab(value: string | null): TabId {
   if (value === "security" || value === "password") return "security";
   if (value === "notifications" || value === "system") return "notifications";
+  if (value === "apps" || value === "applications") return "apps";
   return "profile";
 }
 
@@ -317,6 +320,8 @@ function SettingsContent() {
           </form>
         </div>
       ) : null}
+
+      {tab === "apps" ? <SettingsAppsPanel /> : null}
 
       {tab === "notifications" ? (
         <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
