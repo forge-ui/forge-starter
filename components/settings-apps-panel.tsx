@@ -97,6 +97,10 @@ export function SettingsAppsPanel() {
   }
 
   function startEdit(app: AppEntry) {
+    if (app.isCurrentProduct) {
+      setError("当前宿主产品不在此列表维护");
+      return;
+    }
     setEditingId(app.id);
     setDraft({
       name: app.name,
@@ -170,19 +174,8 @@ export function SettingsAppsPanel() {
 
     if (editingId) {
       const existing = apps.find((a) => a.id === editingId);
-      if (existing?.isCurrentProduct) {
-        // Only allow rename / subtitle for builtin
-        const next = apps.map((app) =>
-          app.id === editingId
-            ? normalizeAppEntry({
-                ...app,
-                name,
-                subtitle,
-              })
-            : app,
-        );
-        persist(next, "内置应用信息已更新");
-        cancelEdit();
+      if (!existing || existing.isCurrentProduct) {
+        setError("无法编辑该应用");
         return;
       }
       const next = apps.map((app) =>
@@ -219,69 +212,69 @@ export function SettingsAppsPanel() {
     if (editingId === id) cancelEdit();
   }
 
-  const editingBuiltin = Boolean(
-    editingId && apps.find((a) => a.id === editingId)?.isCurrentProduct,
-  );
+  // Managed list = switcher catalog without the built-in "this product" row.
+  // Current product is fixed as host shell; only other apps are administered here.
+  const managedApps = apps.filter((app) => !app.isCurrentProduct);
 
   return (
     <div className="flex flex-col gap-4">
       <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
-        <h2 className="text-lg font-semibold text-fg-black">应用管理</h2>
+        <h2 className="text-lg font-semibold text-fg-black">应用列表</h2>
         <p className="mt-1 text-sm text-fg-grey-700">
-          配置侧栏可切换的应用：外部链接、外部系统（认证占位）、内部模块菜单。
-          数据保存在本机浏览器。
+          管理侧栏可切换的<strong className="font-medium text-fg-black">其它应用</strong>
+          （外部链接 / 外部系统 / 内部模块）。当前宿主产品不在此列表中展示。
         </p>
 
-        <ul className="mt-5 flex flex-col gap-3">
-          {apps.map((app) => (
-            <li
-              key={app.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-fg-grey-200 px-4 py-3"
-            >
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-semibold text-fg-black">{app.name}</span>
-                  <StatusBadge label={kindLabel(app.kind)} color="blue" />
-                  {app.isCurrentProduct ? (
-                    <StatusBadge label="内置" color="green" />
-                  ) : null}
+        {managedApps.length === 0 ? (
+          <p className="mt-5 rounded-2xl border border-dashed border-fg-grey-200 px-4 py-8 text-center text-sm text-fg-grey-500">
+            暂无其它应用。在下方新建后会出现在侧栏应用切换器中。
+          </p>
+        ) : (
+          <ul className="mt-5 flex flex-col gap-3">
+            {managedApps.map((app) => (
+              <li
+                key={app.id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-fg-grey-200 px-4 py-3"
+              >
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-semibold text-fg-black">{app.name}</span>
+                    <StatusBadge label={kindLabel(app.kind)} color="blue" />
+                  </div>
+                  <p className="mt-0.5 text-xs text-fg-grey-500">
+                    {app.subtitle || "—"}
+                    {app.kind !== "internal"
+                      ? ` · ${app.href ?? "无 URL"} · ${APP_AUTH_META[app.authMode].label}`
+                      : ` · 菜单 ${MENU_PRESET_META[app.menuPreset]?.label ?? app.menuPreset}`}
+                  </p>
                 </div>
-                <p className="mt-0.5 text-xs text-fg-grey-500">
-                  {app.subtitle || "—"}
-                  {app.kind !== "internal"
-                    ? ` · ${app.href ?? "无 URL"} · ${APP_AUTH_META[app.authMode].label}`
-                    : ` · 菜单 ${MENU_PRESET_META[app.menuPreset]?.label ?? app.menuPreset}`}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  color={siteConfig.accent}
-                  variant="tertiary"
-                  size="sm"
-                  onClick={() => startEdit(app)}
-                >
-                  编辑
-                </Button>
-                {!app.isCurrentProduct ? (
+                <div className="flex items-center gap-2">
+                  <Button
+                    color={siteConfig.accent}
+                    variant="tertiary"
+                    size="sm"
+                    onClick={() => startEdit(app)}
+                  >
+                    编辑
+                  </Button>
                   <Button color="red" variant="tertiary" size="sm" onClick={() => removeApp(app.id)}>
                     删除
                   </Button>
-                ) : null}
-              </div>
-            </li>
-          ))}
-        </ul>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
         <h3 className="text-base font-semibold text-fg-black">
           {editingId ? "编辑应用" : "新建应用"}
         </h3>
-        {editingBuiltin ? (
-          <p className="mt-1 text-sm text-fg-grey-500">
-            内置产品仅可改名称与副标题；类型与菜单固定。
-          </p>
-        ) : null}
+        <p className="mt-1 text-sm text-fg-grey-500">
+          此处维护的是应用切换器中的<strong className="text-fg-black">其它应用</strong>
+          ，不是当前这套账号管理后台本身。
+        </p>
 
         <form onSubmit={submit} className="mt-4 flex max-w-xl flex-col gap-4">
           <TextField
@@ -299,130 +292,126 @@ export function SettingsAppsPanel() {
             placeholder="显示在侧栏当前应用下"
           />
 
-          {!editingBuiltin ? (
+          <SelectOption
+            color={siteConfig.accent}
+            label="应用类型"
+            width="100%"
+            options={kindOptions}
+            value={draft.kind}
+            onChange={(v) =>
+              setDraft((d) => ({
+                ...d,
+                kind: v as AppKind,
+                authMode: v === "link" ? "none" : d.authMode,
+                openMode: v === "internal" ? "same_tab" : d.openMode || "new_tab",
+              }))
+            }
+          />
+          <p className="text-xs text-fg-grey-500">
+            {APP_KIND_META[draft.kind].description}
+          </p>
+
+          {(draft.kind === "link" || draft.kind === "external") ? (
+            <>
+              <TextField
+                color={siteConfig.accent}
+                label="入口地址"
+                value={draft.href}
+                onChange={(v) => setDraft((d) => ({ ...d, href: v }))}
+                placeholder="https://example.com 或 /path/"
+              />
+              <SelectOption
+                color={siteConfig.accent}
+                label="打开方式"
+                width="100%"
+                options={openOptions}
+                value={draft.openMode}
+                onChange={(v) => setDraft((d) => ({ ...d, openMode: v as AppOpenMode }))}
+              />
+            </>
+          ) : null}
+
+          {draft.kind === "external" ? (
+            <SelectOption
+              color={siteConfig.accent}
+              label="认证方式"
+              width="100%"
+              options={authOptions}
+              value={draft.authMode}
+              onChange={(v) => setDraft((d) => ({ ...d, authMode: v as AppAuthMode }))}
+            />
+          ) : null}
+
+          {draft.kind === "external" && draft.authMode === "oidc" ? (
+            <p className="rounded-xl border border-dashed border-fg-grey-200 px-3 py-2 text-xs text-fg-grey-500">
+              OIDC Client ID / Issuer 等配置将在后续版本接入，当前仅保存认证类型。
+            </p>
+          ) : null}
+
+          {draft.kind === "internal" ? (
             <>
               <SelectOption
                 color={siteConfig.accent}
-                label="应用类型"
+                label="菜单预设"
                 width="100%"
-                options={kindOptions}
-                value={draft.kind}
+                options={presetOptions}
+                value={draft.menuPreset}
                 onChange={(v) =>
                   setDraft((d) => ({
                     ...d,
-                    kind: v as AppKind,
-                    authMode: v === "link" ? "none" : d.authMode,
-                    openMode: v === "internal" ? "same_tab" : d.openMode || "new_tab",
+                    menuPreset: v as MenuPresetId,
+                    modules:
+                      v === "custom"
+                        ? d.modules
+                        : MENU_PRESET_META[v as MenuPresetId].modules,
                   }))
                 }
               />
-              <p className="text-xs text-fg-grey-500">
-                {APP_KIND_META[draft.kind].description}
-              </p>
-
-              {(draft.kind === "link" || draft.kind === "external") ? (
-                <>
-                  <TextField
-                    color={siteConfig.accent}
-                    label="入口地址"
-                    value={draft.href}
-                    onChange={(v) => setDraft((d) => ({ ...d, href: v }))}
-                    placeholder="https://example.com 或 /path/"
-                  />
-                  <SelectOption
-                    color={siteConfig.accent}
-                    label="打开方式"
-                    width="100%"
-                    options={openOptions}
-                    value={draft.openMode}
-                    onChange={(v) => setDraft((d) => ({ ...d, openMode: v as AppOpenMode }))}
-                  />
-                </>
-              ) : null}
-
-              {draft.kind === "external" ? (
-                <SelectOption
-                  color={siteConfig.accent}
-                  label="认证方式"
-                  width="100%"
-                  options={authOptions}
-                  value={draft.authMode}
-                  onChange={(v) => setDraft((d) => ({ ...d, authMode: v as AppAuthMode }))}
-                />
-              ) : null}
-
-              {draft.kind === "external" && draft.authMode === "oidc" ? (
-                <p className="rounded-xl border border-dashed border-fg-grey-200 px-3 py-2 text-xs text-fg-grey-500">
-                  OIDC Client ID / Issuer 等配置将在后续版本接入，当前仅保存认证类型。
+              {draft.menuPreset === "custom" ? (
+                <div>
+                  <p className="mb-2 text-sm font-medium text-fg-grey-700">选择模块</p>
+                  <div className="flex flex-col gap-2">
+                    {(Object.keys(APP_MODULE_META) as AppModuleId[]).map((id) => {
+                      const checked = draft.modules.includes(id);
+                      return (
+                        <label
+                          key={id}
+                          className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-fg-grey-200 px-4 py-3"
+                        >
+                          <span className="text-sm font-medium text-fg-black">
+                            {APP_MODULE_META[id].label}
+                          </span>
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4"
+                            checked={checked}
+                            onChange={() =>
+                              setDraft((d) => ({
+                                ...d,
+                                modules: toggleModule(d.modules, id),
+                              }))
+                            }
+                          />
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-fg-grey-500">
+                  将包含：
+                  {MENU_PRESET_META[draft.menuPreset].modules
+                    .map((m) => APP_MODULE_META[m].label)
+                    .join("、")}
                 </p>
-              ) : null}
-
-              {draft.kind === "internal" ? (
-                <>
-                  <SelectOption
-                    color={siteConfig.accent}
-                    label="菜单预设"
-                    width="100%"
-                    options={presetOptions}
-                    value={draft.menuPreset}
-                    onChange={(v) =>
-                      setDraft((d) => ({
-                        ...d,
-                        menuPreset: v as MenuPresetId,
-                        modules:
-                          v === "custom"
-                            ? d.modules
-                            : MENU_PRESET_META[v as MenuPresetId].modules,
-                      }))
-                    }
-                  />
-                  {draft.menuPreset === "custom" ? (
-                    <div>
-                      <p className="mb-2 text-sm font-medium text-fg-grey-700">选择模块</p>
-                      <div className="flex flex-col gap-2">
-                        {(Object.keys(APP_MODULE_META) as AppModuleId[]).map((id) => {
-                          const checked = draft.modules.includes(id);
-                          return (
-                            <label
-                              key={id}
-                              className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-fg-grey-200 px-4 py-3"
-                            >
-                              <span className="text-sm font-medium text-fg-black">
-                                {APP_MODULE_META[id].label}
-                              </span>
-                              <input
-                                type="checkbox"
-                                className="h-4 w-4"
-                                checked={checked}
-                                onChange={() =>
-                                  setDraft((d) => ({
-                                    ...d,
-                                    modules: toggleModule(d.modules, id),
-                                  }))
-                                }
-                              />
-                            </label>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="text-xs text-fg-grey-500">
-                      将包含：
-                      {MENU_PRESET_META[draft.menuPreset].modules
-                        .map((m) => APP_MODULE_META[m].label)
-                        .join("、")}
-                    </p>
-                  )}
-                  <TextField
-                    color={siteConfig.accent}
-                    label="默认首页路径（可选）"
-                    value={draft.href}
-                    onChange={(v) => setDraft((d) => ({ ...d, href: v }))}
-                    placeholder="/dashboard/"
-                  />
-                </>
-              ) : null}
+              )}
+              <TextField
+                color={siteConfig.accent}
+                label="默认首页路径（可选）"
+                value={draft.href}
+                onChange={(v) => setDraft((d) => ({ ...d, href: v }))}
+                placeholder="/dashboard/"
+              />
             </>
           ) : null}
 

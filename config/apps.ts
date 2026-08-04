@@ -89,6 +89,7 @@ export const MENU_PRESET_META: Record<
     label: "账号管理后台（完整）",
     modules: ["dashboard", "accounts", "settings"],
   },
+  // settings 模块在 menu 里展开为四个子路由
   "dashboard-only": {
     label: "仅工作台",
     modules: ["dashboard"],

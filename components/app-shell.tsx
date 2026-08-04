@@ -200,15 +200,15 @@ export function AppShell({ children }: { children: ReactNode }) {
           return;
         }
         if (label.includes("编辑资料")) {
-          router.push("/settings/?tab=profile");
+          router.push("/settings/profile/");
           return;
         }
         if (label.includes("修改密码")) {
-          router.push("/settings/?tab=security");
+          router.push("/settings/security/");
           return;
         }
         if (label.includes("系统设置")) {
-          router.push("/settings/?tab=apps");
+          router.push("/settings/apps/");
         }
         return;
       }
