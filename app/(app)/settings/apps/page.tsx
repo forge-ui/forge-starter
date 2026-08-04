@@ -15,8 +15,6 @@ import {
   Breadcrumbs,
   Button,
   ButtonGroup,
-  CellMuted,
-  CellText,
   ConfirmationDialog,
   DataTable,
   IconButton,
@@ -110,27 +108,29 @@ export default function SettingsAppsPage() {
         header: "应用",
         sortable: true,
         flex: true,
+        // Avoid CellText (flex-1) beside badges — it shoves badges to the cell edge.
         render: (row) => (
-          <div className="flex flex-col gap-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <CellText>{row.name}</CellText>
-              {row.isCurrentProduct ? (
-                <StatusBadge label="当前后台" color="green" />
-              ) : null}
-            </div>
-            <div className="text-xs text-fg-grey-500">{row.subtitle || "—"}</div>
+          <div className="flex h-10 min-w-0 flex-col justify-center gap-0.5">
+            <span className="truncate text-sm font-semibold leading-5 tracking-fg text-fg-black">
+              {row.name}
+            </span>
+            <span className="truncate text-xs leading-4 text-fg-grey-500">
+              {row.subtitle || "—"}
+            </span>
           </div>
         ),
       },
       {
         key: "kind",
         header: "类型",
-        width: "w-28",
+        width: "w-32",
         render: (row) => (
-          <StatusBadge
-            label={row.isCurrentProduct ? "宿主应用" : kindLabel(row.kind)}
-            color={row.isCurrentProduct ? "green" : kindColor(row.kind)}
-          />
+          <div className="flex h-10 items-center justify-start">
+            <StatusBadge
+              label={row.isCurrentProduct ? "宿主应用" : kindLabel(row.kind)}
+              color={row.isCurrentProduct ? "green" : kindColor(row.kind)}
+            />
+          </div>
         ),
       },
       {
@@ -138,9 +138,11 @@ export default function SettingsAppsPage() {
         header: "入口 / 菜单",
         width: "w-56",
         render: (row) => (
-          <CellMuted>
-            {row.kind === "internal" ? modulesLabel(row) : row.href || "—"}
-          </CellMuted>
+          <div className="flex h-10 items-center">
+            <span className="truncate text-sm font-medium text-fg-grey-700">
+              {row.kind === "internal" ? modulesLabel(row) : row.href || "—"}
+            </span>
+          </div>
         ),
       },
       {
@@ -148,13 +150,15 @@ export default function SettingsAppsPage() {
         header: "认证",
         width: "w-36",
         render: (row) => (
-          <CellMuted>
-            {row.kind === "link"
-              ? "—"
-              : row.kind === "internal"
-                ? "本平台"
-                : APP_AUTH_META[row.authMode].label}
-          </CellMuted>
+          <div className="flex h-10 items-center">
+            <span className="truncate text-sm font-medium text-fg-grey-700">
+              {row.kind === "link"
+                ? "—"
+                : row.kind === "internal"
+                  ? "本平台"
+                  : APP_AUTH_META[row.authMode].label}
+            </span>
+          </div>
         ),
       },
       {
@@ -164,7 +168,7 @@ export default function SettingsAppsPage() {
         render: (row) => (
           <div className="flex h-10 items-center justify-end gap-2">
             {row.isCurrentProduct ? (
-              <CellMuted>—</CellMuted>
+              <span className="text-sm text-fg-grey-500">—</span>
             ) : (
               <>
                 <IconButton
