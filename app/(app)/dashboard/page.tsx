@@ -1,158 +1,221 @@
 "use client";
 
+/**
+ * Dashboard layout aligned with Forge template:
+ * https://www.forgeui.org/templates/dashboards/ecommerce-2
+ * Source: forge/src/app/templates/(dashboards)/dashboards/ecommerce-2/page.tsx
+ *
+ * Metrics / recent table are driven by the starter demo store (business records).
+ * Accent chrome uses siteConfig blue (starter brand); multi-series chart colors follow the template.
+ */
+
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
-  AddCircleLinear,
+  AltArrowRightLinear,
   ArrowRightUpLinear,
-  BillListBoldDuotone,
-  FolderBoldDuotone,
-  FolderWithFilesBoldDuotone,
-  LetterLinear,
-  PhoneCallingLinear,
-  UserBoldDuotone,
-  UsersGroupTwoRoundedBoldDuotone,
+  BoxBoldDuotone,
+  FilterLinear,
 } from "solar-icon-set";
 import {
-  Avatar,
+  BarChartStatCard,
+  BubbleChart,
   Button,
-  IconButton,
+  CellImageText,
+  CellMuted,
+  CellText,
+  CellTextSubtitle,
+  ChartListItem,
+  DataTable,
   KebabMenu,
   LineChartStatCard,
   ListGroup,
-  PieChart,
+  MapCard,
   PlusIcon,
   ProgressStatCard,
-  ProjectCard,
   SmoothLineChart,
   StatusBadge,
-  WheelChartStatCard,
+  type ColumnDef,
+  type MapRegion,
+  type StatusBadgeColor,
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
 import { useDemoStore } from "@/components/demo-store";
-import { RECORD_STATUS_META } from "@/lib/demo/records";
+import {
+  RECORD_STATUS_META,
+  type BusinessRecord,
+  type RecordStatus,
+} from "@/lib/demo/records";
 
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+const regionsForMap: MapRegion[] = [
+  { name: "United Kingdom", flag: "https://placehold.co/44x44/1e40af/fff?text=UK", salesLabel: "340 Sales", value: "$17,678" },
+  { name: "Spain", flag: "https://placehold.co/44x44/dc2626/fff?text=ES", salesLabel: "100 Sales", value: "$5,500" },
+  { name: "Indonesia", flag: "https://placehold.co/44x44/dc2626/fff?text=ID", salesLabel: "50 Sales", value: "$2,500" },
+];
+
+function statusColor(status: RecordStatus): StatusBadgeColor {
+  return RECORD_STATUS_META[status].color;
+}
 
 export default function DashboardPage() {
   const router = useRouter();
   const { records, countsByStatus } = useDemoStore();
 
-  const active = countsByStatus.active ?? 0;
-  const draft = countsByStatus.draft ?? 0;
-  const done = countsByStatus.done ?? 0;
-  const blocked = countsByStatus.blocked ?? 0;
   const total = countsByStatus.all ?? 0;
+  const active = countsByStatus.active ?? 0;
+  const done = countsByStatus.done ?? 0;
+  const draft = countsByStatus.draft ?? 0;
+  const blocked = countsByStatus.blocked ?? 0;
 
-  const pieSegments = useMemo(() => {
-    const parts = [
-      { value: Math.max(active, 0.01), color: "#2563eb" },
-      { value: Math.max(draft, 0.01), color: "#fbbf24" },
-      { value: Math.max(done, 0.01), color: "#10b981" },
-      { value: Math.max(blocked, 0.01), color: "#ef4444" },
-    ];
-    return parts;
-  }, [active, draft, done, blocked]);
-
-  const recent = records.slice(0, 4);
-  const owners = useMemo(() => {
+  const categoryRows = useMemo(() => {
     const map = new Map<string, number>();
-    for (const r of records) map.set(r.owner, (map.get(r.owner) ?? 0) + 1);
-    return [...map.entries()].map(([name, count]) => ({ name, count }));
+    for (const r of records) map.set(r.category, (map.get(r.category) ?? 0) + 1);
+    return [...map.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, count]) => ({ name, count }));
   }, [records]);
+
+  const topRecords = records.slice(0, 7);
+
+  const tableColumns: ColumnDef<BusinessRecord>[] = useMemo(
+    () => [
+      {
+        key: "code",
+        header: "编号",
+        sortable: true,
+        width: "w-[120px]",
+        render: (row) => <CellText>{row.code}</CellText>,
+      },
+      {
+        key: "name",
+        header: "记录",
+        sortable: true,
+        flex: true,
+        render: (row) => (
+          <button
+            type="button"
+            className="text-left"
+            onClick={() => router.push(`/examples/detail/?id=${row.id}`)}
+          >
+            <CellImageText src={row.imageUrl} title={row.name} subtitle={row.subtitle} />
+          </button>
+        ),
+      },
+      {
+        key: "updated",
+        header: "更新",
+        sortable: true,
+        width: "w-[120px]",
+        render: (row) => <CellMuted>{row.updatedDate}</CellMuted>,
+      },
+      {
+        key: "owner",
+        header: "负责人",
+        width: "w-[160px]",
+        render: (row) => (
+          <CellTextSubtitle title={row.owner} subtitle={row.category} />
+        ),
+      },
+      {
+        key: "status",
+        header: "状态",
+        sortable: true,
+        width: "w-[120px]",
+        render: (row) => (
+          <StatusBadge label={RECORD_STATUS_META[row.status].label} color={statusColor(row.status)} />
+        ),
+      },
+      {
+        key: "actions",
+        header: "",
+        width: "w-[60px]",
+        render: (row) => (
+          <KebabMenu
+            accent={siteConfig.accent}
+            items={[
+              { label: "查看", onSelect: () => router.push(`/examples/detail/?id=${row.id}`) },
+              { label: "编辑", onSelect: () => router.push(`/examples/form/?id=${row.id}`) },
+            ]}
+          />
+        ),
+      },
+    ],
+    [router],
+  );
+
+  const bubbleTotal = Math.max(total, 1);
+  const bubbles = [
+    { value: Math.round((active / bubbleTotal) * 10000) / 100 || 8, label: `${Math.round((active / bubbleTotal) * 100) || 0}%`, color: "bg-fg-blue-500" },
+    { value: Math.round((done / bubbleTotal) * 10000) / 100 || 6, label: `${Math.round((done / bubbleTotal) * 100) || 0}%`, color: "bg-yellow-400" },
+    { value: Math.round((draft / bubbleTotal) * 10000) / 100 || 4, label: `${Math.round((draft / bubbleTotal) * 100) || 0}%`, color: "bg-sky-500" },
+    { value: Math.round((blocked / bubbleTotal) * 10000) / 100 || 2, label: `${Math.round((blocked / bubbleTotal) * 100) || 0}%`, color: "bg-orange-500" },
+  ];
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header — project-2 / overview style */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-fg text-fg-black">Overview</h1>
-          <p className="text-sm text-fg-grey-500">
-            你好，这里是业务记录总览（数据与列表/详情联动）
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button
-            color={siteConfig.accent}
-            variant="tertiary"
-            iconLeft={<AddCircleLinear size={16} />}
-            onClick={() => router.push("/examples/list/")}
-          >
-            查看列表
-          </Button>
-          <Button
-            color={siteConfig.accent}
-            iconLeft={<PlusIcon size={16} />}
-            onClick={() => router.push("/examples/form/")}
-          >
-            新建记录
-          </Button>
-        </div>
-      </div>
-
-      {/* 3 metric cards — project-2 */}
-      <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-3 [&>*]:!w-full">
+      {/* 3 stats — ecommerce-2 */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 [&>*]:!w-full">
         <ProgressStatCard
-          title="进行中"
-          subtitle={`共 ${total} 条记录`}
-          value={String(active)}
+          title="全部记录"
+          subtitle="Demo store"
+          value={String(total)}
           trend="10%"
           trendDirection="up"
           theme="white"
-          progressValue={total ? Math.round((active / total) * 100) : 0}
+          progressValue={total ? Math.min(100, total * 8) : 25}
           progressColor="blue"
-          icon={<FolderBoldDuotone size={20} />}
           size="wide"
           width="full"
         />
         <LineChartStatCard
-          title="已完成"
-          subtitle="+0 today"
-          value={String(done)}
-          trend="4%"
+          title="进行中"
+          subtitle="Active records"
+          value={String(active)}
+          trend="10%"
           trendDirection="up"
-          chartColor="green"
-          chartDirection="up"
           size="wide"
           width="full"
-          series={[2, 3, 3, 4, 5, 4, 6, 7, 6, 8, 7, done || 6]}
-          icon={<FolderWithFilesBoldDuotone size={20} />}
+          chartColor="red"
+          chartDirection="down"
+          series={[10, 14, 12, 18, 16, 20, 18, 22, 20, 24, 22, Math.max(active * 2, 12)]}
         />
-        <WheelChartStatCard
-          title="负责人覆盖"
-          subtitle={`阻断 ${blocked}`}
-          value={String(owners.length)}
-          trend="5%"
+        <BarChartStatCard
+          title="已完成"
+          subtitle="Completed"
+          value={String(done)}
+          trend="10%"
           trendDirection="up"
-          wheelColor="blue"
-          wheelPercent={total ? Math.min(100, Math.round((done / total) * 100) + 20) : 40}
           size="wide"
           width="full"
-          icon={<UsersGroupTwoRoundedBoldDuotone size={20} />}
+          barColor="blue"
+          bars={[10, 30, 60, 95, 50, 40, Math.max(done * 8, 30)]}
         />
       </div>
 
-      {/* Statistic + pie — project-2 */}
+      {/* Statistic + Expenses bubbles — ecommerce-2 */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-5 rounded-3xl border border-fg-grey-200 bg-white p-6 lg:col-span-2">
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h3 className="text-lg font-semibold text-fg-black">Statistic</h3>
-              <p className="text-sm text-fg-grey-500">记录创建与完成趋势（演示序列）</p>
+              <p className="text-sm text-fg-grey-500">记录状态趋势（演示序列）</p>
             </div>
-            <KebabMenu
-              accent={siteConfig.accent}
-              items={[
-                { label: "打开列表", onSelect: () => router.push("/examples/list/") },
-                { label: "新建", onSelect: () => router.push("/examples/form/") },
-              ]}
-            />
+            <div className="inline-flex items-center gap-1 rounded-full bg-fg-grey-100 p-1 text-xs">
+              <button type="button" className="px-3 py-1.5 text-fg-grey-500">Day</button>
+              <button type="button" className="px-3 py-1.5 text-fg-grey-500">Week</button>
+              <button type="button" className="rounded-full bg-white px-3 py-1.5 text-fg-black shadow-sm">
+                Month
+              </button>
+              <button type="button" className="px-3 py-1.5 text-fg-grey-500">Year</button>
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-6">
             {[
               { label: "进行中", value: String(active), trend: "10%", up: true, color: "#2563eb" },
-              { label: "草稿", value: String(draft), trend: "2%", up: false, color: "#fbbf24" },
-              { label: "已完成", value: String(done), trend: "8%", up: true, color: "#10b981" },
+              { label: "草稿", value: String(draft), trend: "4%", up: false, color: "#fbbf24" },
+              { label: "已完成", value: String(done), trend: "8%", up: true, color: "#0ea5e9" },
             ].map((s) => (
               <div key={s.label} className="flex items-center gap-2">
                 <div
@@ -175,9 +238,9 @@ export default function DashboardPage() {
           </div>
           <SmoothLineChart
             series={[
-              { data: [12, 14, 13, 16, 18, 17, 20, 22, 21, 24, 23, Math.max(active * 3, 12)], color: "#2563eb" },
-              { data: [8, 9, 10, 9, 11, 10, 12, 11, 10, 9, 10, Math.max(draft * 2, 8)], color: "#fbbf24" },
-              { data: [6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, Math.max(done * 2, 10)], color: "#10b981" },
+              { data: [0.5, 0.55, 0.65, 0.6, 0.55, 0.7, 0.55, 0.6, 0.6, 0.65, 0.55, 0.5].map((v) => v * 1000), color: "#2563eb" },
+              { data: [0.4, 0.4, 0.5, 0.45, 0.42, 0.55, 0.45, 0.5, 0.45, 0.55, 0.4, 0.45].map((v) => v * 1000), color: "#fbbf24" },
+              { data: [0.2, 0.22, 0.25, 0.22, 0.2, 0.3, 0.22, 0.2, 0.18, 0.2, 0.18, 0.2].map((v) => v * 1000), color: "#ef4444" },
             ]}
             accent="blue"
             activeIndex={6}
@@ -185,10 +248,10 @@ export default function DashboardPage() {
             tooltipItems={[
               { label: "进行中", value: String(active), trend: "up", color: "#2563eb" },
               { label: "草稿", value: String(draft), trend: "down", color: "#fbbf24" },
-              { label: "已完成", value: String(done), trend: "up", color: "#10b981" },
+              { label: "已完成", value: String(done), trend: "up", color: "#0ea5e9" },
             ]}
             showYAxis
-            yAxisLabels={["24", "18", "12", "6", "0"]}
+            yAxisLabels={["$1.2k", "$1k", "$800", "$600", "$400", "$200", "0"]}
             xAxisLabels={months}
             height="h-[260px]"
           />
@@ -197,39 +260,48 @@ export default function DashboardPage() {
         <div className="flex flex-col gap-5 rounded-3xl border border-fg-grey-200 bg-white p-6">
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-fg-black">状态分布</h3>
-              <p className="text-sm text-fg-grey-500">Based on status</p>
+              <h3 className="text-lg font-semibold text-fg-black">状态占比</h3>
+              <p className="text-sm text-fg-grey-500">Based on category</p>
             </div>
             <KebabMenu
               accent={siteConfig.accent}
-              items={[{ label: "刷新", onSelect: () => undefined }]}
+              items={[{ label: "打开列表", onSelect: () => router.push("/examples/list/") }]}
             />
           </div>
-          <div className="flex justify-center">
-            <PieChart segments={pieSegments} accent="blue" size="lg" />
-          </div>
+          <BubbleChart bubbles={bubbles} accent="blue" height={240} />
           <div className="grid grid-cols-2 gap-2 text-xs text-fg-grey-700">
             <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full bg-[#2563eb]" /> 进行中 {active}
+              <span className="size-2 rounded-full" style={{ backgroundColor: "#2563eb" }} /> 进行中
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full bg-[#fbbf24]" /> 草稿 {draft}
+              <span className="size-2 rounded-full" style={{ backgroundColor: "#fbbf24" }} /> 已完成
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full bg-[#10b981]" /> 已完成 {done}
+              <span className="size-2 rounded-full" style={{ backgroundColor: "#0ea5e9" }} /> 草稿
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full bg-[#ef4444]" /> 已阻断 {blocked}
+              <span className="size-2 rounded-full" style={{ backgroundColor: "#f97316" }} /> 已阻断
             </span>
           </div>
         </div>
       </div>
 
-      {/* Recent + owners — project-2 bottom row */}
+      {/* Top Region + Top Product + Top Category — ecommerce-2 */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <MapCard
+          title="Top Region"
+          subtitle="Sales by region"
+          color="blue"
+          variant="md"
+          width="full"
+          regions={regionsForMap}
+          highlights={["north-america", "europe", "asia", "oceania"]}
+          onMenuClick={() => undefined}
+        />
+
         <ListGroup
           title="最近记录"
-          subtitle="Recent Active"
+          subtitle="Based on activity"
           action={
             <KebabMenu
               accent={siteConfig.accent}
@@ -237,131 +309,107 @@ export default function DashboardPage() {
             />
           }
           items={
-            <div className="flex flex-col gap-3">
-              {recent.length === 0 ? (
+            <div className="flex flex-col">
+              {topRecords.length === 0 ? (
                 <p className="py-8 text-center text-sm text-fg-grey-500">暂无记录</p>
               ) : (
-                recent.map((item) => {
-                  const progress =
-                    item.status === "done" ? 100
-                      : item.status === "active" ? 65
-                        : item.status === "blocked" ? 35
-                          : 20;
-                  const progressColor =
-                    item.status === "done" ? "green"
-                      : item.status === "blocked" ? "red"
-                        : item.status === "active" ? "blue"
-                          : "gray";
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      className="w-full text-left"
-                      onClick={() => router.push(`/examples/detail/?id=${item.id}`)}
-                    >
-                      <ProjectCard
-                        width="full"
-                        logo={item.imageUrl}
-                        title={item.name}
-                        labelText={RECORD_STATUS_META[item.status].label}
-                        labelColor={progressColor}
-                        progress={progress}
-                        progressColor={progressColor}
-                        date={item.updatedDate}
-                        avatars={[item.imageUrl]}
-                      />
-                    </button>
-                  );
-                })
-              )}
-            </div>
-          }
-        />
-
-        <ListGroup
-          title="负责人"
-          subtitle="按记录数"
-          action={
-            <KebabMenu
-              accent={siteConfig.accent}
-              items={[{ label: "打开列表", onSelect: () => router.push("/examples/list/") }]}
-            />
-          }
-          items={
-            <div className="flex flex-col">
-              {owners.length === 0 ? (
-                <p className="py-8 text-center text-sm text-fg-grey-500">暂无</p>
-              ) : (
-                owners.map((m) => (
-                  <div key={m.name} className="flex items-center justify-between py-2.5">
-                    <div className="flex items-center gap-3">
-                      <Avatar
-                        src={`https://placehold.co/40x40/dbeafe/1d4ed8?text=${encodeURIComponent(m.name[0])}`}
-                        size="md"
-                      />
-                      <div>
-                        <div className="text-sm font-semibold text-fg-black">{m.name}</div>
-                        <div className="text-xs text-fg-grey-500">{m.count} 条记录</div>
-                      </div>
+                topRecords.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    className="flex items-center gap-3 py-2.5 text-left hover:opacity-90"
+                    onClick={() => router.push(`/examples/detail/?id=${p.id}`)}
+                  >
+                    <div className="flex size-10 items-center justify-center overflow-hidden rounded-lg bg-fg-grey-100">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={p.imageUrl} alt={p.name} className="size-full object-cover" />
                     </div>
-                    <div className="flex items-center gap-2">
-                      <IconButton variant="ghost" shape="square" size="sm" aria-label="call">
-                        <PhoneCallingLinear size={14} />
-                      </IconButton>
-                      <IconButton variant="ghost" shape="square" size="sm" aria-label="mail">
-                        <LetterLinear size={14} />
-                      </IconButton>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-semibold text-fg-black">{p.name}</div>
+                      <div className="text-xs text-fg-grey-500">{p.code}</div>
                     </div>
-                  </div>
+                    <div className="text-right">
+                      <div className="text-sm font-semibold text-fg-black">{p.owner}</div>
+                      <div className="text-xs text-emerald-500">{RECORD_STATUS_META[p.status].label}</div>
+                    </div>
+                  </button>
                 ))
               )}
             </div>
           }
         />
 
-        <div className="flex flex-col gap-4 rounded-3xl border border-fg-grey-200 bg-white p-6">
-          <div className="flex items-start justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-fg-black">待办焦点</h3>
-              <p className="text-sm text-fg-grey-500">来自业务记录</p>
-            </div>
-            <BillListBoldDuotone size={20} color="#71717A" />
-          </div>
-          <div className="flex flex-col gap-3">
-            {records
-              .filter((r) => r.status === "blocked" || r.status === "draft")
-              .slice(0, 4)
-              .map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => router.push(`/examples/detail/?id=${item.id}`)}
-                  className="flex items-center justify-between rounded-2xl border border-fg-grey-200 px-3 py-3 text-left hover:bg-fg-grey-50"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-fg-black">{item.name}</p>
-                    <p className="text-xs text-fg-grey-500">{item.owner}</p>
-                  </div>
-                  <StatusBadge
-                    label={RECORD_STATUS_META[item.status].label}
-                    color={RECORD_STATUS_META[item.status].color}
-                  />
-                </button>
+        <ListGroup
+          title="分类排行"
+          subtitle="Based on records"
+          action={
+            <KebabMenu
+              accent={siteConfig.accent}
+              items={[{ label: "刷新", onSelect: () => undefined }]}
+            />
+          }
+          items={
+            <div className="flex flex-col">
+              {(categoryRows.length ? categoryRows : [{ name: "暂无", count: 0 }]).map((c, i) => (
+                <ChartListItem
+                  key={c.name + i}
+                  icon={BoxBoldDuotone}
+                  accent={i === 0 ? "blue" : "blue"}
+                  title={c.name}
+                  subtitle="分类"
+                  value={`${c.count} 条`}
+                />
               ))}
-            {records.filter((r) => r.status === "blocked" || r.status === "draft").length === 0 ? (
-              <p className="py-6 text-center text-sm text-fg-grey-500">没有草稿或阻断项</p>
-            ) : null}
+            </div>
+          }
+        />
+      </div>
+
+      {/* Recent table — ecommerce-2 Recent Orders */}
+      <div className="flex flex-col gap-5 rounded-3xl border border-fg-grey-200 bg-white p-6">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 className="text-lg font-semibold text-fg-black">最近业务记录</h3>
+            <p className="text-sm text-fg-grey-500">与列表页同一数据源</p>
           </div>
-          <Button
-            color={siteConfig.accent}
-            variant="tertiary"
-            className="w-full"
-            iconLeft={<UserBoldDuotone size={16} />}
-            onClick={() => router.push("/examples/list/")}
-          >
-            去处理
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button color={siteConfig.accent} variant="tertiary" size="sm" iconLeft={<FilterLinear size={14} />}>
+              Filters
+            </Button>
+            <Button color={siteConfig.accent} variant="tertiary" size="sm">
+              Show {Math.min(8, records.length)}
+            </Button>
+            <Button
+              color={siteConfig.accent}
+              size="sm"
+              iconRight={<AltArrowRightLinear size={14} />}
+              onClick={() => router.push("/examples/list/")}
+            >
+              See More
+            </Button>
+            <Button
+              color={siteConfig.accent}
+              size="sm"
+              iconLeft={<PlusIcon size={14} />}
+              onClick={() => router.push("/examples/form/")}
+            >
+              新建
+            </Button>
+          </div>
         </div>
+        <DataTable<BusinessRecord>
+          color={siteConfig.accent}
+          columns={tableColumns}
+          rows={records.slice(0, 8)}
+          showCheckbox
+          checkboxColor={siteConfig.accent}
+          showPagination
+          currentPage={1}
+          totalPages={Math.max(1, Math.ceil(records.length / 8))}
+          onPageChange={() => undefined}
+          paginationLabel={`Showing 1-${Math.min(8, records.length)} from ${records.length}`}
+          getRowKey={(row) => row.id}
+        />
       </div>
     </div>
   );

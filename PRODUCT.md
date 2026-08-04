@@ -155,7 +155,7 @@ docker-compose.yml        # 可选：本地 Postgres 一键起
 | **0.1.x** | 认证 UI + dashboard 占位 + Forge 接入；演示级跳转 |
 | **0.2.0** | 定位更名 + 模块路线图 + **认证/SMTP 产品决策** |
 | **0.3.0** | P0：共享 layout、**PostgreSQL + local 用户名/邮箱密码**、**SMTP 找回密码**、守卫、列表/表单范例 |
-| **0.4.x**（当前） | 模板对齐：Dashboard←`dashboards/project-2`；列表←`ecommerce/products`；表单/详情/删除←`crm-template/leads`；共享 demo store 闭环 |
+| **0.4.x**（当前） | Dashboard←**`dashboards/ecommerce-2`**（https://www.forgeui.org/templates/dashboards/ecommerce-2）；列表←`ecommerce/products`；表单/详情←`crm-template/leads`；共享 demo store 闭环 |
 | **0.5.0** | 可选邮箱验证、部署与 SMTP 运维说明、设置写回用户表 |
 
 ## 7. 成功标准
