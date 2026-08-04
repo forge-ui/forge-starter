@@ -65,10 +65,10 @@ pnpm dev
 | 登录用户 | Postgres `users`（`local`）/ demo session | 认证、profile 改名改密 |
 | 运营「账号管理」列表 | Postgres `admin_accounts` | 业务账号 CRUD；**需 `DATABASE_URL` + `pnpm db:push`**；无数据则为空 |
 
-侧栏顶部「账号管理后台」是 **单应用品牌区**（Forge team switcher 壳），**不是多租户**：
-- 「新建账号」→ 打开账号创建弹窗  
-- 「系统设置」→ 个人设置  
-- 「新建团队」→ 未启用（本脚手架不做多团队） |
+侧栏顶部是 **应用切换器**（Forge `teams` 槽位），配置在 `config/apps.ts`：
+- 列表项：当前产品 + 占位应用（可改 `href` 接独立部署）
+- 「新建账号」→ 创建弹窗；「系统设置」→ 设置页
+- 「新建应用」→ 未启用；**不必改 core** 即可做应用列表 + 点击切换骨架 |
 
 ## 环境变量
 
