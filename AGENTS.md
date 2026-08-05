@@ -1,74 +1,91 @@
 # Forge Starter — Agent 合约（必读）
 
-你正在 **Forge Starter** 仓库中工作：面向 Coding Agent 的 **Forge 后台 0→1 脚手架**（Next.js 16 + Tailwind v4 + `@forge-ui-official/core`）。
+**Forge 后台 0→1 脚手架**：Next.js 16 + Tailwind v4 + `@forge-ui-official/core`。  
+Coding Agent 是第一开发界面。
 
-**不是** 中台、**不是** ShipAny 全量 AI SaaS。参照 ShipAny 的是 **Agent skills 工作方式**，不是支付/积分清单。
+**不是** 中台、**不是** ShipAny 全量 SaaS。  
+学 Next 的是 **skill 拆分与样板驱动**，不学支付/积分/CMS。
 
-先读：`PRODUCT.md`、`docs/agent-native.md`、`docs/module-template.md`、`docs/page-roles.md`。
+必读：`PRODUCT.md`、`docs/agent-native.md`、`docs/module-template.md`、`docs/page-roles.md`。
 
 ## 铁律
 
-1. 组件只 `import { … } from "@forge-ui-official/core"`。
-2. 颜色只用 `fg-*` token；业务控件传 `color={siteConfig.accent}`（默认 `blue`）。
-3. 图标用 `solar-icon-set`；侧栏主菜单 `BoldDuotone`、`size={20}`、不写死 color。
-4. 登录后页面在 `AppLayout` 内（`components/app-shell.tsx`）。
-5. **禁止** MUI / Ant / 全量 shadcn 替代 Forge；缺能力写 `FORGE-GAP` 并停下询问。
-6. 认证：用户名或邮箱 + 密码；库 **PostgreSQL only**；邮件 **仅 SMTP**。
-7. 登录用户表 `users` ≠ 业务样板表 `admin_accounts`，不要混接。
-8. CRUD：**列表 + 弹窗表单 + 详情 + API**；默认不要整页表单。
-9. 不做无行为的装饰按钮（导出/通知铃铛等）；要么实现要么隐藏。
-10. 交付前：`pnpm typecheck`。
+1. 组件只 `import { … } from "@forge-ui-official/core"`。  
+2. 颜色只用 `fg-*`；业务控件 `color={siteConfig.accent}`（默认 `blue`）。  
+3. 图标 `solar-icon-set`；侧栏主菜单 `BoldDuotone`、`size={20}`。  
+4. 登录后页面在 `AppLayout`（`components/app-shell.tsx`）。  
+5. **禁止** MUI / Ant / 全量 shadcn 替代 Forge；缺能力 `FORGE-GAP` 并询问。  
+6. 认证：用户名或邮箱 + 密码；库 **PostgreSQL only**；邮件 **仅 SMTP**。  
+7. 登录表 `users` ≠ 业务表（如 `admin_accounts`），不要混接。  
+8. **后端与页面分开做**：先 module（数据+API），再 page（UI）。不要一条指令无脑抄 accounts 全套且写死详情形态。  
+9. 详情 **无全局默认**：重 → `accounts`；轻 → `approvals`；拿不准问用户。  
+10. 列表筛选 **一行** `ButtonGroup` + 搜索；禁止两行 pills。  
+11. 侧栏/摘要卡禁止塞「返回列表」；`hideHeader: true` 时壳 `onBack` 不渲染。  
+12. 不做无行为装饰按钮；要么实现要么隐藏。  
+13. 交付：`pnpm typecheck`；改 UI 后 **浏览器点主路径**（禁止只 curl）。
 
-## Skills（优先调用）
+## Forge UI 组件库（必读）
 
-| Skill | 何时用 |
-|-------|--------|
-| `forge-starter-quick-start` | 新项目改名、主题、菜单、env 第一遍定制 |
-| `forge-starter-new-module` | 新增业务域 CRUD（抄 accounts） |
-| `forge-starter-new-page` | 单页对照 forge 官方 template |
+写业务 UI 前加载旁路 monorepo skill（权威）：
 
-路径：
+```text
+../forge/.agents/skills/forge/SKILL.md
+```
 
-- `.agents/skills/<name>/SKILL.md`
-- `.claude/skills/<name>/SKILL.md`（与上同步，给 Claude Code）
+- props / token / cases → 该 skill 的 `references/`  
+- 常用：`DataTable`、`Button`、`ButtonGroup`、`TextField`、`SelectOption`、`TextArea`、`StatusBadge`、`Breadcrumbs`、`ConfirmationDialog`  
+- 通用 Modal：core 无导出 → 用本仓 `components/ui/modal.tsx`  
+- 缺组件 → `FORGE-GAP`，禁止手搓  
+
+## Skills
+
+| Skill | 何时 | 边界 |
+|-------|------|------|
+| `forge-starter-quick-start` | 改名 / accent / 菜单 / env | 只品牌壳 |
+| `forge-starter-new-module` | 新业务数据与接口 | **只** schema + service + API（+ 可选 store） |
+| `forge-starter-new-page` | 列表 / 详情 / 看板 UI | **只** 页面 + 菜单；对照样板选型 |
+
+路径：`.agents/skills/<name>/SKILL.md`（canonical）。  
+`.claude/skills/` **必须与 `.agents/skills/` 内容一致**（改一处同步另一处）。
+
+人类说「加 xxx 管理」→ 先 `new-module`，再 `new-page`（可同会话顺序执行）。
 
 ## 仓库地图
 
 ```
-app/(auth)/          登录注册找回重置
-app/(app)/dashboard  工作台（ecommerce-2）
-app/(app)/accounts   ★ CRUD 样板
-app/(app)/settings   profile / security / apps / notifications
-app/api/auth         登录用户 API
-app/api/accounts     业务账号 API
+app/(auth)/              登录注册找回
+app/(app)/dashboard      工作台
+app/(app)/accounts       ★ 重样板：列表 + 表单弹窗 + 全页详情
+app/(app)/approvals      ★ 轻样板：列表 + 表单/详情弹窗
+app/(app)/settings       profile / security / apps
+app/api/auth|accounts|approvals
 components/app-shell.tsx
-components/*-form-dialog.tsx
-components/ui/modal.tsx    宿主 Modal（core 无通用弹窗）
+components/*-form-dialog.tsx | *-detail-dialog.tsx | *-store.tsx
+components/ui/modal.tsx
 config/site.ts menu.tsx apps.ts
-lib/auth lib/db lib/accounts lib/apps
+lib/auth lib/db lib/accounts lib/approvals
+docs/agent-native.md module-template.md page-roles.md
 ```
 
 ## 官方视觉对照
 
-完整角色表：`docs/page-roles.md`（页面角色 → template，**无外部设计插件**）。
+角色表：`docs/page-roles.md`。
 
-| 页面 | Forge 官方模板 |
-|------|----------------|
-| 工作台 | `dashboards/ecommerce-2` |
-| 列表 | `ecommerce/customers` |
-| 弹窗表单 | customers Add Modal / 窄表单 |
-| 详情 | `ecommerce/customers/[id]` |
+| 角色 | Starter 样板 | Forge monorepo template（旁路） |
+|------|--------------|----------------------------------|
+| 工作台 | `dashboard` | `dashboards/ecommerce-2` |
+| 列表 | `accounts` / `approvals` 列表 | `ecommerce/customers` |
+| 表单弹窗 | `*-form-dialog` | customers Add Modal |
+| 详情弹窗 | `approvals` detail dialog | — |
+| 全页详情 | `accounts/[id]` | `ecommerce/customers/[id]` |
 
-模板源码：本机 `../forge/src/app/templates/...`（若 monorepo 旁路存在）。
+模板源码：`../forge/src/app/templates/...`（若存在）。
 
-## 扩模块最短路径
+## 扩业务最短路径
 
-1. 复制 accounts 相关文件，全局重命名资源名。  
-2. schema + `pnpm db:push`。  
-3. API + service + types。  
-4. list page + form dialog + detail。  
-5. `config/menu.tsx` 加菜单。  
-6. `pnpm typecheck`。
+1. `new-module`：types + service + schema + `db:push` + API。  
+2. `new-page`：读 page-roles → 选 accounts 或 approvals 形态 → 列表/弹窗/详情 + menu。  
+3. `pnpm typecheck` + 浏览器点通。  
 
 详见 `docs/module-template.md`。
 
@@ -84,7 +101,8 @@ lib/auth lib/db lib/accounts lib/apps
 
 ## 提交前
 
-- 无密钥进库  
-- 无 Tailwind 默认色顶替 `fg-*`  
-- 无手搓已有 Forge 组件  
-- typecheck 通过  
+- [ ] 无密钥  
+- [ ] 无 Tailwind 默认色顶替 `fg-*`  
+- [ ] 无手搓已有 Forge 组件  
+- [ ] typecheck  
+- [ ] UI 变更已浏览器点过  

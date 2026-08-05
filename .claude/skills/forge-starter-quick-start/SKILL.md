@@ -41,7 +41,10 @@ Bootstrap **branding + shell** only. Do **not** add payment/CMS/OAuth unless the
 2. 应用 allowlist 修改。
 3. `pnpm typecheck`。
 4. 提示用户：`pnpm dev --port 3020`，用 demo 登录看侧栏标题与菜单。
-5. 若 brief 含新业务模块 → 引导下一步 skill：`forge-starter-new-module`。
+5. 若 brief 含新业务模块 → 按序引导：  
+   - `forge-starter-new-module`（数据 + API）  
+   - `forge-starter-new-page`（UI；详情对照 accounts 重 / approvals 轻）  
+6. 报告：改了哪些文件；本地 `pnpm dev`；下一步模块 backlog（名词列表即可）。
 
 ## Checklist
 
@@ -49,3 +52,4 @@ Bootstrap **branding + shell** only. Do **not** add payment/CMS/OAuth unless the
 - [ ] accent 全站一致  
 - [ ] typecheck 绿  
 - [ ] 未引入无关模块  
+- [ ] 有业务 brief 时已提示 module → page 两步  

@@ -17,13 +17,13 @@ UI 与页面范式以 **`@forge-ui-official/core`** 为硬约束；Agent 通过�
 | 主战场 | AI SaaS（计费 / CMS） | **Admin 后台** |
 | UI | headless / 可换壳 | **Forge-first，禁止第二套 UI 库** |
 | Agent 价值 | 装业务能力快 | **装页面不歪、扩 CRUD 不翻车** |
-| 默认能力 | auth + pay + credits… | 壳 + 认证 + SMTP + **一种完整 CRUD 范式** + 应用注册 |
+| 默认能力 | auth + pay + credits… | 壳 + 认证 + SMTP + **双 CRUD 样板（重/轻）** + 应用注册 |
 
 ## 2. 设计原则
 
 1. **Forge-first**：只从 `@forge-ui-official/core` 取组件；颜色只用 `fg-*`；图标用 `solar-icon-set`。
 2. **Agent-native**：第一开发界面是 Agent + skills（`quick-start` / `new-module` / `new-page`），人读 `AGENTS.md`。
-3. **范例即文档**：账号管理 = 唯一官方 CRUD 样板（列表 + 弹窗表单 + 详情 + API）。
+3. **范例即文档**：`accounts` = 重详情样板；`approvals` = 轻详情弹窗样板。无「只许一种」默认。
 4. **轻默认、可删除**：模块可摘；不绑 Stripe / Clerk / 云邮件 SDK。
 5. **演示与生产边界清晰**：`AUTH_MODE=demo|local`；登录用户与业务表分表。
 6. **不做中台**：无代码生成引擎、无 BPM、无复杂多租户。

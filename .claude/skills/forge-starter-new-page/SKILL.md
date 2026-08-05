@@ -1,48 +1,109 @@
 ---
 name: forge-starter-new-page
 description: >
-  Build a single admin page in Forge Starter by cloning a Forge official
-  template layout (ecommerce / dashboard / CRM). Use for dashboards or
-  non-CRUD screens, not full resource modules.
+  Add admin UI only in Forge Starter: list, form modal, detail (modal or full
+  page), menu entry. Chooses layout by cloning accounts (heavy) or approvals
+  (light). Requires API/store already present or created via new-module first.
+  Use for dashboard pages or finishing a resource after new-module.
 ---
 
-# Forge Starter New Page
+# Forge Starter New Page（只 UI）
 
-One route, Forge template-first. For full CRUD domains use `forge-starter-new-module`.
+对齐 ShipAny Next 的 `/new-page`：**页面 + 导航**，不新建业务表/service（缺后端先跑 `new-module`）。
 
-**选型表（必读）**：仓库内 `docs/page-roles.md` — 先定页面角色再抄 template。  
-不使用、不引用任何已废弃的设计插件。
+选型：`docs/page-roles.md`、`docs/module-template.md` §B。
 
 ## When to use
 
-- 「做一个看板页」「照着 ecommerce-2」「单独一页」
+- 「加列表页」「做详情 UI」「看板页」  
+- 「加 xxx 管理」的 **第二步**（数据已有或刚做完 new-module）  
 
-## Inputs
+## 禁止
 
-- 路由：如 `/reports`
-- 中文标题
-- **页面角色**（dashboard / collection / detail / settings…）→ 查 `docs/page-roles.md`
-- 对照模板：表中「首选」路径；旁路 monorepo `../forge/src/app/templates/...`
-- 数据：mock / 接已有 store / 新 API（说明即可）
+- 在本 skill 里从零加 schema/service（应先 new-module）  
+- 两行筛选 pills  
+- 侧栏塞「返回列表」  
+- 写死「默认全页详情」或「默认弹窗」  
+- 第二 UI 库 / Tailwind 默认色 / 假按钮  
+- 只 curl 验收  
 
-## Steps
+## Step 0 — Forge 组件
 
-1. 打开 `docs/page-roles.md`，锁定角色与首选 template。  
-2. 在旁路 monorepo 读官方源码（若存在）。  
-3. 在 `app/(app)/<route>/page.tsx` 实现；`"use client"` 若需交互。  
-4. 组件仅 core；`siteConfig.accent`；solar icons。  
-5. 注册 `config/menu.tsx` + `config/site.ts` routeShell（`hideHeader: true` 若页内自带 header）。  
-6. 中文文案；去掉无行为控件。  
-7. `pnpm typecheck`。
+写代码前：
 
-## Layout rules
+1. 读 `../forge/.agents/skills/forge/SKILL.md`（旁路 monorepo）  
+2. 后台常用：`DataTable`、`Button`、`ButtonGroup`、`TextField`、`SelectOption`、`TextArea`、`StatusBadge`、`Breadcrumbs`、`ConfirmationDialog`  
+3. Modal → `components/ui/modal.tsx`  
+4. 缺组件 → `FORGE-GAP`  
 
-- 页内自带 title + Breadcrumbs 时：`routeShells` 设 `hideHeader: true`。  
-- Dashboard 类：grid + StatCard / Chart 家族，勿手搓图表 div。  
-- 缺组件：`FORGE-GAP` 停下。
+## Step 1 — 定角色与样板
 
-## Forbidden
+从用户描述确定：
 
-- 复制官方模板里的紫色默认而不改 accent  
-- 引入 recharts/echarts 若 core 已有等价图表  
-- 一次做完整 CRUD（改走 new-module）  
+| 角色 | 抄谁 |
+|------|------|
+| collection 列表 | `accounts/page` 或 `approvals/page`（筛选行布局一致） |
+| form-modal | `account-form-dialog` / `approval-form-dialog` |
+| detail-modal | **`approval-detail-dialog`**（轻） |
+| detail 全页 | **`accounts/[id]`**（重） |
+| dashboard | `dashboard/page` + monorepo ecommerce-2 |
+
+详情：
+
+```text
+用户指定？ → 听用户
+字段少、看完回列表？ → approvals（弹窗）
+多区块 / Tab / 档案？ → accounts（全页）
+拿不准？ → 问用户
+```
+
+交付说明里写 **选了哪种 + 一句话理由**。
+
+## Step 2 — 实现
+
+### 列表
+
+- `app/(app)/<res>/page.tsx`  
+- Header + **单行** ButtonGroup + 搜索 + DataTable + 空态  
+- 新建按钮 → form dialog  
+- `config/menu.tsx` + `config/site.ts`（`hideHeader: true`）  
+
+### 表单弹窗
+
+- `components/<res>-form-dialog.tsx`  
+- 调 store/API；成功后关窗或打开详情（按选型）  
+
+### 详情 · 弹窗
+
+- 抄 `components/approval-detail-dialog.tsx`  
+- 列表行点击打开；可选 `?id=`；`[id]/page` 可 redirect  
+
+### 详情 · 全页
+
+- 抄 `app/(app)/accounts/[id]/page.tsx`  
+- 顶栏主操作；侧栏只 meta；页内 `←` 或面包屑  
+
+### 数据
+
+- 优先已有 `components/<res>-store.tsx` 或 fetch `/api/<res>`  
+- 无 API → 停，先 new-module  
+
+## Step 3 — Verify
+
+```bash
+pnpm typecheck
+```
+
+**浏览器**（必做）：
+
+1. 菜单进入列表  
+2. 筛选只有一行  
+3. 新建 → 持久化（刷新还在）  
+4. 打开详情（弹窗或全页），主操作可用  
+5. 能回到列表（关弹窗 / 页内返回 / 面包屑）  
+
+## Report
+
+- 路由、菜单 label  
+- 详情形态 + 理由  
+- 对照样板：accounts 或 approvals  

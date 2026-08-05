@@ -1,73 +1,93 @@
 ---
 name: forge-starter-new-module
 description: >
-  Add a new admin CRUD module to Forge Starter by cloning the accounts
-  vertical slice (list + modal form + detail + API + Drizzle). Use when
-  the user wants a new resource manager (orders, products, customers, etc.).
+  Add backend only for a Forge Starter resource: types, Drizzle schema/service,
+  API routes, optional client store. Does NOT build list/detail UI — use
+  forge-starter-new-page after. Use when the user needs data + API for a new
+  admin domain (orders, tags, notifications, etc.).
 ---
 
-# Forge Starter New Module
+# Forge Starter New Module（只后端）
 
-Clone the **accounts** paradigm. Full map: `docs/module-template.md`.  
-角色固定为 **collection + form-modal + detail**（见 `docs/page-roles.md`）。  
-不依赖任何外部设计插件。
+对齐 ShipAny Next 的 `/new-module`：**service + API**，不写页面。
+
+地图：`docs/module-template.md` §A。  
+UI 下一步：`forge-starter-new-page`。
 
 ## When to use
 
-- 「加一个 xxx 管理」「新模块」「CRUD」「列表增删改」
+- 「加 xxx 的数据和接口」「后端模块」「表 + API」
+- 人类说「加 xxx 管理」时的 **第一步**（第二步是 new-page）
+
+## 禁止
+
+- 创建/大改 `app/(app)/…/page.tsx` 或详情 UI（交给 new-page）  
+- 规定详情必须全页或必须弹窗  
+- 业务表并进 `users`  
+- 假接口 / 假按钮  
 
 ## Inputs
 
-从用户获取（缺则问）：
+- 资源英文名（复数路由优先）：`orders`  
+- 字段与枚举  
+- 需要的操作：list / get / create / update / delete / 自定义 action  
 
-- 资源英文复数路由名：`orders`
-- 中文名：`订单`
-- 字段列表（name/type/required）
-- 状态枚举（若有）
-- 是否需要详情页（默认要）
+## Steps
 
-## Source files to copy
+### 1. 命名与表
+
+- 路由段 / API：`/<res>/`  
+- 表名：清晰英文（如 `orders`）  
+- 加到 `lib/db/schema.ts` → `pnpm db:push`  
+
+### 2. types + service
 
 ```text
-lib/accounts/types.ts          → lib/<res>/types.ts
-lib/accounts/service.ts        → lib/<res>/service.ts
-app/api/accounts/**            → app/api/<res>/**
-components/accounts-store.tsx  → components/<res>-store.tsx
-components/account-form-dialog.tsx → components/<res>-form-dialog.tsx
-app/(app)/accounts/**          → app/(app)/<res>/**
+lib/<res>/types.ts
+lib/<res>/service.ts
 ```
 
-Then global rename + field rewrite. Add table to `lib/db/schema.ts` → `pnpm db:push`.
+参考：`lib/accounts/service.ts` 或 `lib/approvals/service.ts`（业务规则，不抄 UI）。
 
-## Required UX
+- 校验与中文 `throw new Error("…")`  
+- 列表/详情/写操作按需  
 
-| 页面 | 要求 |
-|------|------|
-| List | Header + 新建按钮 + 筛选/搜索 + DataTable + 空态 |
-| Create/Edit | Modal dialog（`components/ui/modal.tsx`） |
-| Detail | 只读 + 编辑/删除（可选但推荐） |
-| API | session 守卫 + zod + 中文错误 |
+### 3. API
 
-## Menu
+```text
+app/api/<res>/route.ts          # GET list, POST create
+app/api/<res>/[id]/route.ts     # GET one, PATCH/DELETE/POST actions
+```
 
-Register in `config/menu.tsx` with `BoldDuotone` icon size 20.
+- `getSessionUser()`，未登录 401  
+- `jsonOk` / `jsonError`（`lib/auth/http.ts`）  
+- Zod 校 body  
 
-## Forbidden
+### 4. 可选 store
 
-- 整页表单当默认（除非用户坚持）
-- 假导出/假通知按钮
-- Tailwind 默认色 / 第二 UI 库
-- 把业务表和 `users` 揉成一张
+若后续列表为 client fetch：
 
-## Validation
+```text
+components/<res>-store.tsx
+```
+
+可先不建，等 new-page 需要再加。若建了，在 `app/(app)/layout.tsx` 挂 Provider（与 accounts/approvals 一致）。
+
+### 5. Verify
 
 ```bash
 pnpm typecheck
 ```
 
-手动：列表空 → 新建 → 刷新仍在 → 编辑 → 删除。
+有表变更：`pnpm db:push`。  
+可用 curl + 登录 cookie 打 API（后端步允许）；**完整 UI 留给 new-page 浏览器测**。
 
-## After done
+## Report
 
-- 简述新增路由与表名  
-- 若官方 template 可对照，写明（如 customers / products）  
+告诉用户：
+
+- 表名、API 路径与方法  
+- store 是否已加  
+- **下一步**：`forge-starter-new-page` — 列表/表单/详情 UI；详情对照  
+  - 重 → `accounts`  
+  - 轻 → `approvals`  

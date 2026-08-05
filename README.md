@@ -19,8 +19,8 @@
 | Skill | 作用 |
 |-------|------|
 | `forge-starter-quick-start` | 改名 / accent / 菜单 / env |
-| `forge-starter-new-module` | 新 CRUD（抄账号管理） |
-| `forge-starter-new-page` | 单页对照官方 template |
+| `forge-starter-new-module` | 只后端：schema + service + API |
+| `forge-starter-new-page` | 只 UI：列表/详情（accounts 重 / approvals 轻） |
 
 Skills 目录：`.agents/skills/`（Claude Code：`.claude/skills/`）
 
@@ -35,7 +35,7 @@ Skills 目录：`.agents/skills/`（Claude Code：`.claude/skills/`）
 | **邮件** | 仅自定义 SMTP |
 | **模式** | `AUTH_MODE=demo` \| `local` |
 | **应用壳** | AppLayout；应用切换器；隐藏未实现的通知/消息 |
-| **CRUD 样板** | 账号：列表 + 弹窗表单 + 详情 + REST API |
+| **CRUD 样板** | accounts（全页详情）+ approvals（详情弹窗）；无单一默认 |
 | **应用管理** | `/settings/apps` 列表 CRUD；内部应用多选菜单 |
 | **Agent** | skills + 文档合约 |
 
