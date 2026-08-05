@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * OA 审批详情 — detail 角色
+ * 对齐 accounts/[id]：顶栏操作按钮；侧栏只放只读摘要；回列表走壳 onBack / 面包屑
+ */
+
 import { use, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -78,7 +83,7 @@ export default function ApprovalDetailPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
-  const { items, me, loading, getById, decide, cancel, refresh } = useApprovalsStore();
+  const { me, loading, getById, decide, cancel, refresh } = useApprovalsStore();
   const [comment, setComment] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -148,6 +153,7 @@ export default function ApprovalDetailPage({
     return <div className="py-20 text-center text-sm text-fg-grey-500">加载中…</div>;
   }
 
+  // 不存在：空态 + 返回列表（与 accounts 一致；正常详情靠壳 onBack / 面包屑）
   if (!item) {
     return (
       <div className="flex flex-col items-center gap-4 py-20">
@@ -164,6 +170,7 @@ export default function ApprovalDetailPage({
 
   return (
     <div className="flex flex-col gap-6">
+      {/* 顶栏：标题 + 主操作（对齐 accounts 编辑/删除位置） */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-display-l font-semibold leading-9 tracking-fg text-fg-black">
@@ -178,12 +185,44 @@ export default function ApprovalDetailPage({
             ]}
           />
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3">
           <StatusBadge label={typeMeta.label} color={typeMeta.color} />
           <StatusBadge label={statusMeta.label} color={statusMeta.color} />
+          {canApprove ? (
+            <>
+              <Button
+                color="green"
+                disabled={busy}
+                onClick={() => void onDecide("approve")}
+              >
+                通过
+              </Button>
+              <Button
+                color="red"
+                variant="tertiary"
+                disabled={busy}
+                onClick={() => void onDecide("reject")}
+              >
+                驳回
+              </Button>
+            </>
+          ) : null}
+          {canCancel ? (
+            <Button
+              color="red"
+              variant="tertiary"
+              disabled={busy}
+              onClick={() => void onCancel()}
+            >
+              撤销申请
+            </Button>
+          ) : null}
         </div>
       </div>
 
+      {error ? <p className="text-sm text-fg-red">{error}</p> : null}
+
+      {/* 主栏表单 + 侧栏只读摘要（侧栏禁止塞导航/返回） */}
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="flex flex-col gap-5">
           <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
@@ -200,69 +239,31 @@ export default function ApprovalDetailPage({
 
           {canApprove ? (
             <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
-              <h3 className="text-base font-semibold text-fg-black">审批处理</h3>
+              <h3 className="text-base font-semibold text-fg-black">审批意见</h3>
               <p className="mt-1 text-sm text-fg-grey-500">
-                演示为单步审批；驳回时必须填写意见。不能审批自己发起的单据。
+                单步审批演示；驳回时意见必填。操作按钮在页面右上角。
               </p>
               <div className="mt-4">
                 <TextArea
                   color={siteConfig.accent}
-                  label="审批意见"
+                  label="意见"
                   rows={3}
                   value={comment}
                   onChange={setComment}
                   placeholder="选填；驳回必填"
                 />
               </div>
-              {error ? <p className="mt-2 text-sm text-fg-red">{error}</p> : null}
-              <div className="mt-4 flex flex-wrap gap-3">
-                <Button
-                  color="green"
-                  disabled={busy}
-                  onClick={() => void onDecide("approve")}
-                >
-                  通过
-                </Button>
-                <Button
-                  color="red"
-                  variant="tertiary"
-                  disabled={busy}
-                  onClick={() => void onDecide("reject")}
-                >
-                  驳回
-                </Button>
-              </div>
-            </div>
-          ) : null}
-
-          {canCancel ? (
-            <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
-              <h3 className="text-base font-semibold text-fg-black">申请人操作</h3>
-              <p className="mt-1 text-sm text-fg-grey-500">待审批状态下可撤销本人发起的申请。</p>
-              {error ? <p className="mt-2 text-sm text-fg-red">{error}</p> : null}
-              <div className="mt-4">
-                <Button color="red" variant="tertiary" disabled={busy} onClick={() => void onCancel()}>
-                  撤销申请
-                </Button>
-              </div>
             </div>
           ) : null}
         </div>
 
-        <aside className="flex flex-col gap-4 self-start rounded-xl bg-white p-5 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
-          <h3 className="text-base font-semibold text-fg-black">审批信息</h3>
+        <aside className="flex flex-col self-start rounded-xl bg-white p-5 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+          <h3 className="mb-1 text-base font-semibold text-fg-black">审批信息</h3>
           <FieldRow label="状态" value={statusMeta.label} />
           <FieldRow label="类型" value={typeMeta.label} />
           <FieldRow label="审批人" value={item.approverName || "—"} />
           <FieldRow label="处理时间" value={item.decidedAt} />
           <FieldRow label="审批意见" value={item.approverComment || "—"} />
-          <Button
-            color={siteConfig.accent}
-            variant="tertiary"
-            onClick={() => router.push("/approvals/")}
-          >
-            返回列表
-          </Button>
         </aside>
       </div>
     </div>

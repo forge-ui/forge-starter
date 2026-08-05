@@ -2,7 +2,7 @@
 
 /**
  * OA 审批列表 — collection + 发起弹窗
- * 范式：docs/module-template.md / forge-starter-new-module
+ * 范式：accounts 列表（一行 ButtonGroup + 搜索）
  */
 
 import { Suspense, useEffect, useMemo, useState } from "react";
@@ -29,25 +29,20 @@ import {
   type ApprovalType,
 } from "@/lib/approvals/types";
 
-const scopeTabs = [
+/** 单行筛选：视角 + 终态（对齐 accounts 的 ButtonGroup + 搜索一行） */
+const filterTabs = [
   { label: "全部", value: "all" as const },
   { label: "待我审批", value: "todo" as const },
   { label: "我发起的", value: "mine" as const },
-];
-
-const statusTabs = [
-  { label: "全部状态", value: "all" },
-  { label: "待审批", value: "pending" },
-  { label: "已通过", value: "approved" },
-  { label: "已驳回", value: "rejected" },
+  { label: "已通过", value: "approved" as const },
+  { label: "已驳回", value: "rejected" as const },
 ];
 
 function ApprovalsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { items, me, loading, error, refresh, counts } = useApprovalsStore();
-  const [scopeIndex, setScopeIndex] = useState(0);
-  const [statusIndex, setStatusIndex] = useState(0);
+  const [filterIndex, setFilterIndex] = useState(0);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [createOpen, setCreateOpen] = useState(false);
@@ -61,20 +56,20 @@ function ApprovalsPageContent() {
   }, [searchParams, router]);
 
   useEffect(() => {
-    // Always load full set so scope tab counts stay accurate
     void refresh("all");
   }, [refresh]);
 
   const filtered = useMemo(() => {
-    const scope = scopeTabs[scopeIndex]?.value ?? "all";
-    const statusKey = statusTabs[statusIndex]?.value ?? "all";
+    const key = filterTabs[filterIndex]?.value ?? "all";
     const q = search.trim().toLowerCase();
     return items.filter((item) => {
-      if (scope === "mine" && me && item.applicantUsername !== me) return false;
-      if (scope === "todo" && (item.status !== "pending" || !me || item.applicantUsername === me)) {
-        return false;
+      if (key === "todo") {
+        if (item.status !== "pending" || !me || item.applicantUsername === me) return false;
+      } else if (key === "mine") {
+        if (!me || item.applicantUsername !== me) return false;
+      } else if (key === "approved" || key === "rejected") {
+        if (item.status !== key) return false;
       }
-      if (statusKey !== "all" && item.status !== statusKey) return false;
       if (!q) return true;
       return (
         item.title.toLowerCase().includes(q)
@@ -82,17 +77,33 @@ function ApprovalsPageContent() {
         || APPROVAL_TYPE_META[item.type].label.includes(q)
       );
     });
-  }, [items, statusIndex, search, scopeIndex, me]);
+  }, [items, filterIndex, search, me]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, statusIndex, scopeIndex]);
+  }, [search, filterIndex]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [currentPage, totalPages]);
 
   const pageRows = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
     return filtered.slice(start, start + pageSize);
   }, [filtered, currentPage]);
+
+  const filterLabels = useMemo(
+    () =>
+      filterTabs.map((tab) => {
+        if (tab.value === "all") return `全部 ${counts.all ?? 0}`;
+        if (tab.value === "todo") return `待我审批 ${counts.todo ?? 0}`;
+        if (tab.value === "mine") return `我发起的 ${counts.mine ?? 0}`;
+        if (tab.value === "approved") return `已通过 ${counts.approved ?? 0}`;
+        return `已驳回 ${counts.rejected ?? 0}`;
+      }),
+    [counts],
+  );
 
   const columns: ColumnDef<ApprovalRequest>[] = useMemo(
     () => [
@@ -180,38 +191,23 @@ function ApprovalsPageContent() {
         </Button>
       </div>
 
-      <div className="flex flex-col gap-3">
+      {/* 与 accounts 一致：一行筛选 + 搜索 */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <ButtonGroup
           color={siteConfig.accent}
           shape="pill"
-          items={scopeTabs.map((tab) => ({
-            label:
-              tab.value === "all"
-                ? `全部 ${counts.all ?? 0}`
-                : tab.value === "todo"
-                  ? `待我审批 ${counts.todo ?? 0}`
-                  : `我发起的 ${counts.mine ?? 0}`,
-          }))}
-          activeIndex={scopeIndex}
-          onChange={setScopeIndex}
+          items={filterLabels.map((label) => ({ label }))}
+          activeIndex={filterIndex}
+          onChange={setFilterIndex}
         />
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <ButtonGroup
+        <div className="w-full max-w-sm">
+          <TextField
             color={siteConfig.accent}
-            shape="pill"
-            items={statusTabs.map((tab) => ({ label: tab.label }))}
-            activeIndex={statusIndex}
-            onChange={setStatusIndex}
+            value={search}
+            onChange={setSearch}
+            placeholder="搜索标题、申请人、类型…"
+            iconLeft={<MagniferLinear size={16} />}
           />
-          <div className="w-full max-w-sm">
-            <TextField
-              color={siteConfig.accent}
-              value={search}
-              onChange={setSearch}
-              placeholder="搜索标题、申请人、类型…"
-              iconLeft={<MagniferLinear size={16} />}
-            />
-          </div>
         </div>
       </div>
 
