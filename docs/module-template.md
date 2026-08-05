@@ -1,78 +1,107 @@
-# CRUD 模块模板（账号管理样板）
+# CRUD 模块模板
 
-所有新业务域默认按此地图复制，再全局替换资源名。
+**先选型，再抄代码。** 不要默认整包复制 `accounts`（含全页详情）。
 
-## 文件地图（accounts 样板）
+| 形态 | 样板 | 适用 |
+|------|------|------|
+| 轻模块（默认） | `approvals` | 字段少、看完就走、审批/单据/简单资源 |
+| 重模块 | `accounts` | Tab、图表、关联列表、档案式详情 |
+
+Skill：`.agents/skills/forge-starter-new-module/SKILL.md`。
+
+## 决策：详情弹窗 vs 全页
 
 ```text
-lib/<resource>/types.ts          # 类型、状态 meta、校验辅助
-lib/<resource>/service.ts        # Drizzle CRUD
-lib/db/schema.ts                 # 增加 pgTable（并 pnpm db:push）
-app/api/<resource>/route.ts      # GET list, POST create
-app/api/<resource>/[id]/route.ts # GET one, PATCH, DELETE
-components/<resource>-store.tsx  # 客户端 fetch 缓存（可参考 accounts-store）
-components/<resource>-form-dialog.tsx
-app/(app)/<resource>/page.tsx           # 列表
-app/(app)/<resource>/[id]/page.tsx      # 详情
-app/(app)/<resource>/new/page.tsx       # redirect ?create=1（可选兼容）
-app/(app)/<resource>/[id]/edit/page.tsx # redirect ?edit=id（可选兼容）
-config/menu.tsx                  # 注册侧栏
+字段一眼看完、主操作 1～3 个？
+  └─ 是 → detail-modal（列表上叠弹窗）     样板: approvals
+  └─ 否 → 有多 Tab / 图 / 关联表？
+           └─ 是 → detail-page             样板: accounts
+           └─ 否 → 仍优先 modal
 ```
 
-## 列表页必备区块
+## 文件地图
 
-1. Page header：`h1` + `Breadcrumbs` + 主按钮「新建」  
-2. 筛选（`ButtonGroup`）+ 搜索（`TextField`）  
-3. `DataTable`：列、行操作（编辑/删除）、分页  
-4. 空态：无数据 / 无匹配  
-5. 弹窗：新建/编辑共用 form dialog  
-6. 删除：`ConfirmationDialog` + 半透明遮罩  
+### 共用
+
+```text
+lib/<resource>/types.ts
+lib/<resource>/service.ts
+lib/db/schema.ts                 # + pgTable → pnpm db:push
+app/api/<resource>/route.ts      # GET list, POST create
+app/api/<resource>/[id]/route.ts # GET one, PATCH/POST actions, DELETE
+components/<resource>-store.tsx
+components/<resource>-form-dialog.tsx   # 新建/编辑
+app/(app)/<resource>/page.tsx           # 列表
+config/menu.tsx
+config/site.ts                          # hideHeader: true
+```
+
+### detail-modal（默认）
+
+```text
+components/<resource>-detail-dialog.tsx
+# page.tsx：行点击 / ?id= / 创建成功 → 开详情弹窗
+# 可选 [id]/page.tsx：redirect → /<resource>/?id=
+```
+
+### detail-page
+
+```text
+app/(app)/<resource>/[id]/page.tsx
+# 顶栏主操作；侧栏只读；页内返回（hideHeader 时壳 onBack 不显示）
+```
+
+## 列表页必备
+
+1. Header：`h1` + `Breadcrumbs` + 主按钮「新建」  
+2. **单行**筛选：`ButtonGroup` + 搜索 `TextField`（**禁止两行 pills**）  
+3. `DataTable` + 分页 + 空态  
+4. 新建/编辑：form modal  
+5. 删除：`ConfirmationDialog`（若有）  
+
+参考：`app/(app)/accounts/page.tsx` 的筛选行布局。
 
 ## 表单弹窗
 
-- 宿主：`components/ui/modal.tsx`（core 无通用 Modal）  
+- 宿主：`components/ui/modal.tsx`  
 - 字段：`TextField` / `SelectOption` / `TextArea`  
-- 多选：`SelectOption type="multiple"`  
-- 校验：前端 + service 双端  
-- 保存成功：关弹窗、刷新列表或跳详情  
+- 校验：前端 + service  
+- 保存成功：关弹窗；轻模块可紧接着开详情弹窗  
 
-## 详情页
+## 详情
 
-- 面包屑 + 编辑/删除  
-- 主栏信息 + 侧栏摘要（可参考 customers/[id]）  
+### modal
+
+- 字段 + 状态 badge + 底栏关闭/主操作  
+- 关弹窗 = 回列表，不需要「返回列表」按钮  
+
+### page
+
+- 顶栏：编辑/删除等主操作（对齐 accounts）  
+- 侧栏：**只** 只读摘要，**禁止** 塞返回/导航  
+- 返回：页内 `←` 或面包屑（因列表/详情通常 `hideHeader: true`）  
 - 不存在：空态 + 返回列表  
 
 ## API
 
-- 需 `getSessionUser()`，未登录 401  
-- `jsonOk` / `jsonError`（`lib/auth/http.ts`）  
-- Zod 校验 body  
-- 错误信息可展示给用户（中文）  
+- `getSessionUser()`，未登录 401  
+- `jsonOk` / `jsonError`  
+- Zod + 中文错误  
 
-## 菜单
-
-```tsx
-{
-  icon: <SomeBoldDuotone size={20} />,
-  label: "某某管理",
-  href: "/xxx/",
-}
-```
-
-## 命名约定
+## 命名
 
 | 概念 | 示例 |
 |------|------|
-| 路由段 | `orders` |
-| 表名 | `orders` |
-| 类型 | `Order` / `OrderInput` |
-| 组件 | `OrderFormDialog` / `OrdersStore` |
+| 路由段 | `orders` / `approvals` |
+| 表名 | `orders` / `approval_requests` |
+| 组件 | `OrderFormDialog` / `ApprovalDetailDialog` |
 
 ## 自检清单
 
-- [ ] schema push 成功  
-- [ ] list/create/update/delete 均可演示  
-- [ ] 刷新后数据仍在（Postgres）  
-- [ ] 菜单可点、accent 为 blue  
+- [ ] 详情形态已显式选择（modal | page）且合理  
+- [ ] 列表筛选只有 **一行**  
+- [ ] schema push；CRUD/关键动作可演示；刷新仍在  
+- [ ] **浏览器**打开过列表与详情，不是只 curl  
+- [ ] 菜单可点、`color={siteConfig.accent}`  
 - [ ] `pnpm typecheck`  
 - [ ] 无假按钮  
