@@ -1,30 +1,39 @@
 # Forge 组件怎么选（Starter 专用）
 
 问题：写业务页时 AI 不知道 Kit 里有什么、该用哪个。  
-解法：**本表选型 → 抄 Starter 样板 → 需要 props 时再进 monorepo cases**。不要凭空 invent。
+解法：**本表选型 → 抄 Starter 样板 → monorepo 总表/cases 查 props**。
+
+## 权威入口（有旁路 forge 时优先）
+
+```text
+../forge/docs/for-agents/README.md      ← 总入口
+../forge/docs/for-agents/routes.md      ← /cases 路由表
+../forge/docs/for-agents/components.md  ← 全量介绍表 + Case 列
+```
+
+原稿还在 `../forge-readdy/catalog/`（sync 脚本 / codegen）；**Agent 日常读 forge/docs/for-agents**。
 
 ## 权威链路（必须按序）
 
 ```text
 1. 定页面角色          → docs/page-roles.md
-2. 本表选组件包        → 下文「角色 → 组件」
+2. 本表或 for-agents 选组件
 3. 抄 Starter 样板     → accounts / approvals / dashboard
-4. 查 props / 变体     → 旁路 monorepo forge skill + cases
-5. 仍没有              → FORGE-GAP，禁止手搓第二套 UI
+4. 查 props            → ../forge/src/app/cases/<name>/page.tsx
+5. 仍没有              → FORGE-GAP
 ```
 
 旁路 monorepo（与 starter 同级）：
 
 | 用途 | 路径 |
 |------|------|
-| Skill 入口 | `../forge/.agents/skills/forge/SKILL.md` |
-| 页面模式总表 | `../forge/.agents/skills/forge/references/page-patterns.md` |
-| Case 索引（组件→路由） | `../forge/.agents/skills/forge/references/cases-index.md` |
-| 活文档（真实 props） | `../forge/src/app/cases/<name>/page.tsx` |
-| 官方后台 template | `../forge/src/app/templates/...` |
+| **Agent 组件总入口** | **`../forge/docs/for-agents/README.md`** |
+| Skill 铁律 | `../forge/.agents/skills/forge/SKILL.md` |
+| 页面模式长文 | `../forge/.agents/skills/forge/references/page-patterns.md` |
+| 活文档 | `../forge/src/app/cases/<name>/page.tsx` |
+| readdy catalog 原稿 | `../forge-readdy/catalog/forge-components.md` |
 
 **无 `../forge` 时：** 只用本表 + Starter 样板 import 列表；不要猜 Kit API。
-
 ## 角色 → 组件包 → Starter 样板 → Case
 
 | 页面/业务意图 | 先用这些组件 | Starter 抄谁 | monorepo case（查 props） |

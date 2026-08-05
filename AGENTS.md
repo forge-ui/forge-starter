@@ -40,9 +40,8 @@ docs/forge-components.md
 旁路 monorepo 权威（与 starter 同级时）：
 
 ```text
+../forge/docs/for-agents/README.md      ← 组件路由表 + 介绍表（优先）
 ../forge/.agents/skills/forge/SKILL.md
-../forge/.agents/skills/forge/references/page-patterns.md
-../forge/.agents/skills/forge/references/cases-index.md
 ../forge/src/app/cases/<name>/page.tsx
 ```
 
