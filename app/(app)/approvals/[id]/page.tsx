@@ -2,11 +2,13 @@
 
 /**
  * OA 审批详情 — detail 角色
- * 对齐 accounts/[id]：顶栏操作按钮；侧栏只放只读摘要；回列表走壳 onBack / 面包屑
+ * 顶栏：返回 + 标题/面包屑 + 主操作；侧栏只读摘要。
+ * 注：列表/详情均 hideHeader，壳 onBack 不会渲染，返回必须页内提供。
  */
 
 import { use, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AltArrowLeftLinear } from "solar-icon-set";
 import {
   Breadcrumbs,
   Button,
@@ -153,7 +155,6 @@ export default function ApprovalDetailPage({
     return <div className="py-20 text-center text-sm text-fg-grey-500">加载中…</div>;
   }
 
-  // 不存在：空态 + 返回列表（与 accounts 一致；正常详情靠壳 onBack / 面包屑）
   if (!item) {
     return (
       <div className="flex flex-col items-center gap-4 py-20">
@@ -170,20 +171,30 @@ export default function ApprovalDetailPage({
 
   return (
     <div className="flex flex-col gap-6">
-      {/* 顶栏：标题 + 主操作（对齐 accounts 编辑/删除位置） */}
+      {/* 顶栏：返回 + 标题 + 主操作（hideHeader 时壳返回不出现，页内补齐） */}
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-display-l font-semibold leading-9 tracking-fg text-fg-black">
-            审批详情
-          </h1>
-          <Breadcrumbs
-            color={siteConfig.accent}
-            items={[
-              { label: "工作台", href: "/dashboard/" },
-              { label: "审批中心", href: "/approvals/" },
-              { label: item.title },
-            ]}
-          />
+        <div className="flex min-w-0 items-start gap-3">
+          <button
+            type="button"
+            aria-label="返回审批列表"
+            onClick={() => router.push("/approvals/")}
+            className="mt-0.5 flex shrink-0 items-center justify-center rounded-full p-3.5 text-fg-grey-700 outline outline-1 outline-offset-[-1px] outline-fg-grey-200 transition-colors hover:bg-fg-grey-100"
+          >
+            <AltArrowLeftLinear size={20} />
+          </button>
+          <div className="flex min-w-0 flex-col gap-1">
+            <h1 className="text-display-l font-semibold leading-9 tracking-fg text-fg-black">
+              审批详情
+            </h1>
+            <Breadcrumbs
+              color={siteConfig.accent}
+              items={[
+                { label: "工作台", href: "/dashboard/" },
+                { label: "审批中心", href: "/approvals/" },
+                { label: item.title },
+              ]}
+            />
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <StatusBadge label={typeMeta.label} color={typeMeta.color} />
