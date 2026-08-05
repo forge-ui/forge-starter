@@ -50,12 +50,11 @@ Coding Agent 是第一开发界面。理念对齐 [ShipAny Next](https://docs.sh
 
 写任何业务 UI 前：
 
-1. 读旁路 monorepo **`../forge/.agents/skills/forge/SKILL.md`**（没有旁路则按 AGENTS 铁律 + 现有样板页）  
-2. props / token / 缺组件：`forge/references/*`  
-3. 缺能力 → `FORGE-GAP`，禁止手搓 Kit 已有物  
+1. **`docs/forge-components.md`**（角色 → 组件 → 样板 → case）  
+2. 旁路 monorepo：`../forge/.agents/skills/forge/SKILL.md` + `cases/<name>`  
+3. 缺能力 → `FORGE-GAP`  
 
-Starter skill 只给后台常用捷径，**不**复制整本组件百科。
-
+没有 monorepo 时仍可用 forge-components + Starter 样板；不要猜 props。
 ## 环境注意（Codex 交叉测试结论）
 
 - `AUTH_MODE=demo` **只**简化登录，**不**提供业务表内存存储。  

@@ -1,0 +1,95 @@
+# Forge 组件怎么选（Starter 专用）
+
+问题：写业务页时 AI 不知道 Kit 里有什么、该用哪个。  
+解法：**本表选型 → 抄 Starter 样板 → 需要 props 时再进 monorepo cases**。不要凭空 invent。
+
+## 权威链路（必须按序）
+
+```text
+1. 定页面角色          → docs/page-roles.md
+2. 本表选组件包        → 下文「角色 → 组件」
+3. 抄 Starter 样板     → accounts / approvals / dashboard
+4. 查 props / 变体     → 旁路 monorepo forge skill + cases
+5. 仍没有              → FORGE-GAP，禁止手搓第二套 UI
+```
+
+旁路 monorepo（与 starter 同级）：
+
+| 用途 | 路径 |
+|------|------|
+| Skill 入口 | `../forge/.agents/skills/forge/SKILL.md` |
+| 页面模式总表 | `../forge/.agents/skills/forge/references/page-patterns.md` |
+| Case 索引（组件→路由） | `../forge/.agents/skills/forge/references/cases-index.md` |
+| 活文档（真实 props） | `../forge/src/app/cases/<name>/page.tsx` |
+| 官方后台 template | `../forge/src/app/templates/...` |
+
+**无 `../forge` 时：** 只用本表 + Starter 样板 import 列表；不要猜 Kit API。
+
+## 角色 → 组件包 → Starter 样板 → Case
+
+| 页面/业务意图 | 先用这些组件 | Starter 抄谁 | monorepo case（查 props） |
+|---------------|--------------|--------------|---------------------------|
+| 列表 / 管理 | `DataTable` `Button` `ButtonGroup` `TextField` `StatusBadge` `Breadcrumbs` `IconButton` `PlusIcon` | `accounts/page` `approvals/page` | `table` `tab` `toolbar` `button-link` |
+| 筛选条 | **单行** `ButtonGroup` + `TextField`（搜索） | 同上 | `tab` `input-field` |
+| 新建/编辑弹窗 | `TextField` `TextArea` `SelectOption` + 本仓 `Modal` | `account-form-dialog` `approval-form-dialog` | `input-field` `modal` |
+| 轻详情（看完回列表） | `StatusBadge` `DescriptionItem`/`字段行` + `Modal` 底栏按钮 | `approval-detail-dialog` | `list` `modal` `badge` |
+| 重详情（档案） | `Breadcrumbs` `StatusBadge` `StatCard` `TabBar` `DataTable` 侧栏字段 | `accounts/[id]` | `page-header` `card` `tab` `list` `table` |
+| 删除确认 | `ConfirmationDialog` **外包** `Modal`/遮罩 | `accounts/page` 删除 | `modal` |
+| 工作台 / 指标 | `StatCard` `ChartCard` 图表家族 `DataTable` | `dashboard` | `card` `chart` `table` |
+| 设置单卡 | `TextField` `Button` 窄卡片 | `settings/profile` 等 | `input-field` |
+| 空态 | 文案 + `Button`；可选 solar 图标 | 各列表 empty | `button-link` |
+
+### 不要默认上的（除非业务明确要）
+
+| 组件/能力 | 原因 |
+|-----------|------|
+| `DataTable.sortable: true` | **不会自动排序**，未实现逻辑=假按钮 |
+| 自拼 sidebar / topbar | 用本仓 `AppShell` / Kit `AppLayout` |
+| Toast / Drawer | Kit 可能未导出；先 FORGE-GAP |
+| 两行 `ButtonGroup` | Starter 禁止 |
+
+## 后台常用 import 清单
+
+```tsx
+import {
+  Breadcrumbs,
+  Button,
+  ButtonGroup,
+  ConfirmationDialog,
+  DataTable,
+  IconButton,
+  PlusIcon,
+  StatusBadge,
+  TextField,
+  TextArea,
+  SelectOption,
+  // 详情/档案按需：
+  StatCard,
+  TabBar,
+  DescriptionItem,
+  type ColumnDef,
+} from "@forge-ui-official/core";
+import { Modal } from "@/components/ui/modal";
+import { siteConfig } from "@/config/site";
+// color={siteConfig.accent}
+```
+
+图标：`solar-icon-set`（菜单 `BoldDuotone` size 20；行内操作 `Linear` size 16）。
+
+## Agent 执行口令（写页面前默念）
+
+1. 这是 **列表 / 表单弹窗 / 轻详情 / 重详情 / 看板** 哪一种？  
+2. 上表对应组件包抄了没有？  
+3. Starter 样板文件打开对照了没有？  
+4. 不确定的 props 是否打开了 `../forge/src/app/cases/...`？  
+5. 没有的组件是否写了 `FORGE-GAP` 而不是 div 手搓？  
+
+## 与 skills 的关系
+
+| Skill | 何时读本文件 |
+|-------|----------------|
+| `forge-starter-new-page` | **必读** Step 0 |
+| `forge-starter-new-module` | 不读（无 UI） |
+| `forge-starter-quick-start` | 报告 backlog 时按角色注明建议组件包即可 |
+
+更全的页面模式（日历/聊天/发票等）见 monorepo `page-patterns.md`；Starter 默认 CRUD 用上表足够。

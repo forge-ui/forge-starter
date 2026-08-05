@@ -29,15 +29,24 @@ Coding Agent 是第一开发界面。
 
 ## Forge UI 组件库（必读）
 
-写业务 UI 前加载旁路 monorepo skill（权威）：
+**选型入口（Starter 内，先看这个）：**
+
+```text
+docs/forge-components.md
+```
+
+流程：页面角色 → 组件包 → 抄 accounts/approvals/dashboard → 查 monorepo cases 的 props。
+
+旁路 monorepo 权威（与 starter 同级时）：
 
 ```text
 ../forge/.agents/skills/forge/SKILL.md
+../forge/.agents/skills/forge/references/page-patterns.md
+../forge/.agents/skills/forge/references/cases-index.md
+../forge/src/app/cases/<name>/page.tsx
 ```
 
-- props / token / cases → 该 skill 的 `references/`  
-- 常用：`DataTable`、`Button`、`ButtonGroup`、`TextField`、`SelectOption`、`TextArea`、`StatusBadge`、`Breadcrumbs`、`ConfirmationDialog`  
-- 通用 Modal：core 无导出 → 用本仓 `components/ui/modal.tsx`  
+- 通用 Modal：core 无导出 → `components/ui/modal.tsx`  
 - 缺组件 → `FORGE-GAP`，禁止手搓  
 
 ## Skills

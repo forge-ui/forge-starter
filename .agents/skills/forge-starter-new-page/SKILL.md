@@ -28,14 +28,20 @@ description: >
 - **`sortable: true` 却未实现排序**（DataTable 不会自动排序）  
 - 只 curl 验收  
 
-## Step 0 — Forge 组件
+## Step 0 — 选组件（禁止跳过）
 
-写代码前：
+写代码前 **必须**：
 
-1. 读 `../forge/.agents/skills/forge/SKILL.md`（旁路 monorepo）  
-2. 后台常用：`DataTable`、`Button`、`ButtonGroup`、`TextField`、`SelectOption`、`TextArea`、`StatusBadge`、`Breadcrumbs`、`ConfirmationDialog`  
-3. Modal → `components/ui/modal.tsx`  
-4. 缺组件 → `FORGE-GAP`  
+1. 打开 **`docs/forge-components.md`**  
+   - 按页面角色选组件包  
+   - 记下要抄的 Starter 样板 + monorepo case 名  
+2. 旁路有 monorepo 时：  
+   - `../forge/.agents/skills/forge/SKILL.md`  
+   - props 不确定 → 打开 `../forge/src/app/cases/<name>/page.tsx`（case 名见 forge-components 表）  
+3. Modal 宿主：`components/ui/modal.tsx`  
+4. 表里没有的组件 → `FORGE-GAP`，禁止 div 手搓  
+
+交付报告里写一句：用了哪些 Kit 组件 + 对照了哪个 case/样板。  
 
 ## Step 1 — 定角色与样板
 

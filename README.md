@@ -2,88 +2,77 @@
 
 **Agent-native Forge 后台脚手架** — Next.js 16 + Tailwind v4 + `@forge-ui-official/core`。
 
-面向 Coding Agent 与人类：从 0 快速做 **管理后台 / 内部系统**，UI 铁律为 Forge Kit。  
-参照 [ShipAny Next](https://docs.shipany.ai/zh/shipany-next) 的 **Agent skills 工作方式**；**不对标** 其支付/积分/CMS 全家桶。
+面向 Coding Agent 与人类：从 0 搭 **管理后台 / 内部系统**。  
+学 [ShipAny Next](https://docs.shipany.ai/zh/shipany-next) 的 **skill 拆分**，不对标支付/积分/CMS。
 
 | | |
 |--|--|
 | 英文 | Forge Starter |
 | 中文 | Forge 后台脚手架 |
-| 宿主应用名 | Forge Starter 基础后台 |
+| GitHub | https://github.com/forge-ui/forge-starter |
 
-## Agent 怎么用
+## Agent 怎么用（一眼）
 
-1. 读 `AGENTS.md` + `PRODUCT.md`
-2. 按 brief 跑 skills：
+1. 读 `AGENTS.md`  
+2. 跑 skills（**加业务 = 先 module 再 page**）：
 
-| Skill | 作用 |
-|-------|------|
-| `forge-starter-quick-start` | 改名 / accent / 菜单 / env |
-| `forge-starter-new-module` | 只后端：schema + service + API |
-| `forge-starter-new-page` | 只 UI：列表/详情（accounts 重 / approvals 轻） |
+| Skill | 只做什么 |
+|-------|----------|
+| `forge-starter-quick-start` | 品牌 / accent / 菜单文案 / env + 模块 backlog |
+| `forge-starter-new-module` | **后端**：schema + service + API |
+| `forge-starter-new-page` | **UI**：列表 / 表单 / 详情 + 菜单 |
 
-Skills 目录：`.agents/skills/`（Claude Code：`.claude/skills/`）
+3. 选组件：`docs/forge-components.md`（角色 → Kit 组件 → 样板 → monorepo case）  
+4. 详情形态 **无默认**：  
+   - **重** → 抄 `accounts`（全页详情）  
+   - **轻** → 抄 `approvals`（详情弹窗）  
 
-详见 `docs/agent-native.md`、`docs/module-template.md`、`docs/page-roles.md`（页面角色对照表，不依赖废弃设计插件）。
+Skills：`.agents/skills/`（与 `.claude/skills/` 同步）。
 
-## 当前能力（0.5）
+## 样板页（给 AI 抄的）
+
+| 路径 | 形态 |
+|------|------|
+| `/accounts` + `/accounts/[id]` | 列表 + 弹窗表单 + **全页详情** |
+| `/approvals` | 列表 + 弹窗发起 + **详情弹窗** |
+| `/dashboard` | 工作台 |
+| `/settings/*` | 设置 |
+
+更多文档：`docs/agent-native.md` · `docs/module-template.md` · `docs/page-roles.md` · **`docs/forge-components.md`**
+
+## 能力摘要
 
 | 模块 | 说明 |
 |------|------|
-| **认证** | 用户名或邮箱 + 密码；注册 / 登录 / 退出 / 找回与重置 |
-| **数据库** | PostgreSQL（Drizzle）：`users` 登录；`admin_accounts` 业务样板 |
-| **邮件** | 仅自定义 SMTP |
-| **模式** | `AUTH_MODE=demo` \| `local` |
-| **应用壳** | AppLayout；应用切换器；隐藏未实现的通知/消息 |
-| **CRUD 样板** | accounts（全页详情）+ approvals（详情弹窗）；无单一默认 |
-| **应用管理** | `/settings/apps` 列表 CRUD；内部应用多选菜单 |
-| **Agent** | skills + 文档合约 |
+| 认证 | 用户名/邮箱 + 密码；demo \| local |
+| 数据库 | PostgreSQL；**CRUD 必须 `DATABASE_URL`**（demo 只省登录用户表） |
+| 邮件 | SMTP |
+| 应用壳 | AppLayout + 应用切换 |
+| Agent | skills + 双样板 + 组件选型表 |
 
 ## 快速开始
 
 ```bash
 pnpm install
 cp .env.example .env
-# demo 可直接开发；local 需 Postgres：
-docker compose up -d
+# local 需要 Postgres：
+# docker compose up -d
 # AUTH_MODE=local
-# AUTH_SECRET=至少16位随机串
+# AUTH_SECRET=至少16位
 # DATABASE_URL=postgresql://forge:forge@127.0.0.1:5432/forge_starter
-# APP_URL=http://localhost:3020
 pnpm db:push
 pnpm dev --port 3020
 ```
-
-| 路径 | 说明 |
-|------|------|
-| `/login` | 登录（demo：任意账号） |
-| `/dashboard` | 工作台 ← ecommerce-2 |
-| `/accounts` | 账号列表（弹窗新建/编辑） |
-| `/settings/apps` | 应用管理 |
-| profile 菜单 | 资料 / 改密 / 系统设置 / 退出 |
-
-## 环境变量
-
-见 `.env.example`。
-
-| 变量 | 含义 |
-|------|------|
-| `AUTH_MODE` | `demo` \| `local` |
-| `AUTH_SECRET` | session 签名（local ≥16） |
-| `DATABASE_URL` | Postgres |
-| `APP_URL` | 重置密码链接根 |
-| `SMTP_*` | 自建 SMTP |
 
 ## 目录
 
 ```text
 app/(auth)/ (app)/ api/
-components/   app-shell, *-form-dialog, accounts-store, ui/modal
+components/   app-shell, *-dialog, *-store, ui/modal
 config/       site, menu, apps
-lib/          auth, db, accounts, apps, mail
-.agents/skills/   Agent skills
-.claude/skills/   Claude 同步
-docs/         agent-native, module-template
+lib/          auth, db, accounts, approvals, …
+docs/         agent-native, module-template, page-roles, forge-components
+.agents/skills/
 AGENTS.md PRODUCT.md
 ```
 
@@ -92,12 +81,11 @@ AGENTS.md PRODUCT.md
 ```bash
 pnpm dev --port 3020
 pnpm typecheck
-pnpm build
 pnpm db:push
-pnpm db:studio
 ```
 
 ## 边界
 
-- **做**：后台壳、认证、CRUD 范式、Agent 扩模块  
-- **不做**：营销站、支付订阅、完整 IM、中台 BPM、第二套 UI 库  
+- 只 Forge Kit；缺组件 `FORGE-GAP`  
+- 不做支付/IM/中台代码生成  
+- UI 改完要浏览器点主路径，禁止只 curl  
