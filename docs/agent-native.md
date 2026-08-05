@@ -29,6 +29,8 @@ Forge Starter 把 **Coding Agent** 当作第一开发界面（对齐 [ShipAny Ne
 | 加一个「xxx 管理」 | `forge-starter-new-module` |
 | 照着 ecommerce-2 做一个页 | `forge-starter-new-page` |
 
+写页前先定角色，查对照表：`docs/page-roles.md`（不依赖任何外部设计插件）。
+
 ## 质量门禁
 
 - 视觉：像 Forge 官方 template，不像自定义玩具 UI  

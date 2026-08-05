@@ -8,7 +8,9 @@ description: >
 
 # Forge Starter New Module
 
-Clone the **accounts** paradigm. Full map: `docs/module-template.md`.
+Clone the **accounts** paradigm. Full map: `docs/module-template.md`.  
+角色固定为 **collection + form-modal + detail**（见 `docs/page-roles.md`）。  
+不依赖任何外部设计插件。
 
 ## When to use
 

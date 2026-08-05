@@ -24,7 +24,7 @@
 
 Skills 目录：`.agents/skills/`（Claude Code：`.claude/skills/`）
 
-详见 `docs/agent-native.md`、`docs/module-template.md`。
+详见 `docs/agent-native.md`、`docs/module-template.md`、`docs/page-roles.md`（页面角色对照表，不依赖废弃设计插件）。
 
 ## 当前能力（0.5）
 

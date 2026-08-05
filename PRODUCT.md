@@ -105,6 +105,7 @@ UI 与页面范式以 **`@forge-ui-official/core`** 为硬约束；Agent 通过�
 - `AGENTS.md` — 铁律摘要  
 - `docs/agent-native.md` — 工作流  
 - `docs/module-template.md` — CRUD 文件地图  
+- `docs/page-roles.md` — 页面角色 → 官方 template（**无外部设计插件**）  
 - `.agents/skills/*/SKILL.md`（Claude 同步：`.claude/skills/`）
 
 ## 7. 版本节奏

@@ -10,6 +10,9 @@ description: >
 
 One route, Forge template-first. For full CRUD domains use `forge-starter-new-module`.
 
+**选型表（必读）**：仓库内 `docs/page-roles.md` — 先定页面角色再抄 template。  
+不使用、不引用任何已废弃的设计插件。
+
 ## When to use
 
 - 「做一个看板页」「照着 ecommerce-2」「单独一页」
@@ -18,21 +21,19 @@ One route, Forge template-first. For full CRUD domains use `forge-starter-new-mo
 
 - 路由：如 `/reports`
 - 中文标题
-- 对照模板：优先  
-  - `dashboards/ecommerce-2`  
-  - `ecommerce/customers`  
-  - `ecommerce/products`  
-  - `crm` leads（若仓库有）  
+- **页面角色**（dashboard / collection / detail / settings…）→ 查 `docs/page-roles.md`
+- 对照模板：表中「首选」路径；旁路 monorepo `../forge/src/app/templates/...`
 - 数据：mock / 接已有 store / 新 API（说明即可）
 
 ## Steps
 
-1. 在旁路 `../forge/src/app/templates/...` 读官方源码（若存在）。  
-2. 在 `app/(app)/<route>/page.tsx` 实现；`"use client"` 若需交互。  
-3. 组件仅 core；`siteConfig.accent`；solar icons。  
-4. 注册 `config/menu.tsx` + `config/site.ts` routeShell（`hideHeader: true` 若页内自带 header）。  
-5. 中文文案；去掉无行为控件。  
-6. `pnpm typecheck`。
+1. 打开 `docs/page-roles.md`，锁定角色与首选 template。  
+2. 在旁路 monorepo 读官方源码（若存在）。  
+3. 在 `app/(app)/<route>/page.tsx` 实现；`"use client"` 若需交互。  
+4. 组件仅 core；`siteConfig.accent`；solar icons。  
+5. 注册 `config/menu.tsx` + `config/site.ts` routeShell（`hideHeader: true` 若页内自带 header）。  
+6. 中文文案；去掉无行为控件。  
+7. `pnpm typecheck`。
 
 ## Layout rules
 

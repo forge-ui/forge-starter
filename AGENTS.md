@@ -4,7 +4,7 @@
 
 **不是** 中台、**不是** ShipAny 全量 AI SaaS。参照 ShipAny 的是 **Agent skills 工作方式**，不是支付/积分清单。
 
-先读：`PRODUCT.md`、`docs/agent-native.md`、`docs/module-template.md`。
+先读：`PRODUCT.md`、`docs/agent-native.md`、`docs/module-template.md`、`docs/page-roles.md`。
 
 ## 铁律
 
@@ -49,6 +49,8 @@ lib/auth lib/db lib/accounts lib/apps
 ```
 
 ## 官方视觉对照
+
+完整角色表：`docs/page-roles.md`（页面角色 → template，**无外部设计插件**）。
 
 | 页面 | Forge 官方模板 |
 |------|----------------|
