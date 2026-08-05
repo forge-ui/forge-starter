@@ -6,7 +6,7 @@ Coding Agent 是第一开发界面。
 **不是** 中台、**不是** ShipAny 全量 SaaS。  
 学 Next 的是 **skill 拆分与样板驱动**，不学支付/积分/CMS。
 
-必读：`PRODUCT.md`、`docs/agent-native.md`、`docs/module-template.md`、`docs/page-roles.md`。
+必读：`PRODUCT.md`、`docs/agent-native.md`、`docs/module-template.md`、`docs/page-roles.md`、`docs/forge-components.md`。
 
 ## 铁律
 
