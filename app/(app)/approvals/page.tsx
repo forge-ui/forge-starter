@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * OA 审批列表 — collection + 发起弹窗
- * 范式：accounts 列表（一行 ButtonGroup + 搜索）
+ * OA 审批列表 — collection + 发起/详情弹窗
+ * 字段少：详情不进全页，弹窗查看与审批
  */
 
 import { Suspense, useEffect, useMemo, useState } from "react";
@@ -19,6 +19,7 @@ import {
   type ColumnDef,
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
+import { ApprovalDetailDialog } from "@/components/approval-detail-dialog";
 import { ApprovalFormDialog } from "@/components/approval-form-dialog";
 import { useApprovalsStore } from "@/components/approvals-store";
 import {
@@ -29,7 +30,6 @@ import {
   type ApprovalType,
 } from "@/lib/approvals/types";
 
-/** 单行筛选：视角 + 终态（对齐 accounts 的 ButtonGroup + 搜索一行） */
 const filterTabs = [
   { label: "全部", value: "all" as const },
   { label: "待我审批", value: "todo" as const },
@@ -46,11 +46,19 @@ function ApprovalsPageContent() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [createOpen, setCreateOpen] = useState(false);
+  const [detailId, setDetailId] = useState<string | null>(null);
   const pageSize = 8;
 
   useEffect(() => {
-    if (searchParams.get("create") === "1") {
+    const create = searchParams.get("create") === "1";
+    const id = searchParams.get("id");
+    if (create) {
       setCreateOpen(true);
+      router.replace("/approvals/", { scroll: false });
+      return;
+    }
+    if (id) {
+      setDetailId(id);
       router.replace("/approvals/", { scroll: false });
     }
   }, [searchParams, router]);
@@ -116,7 +124,7 @@ function ApprovalsPageContent() {
           <button
             type="button"
             className="flex h-10 min-w-0 flex-col justify-center text-left"
-            onClick={() => router.push(`/approvals/${row.id}/`)}
+            onClick={() => setDetailId(row.id)}
           >
             <span className="truncate text-sm font-semibold text-fg-black">{row.title}</span>
             <span className="truncate text-xs text-fg-grey-500">
@@ -162,12 +170,24 @@ function ApprovalsPageContent() {
         ),
       },
     ],
-    [router],
+    [],
   );
 
   return (
     <div className="flex flex-col gap-6">
-      <ApprovalFormDialog open={createOpen} onClose={() => setCreateOpen(false)} />
+      <ApprovalFormDialog
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreated={(item) => {
+          setCreateOpen(false);
+          setDetailId(item.id);
+        }}
+      />
+      <ApprovalDetailDialog
+        open={detailId != null}
+        approvalId={detailId}
+        onClose={() => setDetailId(null)}
+      />
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
@@ -191,7 +211,6 @@ function ApprovalsPageContent() {
         </Button>
       </div>
 
-      {/* 与 accounts 一致：一行筛选 + 搜索 */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <ButtonGroup
           color={siteConfig.accent}

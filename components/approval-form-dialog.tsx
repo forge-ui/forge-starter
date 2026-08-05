@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button, SelectOption, TextArea, TextField } from "@forge-ui-official/core";
 import { Modal } from "@/components/ui/modal";
 import { siteConfig } from "@/config/site";
@@ -10,6 +9,7 @@ import {
   APPROVAL_TYPE_META,
   APPROVAL_TYPES,
   type ApprovalFormPayload,
+  type ApprovalRequest,
   type ApprovalType,
 } from "@/lib/approvals/types";
 
@@ -42,10 +42,11 @@ const urgencyOptions = [
 type Props = {
   open: boolean;
   onClose: () => void;
+  /** 提交成功后打开详情弹窗（不跳全页） */
+  onCreated?: (item: ApprovalRequest) => void;
 };
 
-export function ApprovalFormDialog({ open, onClose }: Props) {
-  const router = useRouter();
+export function ApprovalFormDialog({ open, onClose, onCreated }: Props) {
   const { create } = useApprovalsStore();
   const [type, setType] = useState<ApprovalType>("leave");
   const [title, setTitle] = useState("");
@@ -129,7 +130,7 @@ export function ApprovalFormDialog({ open, onClose }: Props) {
       const form = buildForm();
       const item = await create({ type, title, form });
       onClose();
-      router.push(`/approvals/${item.id}/`);
+      onCreated?.(item);
     } catch (err) {
       setError(err instanceof Error ? err.message : "发起失败");
     } finally {

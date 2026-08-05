@@ -29,8 +29,6 @@ export function shellForPath(pathname: string): RouteShell {
   if (normalized.match(/^\/accounts\/[^/]+$/)) {
     return { title: "账号详情", hideHeader: true };
   }
-  if (normalized.match(/^\/approvals\/[^/]+$/)) {
-    return { title: "审批详情", hideHeader: true };
-  }
+  // approvals 详情为弹窗，无独立详情页壳
   return routeShells[normalized] ?? { title: siteConfig.name };
 }
