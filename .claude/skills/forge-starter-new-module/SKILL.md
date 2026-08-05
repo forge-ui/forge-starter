@@ -63,31 +63,27 @@ app/api/<res>/[id]/route.ts     # GET one, PATCH/DELETE/POST actions
 - `jsonOk` / `jsonError`（`lib/auth/http.ts`）  
 - Zod 校 body  
 
-### 4. 可选 store
+### 4. store 归属
 
-若后续列表为 client fetch：
-
-```text
-components/<res>-store.tsx
-```
-
-可先不建，等 new-page 需要再加。若建了，在 `app/(app)/layout.tsx` 挂 Provider（与 accounts/approvals 一致）。
+**默认不在 new-module 建 store。**  
+Client store（`components/<res>-store.tsx` + layout Provider）归 **new-page / UI 层**。  
+本步只保证 REST API 可被 `fetch` 调用。
 
 ### 5. Verify
 
 ```bash
 pnpm typecheck
+pnpm db:push   # 业务表必须 Postgres；demo 登录模式不能代替 DATABASE_URL
 ```
 
-有表变更：`pnpm db:push`。  
-可用 curl + 登录 cookie 打 API（后端步允许）；**完整 UI 留给 new-page 浏览器测**。
+- `AUTH_MODE=demo`：可不建 `users`，但 **CRUD API 仍要 DATABASE_URL**。  
+- 可用 curl + 登录 cookie 打 API；**完整 UI 留给 new-page 浏览器测**。
 
 ## Report
 
 告诉用户：
 
 - 表名、API 路径与方法  
-- store 是否已加  
-- **下一步**：`forge-starter-new-page` — 列表/表单/详情 UI；详情对照  
-  - 重 → `accounts`  
-  - 轻 → `approvals`  
+- **下一步**：`forge-starter-new-page`（含 store + 列表/表单/详情 UI）  
+  - 重详情 → 对照 `accounts`  
+  - 轻详情 → 对照 `approvals`  

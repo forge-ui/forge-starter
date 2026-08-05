@@ -25,6 +25,7 @@ description: >
 - 侧栏塞「返回列表」  
 - 写死「默认全页详情」或「默认弹窗」  
 - 第二 UI 库 / Tailwind 默认色 / 假按钮  
+- **`sortable: true` 却未实现排序**（DataTable 不会自动排序）  
 - 只 curl 验收  
 
 ## Step 0 — Forge 组件
@@ -83,10 +84,16 @@ description: >
 - 抄 `app/(app)/accounts/[id]/page.tsx`  
 - 顶栏主操作；侧栏只 meta；页内 `←` 或面包屑  
 
-### 数据
+### 数据层（UI 侧）
 
-- 优先已有 `components/<res>-store.tsx` 或 fetch `/api/<res>`  
-- 无 API → 停，先 new-module  
+- **API 必须已存在**（new-module 产物）；没有 → 停，先 new-module。  
+- **store 默认在本步创建：`components/<res>-store.tsx` + `app/(app)/layout.tsx` Provider（抄 accounts/approvals store）。  
+- 也可页内直接 `fetch`，但列表+弹窗+详情共享状态时优先 store。  
+- 业务持久化需要 `DATABASE_URL`；与 `AUTH_MODE=demo` 无关。  
+
+### 删除确认
+
+- 使用 `ConfirmationDialog` 时，外层必须包 `Modal` 或半透明遮罩宿主（抄 `accounts/page` 删除流程），不要只渲染裸 Dialog 卡。  
 
 ## Step 3 — Verify
 

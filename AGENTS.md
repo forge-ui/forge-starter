@@ -17,12 +17,15 @@ Coding Agent 是第一开发界面。
 5. **禁止** MUI / Ant / 全量 shadcn 替代 Forge；缺能力 `FORGE-GAP` 并询问。  
 6. 认证：用户名或邮箱 + 密码；库 **PostgreSQL only**；邮件 **仅 SMTP**。  
 7. 登录表 `users` ≠ 业务表（如 `admin_accounts`），不要混接。  
-8. **后端与页面分开做**：先 module（数据+API），再 page（UI）。不要一条指令无脑抄 accounts 全套且写死详情形态。  
-9. 详情 **无全局默认**：重 → `accounts`；轻 → `approvals`；拿不准问用户。  
-10. 列表筛选 **一行** `ButtonGroup` + 搜索；禁止两行 pills。  
-11. 侧栏/摘要卡禁止塞「返回列表」；`hideHeader: true` 时壳 `onBack` 不渲染。  
-12. 不做无行为装饰按钮；要么实现要么隐藏。  
-13. 交付：`pnpm typecheck`；改 UI 后 **浏览器点主路径**（禁止只 curl）。
+8. **`AUTH_MODE=demo` 只绕过登录用户库，不提供业务持久化。** 任何 CRUD（accounts/approvals/新模块）都需要 `DATABASE_URL` + `pnpm db:push`。不要写「无 Postgres 也能做完整业务 CRUD」。  
+9. **后端与页面分开做**：先 module（数据+API），再 page（UI）。不要一条指令无脑抄 accounts 全套且写死详情形态。  
+10. 详情 **无全局默认**：重 → `accounts`；轻 → `approvals`；拿不准问用户。  
+11. 列表筛选 **一行** `ButtonGroup` + 搜索；禁止两行 pills。  
+12. **`DataTable` 的 `sortable` 只画排序 UI，不会自动排序。** 未实现点击排序逻辑时 **禁止** 设 `sortable: true`（假按钮）。  
+13. `ConfirmationDialog` 只是内容卡：必须用本仓 `components/ui/modal.tsx`（或等价宿主）包一层；对齐 `accounts` 删除确认。  
+14. 侧栏/摘要卡禁止塞「返回列表」；`hideHeader: true` 时壳 `onBack` 不渲染。  
+15. 不做无行为装饰按钮；要么实现要么隐藏。  
+16. 交付：`pnpm typecheck`；改 UI 后 **浏览器点主路径**（禁止只 curl）。
 
 ## Forge UI 组件库（必读）
 

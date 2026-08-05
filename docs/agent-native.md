@@ -56,6 +56,13 @@ Coding Agent 是第一开发界面。理念对齐 [ShipAny Next](https://docs.sh
 
 Starter skill 只给后台常用捷径，**不**复制整本组件百科。
 
+## 环境注意（Codex 交叉测试结论）
+
+- `AUTH_MODE=demo` **只**简化登录，**不**提供业务表内存存储。  
+- 凡 CRUD 必须有 `DATABASE_URL` + `pnpm db:push`。  
+- `DataTable.sortable` 未接排序逻辑时不要开。  
+- store 归 **new-page**；new-module 只保证 API。  
+
 ## 质量门禁
 
 - 像 Forge 官方后台，不像玩具 UI  
