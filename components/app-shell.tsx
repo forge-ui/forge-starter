@@ -248,14 +248,17 @@ export function AppShell({ children }: { children: ReactNode }) {
       hideSidebarWidgets
       pageTitle={shell.title}
       pageHeaderVariant={
-        /\/accounts\/[^/]+\/?$/.test(pathname) && !pathname.endsWith("/accounts/")
+        (/\/accounts\/[^/]+\/?$/.test(pathname) && !pathname.endsWith("/accounts/"))
+        || (/\/approvals\/[^/]+\/?$/.test(pathname) && !pathname.endsWith("/approvals/"))
           ? "detail"
           : "home"
       }
       onBack={
-        /\/accounts\/[^/]+/.test(pathname)
+        /\/accounts\/[^/]+/.test(pathname) && !pathname.endsWith("/accounts/")
           ? () => router.push("/accounts/")
-          : undefined
+          : /\/approvals\/[^/]+/.test(pathname) && !pathname.endsWith("/approvals/")
+            ? () => router.push("/approvals/")
+            : undefined
       }
       primaryAction={
         shell.primaryAction

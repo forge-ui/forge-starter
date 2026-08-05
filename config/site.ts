@@ -14,6 +14,7 @@ export type RouteShell = {
 export const routeShells: Record<string, RouteShell> = {
   "/dashboard": { title: "工作台", hideHeader: true },
   "/accounts": { title: "账号管理", hideHeader: true },
+  "/approvals": { title: "审批中心", hideHeader: true },
   "/settings": { title: "设置", hideHeader: true },
   "/settings/profile": { title: "个人资料", hideHeader: true },
   "/settings/security": { title: "修改密码", hideHeader: true },
@@ -27,6 +28,9 @@ export function shellForPath(pathname: string): RouteShell {
     : pathname;
   if (normalized.match(/^\/accounts\/[^/]+$/)) {
     return { title: "账号详情", hideHeader: true };
+  }
+  if (normalized.match(/^\/approvals\/[^/]+$/)) {
+    return { title: "审批详情", hideHeader: true };
   }
   return routeShells[normalized] ?? { title: siteConfig.name };
 }
