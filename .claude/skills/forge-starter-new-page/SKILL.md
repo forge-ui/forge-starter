@@ -54,7 +54,8 @@ description: >
 | form-modal | `/ref/form-modal` | `account-form-dialog` / `approval-form-dialog` |
 | form-page | `/ref/form-page` | 字段极多时 |
 | detail-modal | `/ref/detail-modal` | **`approval-detail-dialog`** |
-| detail 全页 | `/ref/detail` | **`accounts/[id]`** |
+| detail 全页（业务对象） | `/ref/detail` | **`accounts/[id]`** |
+| profile 个人/成员 | `/ref/profile` | 左资料卡 + 右 KPI/Tab；对照 monorepo members/[id] |
 | split 主从 | `/ref/split` | — |
 | queue 行内动作 | `/ref/queue` | approvals 待办 |
 | settings | `/ref/settings` | `settings/*` |

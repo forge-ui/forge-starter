@@ -39,6 +39,14 @@ export const REF_PAGES: RefPageMeta[] = [
     components: ["Breadcrumbs", "StatusBadge", "Button", "DescriptionItem", "StatCard"],
   },
   {
+    slug: "profile",
+    title: "详情 · 个人/成员",
+    role: "profile",
+    summary: "左：头像资料卡；右：KPI + Tab（项目/任务/动态）。成员档案专用，不是普通业务 detail。",
+    forgeTemplate: "templates/project-template/members/[id]",
+    components: ["Avatar", "LineChartStatCard", "TabBar", "DataTable", "HistoryGrouped", "StatusBadge", "Button"],
+  },
+  {
     slug: "detail-modal",
     title: "详情 · 弹窗",
     role: "detail-modal",

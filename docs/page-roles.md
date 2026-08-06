@@ -51,6 +51,7 @@
 | collection-table | `/ref/list-table` | accounts / approvals 列表 |
 | collection-cards | `/ref/list-cards` | — |
 | detail | `/ref/detail` | accounts/[id] |
+| profile（个人/成员） | `/ref/profile` | —（模板 members/[id]） |
 | detail-modal | `/ref/detail-modal` | approvals 弹窗 |
 | form-page | `/ref/form-page` | — |
 | form-modal | `/ref/form-modal` | *-form-dialog |

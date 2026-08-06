@@ -15,7 +15,8 @@
 |------|------|------|
 | `/ref/list-table` | 列表 · 表格 | ecommerce/customers、accounts |
 | `/ref/list-cards` | 列表 · 卡片网格 | project projects |
-| `/ref/detail` | 详情 · 全页 | accounts/[id] |
+| `/ref/detail` | 详情 · 全页业务档案 | accounts/[id] |
+| `/ref/profile` | 详情 · **个人/成员**（左资料卡 + 右 KPI/Tab） | project members/[id] |
 | `/ref/detail-modal` | 详情 · 弹窗 | approvals |
 | `/ref/form-page` | 表单 · 整页 | products/new |
 | `/ref/form-modal` | 表单 · 弹窗 | form dialogs |
