@@ -20,6 +20,7 @@ export const routeShells: Record<string, RouteShell> = {
   "/settings/security": { title: "修改密码", hideHeader: true },
   "/settings/apps": { title: "应用管理", hideHeader: true },
   "/settings/notifications": { title: "系统设置", hideHeader: true },
+  "/ref": { title: "页面参考库", hideHeader: true },
 };
 
 export function shellForPath(pathname: string): RouteShell {
@@ -28,6 +29,10 @@ export function shellForPath(pathname: string): RouteShell {
     : pathname;
   if (normalized.match(/^\/accounts\/[^/]+$/)) {
     return { title: "账号详情", hideHeader: true };
+  }
+  // AI reference gallery (not in product menu)
+  if (normalized === "/ref" || normalized.startsWith("/ref/")) {
+    return { title: "页面参考库", hideHeader: true };
   }
   // approvals 详情为弹窗，无独立详情页壳
   return routeShells[normalized] ?? { title: siteConfig.name };

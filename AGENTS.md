@@ -68,15 +68,18 @@ app/(auth)/              登录注册找回
 app/(app)/dashboard      工作台
 app/(app)/accounts       ★ 重样板：列表 + 表单弹窗 + 全页详情
 app/(app)/approvals      ★ 轻样板：列表 + 表单/详情弹窗
+app/(app)/ref/**         ★ AI 参考页（真实路由，不进菜单；生产默认关）
 app/(app)/settings       profile / security / apps
 app/api/auth|accounts|approvals
 components/app-shell.tsx
 components/*-form-dialog.tsx | *-detail-dialog.tsx | *-store.tsx
 components/ui/modal.tsx
 config/site.ts menu.tsx apps.ts
-lib/auth lib/db lib/accounts lib/approvals
-docs/agent-native.md module-template.md page-roles.md
+lib/auth lib/db lib/accounts lib/approvals lib/reference
+docs/agent-native.md module-template.md page-roles.md reference-pages.md forge-components.md
 ```
+
+参考页索引：`/ref/` · 说明：`docs/reference-pages.md` · 生产开启：`SHOW_REF_PAGES=true`
 
 ## 官方视觉对照
 

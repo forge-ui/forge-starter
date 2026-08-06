@@ -59,12 +59,27 @@ async function hasValidSession(request: NextRequest) {
   }
 }
 
+function refPagesEnabled() {
+  // AI/dev reference gallery under /ref — off in production unless explicitly enabled
+  if (process.env.SHOW_REF_PAGES?.trim().toLowerCase() === "true") return true;
+  if (process.env.SHOW_REF_PAGES?.trim().toLowerCase() === "false") return false;
+  return process.env.NODE_ENV !== "production";
+}
+
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const path = normalizePath(pathname);
+
+  if (path === "/ref" || path.startsWith("/ref/")) {
+    if (!refPagesEnabled()) {
+      return new NextResponse("Not Found", { status: 404 });
+    }
+  }
+
   if (!guardEnabled()) {
     return NextResponse.next();
   }
 
-  const { pathname } = request.nextUrl;
   const loggedIn = await hasValidSession(request);
 
   if (isProtectedAppPath(pathname) && !loggedIn) {

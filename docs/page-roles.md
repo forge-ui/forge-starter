@@ -42,12 +42,31 @@
 
 拿不准时问用户，不要在 skill 里写死某一种。
 
+## Starter 可渲染参考页（不进菜单）
+
+开发环境打开 **`/ref/`**。生产默认关闭，见 `docs/reference-pages.md`。
+
+| 角色 | `/ref/*` | 业务可运行样板 |
+|------|----------|----------------|
+| collection-table | `/ref/list-table` | accounts / approvals 列表 |
+| collection-cards | `/ref/list-cards` | — |
+| detail | `/ref/detail` | accounts/[id] |
+| detail-modal | `/ref/detail-modal` | approvals 弹窗 |
+| form-page | `/ref/form-page` | — |
+| form-modal | `/ref/form-modal` | *-form-dialog |
+| split | `/ref/split` | — |
+| settings | `/ref/settings` | settings/* |
+| activity | `/ref/activity` | — |
+| queue | `/ref/queue` | approvals 待办 |
+| empty | `/ref/empty` | 各列表空态 |
+| dashboard | `/ref/dashboard-kpi` | `/dashboard` |
+
 ## 推荐对照
 
 | 角色 | 官方参考 | Starter 样板 |
 |------|----------|--------------|
-| dashboard | ecommerce-2 | `dashboard` |
-| collection | ecommerce/customers | `accounts`、`approvals` 列表 |
+| dashboard | ecommerce-2 | `dashboard` + `/ref/dashboard-kpi` |
+| collection | ecommerce/customers | `accounts`、`approvals` 列表 + `/ref/list-table` / `list-cards` |
 | form-modal | customers Add Modal | `account-form-dialog`、`approval-form-dialog` |
 | detail-modal | （Starter 自研） | `approval-detail-dialog` |
 | detail | customers/[id] | `accounts/[id]` |

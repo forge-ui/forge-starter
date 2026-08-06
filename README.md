@@ -33,12 +33,16 @@ Skills：`.agents/skills/`（与 `.claude/skills/` 同步）。
 
 | 路径 | 形态 |
 |------|------|
-| `/accounts` + `/accounts/[id]` | 列表 + 弹窗表单 + **全页详情** |
-| `/approvals` | 列表 + 弹窗发起 + **详情弹窗** |
+| `/accounts` + `/accounts/[id]` | 列表 + 弹窗表单 + **全页详情**（菜单可见） |
+| `/approvals` | 列表 + 弹窗发起 + **详情弹窗**（菜单可见） |
 | `/dashboard` | 工作台 |
 | `/settings/*` | 设置 |
+| **`/ref/`** | **AI 参考库**（真实页、**不进菜单**；表/卡列表、详情、分屏、设置、时间线…） |
 
-更多文档：`docs/agent-native.md` · `docs/module-template.md` · `docs/page-roles.md` · **`docs/forge-components.md`**
+开发：`http://localhost:3020/ref/`  
+生产默认 404；需要时设 `SHOW_REF_PAGES=true`。
+
+更多文档：`docs/reference-pages.md` · `docs/agent-native.md` · `docs/page-roles.md` · `docs/forge-components.md`
 
 ## 能力摘要
 

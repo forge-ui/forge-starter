@@ -45,16 +45,24 @@ description: >
 
 ## Step 1 — 定角色与样板
 
-从用户描述确定：
+从用户描述确定。**先打开 `/ref/` 对照范式，再抄业务样板接真数据。**
 
-| 角色 | 抄谁 |
-|------|------|
-| collection 列表 | `accounts/page` 或 `approvals/page`（筛选行布局一致） |
-| form-modal | `account-form-dialog` / `approval-form-dialog` |
-| detail-modal | **`approval-detail-dialog`**（轻） |
-| detail 全页 | **`accounts/[id]`**（重） |
-| dashboard | `dashboard/page` + monorepo ecommerce-2 |
+| 角色 | 参考页（不进菜单） | 业务可运行样板 |
+|------|-------------------|----------------|
+| collection 表格列表 | `/ref/list-table` | `accounts/page` / `approvals/page` |
+| collection 卡片网格 | `/ref/list-cards` | — |
+| form-modal | `/ref/form-modal` | `account-form-dialog` / `approval-form-dialog` |
+| form-page | `/ref/form-page` | 字段极多时 |
+| detail-modal | `/ref/detail-modal` | **`approval-detail-dialog`** |
+| detail 全页 | `/ref/detail` | **`accounts/[id]`** |
+| split 主从 | `/ref/split` | — |
+| queue 行内动作 | `/ref/queue` | approvals 待办 |
+| settings | `/ref/settings` | `settings/*` |
+| activity | `/ref/activity` | — |
+| dashboard | `/ref/dashboard-kpi` | `dashboard/page` |
+| 空态 | `/ref/empty` | 各列表 empty |
 
+目录：`docs/reference-pages.md`、`lib/reference/catalog.ts`。
 详情：
 
 ```text

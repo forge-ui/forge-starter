@@ -21,6 +21,12 @@ Coding Agent 是第一开发界面。理念对齐 [ShipAny Next](https://docs.sh
 详情弹窗还是全页：**按内容选**，用户指定听用户，拿不准就问。  
 禁止 skill 写死「默认全页」或「默认弹窗」。
 
+## AI 参考页（真实页面 · 不进菜单）
+
+开发环境打开 **`/ref/`**：表格列表、卡片列表、全页/弹窗详情、主从分屏、设置、时间线、队列、空态、KPI 等。  
+说明：`docs/reference-pages.md`。生产默认 404（`SHOW_REF_PAGES=true` 可开）。  
+写 UI 时：**/ref 定范式 → accounts/approvals 接业务**。
+
 ## 推荐流程
 
 ```text
