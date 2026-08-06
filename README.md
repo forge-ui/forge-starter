@@ -35,10 +35,6 @@ Skills：`.agents/skills/`（与 `.claude/skills/` 同步）。
 |------|------|
 | `/accounts` + `/accounts/[id]` | 列表 + 弹窗表单 + **全页详情**（菜单可见） |
 | `/approvals` | 列表 + 弹窗发起 + **详情弹窗**（菜单可见） |
-| **采购应用** | **完整业务切片**（应用切换 →「采购管理系统」） |
-| `/procurement` | 采购工作台 KPI |
-| `/suppliers` + `/suppliers/[id]` | 供应商 · **重详情** CRUD |
-| `/purchase-orders` | 采购单 · **轻详情弹窗** + 审批流 |
 | `/dashboard` | 工作台 |
 | `/settings/*` | 设置 |
 | **`/ref/`** | **AI 参考库**（真实页、不进菜单：表/卡列表、CRM 人物与产品多 Tab、整页表单、日历、对话、文件、看板…） |

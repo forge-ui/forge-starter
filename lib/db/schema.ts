@@ -78,56 +78,9 @@ export const approvalRequests = pgTable("approval_requests", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
-/** Procurement: suppliers (heavy detail sample) */
-export const suppliers = pgTable(
-  "suppliers",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    name: text("name").notNull(),
-    code: text("code").notNull(),
-    contactName: text("contact_name").notNull().default(""),
-    contactEmail: text("contact_email").notNull().default(""),
-    contactPhone: text("contact_phone").notNull().default(""),
-    category: text("category").notNull().default("general"),
-    status: text("status").notNull().default("active"),
-    rating: integer("rating").notNull().default(3),
-    address: text("address").notNull().default(""),
-    notes: text("notes").notNull().default(""),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [uniqueIndex("suppliers_code_uidx").on(table.code)],
-);
-
-/** Procurement: purchase orders (light modal + approve workflow) */
-export const purchaseOrders = pgTable("purchase_orders", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  orderNo: text("order_no").notNull(),
-  title: text("title").notNull(),
-  supplierId: uuid("supplier_id").references(() => suppliers.id, { onDelete: "set null" }),
-  supplierName: text("supplier_name").notNull().default(""),
-  status: text("status").notNull().default("pending"),
-  amountCents: integer("amount_cents").notNull().default(0),
-  currency: text("currency").notNull().default("CNY"),
-  requesterName: text("requester_name").notNull(),
-  requesterUsername: text("requester_username").notNull(),
-  itemsJson: text("items_json").notNull().default("[]"),
-  reason: text("reason").notNull().default(""),
-  approverName: text("approver_name"),
-  approverUsername: text("approver_username"),
-  approverComment: text("approver_comment").notNull().default(""),
-  decidedAt: timestamp("decided_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-});
-
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type AdminAccountRow = typeof adminAccounts.$inferSelect;
 export type NewAdminAccountRow = typeof adminAccounts.$inferInsert;
 export type ApprovalRequestRow = typeof approvalRequests.$inferSelect;
 export type NewApprovalRequestRow = typeof approvalRequests.$inferInsert;
-export type SupplierRow = typeof suppliers.$inferSelect;
-export type NewSupplierRow = typeof suppliers.$inferInsert;
-export type PurchaseOrderRow = typeof purchaseOrders.$inferSelect;
-export type NewPurchaseOrderRow = typeof purchaseOrders.$inferInsert;

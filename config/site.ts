@@ -15,9 +15,6 @@ export const routeShells: Record<string, RouteShell> = {
   "/dashboard": { title: "工作台", hideHeader: true },
   "/accounts": { title: "账号管理", hideHeader: true },
   "/approvals": { title: "审批中心", hideHeader: true },
-  "/procurement": { title: "采购工作台", hideHeader: true },
-  "/suppliers": { title: "供应商", hideHeader: true },
-  "/purchase-orders": { title: "采购单", hideHeader: true },
   "/settings": { title: "设置", hideHeader: true },
   "/settings/profile": { title: "个人资料", hideHeader: true },
   "/settings/security": { title: "修改密码", hideHeader: true },
@@ -33,13 +30,10 @@ export function shellForPath(pathname: string): RouteShell {
   if (normalized.match(/^\/accounts\/[^/]+$/)) {
     return { title: "账号详情", hideHeader: true };
   }
-  if (normalized.match(/^\/suppliers\/[^/]+$/)) {
-    return { title: "供应商详情", hideHeader: true };
-  }
   // AI reference gallery (not in product menu)
   if (normalized === "/ref" || normalized.startsWith("/ref/")) {
     return { title: "页面参考库", hideHeader: true };
   }
-  // approvals / purchase-orders 详情为弹窗
+  // approvals 详情为弹窗，无独立详情页壳
   return routeShells[normalized] ?? { title: siteConfig.name };
 }

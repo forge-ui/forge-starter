@@ -22,14 +22,7 @@ const PRESETS: MenuPresetId[] = [
   "accounts-only",
   "custom",
 ];
-const MODULES: AppModuleId[] = [
-  "dashboard",
-  "accounts",
-  "settings",
-  "procurement",
-  "suppliers",
-  "purchase-orders",
-];
+const MODULES: AppModuleId[] = ["dashboard", "accounts", "settings"];
 
 function asKind(v: unknown): AppKind {
   return typeof v === "string" && (KINDS as string[]).includes(v)
@@ -121,11 +114,16 @@ function safeParse(raw: string | null): unknown[] | null {
 }
 
 /**
- * Always pin built-in catalog apps (accounts-admin, procurement, …).
+ * Always pin built-in catalog apps from DEFAULT_APP_ENTRIES.
  * localStorage may predate new seeds — merge by id without wiping user-added apps.
  */
+/** Former seed apps removed from the product — drop on load. */
+const REMOVED_SEED_IDS = new Set(["procurement"]);
+
 function mergeBuiltinApps(list: AppEntry[]): AppEntry[] {
-  const byId = new Map(list.map((a) => [a.id, a]));
+  const byId = new Map(
+    list.filter((a) => !REMOVED_SEED_IDS.has(a.id)).map((a) => [a.id, a]),
+  );
   for (const builtin of DEFAULT_APP_ENTRIES) {
     const existing = byId.get(builtin.id);
     if (!existing) {
