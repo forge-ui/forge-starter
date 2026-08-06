@@ -1,95 +1,168 @@
 # Forge Starter
 
-**Agent-native Forge 后台脚手架** — Next.js 16 + Tailwind v4 + `@forge-ui-official/core`。
+**Agent-native admin scaffold** for 0→1 B-side / internal apps.
 
-面向 Coding Agent 与人类：从 0 搭 **管理后台 / 内部系统**。  
-学 [ShipAny Next](https://docs.shipany.ai/zh/shipany-next) 的 **skill 拆分**，不对标支付/积分/CMS。
+Next.js 16 + Tailwind v4 + [`@forge-ui-official/core`]. Coding Agent is the primary IDE: skills split backend vs UI, real pages act as copyable samples — same *method* as [ShipAny Next](https://docs.shipany.ai/zh/shipany-next), **not** a SaaS feature pack (no payments / credits / CMS / landing factory).
 
 | | |
 |--|--|
-| 英文 | Forge Starter |
+| English | Forge Starter |
 | 中文 | Forge 后台脚手架 |
 | GitHub | https://github.com/forge-ui/forge-starter |
 
-## Agent 怎么用（一眼）
-
-1. 读 `AGENTS.md`  
-2. 跑 skills（**加业务 = 先 module 再 page**）：
-
-| Skill | 只做什么 |
-|-------|----------|
-| `forge-starter-quick-start` | 品牌 / accent / 菜单文案 / env + 模块 backlog |
-| `forge-starter-new-module` | **后端**：schema + service + API |
-| `forge-starter-new-page` | **UI**：列表 / 表单 / 详情 + 菜单 |
-
-3. 选组件：`docs/forge-components.md`（角色 → Kit 组件 → 样板 → monorepo case）  
-4. 详情形态 **无默认**：  
-   - **重** → 抄 `accounts`（全页详情）  
-   - **轻** → 抄 `approvals`（详情弹窗）  
-
-Skills：`.agents/skills/`（与 `.claude/skills/` 同步）。
-
-## 样板页（给 AI 抄的）
-
-| 路径 | 形态 |
-|------|------|
-| `/accounts` + `/accounts/[id]` | 列表 + 弹窗表单 + **全页详情**（菜单可见） |
-| `/approvals` | 列表 + 弹窗发起 + **详情弹窗**（菜单可见） |
-| `/dashboard` | 工作台 |
-| `/settings/*` | 设置 |
-| **`/ref/`** | **AI 参考库**（真实页、不进菜单：表/卡列表、CRM 人物与产品多 Tab、整页表单、日历、对话、文件、看板…） |
-
-开发：`http://localhost:3020/ref/`  
-生产默认 404；需要时设 `SHOW_REF_PAGES=true`。
-
-更多文档：`docs/reference-pages.md` · `docs/agent-native.md` · `docs/page-roles.md` · `docs/forge-components.md`
-
-## 能力摘要
-
-| 模块 | 说明 |
-|------|------|
-| 认证 | 用户名/邮箱 + 密码；demo \| local |
-| 数据库 | PostgreSQL；**CRUD 必须 `DATABASE_URL`**（demo 只省登录用户表） |
-| 邮件 | SMTP |
-| 应用壳 | AppLayout + 应用切换 |
-| Agent | skills + 双样板 + 组件选型表 |
-
-## 快速开始
+## Quick Start
 
 ```bash
 pnpm install
 cp .env.example .env
-# local 需要 Postgres：
+# Optional local Postgres (required for AUTH_MODE=local and all business CRUD):
 # docker compose up -d
 # AUTH_MODE=local
-# AUTH_SECRET=至少16位
+# AUTH_SECRET=<at-least-16-chars>
 # DATABASE_URL=postgresql://forge:forge@127.0.0.1:5432/forge_starter
 pnpm db:push
-pnpm dev --port 3020
+pnpm dev
 ```
 
-## 目录
+Open `http://localhost:3000`. Login uses demo mode by default (`AUTH_MODE=demo` — any username/password works; **demo does not store business data**).
+
+> **CRUD always needs Postgres.** `AUTH_MODE=demo` only skips the login-user table. Accounts, approvals, and any new module require `DATABASE_URL` + `pnpm db:push`.
+
+## What this is / is not
+
+| Is | Is not |
+|----|--------|
+| Forge-only admin shell + dual UI samples | ShipAny full SaaS (billing, credits, RBAC product, CMS) |
+| Skill pipeline: module → page | One-shot “generate whole product” |
+| `/ref/*` layout gallery for agents | Product features in the sidebar |
+| Postgres + SMTP + password auth | Multi-DB / OAuth / cloud mail SDKs |
+
+Agent contract (must-read): **`AGENTS.md`**. Product intent: **`PRODUCT.md`**.
+
+## Agent workflow
 
 ```text
-app/(auth)/ (app)/ api/
-components/   app-shell, *-dialog, *-store, ui/modal
-config/       site, menu, apps
-lib/          auth, db, accounts, approvals, …
-docs/         agent-native, module-template, page-roles, forge-components
-.agents/skills/
+1. Read AGENTS.md + docs/forge-components.md
+2. Brand / env        → forge-starter-quick-start
+3. Each business object:
+     a. forge-starter-new-module  → schema + service + API
+     b. forge-starter-new-page    → list / form / detail + menu
+4. Pure board / non-CRUD screen → new-page only
+5. pnpm typecheck · browser-check the main path (no curl-only QA)
+```
+
+**Detail shape has no global default:**
+
+- **Heavy** (tabs, archive, multi-block) → clone **`accounts`** (full page detail)
+- **Light** (few fields, back to list) → clone **`approvals`** (detail modal)
+- Unsure → ask the user
+
+**Component pick order:** live samples → `/ref/*` → forge monorepo cases (if present).
+
+## Runnable samples
+
+| Path | Role |
+|------|------|
+| `/accounts` · `/accounts/[id]` | Collection + modal form + **full-page detail** |
+| `/approvals` | Collection + create modal + **detail modal** + queue actions |
+| `/dashboard` | Workbench (ecommerce-2 style) |
+| `/settings/*` | Profile, security, apps, notifications |
+| **`/ref/`** | **AI reference gallery** (real routes, **not** in product menu) |
+
+`/ref` is on in development by default; production returns 404 unless `SHOW_REF_PAGES=true`. Index and catalog: `docs/reference-pages.md`, `lib/reference/catalog.ts`.
+
+Includes layout paradigms such as list table/cards, CRM person & product multi-tab, full-page form, calendar, chat, files, kanban, dashboards, invoice, tickets, API keys, credits ledger, billing, and more — **mock UI for cloning**, not SaaS product modules.
+
+## Tech stack
+
+- **Framework:** Next.js 16 (App Router), React 19, TypeScript
+- **UI:** `@forge-ui-official/core` (Forge UI Kit) + Tailwind CSS v4 + solar-icon-set
+- **Auth:** Username/email + password · `jose` sessions · demo \| local
+- **DB:** PostgreSQL only · Drizzle ORM
+- **Mail:** SMTP only (nodemailer); no cloud email SDK
+
+## Project structure
+
+```text
+app/
+  (auth)/          # login · register · forgot/reset password
+  (app)/           # dashboard · accounts · approvals · settings · ref/*
+  api/             # auth · accounts · approvals
+components/        # app-shell · *-store · *-dialog · ui/modal
+config/            # site · menu · apps
+lib/               # auth · db · accounts · approvals · reference
+docs/              # agent-native · page-roles · forge-components · …
+.agents/skills/    # quick-start · new-module · new-page  (sync .claude/skills)
 AGENTS.md PRODUCT.md
 ```
 
-## 常用命令
+## Skills
 
-```bash
-pnpm dev --port 3020
-pnpm typecheck
-pnpm db:push
+| Skill | Scope |
+|-------|--------|
+| `forge-starter-quick-start` | Brand, accent, menu labels, env, module backlog |
+| `forge-starter-new-module` | **Backend only:** schema + service + API |
+| `forge-starter-new-page` | **UI only:** list / form / detail + menu (needs API first) |
+
+Canonical path: `.agents/skills/`. Keep `.claude/skills/` in sync when editing.
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Dev server |
+| `pnpm build` | Production build |
+| `pnpm typecheck` | TypeScript check |
+| `pnpm db:push` | Push schema (dev) |
+| `pnpm db:generate` | Generate migrations |
+| `pnpm db:studio` | Drizzle Studio |
+
+## Environment
+
+```env
+# demo | local  (demo = skip login user table only)
+AUTH_MODE=demo
+AUTH_SECRET=change-me-to-a-long-random-string
+
+APP_URL=http://localhost:3000
+DATABASE_URL=postgresql://forge:forge@127.0.0.1:5432/forge_starter
+
+# Optional: force login even in demo
+# AUTH_GUARD=true
+
+# Optional: AI reference pages in production
+# SHOW_REF_PAGES=true
+
+# Optional SMTP (forgot-password logs link to console if unset)
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASS=
+SMTP_FROM="Forge Starter <noreply@example.com>"
 ```
 
-## 边界
+See `.env.example`. Docker Postgres: `docker compose up -d` (see `docker-compose.yml`).
 
-- 只 Forge Kit；缺组件 `FORGE-GAP`  
-- 不做支付/IM/中台代码生成  
-- UI 改完要浏览器点主路径，禁止只 curl  
+## Docs
+
+| Doc | Purpose |
+|-----|---------|
+| `AGENTS.md` | Agent contract (must-read) |
+| `PRODUCT.md` | Product intent & non-goals |
+| `docs/agent-native.md` | Workflow & skill boundaries |
+| `docs/forge-components.md` | Role → kit components → samples |
+| `docs/page-roles.md` | Page roles & detail choice |
+| `docs/module-template.md` | Module + page dual samples |
+| `docs/reference-pages.md` | `/ref/*` catalog |
+
+## Boundaries
+
+- **Forge only** — no MUI / Ant / second component kit; missing capability → `FORGE-GAP`
+- Colors: `fg-*` tokens · controls: `color={siteConfig.accent}`
+- List filters: **one row** pills + search
+- No dead / decorative buttons; implement or hide
+- Ship gate: `pnpm typecheck` + **browser** main path (not curl-only)
+
+---
+
+**Forge Starter** — scaffold for agents building real admin UIs on Forge.
