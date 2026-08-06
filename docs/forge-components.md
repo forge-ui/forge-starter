@@ -11,14 +11,14 @@
 ../forge/docs/for-agents/components.md  ← 全量介绍表 + Case 列
 ```
 
-原稿还在 `../forge-readdy/catalog/`（sync 脚本 / codegen）；**Agent 日常读 forge/docs/for-agents**。
+原稿还在 `../forge-readdy/catalog/`（sync 脚本、codegen）；**Agent 日常读 forge/docs/for-agents**。
 
 ## 权威链路（必须按序）
 
 ```text
 1. 定页面角色          → docs/page-roles.md
 2. 本表或 for-agents 选组件
-3. 抄 Starter 样板     → accounts / approvals / dashboard
+3. 抄 Starter 样板     → accounts、approvals、dashboard
 4. 查 props            → ../forge/src/app/cases/<name>/page.tsx
 5. 仍没有              → FORGE-GAP
 ```
@@ -38,13 +38,13 @@
 
 | 页面/业务意图 | 先用这些组件 | Starter 抄谁 | monorepo case（查 props） |
 |---------------|--------------|--------------|---------------------------|
-| 列表 / 管理 | `DataTable` `Button` `ButtonGroup` `TextField` `StatusBadge` `Breadcrumbs` `IconButton` `PlusIcon` | `accounts/page` `approvals/page` | `table` `tab` `toolbar` `button-link` |
+| 列表、管理 | `DataTable` `Button` `ButtonGroup` `TextField` `StatusBadge` `Breadcrumbs` `IconButton` `PlusIcon` | `accounts/page` `approvals/page` | `table` `tab` `toolbar` `button-link` |
 | 筛选条 | **单行** `ButtonGroup` + `TextField`（搜索） | 同上 | `tab` `input-field` |
 | 新建/编辑弹窗 | `TextField` `TextArea` `SelectOption` + 本仓 `Modal` | `account-form-dialog` `approval-form-dialog` | `input-field` `modal` |
 | 轻详情（看完回列表） | `StatusBadge` `DescriptionItem`/`字段行` + `Modal` 底栏按钮 | `approval-detail-dialog` | `list` `modal` `badge` |
 | 重详情（档案） | `Breadcrumbs` `StatusBadge` `StatCard` `TabBar` `DataTable` 侧栏字段 | `accounts/[id]` | `page-header` `card` `tab` `list` `table` |
 | 删除确认 | `ConfirmationDialog` **外包** `Modal`/遮罩 | `accounts/page` 删除 | `modal` |
-| 工作台 / 指标 | `StatCard` `ChartCard` 图表家族 `DataTable` | `dashboard` | `card` `chart` `table` |
+| 工作台、指标 | `StatCard` `ChartCard` 图表家族 `DataTable` | `dashboard` | `card` `chart` `table` |
 | 设置单卡 | `TextField` `Button` 窄卡片 | `settings/profile` 等 | `input-field` |
 | 空态 | 文案 + `Button`；可选 solar 图标 | 各列表 empty | `button-link` |
 
@@ -53,8 +53,8 @@
 | 组件/能力 | 原因 |
 |-----------|------|
 | `DataTable.sortable: true` | **不会自动排序**，未实现逻辑=假按钮 |
-| 自拼 sidebar / topbar | 用本仓 `AppShell` / Kit `AppLayout` |
-| Toast / Drawer | Kit 可能未导出；先 FORGE-GAP |
+| 自拼 sidebar、topbar | 用本仓 `AppShell`、Kit `AppLayout` |
+| Toast、Drawer | Kit 可能未导出；先 FORGE-GAP |
 | 两行 `ButtonGroup` | Starter 禁止 |
 
 ## 后台常用 import 清单
@@ -87,7 +87,7 @@ import { siteConfig } from "@/config/site";
 
 ## Agent 执行口令（写页面前默念）
 
-1. 这是 **列表 / 表单弹窗 / 轻详情 / 重详情 / 看板** 哪一种？  
+1. 这是 **列表、表单弹窗、轻详情、重详情、看板** 哪一种？  
 2. 上表对应组件包抄了没有？  
 3. Starter 样板文件打开对照了没有？  
 4. 不确定的 props 是否打开了 `../forge/src/app/cases/...`？  

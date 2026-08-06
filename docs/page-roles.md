@@ -48,7 +48,7 @@
 
 | 角色 | `/ref/*` | 业务可运行样板 |
 |------|----------|----------------|
-| collection-table | `/ref/list-table` | accounts / approvals 列表 |
+| collection-table | `/ref/list-table` | accounts、approvals 列表 |
 | collection-cards | `/ref/list-cards` | — |
 | detail | `/ref/detail` | accounts/[id] |
 | person（CRM 人物多 Tab） | `/ref/person` | — john-bushmill |
@@ -79,8 +79,8 @@
 
 | 角色 | 官方参考 | Starter 样板 |
 |------|----------|--------------|
-| dashboard | ecommerce-2 / crm / analytics | `/dashboard` + `/ref/dashboard-*` |
-| collection | ecommerce/customers | `accounts`、`approvals` 列表 + `/ref/list-table` / `list-cards` |
+| dashboard | ecommerce-2、crm、analytics | `/dashboard` + `/ref/dashboard-*` |
+| collection | ecommerce/customers | `accounts`、`approvals` 列表 + `/ref/list-table`、`list-cards` |
 | form-modal | customers Add Modal | `account-form-dialog`、`approval-form-dialog` |
 | detail-modal | （Starter 自研） | `approval-detail-dialog` |
 | detail | customers/[id] | `accounts/[id]` |
@@ -112,5 +112,5 @@
 
 ## 选型权威
 
-本表 + monorepo templates + Starter 双样板（approvals / accounts）。  
+本表 + monorepo templates + Starter 双样板（approvals、accounts）。  
 不依赖仓库外设计插件。

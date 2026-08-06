@@ -20,18 +20,18 @@ Bootstrap **branding + shell** only。不装支付/CMS/OAuth。
 |------|------|
 | 产品中文名 | `Forge Starter 基础后台` |
 | 产品英文名 | `Forge Starter` |
-| accent | `blue`（可选 purple / black） |
+| accent | `blue`（可选 purple、black） |
 | 侧栏应用名 | 同中文名 |
 | AUTH_MODE | `demo` 或 `local` |
 | 首期模块（可选） | 名词列表，如：订单、客户 |
 
 ## Allowlist（第一遍只改这些）
 
-1. `config/site.ts` — `name` / `teamName` / `accent`  
-2. `config/apps.ts` — 默认应用 `name` / `subtitle`  
+1. `config/site.ts` — `name`、`teamName`、`accent`  
+2. `config/apps.ts` — 默认应用 `name`、`subtitle`  
 3. `config/menu.tsx` — 菜单 label（href 仅 brief 明确时改）  
 4. `app/layout.tsx` — `metadata`  
-5. `.env` / `.env.example` — `APP_URL`、`AUTH_MODE` 说明  
+5. `.env`、`.env.example` — `APP_URL`、`AUTH_MODE` 说明  
 6. `README.md` — 顶部一句话（可选）  
 
 **禁止**第一遍：业务 CRUD、新依赖、第二 UI 库。

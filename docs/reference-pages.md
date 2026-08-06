@@ -48,7 +48,7 @@
 ## Agent 用法
 
 1. 定角色 → 打开对应 `/ref/...`  
-2. 接业务时抄 **accounts / approvals** 的数据层  
+2. 接业务时抄 **accounts、approvals** 的数据层  
 3. props 查 `../forge/docs/for-agents/` 与 cases  
 
 **优先级：** 可运行业务样板 > `/ref/*` > monorepo 全文 template。

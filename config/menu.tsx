@@ -13,7 +13,7 @@ import {
   type AppModuleId,
 } from "@/config/apps";
 
-// 个人资料 / 改密 / 系统偏好走侧栏 profile 菜单，不占主菜单。
+// 个人资料、改密、系统偏好走侧栏 profile 菜单，不占主菜单。
 const MODULE_MENU: Record<AppModuleId, AppLayoutMenuItem> = {
   dashboard: {
     icon: <HomeSmileBoldDuotone size={20} />,

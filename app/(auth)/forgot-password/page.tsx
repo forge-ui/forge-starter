@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
 
       <div className="flex flex-col gap-4">
         <TextField
-          label="用户名 / 邮箱"
+          label="用户名或邮箱"
           placeholder="输入用户名或邮箱..."
           value={login}
           onChange={setLogin}

@@ -7,7 +7,7 @@ Coding Agent 是第一开发界面，专注 **Forge 管理后台**：skills 拆�
 | 做法 | 价值 |
 |------|------|
 | skill 拆分：后端 vs 页面 | 接口与 UI 边界清晰，Agent 不容易一次抄乱 |
-| 仓库里真页面当抄写样板 | accounts / approvals / `/ref` 可直接对照 |
+| 仓库里真页面当抄写样板 | accounts、approvals、`/ref` 可直接对照 |
 | AGENTS 写清规矩 | 颜色、组件、详情形态有据可依 |
 | typecheck + 浏览器点主路径 | 交付质量可感知 |
 
@@ -15,7 +15,7 @@ Coding Agent 是第一开发界面，专注 **Forge 管理后台**：skills 拆�
 
 | 样板 | 适合 | 路径 |
 |------|------|------|
-| **accounts** | 重详情：Tab / 多区块 / 档案 | 列表 + 表单弹窗 + **全页** `accounts/[id]` |
+| **accounts** | 重详情：Tab、多区块、档案 | 列表 + 表单弹窗 + **全页** `accounts/[id]` |
 | **approvals** | 轻详情：字段少、看完回列表 | 列表 + 表单弹窗 + **详情弹窗** |
 
 详情弹窗还是全页：**按内容选**，用户指定听用户，拿不准就问。  
@@ -46,7 +46,7 @@ Coding Agent 是第一开发界面，专注 **Forge 管理后台**：skills 拆�
 
 | 说法 | Skill | 边界 |
 |------|--------|------|
-| 新开后台 / 改品牌 | `forge-starter-quick-start` | 只 brand + env |
+| 新开后台、改品牌 | `forge-starter-quick-start` | 只 brand + env |
 | 加数据与接口 | `forge-starter-new-module` | **只后端** |
 | 加列表/详情/看板页 | `forge-starter-new-page` | **只 UI** + 菜单 |
 
@@ -74,6 +74,6 @@ Coding Agent 是第一开发界面，专注 **Forge 管理后台**：skills 拆�
 - 列表筛选 **一行** pills + 搜索  
 - 侧栏摘要卡 **不** 塞「返回列表」  
 - `pnpm typecheck`；改 UI 要浏览器点过，**禁止只 curl**  
-- 不引入第二 UI 库 / 支付 / 假按钮  
+- 不引入第二 UI 库、支付、假按钮  
 
 本仓库胜负手：**Forge-only + 清晰 skill 边界 + 可抄样板**。

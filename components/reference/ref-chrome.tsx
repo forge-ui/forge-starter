@@ -16,7 +16,7 @@ export function RefChrome({
   return (
     <div className="flex flex-col gap-5">
       <div className="rounded-2xl border border-dashed border-fg-blue-200 bg-fg-blue-50/60 px-4 py-3 text-sm text-fg-grey-700">
-        <p className="font-semibold text-fg-black">AI / 开发参考页 · 不进侧栏菜单</p>
+        <p className="font-semibold text-fg-black">AI、开发参考页 · 不进侧栏菜单</p>
         <p className="mt-1">
           路径前缀 <code className="text-fg-blue">/ref/*</code>
           。生产默认 404（设 <code className="text-fg-blue">SHOW_REF_PAGES=true</code> 可开）。

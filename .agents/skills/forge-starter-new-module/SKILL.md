@@ -24,19 +24,19 @@ UI 下一步：`forge-starter-new-page`。
 - 创建/大改 `app/(app)/…/page.tsx` 或详情 UI（交给 new-page）  
 - 规定详情必须全页或必须弹窗  
 - 业务表并进 `users`  
-- 假接口 / 假按钮  
+- 假接口、假按钮  
 
 ## Inputs
 
 - 资源英文名（复数路由优先）：`orders`  
 - 字段与枚举  
-- 需要的操作：list / get / create / update / delete / 自定义 action  
+- 需要的操作：list、get、create、update、delete、自定义 action  
 
 ## Steps
 
 ### 1. 命名与表
 
-- 路由段 / API：`/<res>/`  
+- 路由段、API：`/<res>/`  
 - 表名：清晰英文（如 `orders`）  
 - 加到 `lib/db/schema.ts` → `pnpm db:push`  
 
@@ -60,13 +60,13 @@ app/api/<res>/[id]/route.ts     # GET one, PATCH/DELETE/POST actions
 ```
 
 - `getSessionUser()`，未登录 401  
-- `jsonOk` / `jsonError`（`lib/auth/http.ts`）  
+- `jsonOk`、`jsonError`（`lib/auth/http.ts`）  
 - Zod 校 body  
 
 ### 4. store 归属
 
 **默认不在 new-module 建 store。**  
-Client store（`components/<res>-store.tsx` + layout Provider）归 **new-page / UI 层**。  
+Client store（`components/<res>-store.tsx` + layout Provider）归 **new-page、UI 层**。  
 本步只保证 REST API 可被 `fetch` 调用。
 
 ### 5. Verify

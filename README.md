@@ -26,7 +26,7 @@
 ```bash
 pnpm install
 cp .env.example .env
-# 本地业务 CRUD / AUTH_MODE=local 需要 Postgres：
+# 本地业务 CRUD、AUTH_MODE=local 需要 Postgres：
 # docker compose up -d
 # AUTH_MODE=local
 # AUTH_SECRET=<至少16位>
@@ -41,7 +41,7 @@ pnpm dev
 
 ## 适合做什么
 
-- 内部运营 / 管理后台、OA 类轻应用  
+- 内部运营、管理后台、OA 类轻应用  
 - 用 AI 助手从 0 搭第一版 B 端，并保持 Forge 视觉一致  
 - 需要「列表 + 表单 + 详情」标准 CRUD，以及日历、看板、档案等多页范式  
 
@@ -51,19 +51,19 @@ Agent 合约：**`AGENTS.md`**。产品说明：**`PRODUCT.md`**。
 
 ```text
 1. 读 AGENTS.md + docs/forge-components.md
-2. 品牌 / 环境        → forge-starter-quick-start
+2. 品牌、环境        → forge-starter-quick-start
 3. 每个业务对象：
      a. forge-starter-new-module  → schema + service + API
-     b. forge-starter-new-page    → 列表 / 表单 / 详情 + 菜单
-4. 纯看板 / 非 CRUD 单页 → 只跑 new-page
+     b. forge-starter-new-page    → 列表、表单、详情 + 菜单
+4. 纯看板、非 CRUD 单页 → 只跑 new-page
 5. pnpm typecheck · 浏览器点主路径验收
 ```
 
 **详情怎么选：**
 
-- 内容多、有 Tab / 档案 → 抄 **`accounts`**（全页详情）  
+- 内容多、有 Tab、档案 → 抄 **`accounts`**（全页详情）  
 - 字段少、处理完回列表 → 抄 **`approvals`**（详情弹窗）  
-- 不确定 → 问产品 / 用户  
+- 不确定 → 问产品、用户  
 
 **选组件：** 可运行样板 → `/ref/*` → forge monorepo cases（有旁路时）
 
@@ -79,7 +79,7 @@ Agent 合约：**`AGENTS.md`**。产品说明：**`PRODUCT.md`**。
 
 生产环境访问 `/ref` 需设 `SHOW_REF_PAGES=true`。完整目录：`docs/reference-pages.md`。
 
-画廊覆盖：表格/卡片列表、CRM 人物与产品多 Tab、整页表单、日历、对话、文件、Kanban、多种 Dashboard、发票、工单、API Key、积分账本、订阅等，方便对照真实业务页来搭。
+画廊覆盖：表格、卡片列表、CRM 人物与产品多 Tab、整页表单、日历、对话、文件、Kanban、多种 Dashboard、发票、工单、API Key、积分账本、订阅等，方便对照真实业务页来搭。
 
 ## 技术栈
 
@@ -93,7 +93,7 @@ Agent 合约：**`AGENTS.md`**。产品说明：**`PRODUCT.md`**。
 
 ```text
 app/
-  (auth)/          # 登录 · 注册 · 找回/重置密码
+  (auth)/          # 登录 · 注册 · 找回、重置密码
   (app)/           # 工作台 · 账号 · 审批 · 设置 · ref/*
   api/             # auth · accounts · approvals
 components/        # app-shell · *-store · *-dialog · ui/modal
@@ -111,7 +111,7 @@ AGENTS.md PRODUCT.md CLAUDE.md
 |-------|--------|
 | `forge-starter-quick-start` | 品牌、accent、菜单文案、env、模块 backlog |
 | `forge-starter-new-module` | 后端：schema + service + API |
-| `forge-starter-new-page` | 前端：列表 / 表单 / 详情 + 菜单（依赖已有 API） |
+| `forge-starter-new-page` | 前端：列表、表单、详情 + 菜单（依赖已有 API） |
 
 Skills 只维护在 **`.agents/skills/`**。
 

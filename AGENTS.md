@@ -11,7 +11,7 @@ Coding Agent 是第一开发界面：skills 拆开后端与页面，双样板 + 
 2. 颜色只用 `fg-*`；业务控件 `color={siteConfig.accent}`（默认 `blue`）。  
 3. 图标 `solar-icon-set`；侧栏主菜单 `BoldDuotone`、`size={20}`。  
 4. 登录后页面在 `AppLayout`（`components/app-shell.tsx`）。  
-5. **禁止** MUI / Ant / 全量 shadcn 替代 Forge；缺能力 `FORGE-GAP` 并询问。  
+5. **禁止** MUI、Ant、全量 shadcn 替代 Forge；缺能力 `FORGE-GAP` 并询问。  
 6. 认证：用户名或邮箱 + 密码；库 **PostgreSQL only**；邮件 **仅 SMTP**。  
 7. 登录表 `users` ≠ 业务表（如 `admin_accounts`），不要混接。  
 8. **`AUTH_MODE=demo` 只绕过登录用户库，不提供业务持久化。** 任何 CRUD（accounts/approvals/新模块）都需要 `DATABASE_URL` + `pnpm db:push`。不要写「无 Postgres 也能做完整业务 CRUD」。  
@@ -49,9 +49,9 @@ docs/forge-components.md
 
 | Skill | 何时 | 边界 |
 |-------|------|------|
-| `forge-starter-quick-start` | 改名 / accent / 菜单 / env | 只品牌壳 |
+| `forge-starter-quick-start` | 改名、accent、菜单、env | 只品牌壳 |
 | `forge-starter-new-module` | 新业务数据与接口 | **只** schema + service + API（+ 可选 store） |
-| `forge-starter-new-page` | 列表 / 详情 / 看板 UI | **只** 页面 + 菜单；对照样板选型 |
+| `forge-starter-new-page` | 列表、详情、看板 UI | **只** 页面 + 菜单；对照样板选型 |
 
 路径：`.agents/skills/<name>/SKILL.md`（canonical）。  
 Skills 只维护 **`.agents/skills/`**。`.claude/skills` 为指向它的 symlink（给 Claude Code 发现用），勿再复制一份。
@@ -66,7 +66,7 @@ app/(app)/dashboard      工作台
 app/(app)/accounts       ★ 重样板：列表 + 表单弹窗 + 全页详情
 app/(app)/approvals      ★ 轻样板：列表 + 表单/详情弹窗
 app/(app)/ref/**         ★ AI 参考页（真实路由，不进菜单；生产默认关）
-app/(app)/settings       profile / security / apps
+app/(app)/settings       profile、security、apps
 app/api/auth|accounts|approvals
 components/app-shell.tsx
 components/*-form-dialog.tsx | *-detail-dialog.tsx | *-store.tsx
@@ -85,7 +85,7 @@ docs/agent-native.md module-template.md page-roles.md reference-pages.md forge-c
 | 角色 | Starter 样板 | Forge monorepo template（旁路） |
 |------|--------------|----------------------------------|
 | 工作台 | `dashboard` | `dashboards/ecommerce-2` |
-| 列表 | `accounts` / `approvals` 列表 | `ecommerce/customers` |
+| 列表 | `accounts`、`approvals` 列表 | `ecommerce/customers` |
 | 表单弹窗 | `*-form-dialog` | customers Add Modal |
 | 详情弹窗 | `approvals` detail dialog | — |
 | 全页详情 | `accounts/[id]` | `ecommerce/customers/[id]` |

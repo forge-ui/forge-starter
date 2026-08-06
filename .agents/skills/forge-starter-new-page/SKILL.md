@@ -24,7 +24,7 @@ description: >
 - 两行筛选 pills  
 - 侧栏塞「返回列表」  
 - 写死「默认全页详情」或「默认弹窗」  
-- 第二 UI 库 / Tailwind 默认色 / 假按钮  
+- 第二 UI 库、Tailwind 默认色、假按钮  
 - **`sortable: true` 却未实现排序**（DataTable 不会自动排序）  
 - 只 curl 验收  
 
@@ -49,7 +49,7 @@ description: >
 
 | 角色 | 参考页（不进菜单） | 业务可运行样板 |
 |------|-------------------|----------------|
-| collection 表格 | `/ref/list-table` | accounts / approvals |
+| collection 表格 | `/ref/list-table` | accounts、approvals |
 | collection 卡片 | `/ref/list-cards` | — |
 | form-modal | `/ref/form-modal` | *-form-dialog |
 | form-page 整页 | `/ref/form-page`（CRM leads/new） | 字段极多时 |
@@ -85,7 +85,7 @@ description: >
 ```text
 用户指定？ → 听用户
 字段少、看完回列表？ → approvals（弹窗）
-多区块 / Tab / 档案？ → accounts（全页）
+多区块、Tab、档案？ → accounts（全页）
 拿不准？ → 问用户
 ```
 
@@ -138,7 +138,7 @@ pnpm typecheck
 2. 筛选只有一行  
 3. 新建 → 持久化（刷新还在）  
 4. 打开详情（弹窗或全页），主操作可用  
-5. 能回到列表（关弹窗 / 页内返回 / 面包屑）  
+5. 能回到列表（关弹窗、页内返回、面包屑）  
 
 ## Report
 

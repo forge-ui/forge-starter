@@ -41,7 +41,7 @@ config/site.ts                    # hideHeader: true
 
 ```text
 components/<resource>-detail-dialog.tsx
-# 行点击 / ?id= 打开；可选 [id]/page.tsx redirect → ?id=
+# 行点击或 ?id= 打开；可选 [id]/page.tsx redirect → ?id=
 ```
 
 ### 全页详情（抄 accounts）
