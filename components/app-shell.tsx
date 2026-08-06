@@ -25,6 +25,7 @@ import {
   PROFILE_UPDATED_EVENT,
   type ProfileUpdatedDetail,
 } from "@/lib/auth/profile-events";
+import { ToastProvider } from "@/components/ui/toast-provider";
 
 type MeResponse = {
   ok: boolean;
@@ -269,6 +270,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       showKebab={false}
     >
       {children}
+      <ToastProvider />
     </AppLayout>
   );
 }

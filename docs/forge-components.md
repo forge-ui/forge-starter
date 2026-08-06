@@ -54,8 +54,25 @@
 |-----------|------|
 | `DataTable.sortable: true` | **不会自动排序**，未实现逻辑=假按钮 |
 | 自拼 sidebar、topbar | 用本仓 `AppShell`、Kit `AppLayout` |
-| Toast、Drawer | Kit 可能未导出；先 FORGE-GAP |
+| Drawer | Kit 可能未导出；先 FORGE-GAP |
+| 页面内嵌成功绿条 / 红条 | **禁止**；用全站 `toast`（见下） |
 | 两行 `ButtonGroup` | Starter 禁止 |
+
+### 全站 Toast（Starter 内置，非 Kit）
+
+操作成功/失败提示 **不要** 写进页面正文，统一弹层：
+
+```tsx
+import { toast } from "@/lib/toast";
+
+toast.success("保存成功");
+toast.error("删除失败");
+toast.info("请填写名称");
+```
+
+- 宿主：`ToastProvider` 已挂在 `components/app-shell.tsx`（登录后页面可用）
+- 实现：`lib/toast.ts`（总线）+ `components/ui/toast-provider.tsx`（浮层 UI）
+- 底部居中，约 2.6s 自动消失，可点关闭
 
 ## 后台常用 import 清单
 
@@ -79,8 +96,10 @@ import {
   type ColumnDef,
 } from "@forge-ui-official/core";
 import { Modal } from "@/components/ui/modal";
+import { toast } from "@/lib/toast";
 import { siteConfig } from "@/config/site";
 // color={siteConfig.accent}
+// toast.success("已保存") — 不要在页面里塞成功横幅
 ```
 
 图标：`solar-icon-set`（菜单 `BoldDuotone` size 20；行内操作 `Linear` size 16）。

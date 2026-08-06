@@ -22,7 +22,8 @@ Coding Agent 是第一开发界面：skills 拆开后端与页面，双样板 + 
 13. `ConfirmationDialog` 只是内容卡：必须用本仓 `components/ui/modal.tsx`（或等价宿主）包一层；对齐 `accounts` 删除确认。  
 14. 侧栏/摘要卡禁止塞「返回列表」；`hideHeader: true` 时壳 `onBack` 不渲染。  
 15. 不做无行为装饰按钮；要么实现要么隐藏。  
-16. 交付：`pnpm typecheck`；改 UI 后 **浏览器点主路径**（禁止只 curl）。
+16. **操作反馈用全站 toast**，禁止页面内嵌「创建成功」绿条：`import { toast } from "@/lib/toast"` → `toast.success/error/info(...)`。宿主已在 `AppShell`。  
+17. 交付：`pnpm typecheck`；改 UI 后 **浏览器点主路径**（禁止只 curl）。
 
 ## Forge UI 组件库（必读）
 
@@ -43,6 +44,7 @@ docs/forge-components.md
 ```
 
 - 通用 Modal：core 无导出 → `components/ui/modal.tsx`  
+- 操作 Toast：core 无导出 → `lib/toast.ts` + `components/ui/toast-provider.tsx`（已挂 AppShell）  
 - 缺组件 → `FORGE-GAP`，禁止手搓  
 
 ## Skills
