@@ -16,7 +16,13 @@ export type AppOpenMode = "same_tab" | "new_tab";
 export type AppAuthMode = "none" | "passthrough" | "oidc" | "platform";
 
 /** Built-in nav modules for internal apps */
-export type AppModuleId = "dashboard" | "accounts" | "settings";
+export type AppModuleId =
+  | "dashboard"
+  | "accounts"
+  | "settings"
+  | "procurement"
+  | "suppliers"
+  | "purchase-orders";
 
 /** @deprecated kept for localStorage migration only */
 export type MenuPresetId = "accounts-admin" | "dashboard-only" | "accounts-only" | "custom";
@@ -74,6 +80,9 @@ export const APP_MODULE_META: Record<
   dashboard: { label: "工作台", href: "/dashboard/" },
   accounts: { label: "账号管理", href: "/accounts/" },
   settings: { label: "应用管理", href: "/settings/apps/" },
+  procurement: { label: "采购工作台", href: "/procurement/" },
+  suppliers: { label: "供应商", href: "/suppliers/" },
+  "purchase-orders": { label: "采购单", href: "/purchase-orders/" },
 };
 
 /** Legacy presets → modules (migration) */
@@ -103,13 +112,23 @@ export const DEFAULT_APP_ENTRIES: AppEntry[] = [
   {
     id: "accounts-admin",
     name: "Forge Starter 基础后台",
-    subtitle: "当前产品",
+    subtitle: "账号 / 审批样板",
     kind: "internal",
     href: "/dashboard/",
     openMode: "same_tab",
     authMode: "platform",
     modules: ["dashboard", "accounts", "settings"],
     isCurrentProduct: true,
+  },
+  {
+    id: "procurement",
+    name: "采购管理系统",
+    subtitle: "供应商 + 采购单完整业务",
+    kind: "internal",
+    href: "/procurement/",
+    openMode: "same_tab",
+    authMode: "platform",
+    modules: ["procurement", "suppliers", "purchase-orders", "settings"],
   },
 ];
 

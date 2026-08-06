@@ -1,8 +1,11 @@
 "use client";
 
 import {
+  BagBoldDuotone,
+  BillListBoldDuotone,
   ClipboardListBoldDuotone,
   HomeSmileBoldDuotone,
+  ShopBoldDuotone,
   UsersGroupTwoRoundedBoldDuotone,
   WidgetBoldDuotone,
 } from "solar-icon-set";
@@ -30,6 +33,21 @@ const MODULE_MENU: Record<AppModuleId, AppLayoutMenuItem> = {
     label: "应用管理",
     href: "/settings/apps/",
   },
+  procurement: {
+    icon: <BagBoldDuotone size={20} />,
+    label: "采购工作台",
+    href: "/procurement/",
+  },
+  suppliers: {
+    icon: <ShopBoldDuotone size={20} />,
+    label: "供应商",
+    href: "/suppliers/",
+  },
+  "purchase-orders": {
+    icon: <BillListBoldDuotone size={20} />,
+    label: "采购单",
+    href: "/purchase-orders/",
+  },
 };
 
 /** OA 审批 — skill new-module demo（非 AppModuleId，固定挂在基础菜单） */
@@ -44,12 +62,22 @@ export const menuItems: AppLayoutMenuItem[] = [
   MODULE_MENU.dashboard,
   MODULE_MENU.accounts,
   APPROVALS_MENU,
+  MODULE_MENU.procurement,
+  MODULE_MENU.suppliers,
+  MODULE_MENU["purchase-orders"],
   MODULE_MENU.settings,
 ];
 
 export function menuItemsForApp(app: AppEntry | null | undefined): AppLayoutMenuItem[] {
   if (!app || app.kind !== "internal") {
-    return [MODULE_MENU.dashboard, APPROVALS_MENU, MODULE_MENU.settings];
+    return [
+      MODULE_MENU.dashboard,
+      APPROVALS_MENU,
+      MODULE_MENU.procurement,
+      MODULE_MENU.suppliers,
+      MODULE_MENU["purchase-orders"],
+      MODULE_MENU.settings,
+    ];
   }
   const mods = modulesForApp(app);
   const ordered: AppModuleId[] = [];
@@ -58,12 +86,15 @@ export function menuItemsForApp(app: AppEntry | null | undefined): AppLayoutMenu
   }
   if (!ordered.includes("settings")) ordered.push("settings");
   const items = ordered.map((id) => MODULE_MENU[id]);
-  // Insert OA demo after accounts (or after dashboard if accounts missing)
-  const accountsIdx = items.findIndex((i) => i.href === "/accounts/");
-  if (accountsIdx >= 0) {
-    items.splice(accountsIdx + 1, 0, APPROVALS_MENU);
-  } else {
-    items.splice(1, 0, APPROVALS_MENU);
+  // OA demo only on accounts-admin style apps
+  const isAccountsApp = mods.includes("accounts");
+  if (isAccountsApp) {
+    const accountsIdx = items.findIndex((i) => i.href === "/accounts/");
+    if (accountsIdx >= 0) {
+      items.splice(accountsIdx + 1, 0, APPROVALS_MENU);
+    } else {
+      items.splice(1, 0, APPROVALS_MENU);
+    }
   }
   return items;
 }
