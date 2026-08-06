@@ -1,10 +1,7 @@
 # Forge Starter — Agent 合约（必读）
 
-**Forge 后台 0→1 脚手架**：Next.js 16 + Tailwind v4 + `@forge-ui-official/core`。  
-Coding Agent 是第一开发界面。
-
-**不是** 中台、**不是** 完整 SaaS 套件。  
-学 Next 的是 **skill 拆分与样板驱动**，不学支付/积分/CMS。
+**用 Forge 搭管理后台的脚手架**：Next.js 16 + Tailwind v4 + `@forge-ui-official/core`。  
+Coding Agent 是第一开发界面：skills 拆开后端与页面，双样板 + `/ref` 画廊保证 UI 不跑偏。
 
 必读：`PRODUCT.md`、`docs/agent-native.md`、`docs/module-template.md`、`docs/page-roles.md`、`docs/forge-components.md`。
 

@@ -1,15 +1,15 @@
 # Agent-native 工作流
 
-Coding Agent 是第一开发界面。**业务域只做 Forge 管理后台**。
+Coding Agent 是第一开发界面，专注 **Forge 管理后台**：skills 拆模块、真页面当样板、交付可浏览器验收。
 
-## 学什么 / 不学什么
+## 核心做法
 
-| 学（方法） | 不学（产品） |
-|------------|--------------|
-| skill 拆分：后端 vs 页面 | 支付 / 积分 / CMS / OAuth 全家桶 |
-| 仓库里真页面当抄写样板 | 把通用 SaaS settings/admin 页原样搬来 |
-| AGENTS 写清规矩 | 多框架 sync-upstream |
-| 做完 typecheck + 浏览器点主路径 | Landing 克隆 / 营销站流水线 |
+| 做法 | 价值 |
+|------|------|
+| skill 拆分：后端 vs 页面 | 接口与 UI 边界清晰，Agent 不容易一次抄乱 |
+| 仓库里真页面当抄写样板 | accounts / approvals / `/ref` 可直接对照 |
+| AGENTS 写清规矩 | 颜色、组件、详情形态有据可依 |
+| typecheck + 浏览器点主路径 | 交付质量可感知 |
 
 ## 双样板（无全局默认）
 

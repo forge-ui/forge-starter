@@ -11,5 +11,5 @@
 6. 交付：`pnpm typecheck`；改 UI 后浏览器点主路径。  
 7. 文档：[README.md](./README.md)（中文）。  
 
-禁止：支付全家桶、第二 UI 库、假按钮、写死详情形态、只 curl 验收。  
-缺 Forge 组件 → `FORGE-GAP`。
+交付：`pnpm typecheck`；改 UI 后浏览器点主路径。  
+组件只走 Forge；缺组件 → `FORGE-GAP`。详情形态按内容选 accounts / approvals。

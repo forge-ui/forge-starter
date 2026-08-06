@@ -2,13 +2,24 @@
 
 **用 Forge UI 快速搭建管理后台** — 给人和 AI 编程助手一起用的脚手架。
 
-技术栈：Next.js 16 + Tailwind v4 + `@forge-ui-official/core`。你可以自己写，也可以让 AI 助手按仓库里的真实样板页和 skills 加业务模块。**不做** 支付 / 积分 / CMS / 落地页等 SaaS 全家桶。
+技术栈：Next.js 16 + Tailwind v4 + `@forge-ui-official/core`。开箱即用的后台壳、登录与业务样板；配上 skills，按固定流程加模块，页面长得像 Forge 官方产品。
 
 | | |
 |--|--|
 | 英文名 | Forge Starter |
 | 中文名 | Forge 后台脚手架 |
 | GitHub | https://github.com/forge-ui/forge-starter |
+
+## 亮点
+
+| 亮点 | 你得到什么 |
+|------|------------|
+| **官方级 Forge 体验** | 统一用 `@forge-ui-official/core`，颜色与布局跟官方后台一致 |
+| **双详情样板** | `accounts` 全页档案 + `approvals` 弹窗处理，两种常见后台形态直接抄 |
+| **AI 友好流水线** | skills 拆开「数据接口」和「页面菜单」，Agent 不容易一次抄乱 |
+| **`/ref` 布局画廊** | 几十种真路由页面：列表、人物/产品多 Tab、表单、日历、对话、看板… 对着抄布局 |
+| **从 0 能跑** | 登录注册、工作台、设置、应用切换；接上 Postgres 就能落库 CRUD |
+| **文档即合约** | `AGENTS.md` + `docs/*` 写清怎么选组件、怎么选详情形态 |
 
 ## 快速开始
 
@@ -24,20 +35,17 @@ pnpm db:push
 pnpm dev
 ```
 
-打开 `http://localhost:3000`。默认 `AUTH_MODE=demo`，任意账号可登录（**demo 不会持久化业务数据**）。
+打开 `http://localhost:3000`。默认 `AUTH_MODE=demo`，任意账号可登录，方便先看界面。
 
-> **做 CRUD 一定要配 Postgres。** `AUTH_MODE=demo` 只跳过登录用户表。账号、审批、新业务模块都需要 `DATABASE_URL` + `pnpm db:push`。
+> 账号管理、审批等业务数据需要 Postgres：配置 `DATABASE_URL` 后执行 `pnpm db:push`。`demo` 模式只简化登录，业务表仍走数据库。
 
-## 这是什么 / 不是什么
+## 适合做什么
 
-| 是 | 不是 |
-|----|------|
-| 只用 Forge 的后台壳 + 双 UI 样板 | 完整 SaaS 套件（计费、积分、CMS…） |
-| skill 流水线：先 module 再 page | 一句话生成完整产品 |
-| `/ref/*` 给 AI 抄的布局画廊 | 侧栏里的产品功能 |
-| Postgres + SMTP + 账密登录 | 多数据库 / OAuth / 云邮件 SDK |
+- 内部运营 / 管理后台、OA 类轻应用  
+- 用 AI 助手从 0 搭第一版 B 端，并保持 Forge 视觉一致  
+- 需要「列表 + 表单 + 详情」标准 CRUD，以及日历、看板、档案等多页范式  
 
-Agent 合约：**`AGENTS.md`**。产品边界：**`PRODUCT.md`**。
+Agent 合约：**`AGENTS.md`**。产品说明：**`PRODUCT.md`**。
 
 ## Agent 工作流
 
@@ -48,16 +56,16 @@ Agent 合约：**`AGENTS.md`**。产品边界：**`PRODUCT.md`**。
      a. forge-starter-new-module  → schema + service + API
      b. forge-starter-new-page    → 列表 / 表单 / 详情 + 菜单
 4. 纯看板 / 非 CRUD 单页 → 只跑 new-page
-5. pnpm typecheck · 浏览器点主路径（禁止只 curl）
+5. pnpm typecheck · 浏览器点主路径验收
 ```
 
-**详情形态没有全局默认：**
+**详情怎么选：**
 
-- **重**（多 Tab、档案、多区块）→ 抄 **`accounts`**（全页详情）
-- **轻**（字段少、看完回列表）→ 抄 **`approvals`**（详情弹窗）
-- 拿不准 → 问用户
+- 内容多、有 Tab / 档案 → 抄 **`accounts`**（全页详情）  
+- 字段少、处理完回列表 → 抄 **`approvals`**（详情弹窗）  
+- 不确定 → 问产品 / 用户  
 
-**选组件优先级：** 可运行样板 → `/ref/*` → forge monorepo cases（有旁路时）
+**选组件：** 可运行样板 → `/ref/*` → forge monorepo cases（有旁路时）
 
 ## 可运行样板
 
@@ -67,19 +75,19 @@ Agent 合约：**`AGENTS.md`**。产品边界：**`PRODUCT.md`**。
 | `/approvals` | 列表 + 新建弹窗 + **详情弹窗** |
 | `/dashboard` | 工作台 |
 | `/settings/*` | 个人资料、改密、应用、通知偏好 |
-| **`/ref/`** | **AI 参考画廊**（真路由，**不进**产品菜单） |
+| **`/ref/`** | **布局参考画廊**（真路由，开发默认开、默认不进侧栏） |
 
-开发环境默认开放 `/ref`；生产默认 404，需要时设 `SHOW_REF_PAGES=true`。目录见 `docs/reference-pages.md`。
+生产环境访问 `/ref` 需设 `SHOW_REF_PAGES=true`。完整目录：`docs/reference-pages.md`。
 
-画廊含列表表格/卡片、CRM 人物与产品多 Tab、整页表单、日历、对话、文件、Kanban、多种 Dashboard、发票、工单、API Key、积分账本、订阅等——**给 AI 抄布局的 mock UI**，不是要交付的 SaaS 模块。
+画廊覆盖：表格/卡片列表、CRM 人物与产品多 Tab、整页表单、日历、对话、文件、Kanban、多种 Dashboard、发票、工单、API Key、积分账本、订阅等，方便对照真实业务页来搭。
 
 ## 技术栈
 
 - **框架：** Next.js 16、React 19、TypeScript  
 - **UI：** `@forge-ui-official/core` + Tailwind CSS v4 + solar-icon-set  
 - **认证：** 用户名/邮箱 + 密码 · jose session · demo \| local  
-- **数据库：** 仅 PostgreSQL · Drizzle ORM  
-- **邮件：** 仅 SMTP（nodemailer）
+- **数据库：** PostgreSQL · Drizzle ORM  
+- **邮件：** SMTP（nodemailer）
 
 ## 目录结构
 
@@ -91,21 +99,21 @@ app/
 components/        # app-shell · *-store · *-dialog · ui/modal
 config/            # site · menu · apps
 lib/               # auth · db · accounts · approvals · reference
-docs/              # agent-native · page-roles · forge-components · …
-.agents/skills/    # 唯一维护的 skills（quick-start · new-module · new-page）
-.claude/skills → .agents/skills   # symlink，给 Claude Code 发现用
+docs/              # 工作流 · 组件选型 · 页面角色 · 参考页目录
+.agents/skills/    # quick-start · new-module · new-page
+.claude/skills → .agents/skills
 AGENTS.md PRODUCT.md CLAUDE.md
 ```
 
 ## Skills
 
-| Skill | 边界 |
-|-------|------|
+| Skill | 做什么 |
+|-------|--------|
 | `forge-starter-quick-start` | 品牌、accent、菜单文案、env、模块 backlog |
-| `forge-starter-new-module` | **只后端：** schema + service + API |
-| `forge-starter-new-page` | **只 UI：** 列表 / 表单 / 详情 + 菜单（API 须先有） |
+| `forge-starter-new-module` | 后端：schema + service + API |
+| `forge-starter-new-page` | 前端：列表 / 表单 / 详情 + 菜单（依赖已有 API） |
 
-只改 **`.agents/skills/`**，不要再复制一份到别处。
+Skills 只维护在 **`.agents/skills/`**。
 
 ## 常用命令
 
@@ -137,7 +145,7 @@ DATABASE_URL=postgresql://forge:forge@127.0.0.1:5432/forge_starter
 | 文档 | 用途 |
 |------|------|
 | `AGENTS.md` | Agent 合约（必读） |
-| `PRODUCT.md` | 产品意图与非目标 |
+| `PRODUCT.md` | 产品说明与规划 |
 | `CLAUDE.md` | Claude Code 短入口 |
 | `docs/agent-native.md` | 工作流与 skill 边界 |
 | `docs/forge-components.md` | 角色 → 组件 → 样板 |
@@ -145,12 +153,12 @@ DATABASE_URL=postgresql://forge:forge@127.0.0.1:5432/forge_starter
 | `docs/module-template.md` | 模块 + 页面双样板 |
 | `docs/reference-pages.md` | `/ref/*` 目录 |
 
-## 边界
+## 质量约定
 
-- **只用 Forge** — 不引入第二套 UI 库；缺能力写 `FORGE-GAP`
-- 颜色用 `fg-*`；业务控件 `color={siteConfig.accent}`
-- 列表筛选：**一行** pills + 搜索
-- 交付门禁：`pnpm typecheck` + **浏览器**点主路径
+- UI 统一走 Forge Kit；缺组件记 `FORGE-GAP` 再决策  
+- 颜色用 `fg-*`；业务控件 `color={siteConfig.accent}`  
+- 列表筛选保持一行 pills + 搜索  
+- 交付：`pnpm typecheck` + 浏览器走通主路径  
 
 ---
 

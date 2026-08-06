@@ -2,32 +2,31 @@
 
 ## 1. 一句话定位
 
-**Agent-native Forge 后台脚手架**：面向 Coding Agent 与人类开发者，从 0 快速搭 **B 端 / 管理后台 / 内部系统**。  
-UI 与页面范式以 **`@forge-ui-official/core`** 为硬约束；Agent 通过内置 skills 稳定扩模块，而不是自由发挥 UI。
+**用 Forge UI 快速搭建管理后台**：面向人类开发者与 Coding Agent，从 0 搭 **B 端 / 运营后台 / 内部系统**。  
+视觉与组件以 **`@forge-ui-official/core`** 为准；内置 skills + 双样板 + `/ref` 画廊，让扩模块又快又稳。
 
 | 对外名称 | 说明 |
 |----------|------|
 | 英文 | **Forge Starter** |
 | 中文 | **Forge 后台脚手架** |
-| 定位 | 用 Forge UI 搭管理后台；skills 驱动扩模块 |
-| 不对标 | 完整 SaaS 内核（支付、积分、CMS）；芋道式中台 |
+| 定位 | Forge 官方级后台体验 · skills 驱动扩模块 · 真页面可抄 |
 
-| 维度 | Forge Starter |
-|------|---------------|
-| 主战场 | **Admin 后台** |
-| UI | **Forge-first，禁止第二套 UI 库** |
-| Agent 价值 | **装页面不歪、扩 CRUD 不翻车** |
-| 默认能力 | 壳 + 认证 + SMTP + **双 CRUD 样板（重/轻）** + 应用注册 |
+| 亮点 | 说明 |
+|------|------|
+| 主战场 | **管理后台 / 内部系统** |
+| UI | **Forge-first**，页面像官方产品 |
+| Agent | skills 拆后端/页面，**装页面不歪、扩 CRUD 稳** |
+| 开箱能力 | 壳 + 登录 + SMTP + **双 CRUD 样板** + 应用切换 + `/ref` 画廊 |
 
 ## 2. 设计原则
 
 1. **Forge-first**：只从 `@forge-ui-official/core` 取组件；颜色只用 `fg-*`；图标用 `solar-icon-set`。
-2. **Agent-native**：第一开发界面是 Agent + skills（`quick-start` / `new-module` / `new-page`），人读 `AGENTS.md`。
-3. **范例即文档**：`accounts` = 重详情样板；`approvals` = 轻详情弹窗样板。无「只许一种」默认。
-4. **轻默认、可删除**：模块可摘；不绑 Stripe / Clerk / 云邮件 SDK。
+2. **Agent 友好**：第一开发界面是 Agent + skills（`quick-start` / `new-module` / `new-page`），人读 `AGENTS.md`。
+3. **范例即文档**：`accounts` = 重详情样板；`approvals` = 轻详情弹窗样板；按内容选型。
+4. **轻量可扩展**：模块边界清晰，按业务逐步加域。
 5. **演示与生产边界清晰**：`AUTH_MODE=demo|local`；登录用户与业务表分表。
-6. **不做中台**：无代码生成引擎、无 BPM、无复杂多租户。
-7. **邮件可自建**：仅标准 SMTP。
+6. **聚焦后台**：优先列表 / 表单 / 详情 / 工作台等高频页面。
+7. **邮件可自建**：标准 SMTP，方便对接企业邮箱。
 
 ## 3. 认证与邮件（已拍板）
 
