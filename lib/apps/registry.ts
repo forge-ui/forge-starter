@@ -22,7 +22,14 @@ const PRESETS: MenuPresetId[] = [
   "accounts-only",
   "custom",
 ];
-const MODULES: AppModuleId[] = ["dashboard", "accounts", "settings"];
+const MODULES: AppModuleId[] = [
+  "dashboard",
+  "accounts",
+  "settings",
+  "procurement",
+  "suppliers",
+  "purchase-orders",
+];
 
 function asKind(v: unknown): AppKind {
   return typeof v === "string" && (KINDS as string[]).includes(v)
@@ -113,10 +120,56 @@ function safeParse(raw: string | null): unknown[] | null {
   }
 }
 
-function ensureCurrentProduct(list: AppEntry[]): AppEntry[] {
-  const builtin = DEFAULT_APP_ENTRIES[0]!;
-  const rest = list.filter((a) => a.id !== builtin.id && !a.isCurrentProduct);
-  return [normalizeAppEntry(builtin), ...rest.map(normalizeAppEntry)];
+/**
+ * Always pin built-in catalog apps (accounts-admin, procurement, …).
+ * localStorage may predate new seeds — merge by id without wiping user-added apps.
+ */
+function mergeBuiltinApps(list: AppEntry[]): AppEntry[] {
+  const byId = new Map(list.map((a) => [a.id, a]));
+  for (const builtin of DEFAULT_APP_ENTRIES) {
+    const existing = byId.get(builtin.id);
+    if (!existing) {
+      byId.set(builtin.id, normalizeAppEntry(builtin));
+      continue;
+    }
+    // Refresh modules/href/name from code for known seeds (keeps user openMode etc.)
+    byId.set(
+      builtin.id,
+      normalizeAppEntry({
+        ...existing,
+        name: builtin.name,
+        subtitle: builtin.subtitle,
+        kind: builtin.kind,
+        href: builtin.href,
+        modules: builtin.modules,
+        isCurrentProduct: builtin.isCurrentProduct,
+        authMode: builtin.authMode,
+      }),
+    );
+  }
+
+  // Host product first, then remaining builtins in DEFAULT order, then user apps
+  const ordered: AppEntry[] = [];
+  const seen = new Set<string>();
+  for (const builtin of DEFAULT_APP_ENTRIES) {
+    const entry = byId.get(builtin.id);
+    if (entry) {
+      ordered.push(entry);
+      seen.add(builtin.id);
+    }
+  }
+  for (const entry of byId.values()) {
+    if (!seen.has(entry.id) && !entry.isCurrentProduct) {
+      ordered.push(normalizeAppEntry(entry));
+    }
+  }
+  // Guarantee exactly one current product
+  const host = DEFAULT_APP_ENTRIES.find((a) => a.isCurrentProduct) ?? DEFAULT_APP_ENTRIES[0]!;
+  return ordered.map((a) =>
+    a.id === host.id
+      ? { ...a, isCurrentProduct: true }
+      : { ...a, isCurrentProduct: false },
+  );
 }
 
 export function loadAppRegistry(): AppEntry[] {
@@ -126,7 +179,7 @@ export function loadAppRegistry(): AppEntry[] {
     if (!parsed || parsed.length === 0) {
       return DEFAULT_APP_ENTRIES.map(normalizeAppEntry);
     }
-    return ensureCurrentProduct(
+    return mergeBuiltinApps(
       parsed.map((item) => normalizeAppEntry(item as Partial<AppEntry>)),
     );
   } catch {
@@ -136,7 +189,7 @@ export function loadAppRegistry(): AppEntry[] {
 
 export function saveAppRegistry(apps: AppEntry[]) {
   if (typeof window === "undefined") return;
-  const next = ensureCurrentProduct(apps.map(normalizeAppEntry));
+  const next = mergeBuiltinApps(apps.map(normalizeAppEntry));
   window.localStorage.setItem(APPS_STORAGE_KEY, JSON.stringify(next));
   window.dispatchEvent(new CustomEvent(APPS_UPDATED_EVENT, { detail: { apps: next } }));
 }

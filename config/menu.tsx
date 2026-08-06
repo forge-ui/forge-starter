@@ -70,22 +70,15 @@ export const menuItems: AppLayoutMenuItem[] = [
 
 export function menuItemsForApp(app: AppEntry | null | undefined): AppLayoutMenuItem[] {
   if (!app || app.kind !== "internal") {
-    return [
-      MODULE_MENU.dashboard,
-      APPROVALS_MENU,
-      MODULE_MENU.procurement,
-      MODULE_MENU.suppliers,
-      MODULE_MENU["purchase-orders"],
-      MODULE_MENU.settings,
-    ];
+    return menuItems;
   }
   const mods = modulesForApp(app);
   const ordered: AppModuleId[] = [];
   for (const id of mods) {
-    if (!ordered.includes(id)) ordered.push(id);
+    if (!ordered.includes(id) && MODULE_MENU[id]) ordered.push(id);
   }
   if (!ordered.includes("settings")) ordered.push("settings");
-  const items = ordered.map((id) => MODULE_MENU[id]);
+  const items = ordered.map((id) => MODULE_MENU[id]).filter(Boolean);
   // OA demo only on accounts-admin style apps
   const isAccountsApp = mods.includes("accounts");
   if (isAccountsApp) {
