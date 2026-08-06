@@ -242,7 +242,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       teamName={activeApp.name}
       teamSubtitle={activeApp.subtitle || "当前应用"}
       teams={teams}
-      showTeamActions={false}
       menuItems={shellMenuItems}
       profile={profile}
       hideSidebarWidgets

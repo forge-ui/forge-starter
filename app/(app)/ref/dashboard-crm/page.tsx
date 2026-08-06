@@ -189,7 +189,6 @@ export default function RefDashboardCrmPage() {
         </div>
 
         <BarChartStatCard
-          density="compact"
           title="Leads"
           value="44,210"
           trend="10%"
@@ -201,7 +200,6 @@ export default function RefDashboardCrmPage() {
           bars={[16, 24, 32, 20, 40]}
         />
         <BarChartStatCard
-          density="compact"
           title="Customer"
           value="21,230"
           trend="10%"
@@ -287,7 +285,6 @@ export default function RefDashboardCrmPage() {
         </div>
 
         <ListGroup
-          density="compact"
           title="Activity"
           subtitle="Recent activity"
           action={

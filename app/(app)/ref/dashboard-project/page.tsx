@@ -169,7 +169,6 @@ export default function RefDashboardProjectPage() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 [&>*]:!w-full">
         <StatCard
-          density="compact"
           size="wide"
           width="full"
           title="Total Project"
@@ -181,7 +180,6 @@ export default function RefDashboardProjectPage() {
           icon={<FolderBoldDuotone size={20} />}
         />
         <StatCard
-          density="compact"
           size="wide"
           width="full"
           title="In Progress"
@@ -193,7 +191,6 @@ export default function RefDashboardProjectPage() {
           icon={<CartLargeBoldDuotone size={20} />}
         />
         <StatCard
-          density="compact"
           size="wide"
           width="full"
           title="Completed"
@@ -205,7 +202,6 @@ export default function RefDashboardProjectPage() {
           icon={<FolderWithFilesBoldDuotone size={20} />}
         />
         <StatCard
-          density="compact"
           size="wide"
           width="full"
           title="Unfinished"
@@ -270,7 +266,6 @@ export default function RefDashboardProjectPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="flex flex-col gap-4">
           <BarChartStatCard
-            density="compact"
             size="wide"
             width="full"
             title="Client Growth"
@@ -356,7 +351,6 @@ export default function RefDashboardProjectPage() {
         </div>
 
         <ListGroup
-          density="compact"
           title="Team Member"
           subtitle="All team members"
           action={

@@ -222,7 +222,6 @@ export default function RefDashboardAnalyticsPage() {
       {/* 4 progress stats */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 [&>*]:!w-full">
         <ProgressStatCard
-          density="compact"
           size="wide"
           width="full"
           title="Income"
@@ -236,7 +235,6 @@ export default function RefDashboardAnalyticsPage() {
           icon={<WalletBoldDuotone size={18} />}
         />
         <ProgressStatCard
-          density="compact"
           size="wide"
           width="full"
           title="Orders"
@@ -250,7 +248,6 @@ export default function RefDashboardAnalyticsPage() {
           icon={<CartLargeBoldDuotone size={18} />}
         />
         <ProgressStatCard
-          density="compact"
           size="wide"
           width="full"
           title="Profit"
@@ -264,7 +261,6 @@ export default function RefDashboardAnalyticsPage() {
           icon={<ChartBoldDuotone size={18} />}
         />
         <ProgressStatCard
-          density="compact"
           size="wide"
           width="full"
           title="Expenses"
@@ -314,7 +310,6 @@ export default function RefDashboardAnalyticsPage() {
         </div>
 
         <ListGroup
-          density="compact"
           title="Campaign"
           subtitle="Active campaign"
           action={<KebabMenu accent={siteConfig.accent} items={[{ label: "Refresh", onSelect: () => {} }]} />}
@@ -356,7 +351,6 @@ export default function RefDashboardAnalyticsPage() {
         />
 
         <ListGroup
-          density="compact"
           title="Visit by Source"
           subtitle="Link clicked"
           action={<KebabMenu accent={siteConfig.accent} items={[{ label: "Refresh", onSelect: () => {} }]} />}
@@ -379,7 +373,6 @@ export default function RefDashboardAnalyticsPage() {
         />
 
         <ListGroup
-          density="compact"
           title="Top Category"
           subtitle="Based on sales"
           action={<KebabMenu accent={siteConfig.accent} items={[{ label: "Refresh", onSelect: () => {} }]} />}
