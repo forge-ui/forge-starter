@@ -68,6 +68,11 @@ description: >
 | dashboard 通用/精简 | `/ref/dashboard-board` · `/ref/dashboard-kpi` | `/dashboard`（ecommerce-2 完整） |
 | dashboard CRM | `/ref/dashboard-crm` | monorepo `dashboards/crm` |
 | dashboard Analytics | `/ref/dashboard-analytics` | monorepo `dashboards/analytics` |
+| dashboard Project | `/ref/dashboard-project` | monorepo `dashboards/project-1` |
+| invoice 单据 | `/ref/invoice` | finance invoices/[id] |
+| task 任务 | `/ref/task` | project tasks/[id] |
+| project 项目 | `/ref/project` | project projects/[id] |
+| kanban 泳道 | `/ref/kanban` | 嵌在 project Task tab，独立抽出 |
 | 空态 | `/ref/empty` | 各列表 empty |
 
 目录：`docs/reference-pages.md`、`lib/reference/catalog.ts`。

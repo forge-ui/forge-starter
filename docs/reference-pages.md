@@ -29,6 +29,11 @@
 | `/ref/dashboard-kpi` | Dashboard · 精简 KPI | ecommerce-2 |
 | `/ref/dashboard-crm` | **Dashboard · CRM** | [dashboards/crm](https://www.forgeui.org/templates/dashboards/crm) |
 | `/ref/dashboard-analytics` | **Dashboard · Analytics** | [dashboards/analytics](https://www.forgeui.org/templates/dashboards/analytics) |
+| `/ref/dashboard-project` | **Dashboard · Project** | [dashboards/project-1](https://www.forgeui.org/templates/dashboards/project-1) |
+| `/ref/invoice` | **发票/单据详情** | finance-template/invoices/[id] |
+| `/ref/task` | **任务详情** | project-template/tasks/[id] |
+| `/ref/project` | **项目详情（多 Tab）** | project-template/projects/[id] |
+| `/ref/kanban` | **Kanban 泳道** | 项目详情 Task tab 内嵌，抽出独立页 |
 | `/ref/settings` | 设置 | settings/* |
 | `/ref/activity` | 时间线 | crm/activity |
 | `/ref/queue` | 待办队列 | approvals todo |

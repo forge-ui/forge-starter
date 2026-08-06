@@ -65,7 +65,11 @@
 | activity | `/ref/activity` | — |
 | queue | `/ref/queue` | approvals 待办 |
 | empty | `/ref/empty` | 各列表空态 |
-| dashboard | `/ref/dashboard-board` · `/ref/dashboard-kpi` · `/ref/dashboard-crm` · `/ref/dashboard-analytics` | `/dashboard` |
+| dashboard | `/ref/dashboard-board` · `/ref/dashboard-kpi` · `/ref/dashboard-crm` · `/ref/dashboard-analytics` · `/ref/dashboard-project` | `/dashboard` |
+| invoice 单据 | `/ref/invoice` | — |
+| task 任务 | `/ref/task` | — |
+| project 项目 | `/ref/project` | — |
+| kanban 泳道 | `/ref/kanban`（官方嵌在 project Task tab） | — |
 
 ## 推荐对照
 
