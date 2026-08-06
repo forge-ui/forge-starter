@@ -51,16 +51,21 @@
 | collection-table | `/ref/list-table` | accounts / approvals 列表 |
 | collection-cards | `/ref/list-cards` | — |
 | detail | `/ref/detail` | accounts/[id] |
-| profile（个人/成员） | `/ref/profile` | —（模板 members/[id]） |
+| person（CRM 人物多 Tab） | `/ref/person` | — john-bushmill |
+| profile（项目成员） | `/ref/profile` | — members/[id] |
+| product（产品多 Tab） | `/ref/product` | — products/[id] |
 | detail-modal | `/ref/detail-modal` | approvals 弹窗 |
-| form-page | `/ref/form-page` | — |
+| form-page（整页） | `/ref/form-page` | — leads/new |
 | form-modal | `/ref/form-modal` | *-form-dialog |
 | split | `/ref/split` | — |
+| calendar | `/ref/calendar` | — |
+| chat | `/ref/chat` | — |
+| files | `/ref/files` | — |
 | settings | `/ref/settings` | settings/* |
 | activity | `/ref/activity` | — |
 | queue | `/ref/queue` | approvals 待办 |
 | empty | `/ref/empty` | 各列表空态 |
-| dashboard | `/ref/dashboard-kpi` | `/dashboard` |
+| dashboard | `/ref/dashboard-board` · `/ref/dashboard-kpi` | `/dashboard` |
 
 ## 推荐对照
 

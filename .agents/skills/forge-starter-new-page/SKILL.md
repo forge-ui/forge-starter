@@ -49,18 +49,23 @@ description: >
 
 | 角色 | 参考页（不进菜单） | 业务可运行样板 |
 |------|-------------------|----------------|
-| collection 表格列表 | `/ref/list-table` | `accounts/page` / `approvals/page` |
-| collection 卡片网格 | `/ref/list-cards` | — |
-| form-modal | `/ref/form-modal` | `account-form-dialog` / `approval-form-dialog` |
-| form-page | `/ref/form-page` | 字段极多时 |
-| detail-modal | `/ref/detail-modal` | **`approval-detail-dialog`** |
-| detail 全页（业务对象） | `/ref/detail` | **`accounts/[id]`** |
-| profile 个人/成员 | `/ref/profile` | 左资料卡 + 右 KPI/Tab；对照 monorepo members/[id] |
+| collection 表格 | `/ref/list-table` | accounts / approvals |
+| collection 卡片 | `/ref/list-cards` | — |
+| form-modal | `/ref/form-modal` | *-form-dialog |
+| form-page 整页 | `/ref/form-page`（CRM leads/new） | 字段极多时 |
+| detail-modal | `/ref/detail-modal` | approval-detail-dialog |
+| detail 业务对象 | `/ref/detail` | accounts/[id] |
+| person CRM 人物 | `/ref/person`（john-bushmill） | — |
+| profile 项目成员 | `/ref/profile`（members/[id]） | — |
+| product 多 Tab | `/ref/product` | — |
+| calendar | `/ref/calendar` | — |
+| chat | `/ref/chat` | — |
+| files | `/ref/files` | — |
 | split 主从 | `/ref/split` | — |
-| queue 行内动作 | `/ref/queue` | approvals 待办 |
-| settings | `/ref/settings` | `settings/*` |
+| queue | `/ref/queue` | approvals 待办 |
+| settings | `/ref/settings` | settings/* |
 | activity | `/ref/activity` | — |
-| dashboard | `/ref/dashboard-kpi` | `dashboard/page` |
+| dashboard | `/ref/dashboard-board` | `/dashboard` |
 | 空态 | `/ref/empty` | 各列表 empty |
 
 目录：`docs/reference-pages.md`、`lib/reference/catalog.ts`。

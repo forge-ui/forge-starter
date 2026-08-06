@@ -37,7 +37,7 @@ Skills：`.agents/skills/`（与 `.claude/skills/` 同步）。
 | `/approvals` | 列表 + 弹窗发起 + **详情弹窗**（菜单可见） |
 | `/dashboard` | 工作台 |
 | `/settings/*` | 设置 |
-| **`/ref/`** | **AI 参考库**（真实页、**不进菜单**；表/卡列表、详情、分屏、设置、时间线…） |
+| **`/ref/`** | **AI 参考库**（真实页、不进菜单：表/卡列表、CRM 人物与产品多 Tab、整页表单、日历、对话、文件、看板…） |
 
 开发：`http://localhost:3020/ref/`  
 生产默认 404；需要时设 `SHOW_REF_PAGES=true`。
