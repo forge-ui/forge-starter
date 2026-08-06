@@ -1,124 +1,124 @@
 # Forge Starter
 
-**Build admin dashboards with Forge UI** — a starter for people and AI coding assistants.
+**用 Forge UI 快速搭建管理后台** — 给人和 AI 编程助手一起用的脚手架。
 
-Stack: Next.js 16 + Tailwind v4 + `@forge-ui-official/core`. You (or an AI assistant) clone real sample pages, add modules with skills, and ship an internal admin console. Inspired by [ShipAny Next](https://docs.shipany.ai/zh/shipany-next)’s *workflow*, **not** its SaaS catalog (no payments, credits, CMS, or marketing-site generator).
-
-**中文文档 → [README.zh-CN.md](./README.zh-CN.md)**
+技术栈：Next.js 16 + Tailwind v4 + `@forge-ui-official/core`。你可以自己写，也可以让 AI 助手按仓库里的真实样板页和 skills 加业务模块。方法借鉴 [ShipAny Next](https://docs.shipany.ai/zh/shipany-next) 的协作方式，**不是** 它那套支付 / 积分 / CMS / 落地页 SaaS 全家桶。
 
 | | |
 |--|--|
-| English | Forge Starter |
-| 中文 | Forge 后台脚手架 |
+| 英文名 | Forge Starter |
+| 中文名 | Forge 后台脚手架 |
 | GitHub | https://github.com/forge-ui/forge-starter |
 
-## Quick Start
+## 快速开始
 
 ```bash
 pnpm install
 cp .env.example .env
-# Optional local Postgres (required for AUTH_MODE=local and all business CRUD):
+# 本地业务 CRUD / AUTH_MODE=local 需要 Postgres：
 # docker compose up -d
 # AUTH_MODE=local
-# AUTH_SECRET=<at-least-16-chars>
+# AUTH_SECRET=<至少16位>
 # DATABASE_URL=postgresql://forge:forge@127.0.0.1:5432/forge_starter
 pnpm db:push
 pnpm dev
 ```
 
-Open `http://localhost:3000`. Default `AUTH_MODE=demo` accepts any login (**demo does not persist business data**).
+打开 `http://localhost:3000`。默认 `AUTH_MODE=demo`，任意账号可登录（**demo 不会持久化业务数据**）。
 
-> **CRUD always needs Postgres.** `AUTH_MODE=demo` only skips the login-user table. Accounts, approvals, and new modules need `DATABASE_URL` + `pnpm db:push`.
+> **做 CRUD 一定要配 Postgres。** `AUTH_MODE=demo` 只跳过登录用户表。账号、审批、新业务模块都需要 `DATABASE_URL` + `pnpm db:push`。
 
-## What this is / is not
+## 这是什么 / 不是什么
 
-| Is | Is not |
-|----|--------|
-| Forge-only admin shell + dual UI samples | ShipAny full SaaS (billing, credits, CMS, …) |
-| Skill pipeline: module → page | One-shot “generate whole product” |
-| `/ref/*` layout gallery for agents | Product features in the sidebar |
-| Postgres + SMTP + password auth | Multi-DB / OAuth / cloud mail SDKs |
+| 是 | 不是 |
+|----|------|
+| 只用 Forge 的后台壳 + 双 UI 样板 | ShipAny 全量 SaaS（计费、积分、CMS…） |
+| skill 流水线：先 module 再 page | 一句话生成完整产品 |
+| `/ref/*` 给 AI 抄的布局画廊 | 侧栏里的产品功能 |
+| Postgres + SMTP + 账密登录 | 多数据库 / OAuth / 云邮件 SDK |
 
-Agent contract: **`AGENTS.md`**. Product intent: **`PRODUCT.md`**.
+Agent 合约：**`AGENTS.md`**。产品边界：**`PRODUCT.md`**。
 
-## Agent workflow
+## Agent 工作流
 
 ```text
-1. Read AGENTS.md + docs/forge-components.md
-2. Brand / env        → forge-starter-quick-start
-3. Each business object:
+1. 读 AGENTS.md + docs/forge-components.md
+2. 品牌 / 环境        → forge-starter-quick-start
+3. 每个业务对象：
      a. forge-starter-new-module  → schema + service + API
-     b. forge-starter-new-page    → list / form / detail + menu
-4. Pure board / non-CRUD screen → new-page only
-5. pnpm typecheck · browser-check main path (no curl-only QA)
+     b. forge-starter-new-page    → 列表 / 表单 / 详情 + 菜单
+4. 纯看板 / 非 CRUD 单页 → 只跑 new-page
+5. pnpm typecheck · 浏览器点主路径（禁止只 curl）
 ```
 
-**Detail shape has no global default:**
+**详情形态没有全局默认：**
 
-- **Heavy** (tabs, archive) → clone **`accounts`** (full-page detail)
-- **Light** (few fields) → clone **`approvals`** (detail modal)
-- Unsure → ask the user
+- **重**（多 Tab、档案、多区块）→ 抄 **`accounts`**（全页详情）
+- **轻**（字段少、看完回列表）→ 抄 **`approvals`**（详情弹窗）
+- 拿不准 → 问用户
 
-**Component pick order:** live samples → `/ref/*` → forge monorepo cases (if present).
+**选组件优先级：** 可运行样板 → `/ref/*` → forge monorepo cases（有旁路时）
 
-## Runnable samples
+## 可运行样板
 
-| Path | Role |
+| 路径 | 形态 |
 |------|------|
-| `/accounts` · `/accounts/[id]` | Collection + modal form + **full-page detail** |
-| `/approvals` | Collection + create modal + **detail modal** |
-| `/dashboard` | Workbench |
-| `/settings/*` | Profile, security, apps, notifications |
-| **`/ref/`** | **AI reference gallery** (real routes, **not** in product menu) |
+| `/accounts` · `/accounts/[id]` | 列表 + 弹窗表单 + **全页详情** |
+| `/approvals` | 列表 + 新建弹窗 + **详情弹窗** |
+| `/dashboard` | 工作台 |
+| `/settings/*` | 个人资料、改密、应用、通知偏好 |
+| **`/ref/`** | **AI 参考画廊**（真路由，**不进**产品菜单） |
 
-`/ref` is on in development by default; production 404 unless `SHOW_REF_PAGES=true`. Catalog: `docs/reference-pages.md`.
+开发环境默认开放 `/ref`；生产默认 404，需要时设 `SHOW_REF_PAGES=true`。目录见 `docs/reference-pages.md`。
 
-## Tech stack
+画廊含列表表格/卡片、CRM 人物与产品多 Tab、整页表单、日历、对话、文件、Kanban、多种 Dashboard、发票、工单、API Key、积分账本、订阅等——**给 AI 抄布局的 mock UI**，不是要交付的 SaaS 模块。
 
-- **Framework:** Next.js 16, React 19, TypeScript  
-- **UI:** `@forge-ui-official/core` + Tailwind CSS v4 + solar-icon-set  
-- **Auth:** Username/email + password · jose sessions · demo \| local  
-- **DB:** PostgreSQL · Drizzle ORM  
-- **Mail:** SMTP only (nodemailer)
+## 技术栈
 
-## Project structure
+- **框架：** Next.js 16、React 19、TypeScript  
+- **UI：** `@forge-ui-official/core` + Tailwind CSS v4 + solar-icon-set  
+- **认证：** 用户名/邮箱 + 密码 · jose session · demo \| local  
+- **数据库：** 仅 PostgreSQL · Drizzle ORM  
+- **邮件：** 仅 SMTP（nodemailer）
+
+## 目录结构
 
 ```text
 app/
-  (auth)/          # login · register · forgot/reset
-  (app)/           # dashboard · accounts · approvals · settings · ref/*
+  (auth)/          # 登录 · 注册 · 找回/重置密码
+  (app)/           # 工作台 · 账号 · 审批 · 设置 · ref/*
   api/             # auth · accounts · approvals
 components/        # app-shell · *-store · *-dialog · ui/modal
 config/            # site · menu · apps
 lib/               # auth · db · accounts · approvals · reference
 docs/              # agent-native · page-roles · forge-components · …
-.agents/skills/    # canonical skills (quick-start · new-module · new-page)
-.claude/skills → .agents/skills   # symlink for Claude Code
+.agents/skills/    # 唯一维护的 skills（quick-start · new-module · new-page）
+.claude/skills → .agents/skills   # symlink，给 Claude Code 发现用
 AGENTS.md PRODUCT.md CLAUDE.md
 ```
 
 ## Skills
 
-| Skill | Scope |
-|-------|--------|
-| `forge-starter-quick-start` | Brand, accent, menu labels, env, backlog |
-| `forge-starter-new-module` | **Backend only:** schema + service + API |
-| `forge-starter-new-page` | **UI only:** list / form / detail + menu |
+| Skill | 边界 |
+|-------|------|
+| `forge-starter-quick-start` | 品牌、accent、菜单文案、env、模块 backlog |
+| `forge-starter-new-module` | **只后端：** schema + service + API |
+| `forge-starter-new-page` | **只 UI：** 列表 / 表单 / 详情 + 菜单（API 须先有） |
 
-Edit only under **`.agents/skills/`**. Do not maintain a second copy.
+只改 **`.agents/skills/`**，不要再复制一份到别处。
 
-## Commands
+## 常用命令
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Dev server |
-| `pnpm build` | Production build |
-| `pnpm typecheck` | TypeScript check |
-| `pnpm db:push` | Push schema (dev) |
-| `pnpm db:generate` | Generate migrations |
+| 命令 | 说明 |
+|------|------|
+| `pnpm dev` | 开发服务器 |
+| `pnpm build` | 生产构建 |
+| `pnpm typecheck` | TypeScript 检查 |
+| `pnpm db:push` | 同步 schema（开发） |
+| `pnpm db:generate` | 生成 migration |
 | `pnpm db:studio` | Drizzle Studio |
 
-## Environment
+## 环境变量
 
 ```env
 AUTH_MODE=demo
@@ -127,31 +127,31 @@ APP_URL=http://localhost:3000
 DATABASE_URL=postgresql://forge:forge@127.0.0.1:5432/forge_starter
 # AUTH_GUARD=true
 # SHOW_REF_PAGES=true
-# SMTP_*  (optional)
+# SMTP_*  （可选）
 ```
 
-Full template: `.env.example`. Local Postgres: `docker compose up -d`.
+完整模板见 `.env.example`。本地库：`docker compose up -d`。
 
-## Docs
+## 文档索引
 
-| Doc | Purpose |
-|-----|---------|
-| `AGENTS.md` | Agent contract (must-read) |
-| `PRODUCT.md` | Product intent & non-goals |
-| `CLAUDE.md` | Short pointer for Claude Code |
-| `docs/agent-native.md` | Workflow & skill boundaries |
-| `docs/forge-components.md` | Role → kit components → samples |
-| `docs/page-roles.md` | Page roles & detail choice |
-| `docs/module-template.md` | Module + page dual samples |
-| `docs/reference-pages.md` | `/ref/*` catalog |
+| 文档 | 用途 |
+|------|------|
+| `AGENTS.md` | Agent 合约（必读） |
+| `PRODUCT.md` | 产品意图与非目标 |
+| `CLAUDE.md` | Claude Code 短入口 |
+| `docs/agent-native.md` | 工作流与 skill 边界 |
+| `docs/forge-components.md` | 角色 → 组件 → 样板 |
+| `docs/page-roles.md` | 页面角色与详情选型 |
+| `docs/module-template.md` | 模块 + 页面双样板 |
+| `docs/reference-pages.md` | `/ref/*` 目录 |
 
-## Boundaries
+## 边界
 
-- **Forge only** — no second UI kit; missing capability → `FORGE-GAP`
-- Colors: `fg-*` · controls: `color={siteConfig.accent}`
-- List filters: **one row** pills + search
-- Ship gate: `pnpm typecheck` + **browser** main path
+- **只用 Forge** — 不引入第二套 UI 库；缺能力写 `FORGE-GAP`
+- 颜色用 `fg-*`；业务控件 `color={siteConfig.accent}`
+- 列表筛选：**一行** pills + 搜索
+- 交付门禁：`pnpm typecheck` + **浏览器**点主路径
 
 ---
 
-**Forge Starter** — start a real Forge admin console, with or without an AI assistant.
+**Forge Starter** — 用 Forge 搭真实管理后台，人和 AI 助手都能上手。
