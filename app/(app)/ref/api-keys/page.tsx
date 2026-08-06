@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * API Keys — ShipAny Next settings/apikeys
+ * API Keys — api keys lifecycle
  * Create once (show full key) · list masked · copy · revoke
  */
 
@@ -166,7 +166,7 @@ export default function RefApiKeysPage() {
     <RefChrome meta={meta}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-fg-grey-600">
-          创建后<strong>只显示一次</strong>完整密钥；列表仅前缀。对齐 ShipAny Next settings/apikeys。
+          创建后<strong>只显示一次</strong>完整密钥；列表仅显示前缀。
         </p>
         <Button color={siteConfig.accent} onClick={() => setCreateOpen(true)}>
           创建 Key

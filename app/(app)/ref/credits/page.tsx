@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Credits ledger — ShipAny Next settings/credits
+ * Credits ledger — credits ledger
  * Balance card + type tabs + transaction table
  */
 

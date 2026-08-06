@@ -9,7 +9,7 @@ description: >
 
 # Forge Starter New Page（只 UI）
 
-对齐 ShipAny Next 的 `/new-page`：**页面 + 导航**，不新建业务表/service（缺后端先跑 `new-module`）。
+**页面 + 导航**，不新建业务表/service（缺后端先跑 `new-module`）。
 
 选型：`docs/page-roles.md`、`docs/module-template.md` §B。
 
@@ -73,7 +73,7 @@ description: >
 | task 任务 | `/ref/task` | project tasks/[id] |
 | project 项目 | `/ref/project` | project projects/[id] |
 | kanban 泳道 | `/ref/kanban` | 嵌在 project Task tab，独立抽出 |
-| tickets 工单 | `/ref/tickets` | ShipAny Next tickets 语义 |
+| tickets 工单 | `/ref/tickets` | 工单线程语义 |
 | api-keys | `/ref/api-keys` | Next settings/apikeys |
 | credits 账本 | `/ref/credits` | Next settings/credits |
 | billing 订阅 | `/ref/billing` | Next settings/billing |

@@ -1,13 +1,13 @@
 # Agent-native 工作流
 
-Coding Agent 是第一开发界面。理念对齐 [ShipAny Next](https://docs.shipany.ai/zh/shipany-next)，**业务域只做 Forge 后台**。
+Coding Agent 是第一开发界面。**业务域只做 Forge 管理后台**。
 
-## 学 Next 什么 / 不学什么
+## 学什么 / 不学什么
 
 | 学（方法） | 不学（产品） |
 |------------|--------------|
 | skill 拆分：后端 vs 页面 | 支付 / 积分 / CMS / OAuth 全家桶 |
-| 仓库里真页面当抄写样板 | 把 Next 的 settings/admin 页原样搬来 |
+| 仓库里真页面当抄写样板 | 把通用 SaaS settings/admin 页原样搬来 |
 | AGENTS 写清规矩 | 多框架 sync-upstream |
 | 做完 typecheck + 浏览器点主路径 | Landing 克隆 / 营销站流水线 |
 

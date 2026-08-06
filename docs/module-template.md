@@ -1,6 +1,6 @@
 # 模块与页面文件地图
 
-对齐 ShipAny Next：**后端切片**与 **页面切片**分开做。  
+**后端切片**与 **页面切片**分开做。  
 Skill：`forge-starter-new-module` → `forge-starter-new-page`。
 
 ## 双样板（无默认）

@@ -3,7 +3,7 @@
 **Forge 后台 0→1 脚手架**：Next.js 16 + Tailwind v4 + `@forge-ui-official/core`。  
 Coding Agent 是第一开发界面。
 
-**不是** 中台、**不是** ShipAny 全量 SaaS。  
+**不是** 中台、**不是** 完整 SaaS 套件。  
 学 Next 的是 **skill 拆分与样板驱动**，不学支付/积分/CMS。
 
 必读：`PRODUCT.md`、`docs/agent-native.md`、`docs/module-template.md`、`docs/page-roles.md`、`docs/forge-components.md`。

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Billing / subscription — ShipAny Next settings/billing
+ * Billing / subscription — subscription billing
  * Current plan card + history table + cancel affordance
  */
 

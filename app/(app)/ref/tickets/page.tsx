@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Support tickets — ShipAny Next settings/tickets + admin/tickets
+ * Support tickets — support tickets list + thread
  * List + conversation thread with attachments (not chat IM, not queue approve).
  */
 

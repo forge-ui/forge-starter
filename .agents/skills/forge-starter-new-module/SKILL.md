@@ -9,7 +9,7 @@ description: >
 
 # Forge Starter New Module（只后端）
 
-对齐 ShipAny Next 的 `/new-module`：**service + API**，不写页面。
+**service + API**，不写页面。
 
 地图：`docs/module-template.md` §A。  
 UI 下一步：`forge-starter-new-page`。

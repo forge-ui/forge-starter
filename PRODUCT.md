@@ -8,16 +8,16 @@ UI 与页面范式以 **`@forge-ui-official/core`** 为硬约束；Agent 通过�
 | 对外名称 | 说明 |
 |----------|------|
 | 英文 | **Forge Starter** |
-| 中文 | **Forge 后台脚手架**（Agent-native Admin Starter） |
-| 参照 | [ShipAny Next](https://docs.shipany.ai/zh/shipany-next) 的 **Agent 工作方式**（skills / 0→1） |
-| 不对标 | ShipAny 全量 AI SaaS 内核（支付、积分、CMS）；芋道式中台 |
+| 中文 | **Forge 后台脚手架** |
+| 定位 | 用 Forge UI 搭管理后台；skills 驱动扩模块 |
+| 不对标 | 完整 SaaS 内核（支付、积分、CMS）；芋道式中台 |
 
-| 维度 | ShipAny Next | Forge Starter |
-|------|--------------|---------------|
-| 主战场 | AI SaaS（计费 / CMS） | **Admin 后台** |
-| UI | headless / 可换壳 | **Forge-first，禁止第二套 UI 库** |
-| Agent 价值 | 装业务能力快 | **装页面不歪、扩 CRUD 不翻车** |
-| 默认能力 | auth + pay + credits… | 壳 + 认证 + SMTP + **双 CRUD 样板（重/轻）** + 应用注册 |
+| 维度 | Forge Starter |
+|------|---------------|
+| 主战场 | **Admin 后台** |
+| UI | **Forge-first，禁止第二套 UI 库** |
+| Agent 价值 | **装页面不歪、扩 CRUD 不翻车** |
+| 默认能力 | 壳 + 认证 + SMTP + **双 CRUD 样板（重/轻）** + 应用注册 |
 
 ## 2. 设计原则
 

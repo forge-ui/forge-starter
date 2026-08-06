@@ -2,7 +2,7 @@
 
 **用 Forge UI 快速搭建管理后台** — 给人和 AI 编程助手一起用的脚手架。
 
-技术栈：Next.js 16 + Tailwind v4 + `@forge-ui-official/core`。你可以自己写，也可以让 AI 助手按仓库里的真实样板页和 skills 加业务模块。方法借鉴 [ShipAny Next](https://docs.shipany.ai/zh/shipany-next) 的协作方式，**不是** 它那套支付 / 积分 / CMS / 落地页 SaaS 全家桶。
+技术栈：Next.js 16 + Tailwind v4 + `@forge-ui-official/core`。你可以自己写，也可以让 AI 助手按仓库里的真实样板页和 skills 加业务模块。**不做** 支付 / 积分 / CMS / 落地页等 SaaS 全家桶。
 
 | | |
 |--|--|
@@ -32,7 +32,7 @@ pnpm dev
 
 | 是 | 不是 |
 |----|------|
-| 只用 Forge 的后台壳 + 双 UI 样板 | ShipAny 全量 SaaS（计费、积分、CMS…） |
+| 只用 Forge 的后台壳 + 双 UI 样板 | 完整 SaaS 套件（计费、积分、CMS…） |
 | skill 流水线：先 module 再 page | 一句话生成完整产品 |
 | `/ref/*` 给 AI 抄的布局画廊 | 侧栏里的产品功能 |
 | Postgres + SMTP + 账密登录 | 多数据库 / OAuth / 云邮件 SDK |

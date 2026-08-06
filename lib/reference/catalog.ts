@@ -217,8 +217,8 @@ export const REF_PAGES: RefPageMeta[] = [
     slug: "tickets",
     title: "工单 · 列表 + 线程",
     role: "tickets",
-    summary: "左工单列表 + 右多轮回复线程 + 附件 + 关闭。对齐 ShipAny Next tickets（非 IM chat）。",
-    forgeTemplate: "shipany-next settings/tickets · admin/tickets",
+    summary: "左工单列表 + 右多轮回复线程 + 附件 + 关闭。客服工单线程（非 IM chat）。",
+    forgeTemplate: "support tickets thread",
     components: ["ButtonGroup", "StatusBadge", "TextArea", "Button"],
   },
   {
@@ -226,7 +226,7 @@ export const REF_PAGES: RefPageMeta[] = [
     title: "密钥 · API Keys",
     role: "api-keys",
     summary: "创建后只显示一次完整 key · 列表脱敏前缀 · 复制 · 吊销。",
-    forgeTemplate: "shipany-next settings/apikeys",
+    forgeTemplate: "api keys lifecycle",
     components: ["DataTable", "Modal", "TextField", "StatusBadge", "Button"],
   },
   {
@@ -234,7 +234,7 @@ export const REF_PAGES: RefPageMeta[] = [
     title: "积分 · 余额 + 流水",
     role: "credits",
     summary: "余额卡 + grant/consume Tab + 流水表（批次剩余/过期）。",
-    forgeTemplate: "shipany-next settings/credits · modules/credits",
+    forgeTemplate: "credits ledger",
     components: ["ButtonGroup", "DataTable", "StatusBadge"],
   },
   {
@@ -242,7 +242,7 @@ export const REF_PAGES: RefPageMeta[] = [
     title: "订阅 · 当前计划 + 历史",
     role: "billing",
     summary: "当前套餐卡（续费日/取消）+ 订阅历史状态 Tab。",
-    forgeTemplate: "shipany-next settings/billing",
+    forgeTemplate: "subscription billing",
     components: ["Button", "ButtonGroup", "DataTable", "StatusBadge"],
   },
   {

@@ -70,7 +70,7 @@
 | task 任务 | `/ref/task` | — |
 | project 项目 | `/ref/project` | — |
 | kanban 泳道 | `/ref/kanban`（官方嵌在 project Task tab） | — |
-| tickets 工单线程 | `/ref/tickets` | —（语义见 ShipAny Next tickets） |
+| tickets 工单线程 | `/ref/tickets` | — |
 | api-keys | `/ref/api-keys` | — |
 | credits 积分账本 | `/ref/credits` | — |
 | billing 订阅 | `/ref/billing` | — |
