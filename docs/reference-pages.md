@@ -34,6 +34,10 @@
 | `/ref/task` | **任务详情** | project-template/tasks/[id] |
 | `/ref/project` | **项目详情（多 Tab）** | project-template/projects/[id] |
 | `/ref/kanban` | **Kanban 泳道** | 项目详情 Task tab 内嵌，抽出独立页 |
+| `/ref/tickets` | **工单线程** | ShipAny Next settings/tickets |
+| `/ref/api-keys` | **API Keys** | ShipAny Next settings/apikeys |
+| `/ref/credits` | **积分账本** | ShipAny Next settings/credits |
+| `/ref/billing` | **订阅账单** | ShipAny Next settings/billing |
 | `/ref/settings` | 设置 | settings/* |
 | `/ref/activity` | 时间线 | crm/activity |
 | `/ref/queue` | 待办队列 | approvals todo |
