@@ -45,6 +45,8 @@ docs/forge-components.md
 
 - 通用 Modal：core 无导出 → `components/ui/modal.tsx`  
 - 操作 Toast：core 无导出 → `lib/toast.ts` + `components/ui/toast-provider.tsx`（已挂 AppShell）  
+- 资源工作台：`WorkspaceSplit` + `FolderNav` + `ResourceCard`（见 `/ref/resource-workspace`）  
+- 时间格式：`lib/format/datetime.ts`（客户端安全，勿塞 next/headers）  
 - 缺组件 → `FORGE-GAP`，禁止手搓  
 
 ## Skills

@@ -45,6 +45,7 @@
 | 重详情（档案） | `Breadcrumbs` `StatusBadge` `StatCard` `TabBar` `DataTable` 侧栏字段 | `accounts/[id]` | `page-header` `card` `tab` `list` `table` |
 | 删除确认 | `ConfirmationDialog` **外包** `Modal`/遮罩 | `accounts/page` 删除 | `modal` |
 | 工作台、指标 | `StatCard` `ChartCard` 图表家族 `DataTable` | `dashboard` | `card` `chart` `table` |
+| **资源工作台** | `WorkspaceSplit` `FolderNav` `ResourceCard` 网格 + toast | `/ref/resource-workspace` | starter 组件 |
 | 设置单卡 | `TextField` `Button` 窄卡片 | `settings/profile` 等 | `input-field` |
 | 空态 | 文案 + `Button`；可选 solar 图标 | 各列表 empty | `button-link` |
 
@@ -96,10 +97,14 @@ import {
   type ColumnDef,
 } from "@forge-ui-official/core";
 import { Modal } from "@/components/ui/modal";
+import { ResourceCard } from "@/components/resource-card";
+import { FolderNav, WorkspaceSplit } from "@/components/workspace-split";
 import { toast } from "@/lib/toast";
+import { formatDateOnly, formatTime } from "@/lib/format/datetime";
 import { siteConfig } from "@/config/site";
 // color={siteConfig.accent}
 // toast.success("已保存") — 不要在页面里塞成功横幅
+// 资源台：WorkspaceSplit + FolderNav + ResourceCard 网格
 ```
 
 图标：`solar-icon-set`（菜单 `BoldDuotone` size 20；行内操作 `Linear` size 16）。

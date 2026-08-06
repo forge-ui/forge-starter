@@ -31,6 +31,22 @@ export const REF_PAGES: RefPageMeta[] = [
     components: ["StatusBadge", "ButtonGroup", "TextField", "Button"],
   },
   {
+    slug: "resource-workspace",
+    title: "资源工作台 · 文件夹 + 卡片",
+    role: "resource-workspace",
+    summary:
+      "左 FolderNav + 右 ResourceCard 网格；主按钮 + Kebab 多类型创建；toast 反馈。AI 资源台（模型/工具/知识库）范式。",
+    forgeTemplate: "agent-factory models/tools/knowledge · starter WorkspaceSplit",
+    components: [
+      "WorkspaceSplit",
+      "FolderNav",
+      "ResourceCard",
+      "ButtonGroup",
+      "KebabMenu",
+      "toast",
+    ],
+  },
+  {
     slug: "detail",
     title: "详情 · 业务档案",
     role: "detail",

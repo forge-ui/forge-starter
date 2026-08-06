@@ -53,15 +53,37 @@ app/(app)/<resource>/[id]/page.tsx
 
 ## 列表 UX
 
+### 表格列表（accounts / list-table）
+
 1. `h1` + Breadcrumbs + 主按钮  
 2. **单行** `ButtonGroup` + 搜索  
 3. DataTable + 分页 + 空态  
 4. 新建/编辑：form modal（`components/ui/modal.tsx`）  
 
+### 资源工作台（第三样板 · 卡片 + 可选文件夹）
+
+适合：模型 / 工具 / 知识库 / Agent 等「资源台」，不是行表 CRUD。
+
+1. `h1` + Breadcrumbs + 主按钮（+ 可选顶栏 `KebabMenu` 多类型创建）  
+2. **可选** `WorkspaceSplit`：左 `FolderNav`，右主区  
+3. 主区：**单行** `ButtonGroup` + 搜索 + 计数  
+4. `ResourceCard` 网格 + 空态  
+5. 反馈：`toast.success/error`（禁止页内绿条）  
+
+参考页：`/ref/resource-workspace`（假数据）。
+
+```text
+components/workspace-split.tsx   # WorkspaceSplit + FolderNav
+components/resource-card.tsx     # ResourceCard
+lib/toast.ts                     # 全站 toast
+lib/format/datetime.ts           # formatTime / formatDateOnly
+```
+
 ## 组件
 
 写 UI 前读 `../forge/.agents/skills/forge/SKILL.md`。  
-Modal 宿主：`components/ui/modal.tsx`。
+Modal 宿主：`components/ui/modal.tsx`。  
+操作反馈：`import { toast } from "@/lib/toast"`。
 
 ## 自检
 
