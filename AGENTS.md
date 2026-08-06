@@ -57,7 +57,7 @@ docs/forge-components.md
 | `forge-starter-new-page` | 列表 / 详情 / 看板 UI | **只** 页面 + 菜单；对照样板选型 |
 
 路径：`.agents/skills/<name>/SKILL.md`（canonical）。  
-`.claude/skills/` **必须与 `.agents/skills/` 内容一致**（改一处同步另一处）。
+Skills 只维护 **`.agents/skills/`**。`.claude/skills` 为指向它的 symlink（给 Claude Code 发现用），勿再复制一份。
 
 人类说「加 xxx 管理」→ 先 `new-module`，再 `new-page`（可同会话顺序执行）。
 

@@ -50,7 +50,7 @@ Coding Agent 是第一开发界面。理念对齐 [ShipAny Next](https://docs.sh
 | 加数据与接口 | `forge-starter-new-module` | **只后端** |
 | 加列表/详情/看板页 | `forge-starter-new-page` | **只 UI** + 菜单 |
 
-路径：`.agents/skills/`（canonical）；`.claude/skills/` 必须同步。
+路径：`.agents/skills/`（canonical）；`.claude/skills` → symlink，勿双份维护。
 
 ## Forge 组件怎么查
 

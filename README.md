@@ -2,7 +2,9 @@
 
 **Agent-native admin scaffold** for 0→1 B-side / internal apps.
 
-Next.js 16 + Tailwind v4 + [`@forge-ui-official/core`]. Coding Agent is the primary IDE: skills split backend vs UI, real pages act as copyable samples — same *method* as [ShipAny Next](https://docs.shipany.ai/zh/shipany-next), **not** a SaaS feature pack (no payments / credits / CMS / landing factory).
+Next.js 16 + Tailwind v4 + `@forge-ui-official/core`. Coding Agent is the primary IDE: skills split backend vs UI, real pages act as copyable samples — same *method* as [ShipAny Next](https://docs.shipany.ai/zh/shipany-next), **not** a SaaS feature pack (no payments / credits / CMS / landing factory).
+
+**中文文档 → [README.zh-CN.md](./README.zh-CN.md)**
 
 | | |
 |--|--|
@@ -24,20 +26,20 @@ pnpm db:push
 pnpm dev
 ```
 
-Open `http://localhost:3000`. Login uses demo mode by default (`AUTH_MODE=demo` — any username/password works; **demo does not store business data**).
+Open `http://localhost:3000`. Default `AUTH_MODE=demo` accepts any login (**demo does not persist business data**).
 
-> **CRUD always needs Postgres.** `AUTH_MODE=demo` only skips the login-user table. Accounts, approvals, and any new module require `DATABASE_URL` + `pnpm db:push`.
+> **CRUD always needs Postgres.** `AUTH_MODE=demo` only skips the login-user table. Accounts, approvals, and new modules need `DATABASE_URL` + `pnpm db:push`.
 
 ## What this is / is not
 
 | Is | Is not |
 |----|--------|
-| Forge-only admin shell + dual UI samples | ShipAny full SaaS (billing, credits, RBAC product, CMS) |
+| Forge-only admin shell + dual UI samples | ShipAny full SaaS (billing, credits, CMS, …) |
 | Skill pipeline: module → page | One-shot “generate whole product” |
 | `/ref/*` layout gallery for agents | Product features in the sidebar |
 | Postgres + SMTP + password auth | Multi-DB / OAuth / cloud mail SDKs |
 
-Agent contract (must-read): **`AGENTS.md`**. Product intent: **`PRODUCT.md`**.
+Agent contract: **`AGENTS.md`**. Product intent: **`PRODUCT.md`**.
 
 ## Agent workflow
 
@@ -48,13 +50,13 @@ Agent contract (must-read): **`AGENTS.md`**. Product intent: **`PRODUCT.md`**.
      a. forge-starter-new-module  → schema + service + API
      b. forge-starter-new-page    → list / form / detail + menu
 4. Pure board / non-CRUD screen → new-page only
-5. pnpm typecheck · browser-check the main path (no curl-only QA)
+5. pnpm typecheck · browser-check main path (no curl-only QA)
 ```
 
 **Detail shape has no global default:**
 
-- **Heavy** (tabs, archive, multi-block) → clone **`accounts`** (full page detail)
-- **Light** (few fields, back to list) → clone **`approvals`** (detail modal)
+- **Heavy** (tabs, archive) → clone **`accounts`** (full-page detail)
+- **Light** (few fields) → clone **`approvals`** (detail modal)
 - Unsure → ask the user
 
 **Component pick order:** live samples → `/ref/*` → forge monorepo cases (if present).
@@ -64,47 +66,46 @@ Agent contract (must-read): **`AGENTS.md`**. Product intent: **`PRODUCT.md`**.
 | Path | Role |
 |------|------|
 | `/accounts` · `/accounts/[id]` | Collection + modal form + **full-page detail** |
-| `/approvals` | Collection + create modal + **detail modal** + queue actions |
-| `/dashboard` | Workbench (ecommerce-2 style) |
+| `/approvals` | Collection + create modal + **detail modal** |
+| `/dashboard` | Workbench |
 | `/settings/*` | Profile, security, apps, notifications |
 | **`/ref/`** | **AI reference gallery** (real routes, **not** in product menu) |
 
-`/ref` is on in development by default; production returns 404 unless `SHOW_REF_PAGES=true`. Index and catalog: `docs/reference-pages.md`, `lib/reference/catalog.ts`.
-
-Includes layout paradigms such as list table/cards, CRM person & product multi-tab, full-page form, calendar, chat, files, kanban, dashboards, invoice, tickets, API keys, credits ledger, billing, and more — **mock UI for cloning**, not SaaS product modules.
+`/ref` is on in development by default; production 404 unless `SHOW_REF_PAGES=true`. Catalog: `docs/reference-pages.md`.
 
 ## Tech stack
 
-- **Framework:** Next.js 16 (App Router), React 19, TypeScript
-- **UI:** `@forge-ui-official/core` (Forge UI Kit) + Tailwind CSS v4 + solar-icon-set
-- **Auth:** Username/email + password · `jose` sessions · demo \| local
-- **DB:** PostgreSQL only · Drizzle ORM
-- **Mail:** SMTP only (nodemailer); no cloud email SDK
+- **Framework:** Next.js 16, React 19, TypeScript  
+- **UI:** `@forge-ui-official/core` + Tailwind CSS v4 + solar-icon-set  
+- **Auth:** Username/email + password · jose sessions · demo \| local  
+- **DB:** PostgreSQL · Drizzle ORM  
+- **Mail:** SMTP only (nodemailer)
 
 ## Project structure
 
 ```text
 app/
-  (auth)/          # login · register · forgot/reset password
+  (auth)/          # login · register · forgot/reset
   (app)/           # dashboard · accounts · approvals · settings · ref/*
   api/             # auth · accounts · approvals
 components/        # app-shell · *-store · *-dialog · ui/modal
 config/            # site · menu · apps
 lib/               # auth · db · accounts · approvals · reference
 docs/              # agent-native · page-roles · forge-components · …
-.agents/skills/    # quick-start · new-module · new-page  (sync .claude/skills)
-AGENTS.md PRODUCT.md
+.agents/skills/    # canonical skills (quick-start · new-module · new-page)
+.claude/skills → .agents/skills   # symlink for Claude Code
+AGENTS.md PRODUCT.md CLAUDE.md
 ```
 
 ## Skills
 
 | Skill | Scope |
 |-------|--------|
-| `forge-starter-quick-start` | Brand, accent, menu labels, env, module backlog |
+| `forge-starter-quick-start` | Brand, accent, menu labels, env, backlog |
 | `forge-starter-new-module` | **Backend only:** schema + service + API |
-| `forge-starter-new-page` | **UI only:** list / form / detail + menu (needs API first) |
+| `forge-starter-new-page` | **UI only:** list / form / detail + menu |
 
-Canonical path: `.agents/skills/`. Keep `.claude/skills/` in sync when editing.
+Edit only under **`.agents/skills/`**. Do not maintain a second copy.
 
 ## Commands
 
@@ -120,28 +121,16 @@ Canonical path: `.agents/skills/`. Keep `.claude/skills/` in sync when editing.
 ## Environment
 
 ```env
-# demo | local  (demo = skip login user table only)
 AUTH_MODE=demo
 AUTH_SECRET=change-me-to-a-long-random-string
-
 APP_URL=http://localhost:3000
 DATABASE_URL=postgresql://forge:forge@127.0.0.1:5432/forge_starter
-
-# Optional: force login even in demo
 # AUTH_GUARD=true
-
-# Optional: AI reference pages in production
 # SHOW_REF_PAGES=true
-
-# Optional SMTP (forgot-password logs link to console if unset)
-SMTP_HOST=
-SMTP_PORT=587
-SMTP_USER=
-SMTP_PASS=
-SMTP_FROM="Forge Starter <noreply@example.com>"
+# SMTP_*  (optional)
 ```
 
-See `.env.example`. Docker Postgres: `docker compose up -d` (see `docker-compose.yml`).
+Full template: `.env.example`. Local Postgres: `docker compose up -d`.
 
 ## Docs
 
@@ -149,6 +138,7 @@ See `.env.example`. Docker Postgres: `docker compose up -d` (see `docker-compose
 |-----|---------|
 | `AGENTS.md` | Agent contract (must-read) |
 | `PRODUCT.md` | Product intent & non-goals |
+| `CLAUDE.md` | Short pointer for Claude Code |
 | `docs/agent-native.md` | Workflow & skill boundaries |
 | `docs/forge-components.md` | Role → kit components → samples |
 | `docs/page-roles.md` | Page roles & detail choice |
@@ -157,11 +147,10 @@ See `.env.example`. Docker Postgres: `docker compose up -d` (see `docker-compose
 
 ## Boundaries
 
-- **Forge only** — no MUI / Ant / second component kit; missing capability → `FORGE-GAP`
-- Colors: `fg-*` tokens · controls: `color={siteConfig.accent}`
+- **Forge only** — no second UI kit; missing capability → `FORGE-GAP`
+- Colors: `fg-*` · controls: `color={siteConfig.accent}`
 - List filters: **one row** pills + search
-- No dead / decorative buttons; implement or hide
-- Ship gate: `pnpm typecheck` + **browser** main path (not curl-only)
+- Ship gate: `pnpm typecheck` + **browser** main path
 
 ---
 

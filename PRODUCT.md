@@ -60,7 +60,7 @@ UI 与页面范式以 **`@forge-ui-official/core`** 为硬约束；Agent 通过�
 | 工作台 | ecommerce-2 布局，指标接业务账号 |
 | 账号管理 | **CRUD 样板**：DataTable 列表 + Modal 新建编辑 + 详情 + `/api/accounts` |
 | 应用管理 | 应用列表 CRUD；内部应用多选菜单；外链/外部系统认证占位 |
-| Agent skills | `.agents/skills/*` + `.claude/skills/*`（见 §6） |
+| Agent skills | `.agents/skills/*`（`.claude/skills` 为 symlink） |
 
 ### 4.1 数据边界
 
@@ -106,7 +106,7 @@ UI 与页面范式以 **`@forge-ui-official/core`** 为硬约束；Agent 通过�
 - `docs/agent-native.md` — 工作流  
 - `docs/module-template.md` — CRUD 文件地图  
 - `docs/page-roles.md` — 页面角色 → 官方 template（**无外部设计插件**）  
-- `.agents/skills/*/SKILL.md`（Claude 同步：`.claude/skills/`）
+- `.agents/skills/*/SKILL.md`（`.claude/skills` → symlink，勿双份）
 
 ## 7. 版本节奏
 
