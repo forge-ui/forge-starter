@@ -25,8 +25,10 @@
 | `/ref/calendar` | **日历** | micellaneous/calendar |
 | `/ref/chat` | **对话** | micellaneous/chat |
 | `/ref/files` | **文件清单** | micellaneous/files |
-| `/ref/dashboard-board` | **看板** | dashboards/crm · ecommerce-2 |
-| `/ref/dashboard-kpi` | 看板精简 | ecommerce-2 |
+| `/ref/dashboard-board` | Dashboard · 通用条 | ecommerce-2 骨架 |
+| `/ref/dashboard-kpi` | Dashboard · 精简 KPI | ecommerce-2 |
+| `/ref/dashboard-crm` | **Dashboard · CRM** | [dashboards/crm](https://www.forgeui.org/templates/dashboards/crm) |
+| `/ref/dashboard-analytics` | **Dashboard · Analytics** | [dashboards/analytics](https://www.forgeui.org/templates/dashboards/analytics) |
 | `/ref/settings` | 设置 | settings/* |
 | `/ref/activity` | 时间线 | crm/activity |
 | `/ref/queue` | 待办队列 | approvals todo |

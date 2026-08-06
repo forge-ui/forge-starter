@@ -65,7 +65,9 @@ description: >
 | queue | `/ref/queue` | approvals 待办 |
 | settings | `/ref/settings` | settings/* |
 | activity | `/ref/activity` | — |
-| dashboard | `/ref/dashboard-board` | `/dashboard` |
+| dashboard 通用/精简 | `/ref/dashboard-board` · `/ref/dashboard-kpi` | `/dashboard`（ecommerce-2 完整） |
+| dashboard CRM | `/ref/dashboard-crm` | monorepo `dashboards/crm` |
+| dashboard Analytics | `/ref/dashboard-analytics` | monorepo `dashboards/analytics` |
 | 空态 | `/ref/empty` | 各列表 empty |
 
 目录：`docs/reference-pages.md`、`lib/reference/catalog.ts`。

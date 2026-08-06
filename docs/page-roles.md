@@ -65,13 +65,13 @@
 | activity | `/ref/activity` | — |
 | queue | `/ref/queue` | approvals 待办 |
 | empty | `/ref/empty` | 各列表空态 |
-| dashboard | `/ref/dashboard-board` · `/ref/dashboard-kpi` | `/dashboard` |
+| dashboard | `/ref/dashboard-board` · `/ref/dashboard-kpi` · `/ref/dashboard-crm` · `/ref/dashboard-analytics` | `/dashboard` |
 
 ## 推荐对照
 
 | 角色 | 官方参考 | Starter 样板 |
 |------|----------|--------------|
-| dashboard | ecommerce-2 | `dashboard` + `/ref/dashboard-kpi` |
+| dashboard | ecommerce-2 / crm / analytics | `/dashboard` + `/ref/dashboard-*` |
 | collection | ecommerce/customers | `accounts`、`approvals` 列表 + `/ref/list-table` / `list-cards` |
 | form-modal | customers Add Modal | `account-form-dialog`、`approval-form-dialog` |
 | detail-modal | （Starter 自研） | `approval-detail-dialog` |
