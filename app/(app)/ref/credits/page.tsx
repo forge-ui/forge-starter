@@ -178,7 +178,7 @@ export default function RefCreditsPage() {
           <p className="text-sm text-white/75">可用积分</p>
           <p className="mt-2 text-4xl font-semibold tracking-tight">{balance.toLocaleString()}</p>
           <p className="mt-3 text-xs text-white/70">
-            FIFO 消耗 · 过期批次优先扣减（语义对齐 Next modules/credits）
+            FIFO 消耗 · 过期批次优先扣减
           </p>
         </div>
         <div className="grid grid-cols-2 gap-4 lg:col-span-2">

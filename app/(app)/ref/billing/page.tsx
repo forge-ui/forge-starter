@@ -153,8 +153,7 @@ export default function RefBillingPage() {
               />
             </div>
             <p className="mt-2 max-w-lg text-sm text-fg-grey-600">
-              $29 / month · 下一扣款日 06 Sep 2026 · 含 2,000 积分/月。对齐 Next
-              settings/billing 顶部当前订阅卡。
+              $29 / month · 下一扣款日 06 Sep 2026 · 含 2,000 积分/月。
             </p>
             <dl className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
               <div>
