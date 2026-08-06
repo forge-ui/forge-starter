@@ -1,8 +1,8 @@
 # Forge Starter
 
-**面向 Agent 的管理后台脚手架**，用来从 0 搭 B 端 / 内部系统。
+**用 Forge UI 快速搭建管理后台** — 给人和 AI 编程助手一起用的脚手架。
 
-技术栈：Next.js 16 + Tailwind v4 + `@forge-ui-official/core`。Coding Agent 是第一开发界面：用 skill 拆开后端与页面，仓库里真页面当抄写样板。方法对齐 [ShipAny Next](https://docs.shipany.ai/zh/shipany-next)，**不是** 支付 / 积分 / CMS / 落地页生成那套 SaaS 全家桶。
+技术栈：Next.js 16 + Tailwind v4 + `@forge-ui-official/core`。你可以自己写，也可以让 AI 助手按仓库里的真实样板页和 skills 加业务模块。方法借鉴 [ShipAny Next](https://docs.shipany.ai/zh/shipany-next) 的协作方式，**不是** 它那套支付 / 积分 / CMS / 落地页 SaaS 全家桶。
 
 **English → [README.md](./README.md)**
 
@@ -156,4 +156,4 @@ DATABASE_URL=postgresql://forge:forge@127.0.0.1:5432/forge_starter
 
 ---
 
-**Forge Starter** — 让 Agent 在 Forge 上搭真实管理后台。
+**Forge Starter** — 用 Forge 搭真实管理后台，人和 AI 助手都能上手。

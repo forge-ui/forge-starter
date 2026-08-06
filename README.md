@@ -1,8 +1,8 @@
 # Forge Starter
 
-**Agent-native admin scaffold** for 0→1 B-side / internal apps.
+**Build admin dashboards with Forge UI** — a starter for people and AI coding assistants.
 
-Next.js 16 + Tailwind v4 + `@forge-ui-official/core`. Coding Agent is the primary IDE: skills split backend vs UI, real pages act as copyable samples — same *method* as [ShipAny Next](https://docs.shipany.ai/zh/shipany-next), **not** a SaaS feature pack (no payments / credits / CMS / landing factory).
+Stack: Next.js 16 + Tailwind v4 + `@forge-ui-official/core`. You (or an AI assistant) clone real sample pages, add modules with skills, and ship an internal admin console. Inspired by [ShipAny Next](https://docs.shipany.ai/zh/shipany-next)’s *workflow*, **not** its SaaS catalog (no payments, credits, CMS, or marketing-site generator).
 
 **中文文档 → [README.zh-CN.md](./README.zh-CN.md)**
 
@@ -154,4 +154,4 @@ Full template: `.env.example`. Local Postgres: `docker compose up -d`.
 
 ---
 
-**Forge Starter** — scaffold for agents building real admin UIs on Forge.
+**Forge Starter** — start a real Forge admin console, with or without an AI assistant.
