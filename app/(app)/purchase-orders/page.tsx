@@ -129,42 +129,19 @@ function PurchaseOrdersPageContent() {
   );
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-display-l font-semibold leading-9 tracking-fg text-fg-black">
-          采购单
-        </h1>
-        <Breadcrumbs
-          color={siteConfig.accent}
-          items={[
-            { label: "采购", href: "/procurement/" },
-            { label: "采购单" },
-          ]}
-        />
-      </div>
-
-      <div className="flex flex-wrap items-center gap-3">
-        <ButtonGroup
-          color={siteConfig.accent}
-          shape="pill"
-          items={scopes.map((s, i) => ({
-            label:
-              i === 0
-                ? `全部 (${counts.all ?? 0})`
-                : i === 1
-                  ? `待审批 (${counts.pending ?? 0})`
-                  : s.label,
-          }))}
-          activeIndex={scopeIndex}
-          onChange={setScopeIndex}
-        />
-        <div className="min-w-[200px] flex-1">
-          <TextField
+    <div className="flex flex-col gap-6">
+      {/* Title row: left title+crumbs, right primary action (accounts pattern) */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-display-l font-semibold leading-9 tracking-fg text-fg-black">
+            采购单
+          </h1>
+          <Breadcrumbs
             color={siteConfig.accent}
-            value={search}
-            onChange={setSearch}
-            placeholder="搜索单号 / 标题 / 供应商"
-            iconLeft={<MagniferLinear size={16} />}
+            items={[
+              { label: "采购", href: "/procurement/" },
+              { label: "采购单" },
+            ]}
           />
         </div>
         <Button
@@ -176,11 +153,61 @@ function PurchaseOrdersPageContent() {
         </Button>
       </div>
 
+      {/* Tool row: filters left, search right (not flex-1 stretch) */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <ButtonGroup
+          color={siteConfig.accent}
+          shape="pill"
+          items={scopes.map((s, i) => ({
+            label:
+              i === 0
+                ? `全部 ${counts.all ?? 0}`
+                : i === 1
+                  ? `待审批 ${counts.pending ?? 0}`
+                  : s.label,
+          }))}
+          activeIndex={scopeIndex}
+          onChange={setScopeIndex}
+        />
+        <div className="w-full max-w-sm">
+          <TextField
+            color={siteConfig.accent}
+            value={search}
+            onChange={setSearch}
+            placeholder="搜索单号 / 标题 / 供应商"
+            iconLeft={<MagniferLinear size={16} />}
+          />
+        </div>
+      </div>
+
       {error ? (
-        <p className="rounded-2xl bg-fg-red-50 px-4 py-3 text-sm text-fg-red">{error}</p>
-      ) : null}
-      {loading ? (
-        <p className="text-sm text-fg-grey-500">加载中…</p>
+        <div className="flex flex-col items-center justify-center gap-3 rounded-[28px] border border-dashed border-fg-grey-200 bg-white py-16">
+          <p className="text-lg font-semibold text-fg-black">无法加载采购单</p>
+          <p className="max-w-md text-center text-sm text-fg-grey-500">{error}</p>
+          <Button color={siteConfig.accent} onClick={() => void refresh(scopes[scopeIndex].value)}>
+            重试
+          </Button>
+        </div>
+      ) : loading ? (
+        <div className="rounded-[28px] border border-fg-grey-200 bg-white py-16 text-center text-sm text-fg-grey-500">
+          加载中…
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center gap-4 rounded-[28px] border border-dashed border-fg-grey-200 bg-white py-16">
+          <p className="text-lg font-semibold text-fg-black">
+            {items.length === 0 ? "暂无采购单" : "无匹配结果"}
+          </p>
+          <p className="text-sm text-fg-grey-500">
+            {items.length === 0
+              ? "还没有采购单，点击右上角发起第一单。"
+              : "试试清空搜索或切换筛选。"}
+          </p>
+          {items.length === 0 ? (
+            <Button color={siteConfig.accent} onClick={() => setFormOpen(true)}>
+              发起采购
+            </Button>
+          ) : null}
+        </div>
       ) : (
         <DataTable<PurchaseOrder>
           color={siteConfig.accent}

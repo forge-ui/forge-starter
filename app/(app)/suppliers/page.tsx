@@ -170,47 +170,20 @@ function SuppliersPageContent() {
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-display-l font-semibold leading-9 tracking-fg text-fg-black">
-          供应商
-        </h1>
-        <Breadcrumbs
-          color={siteConfig.accent}
-          items={[
-            { label: "采购", href: "/procurement/" },
-            { label: "供应商" },
-          ]}
-        />
-      </div>
-
-      <div className="flex flex-wrap items-center gap-3">
-        <ButtonGroup
-          color={siteConfig.accent}
-          shape="pill"
-          items={filterTabs.map((t, i) => ({
-            label:
-              i === 0
-                ? `全部 (${countsByStatus.all ?? 0})`
-                : `${t.label} (${countsByStatus[filterValues[i]] ?? 0})`,
-          }))}
-          activeIndex={filterIndex}
-          onChange={(i) => {
-            setFilterIndex(i);
-          }}
-        />
-        <div className="min-w-[200px] flex-1">
-          <TextField
+    <div className="flex flex-col gap-6">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-display-l font-semibold leading-9 tracking-fg text-fg-black">
+            供应商
+          </h1>
+          <Breadcrumbs
             color={siteConfig.accent}
-            value={search}
-            onChange={setSearch}
-            placeholder="搜索名称 / 编码 / 联系人"
-            iconLeft={<MagniferLinear size={16} />}
+            items={[
+              { label: "采购", href: "/procurement/" },
+              { label: "供应商" },
+            ]}
           />
         </div>
-        <Button color="grey" variant="tertiary" onClick={() => void refresh()}>
-          刷新
-        </Button>
         <Button
           color={siteConfig.accent}
           iconLeft={<PlusIcon size={16} />}
@@ -223,11 +196,66 @@ function SuppliersPageContent() {
         </Button>
       </div>
 
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <ButtonGroup
+          color={siteConfig.accent}
+          shape="pill"
+          items={filterTabs.map((t, i) => ({
+            label:
+              i === 0
+                ? `全部 ${countsByStatus.all ?? 0}`
+                : `${t.label} ${countsByStatus[filterValues[i]] ?? 0}`,
+          }))}
+          activeIndex={filterIndex}
+          onChange={(i) => {
+            setFilterIndex(i);
+          }}
+        />
+        <div className="w-full max-w-sm">
+          <TextField
+            color={siteConfig.accent}
+            value={search}
+            onChange={setSearch}
+            placeholder="搜索名称 / 编码 / 联系人"
+            iconLeft={<MagniferLinear size={16} />}
+          />
+        </div>
+      </div>
+
       {error ? (
-        <p className="rounded-2xl bg-fg-red-50 px-4 py-3 text-sm text-fg-red">{error}</p>
-      ) : null}
-      {loading ? (
-        <p className="text-sm text-fg-grey-500">加载中…</p>
+        <div className="flex flex-col items-center justify-center gap-3 rounded-[28px] border border-dashed border-fg-grey-200 bg-white py-16">
+          <p className="text-lg font-semibold text-fg-black">无法加载供应商</p>
+          <p className="max-w-md text-center text-sm text-fg-grey-500">{error}</p>
+          <Button color={siteConfig.accent} onClick={() => void refresh()}>
+            重试
+          </Button>
+        </div>
+      ) : loading ? (
+        <div className="rounded-[28px] border border-fg-grey-200 bg-white py-16 text-center text-sm text-fg-grey-500">
+          加载中…
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center gap-4 rounded-[28px] border border-dashed border-fg-grey-200 bg-white py-16">
+          <p className="text-lg font-semibold text-fg-black">
+            {suppliers.length === 0 ? "暂无供应商" : "无匹配结果"}
+          </p>
+          <p className="text-sm text-fg-grey-500">
+            {suppliers.length === 0
+              ? "还没有供应商，点击右上角创建第一家。"
+              : "试试清空搜索或切换状态筛选。"}
+          </p>
+          {suppliers.length === 0 ? (
+            <Button
+              color={siteConfig.accent}
+              onClick={() => {
+                setEditId(null);
+                setFormOpen(true);
+              }}
+            >
+              新建供应商
+            </Button>
+          ) : null}
+        </div>
       ) : (
         <DataTable<Supplier>
           color={siteConfig.accent}
