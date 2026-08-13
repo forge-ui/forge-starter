@@ -160,6 +160,11 @@ DATABASE_URL=postgresql://forge:forge@127.0.0.1:5432/forge_starter
 - 列表筛选保持一行 pills + 搜索  
 - 交付：`pnpm typecheck` + 浏览器走通主路径  
 
+## 相关项目
+
+- [Forge UI](https://github.com/forge-ui/forge) — 组件库与文档
+- [Forge Design](https://github.com/forge-ui/forge-design-extension) — 在真实页面上点选或放置组件，用本地 Grok 改 UI
+
 ---
 
 **Forge Starter** — 用 Forge 搭真实管理后台，人和 AI 助手都能上手。
