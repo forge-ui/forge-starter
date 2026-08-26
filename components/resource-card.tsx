@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { StatusBadge, type StatusBadgeColor } from "@forge-ui-official/core";
 
 /**
  * Resource grid card — shared list surface for assets / agents / folders.
@@ -14,7 +13,6 @@ export function ResourceCard({
   iconVariant = "chip",
   iconClassName,
   tag,
-  tagColor = "blue",
   subtitle,
   footer,
   actions,
@@ -29,8 +27,8 @@ export function ResourceCard({
   iconVariant?: "chip" | "plain";
   /** Overrides default blue chip when iconVariant is chip */
   iconClassName?: string;
+  /** 类目/状态短标签，纯文本呈现（彩色胶囊已弃用，见 audit-checklist V6） */
   tag?: string;
-  tagColor?: StatusBadgeColor;
   subtitle?: ReactNode;
   footer?: ReactNode;
   actions?: ReactNode;
@@ -71,8 +69,8 @@ export function ResourceCard({
               {title}
             </h3>
             {tag ? (
-              <span className="shrink-0 whitespace-nowrap">
-                <StatusBadge label={tag} color={tagColor} />
+              <span className="shrink-0 whitespace-nowrap text-xs font-medium text-fg-grey-500">
+                {tag}
               </span>
             ) : null}
           </div>

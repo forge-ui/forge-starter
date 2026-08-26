@@ -24,10 +24,10 @@ import {
   IconButton,
   SmoothLineChart,
   StatCard,
-  StatusBadge,
   TabBar,
   type ColumnDef,
 } from "@forge-ui-official/core";
+import { StatusText } from "@/components/ui/status-text";
 import { siteConfig } from "@/config/site";
 import { useAccountsStore } from "@/components/accounts-store";
 import { AccountFormDialog } from "@/components/account-form-dialog";
@@ -164,7 +164,7 @@ export default function AccountDetailPage({
         width: "w-28",
         render: (row) => {
           const meta = resultMeta[row.result];
-          return <StatusBadge label={meta.label} color={meta.color} />;
+          return <StatusText label={meta.label} color={meta.color} />;
         },
       },
       {
@@ -336,7 +336,7 @@ export default function AccountDetailPage({
                         <p className="truncate text-sm font-semibold text-fg-black">{item.name}</p>
                         <p className="text-xs text-fg-grey-700">{item.role}</p>
                       </div>
-                      <StatusBadge
+                      <StatusText
                         label={ACCOUNT_STATUS_META[item.status].label}
                         color={ACCOUNT_STATUS_META[item.status].color}
                       />
@@ -433,7 +433,7 @@ export default function AccountDetailPage({
                   className="flex items-center justify-between rounded-2xl border border-fg-grey-200 px-4 py-3"
                 >
                   <span className="text-sm font-medium text-fg-black">{item.label}</span>
-                  <StatusBadge
+                  <StatusText
                     label={item.value}
                     color={item.value === "禁止" ? "red" : item.value === "只读" ? "yellow" : "green"}
                   />
@@ -455,7 +455,7 @@ export default function AccountDetailPage({
 
       {/* Sidebar — customer detail pattern */}
       <aside className="w-full shrink-0 rounded-card border border-fg-grey-200 bg-white p-6 self-start xl:w-[336px]">
-        <div className="relative -mx-6 -mt-6 h-[120px] rounded-t-card bg-gradient-to-r from-fg-blue via-sky-300 to-fg-blue-100" />
+        <div className="relative -mx-6 -mt-6 h-[120px] rounded-t-card bg-gradient-to-r from-fg-blue via-fg-blue-300 to-fg-blue-100" />
 
         <div className="-mt-12 flex flex-col items-center gap-3">
           <img
@@ -473,7 +473,7 @@ export default function AccountDetailPage({
               ) : null}
             </div>
             <p className="text-sm text-fg-grey-700">@{account.username}</p>
-            <StatusBadge label={meta.label} color={meta.color} />
+            <StatusText label={meta.label} color={meta.color} />
           </div>
         </div>
 

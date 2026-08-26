@@ -5,8 +5,9 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { Button, StatusBadge, TextArea } from "@forge-ui-official/core";
+import { Button, TextArea } from "@forge-ui-official/core";
 import { Modal } from "@/components/ui/modal";
+import { StatusText } from "@/components/ui/status-text";
 import { siteConfig } from "@/config/site";
 import { useApprovalsStore } from "@/components/approvals-store";
 import {
@@ -184,12 +185,12 @@ export function ApprovalDetailDialog({ open, approvalId, onClose }: Props) {
                   {item.applicantName}（@{item.applicantUsername}） · {item.created}
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center gap-3">
                 {typeMeta ? (
-                  <StatusBadge label={typeMeta.label} color={typeMeta.color} />
+                  <span className="text-sm text-fg-grey-500">{typeMeta.label}</span>
                 ) : null}
                 {statusMeta ? (
-                  <StatusBadge label={statusMeta.label} color={statusMeta.color} />
+                  <StatusText label={statusMeta.label} color={statusMeta.color} />
                 ) : null}
               </div>
             </div>

@@ -18,10 +18,10 @@ import {
   DataTable,
   IconButton,
   PlusIcon,
-  StatusBadge,
   TextField,
   type ColumnDef,
 } from "@forge-ui-official/core";
+import { StatusText } from "@/components/ui/status-text";
 import { siteConfig } from "@/config/site";
 import { useAccountsStore } from "@/components/accounts-store";
 import { AccountFormDialog } from "@/components/account-form-dialog";
@@ -172,7 +172,7 @@ function AccountsPageContent() {
         width: "w-28",
         render: (row) => {
           const meta = ACCOUNT_STATUS_META[row.status as AccountStatus];
-          return <StatusBadge label={meta.label} color={meta.color} />;
+          return <StatusText label={meta.label} color={meta.color} />;
         },
       },
       {

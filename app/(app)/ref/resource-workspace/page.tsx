@@ -244,7 +244,6 @@ export default function RefResourceWorkspacePage() {
                   title={row.title}
                   description={row.description}
                   tag={row.tag}
-                  tagColor={row.tagColor}
                   icon={<ResourceIcon kind={row.kind} />}
                   subtitle={`${row.owner} · 更新于 ${formatDateOnly(row.updated)}`}
                   footer={<span>ID {row.id}</span>}

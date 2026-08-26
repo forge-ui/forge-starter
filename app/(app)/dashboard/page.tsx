@@ -30,10 +30,10 @@ import {
   PlusIcon,
   ProgressStatCard,
   SmoothLineChart,
-  StatusBadge,
   type ColumnDef,
   type MapRegion,
 } from "@forge-ui-official/core";
+import { StatusText } from "@/components/ui/status-text";
 import { siteConfig } from "@/config/site";
 import { useAccountsStore } from "@/components/accounts-store";
 import {
@@ -109,7 +109,7 @@ export default function DashboardPage() {
         header: "状态",
         width: "w-[100px]",
         render: (row) => (
-          <StatusBadge
+          <StatusText
             label={ACCOUNT_STATUS_META[row.status].label}
             color={ACCOUNT_STATUS_META[row.status].color}
           />
@@ -200,7 +200,7 @@ export default function DashboardPage() {
                   <div className="text-xs text-fg-grey-500">{s.label}</div>
                   <div className="flex items-center gap-2">
                     <span className="text-base font-semibold text-fg-black">{s.value}</span>
-                    <span className={`text-xs font-medium ${s.up ? "text-emerald-500" : "text-fg-red"}`}>{s.trend}</span>
+                    <span className={`text-xs font-medium ${s.up ? "text-fg-green" : "text-fg-red"}`}>{s.trend}</span>
                   </div>
                 </div>
               </div>
@@ -243,9 +243,9 @@ export default function DashboardPage() {
             height={240}
             bubbles={[
               { value: Math.max((active / Math.max(total, 1)) * 100, 8), label: `${Math.round((active / Math.max(total, 1)) * 100)}%`, color: "bg-fg-blue-500" },
-              { value: Math.max((disabled / Math.max(total, 1)) * 100, 6), label: `${Math.round((disabled / Math.max(total, 1)) * 100)}%`, color: "bg-yellow-400" },
-              { value: Math.max((pending / Math.max(total, 1)) * 100, 4), label: `${Math.round((pending / Math.max(total, 1)) * 100)}%`, color: "bg-sky-500" },
-              { value: Math.max((locked / Math.max(total, 1)) * 100, 2), label: `${Math.round((locked / Math.max(total, 1)) * 100)}%`, color: "bg-orange-500" },
+              { value: Math.max((disabled / Math.max(total, 1)) * 100, 6), label: `${Math.round((disabled / Math.max(total, 1)) * 100)}%`, color: "bg-fg-yellow-400" },
+              { value: Math.max((pending / Math.max(total, 1)) * 100, 4), label: `${Math.round((pending / Math.max(total, 1)) * 100)}%`, color: "bg-fg-cyan-500" },
+              { value: Math.max((locked / Math.max(total, 1)) * 100, 2), label: `${Math.round((locked / Math.max(total, 1)) * 100)}%`, color: "bg-fg-red-500" },
             ]}
           />
           <div className="grid grid-cols-2 gap-2 text-xs text-fg-grey-700">
@@ -294,7 +294,7 @@ export default function DashboardPage() {
                     <div className="truncate text-sm font-semibold text-fg-black">{p.name}</div>
                     <div className="text-xs text-fg-grey-500">{p.email}</div>
                   </div>
-                  <div className="text-right text-xs text-emerald-500">
+                  <div className="text-right text-xs text-fg-green">
                     {ACCOUNT_STATUS_META[p.status].label}
                   </div>
                 </button>

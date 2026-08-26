@@ -15,11 +15,11 @@ import {
   Breadcrumbs,
   Button,
   ButtonGroup,
+  CellText,
   ConfirmationDialog,
   DataTable,
   IconButton,
   PlusIcon,
-  StatusBadge,
   TextField,
   type ColumnDef,
 } from "@forge-ui-official/core";
@@ -44,12 +44,6 @@ const filterValues = ["all", "link", "external", "internal"] as const;
 
 function kindLabel(kind: AppKind) {
   return APP_KIND_META[kind]?.label ?? kind;
-}
-
-function kindColor(kind: AppKind): "blue" | "green" | "yellow" | "grey" {
-  if (kind === "internal") return "blue";
-  if (kind === "external") return "yellow";
-  return "grey";
 }
 
 export default function SettingsAppsPage() {
@@ -125,12 +119,9 @@ export default function SettingsAppsPage() {
         header: "类型",
         width: "w-32",
         render: (row) => (
-          <div className="flex h-10 items-center justify-start">
-            <StatusBadge
-              label={row.isCurrentProduct ? "宿主应用" : kindLabel(row.kind)}
-              color={row.isCurrentProduct ? "green" : kindColor(row.kind)}
-            />
-          </div>
+          <CellText>
+            {row.isCurrentProduct ? "宿主应用" : kindLabel(row.kind)}
+          </CellText>
         ),
       },
       {
