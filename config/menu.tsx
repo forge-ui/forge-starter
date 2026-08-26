@@ -69,7 +69,8 @@ export function menuItemsForApp(app: AppEntry | null | undefined): AppLayoutMenu
 }
 
 export const defaultProfile: AppLayoutProfile = {
-  avatar: "",
+  // 空串会触发 React「empty string passed to src」警告，用占位头像兜底
+  avatar: "https://api.dicebear.com/9.x/thumbs/svg?seed=guest",
   name: "未登录",
   role: "访客",
 };
