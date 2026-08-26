@@ -129,7 +129,7 @@ description: >
 ## Step 3 — Verify
 
 ```bash
-pnpm typecheck
+pnpm check   # typecheck + 规范绊线
 ```
 
 **浏览器**（必做）：
@@ -139,6 +139,10 @@ pnpm typecheck
 3. 新建 → 持久化（刷新还在）  
 4. 打开详情（弹窗或全页），主操作可用  
 5. 能回到列表（关弹窗、页内返回、面包屑）  
+
+## Step 4 — Audit（必做，不可省略）
+
+按 `.agents/skills/forge-starter-audit/SKILL.md` 对本次改动执行完整四步审计（对照 `docs/audit-checklist.md` 逐条核查 → 样板结构对照 → 截图 → 修复重验），修复全部红线后才算交付。
 
 ## Report
 

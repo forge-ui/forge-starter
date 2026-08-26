@@ -8,6 +8,8 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "audit:tripwire": "node scripts/audit-tripwire.mjs",
+    "check": "pnpm typecheck && pnpm audit:tripwire",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:generate": "drizzle-kit generate"

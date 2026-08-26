@@ -3,7 +3,7 @@
 **用 Forge 搭管理后台的脚手架**：Next.js 16 + Tailwind v4 + `@forge-ui-official/core`。  
 Coding Agent 是第一开发界面：skills 拆开后端与页面，双样板 + `/ref` 画廊保证 UI 不跑偏。
 
-必读：`PRODUCT.md`、`docs/agent-native.md`、`docs/module-template.md`、`docs/page-roles.md`、`docs/forge-components.md`。
+必读：`PRODUCT.md`、`docs/agent-native.md`、`docs/module-template.md`、`docs/page-roles.md`、`docs/forge-components.md`、`docs/audit-checklist.md`。
 
 ## 铁律
 
@@ -23,7 +23,9 @@ Coding Agent 是第一开发界面：skills 拆开后端与页面，双样板 + 
 14. 侧栏/摘要卡禁止塞「返回列表」；`hideHeader: true` 时壳 `onBack` 不渲染。  
 15. 不做无行为装饰按钮；要么实现要么隐藏。  
 16. **操作反馈用全站 toast**，禁止页面内嵌「创建成功」绿条：`import { toast } from "@/lib/toast"` → `toast.success/error/info(...)`。宿主已在 `AppShell`。  
-17. 交付：`pnpm typecheck`；改 UI 后 **浏览器点主路径**（禁止只 curl）。
+17. 交付：`pnpm check`（typecheck + 规范绊线）；改 UI 后 **浏览器点主路径**（禁止只 curl）。
+18. **任何业务页面新建/修改完成后，必须执行完整规范审计**：按 `.agents/skills/forge-starter-audit/SKILL.md` 四步流程，对照 `docs/audit-checklist.md` 逐条核查并修复。绊线（`pnpm check`）通过 ≠ 合规，审计不可省略——无论代码由谁、用什么流程写出。
+19. **彩色胶囊（`StatusBadge`/`Label`）在业务页一律不用**（含状态列）。状态字段用 `components/ui/status-text.tsx` 的 `StatusText` 纯文本（red=危险红字、grey=失效灰字、其余黑字）；分类/角色/标签用 `CellText` 纯文本。绊线会拦截 `StatusBadge`（audit-checklist V6）。
 
 ## Forge UI 组件库（必读）
 
@@ -56,11 +58,12 @@ docs/forge-components.md
 | `forge-starter-quick-start` | 改名、accent、菜单、env | 只品牌壳 |
 | `forge-starter-new-module` | 新业务数据与接口 | **只** schema + service + API（+ 可选 store） |
 | `forge-starter-new-page` | 列表、详情、看板 UI | **只** 页面 + 菜单；对照样板选型 |
+| `forge-starter-audit` | 页面写完/改完后的规范审计（**必跑**） | 只审计与修复规范违规；不重构业务逻辑 |
 
 路径：`.agents/skills/<name>/SKILL.md`（canonical）。  
 Skills 只维护 **`.agents/skills/`**。`.claude/skills` 为指向它的 symlink（给 Claude Code 发现用），勿再复制一份。
 
-人类说「加 xxx 管理」→ 先 `new-module`，再 `new-page`（可同会话顺序执行）。
+人类说「加 xxx 管理」→ 先 `new-module`，再 `new-page`，最后 **`forge-starter-audit`**（可同会话顺序执行）。
 
 ## 仓库地图
 
@@ -119,5 +122,6 @@ docs/agent-native.md module-template.md page-roles.md reference-pages.md forge-c
 - [ ] 无密钥  
 - [ ] 无 Tailwind 默认色顶替 `fg-*`  
 - [ ] 无手搓已有 Forge 组件  
-- [ ] typecheck  
+- [ ] `pnpm check`（typecheck + 绊线）  
 - [ ] UI 变更已浏览器点过  
+- [ ] 已执行 `forge-starter-audit` 完整审计并修复红线  
