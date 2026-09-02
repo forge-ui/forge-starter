@@ -14,7 +14,6 @@ export type RouteShell = {
 export const routeShells: Record<string, RouteShell> = {
   "/dashboard": { title: "工作台", hideHeader: true },
   "/accounts": { title: "账号管理", hideHeader: true },
-  "/approvals": { title: "审批中心", hideHeader: true },
   "/settings": { title: "设置", hideHeader: true },
   "/settings/profile": { title: "个人资料", hideHeader: true },
   "/settings/security": { title: "修改密码", hideHeader: true },
@@ -34,6 +33,5 @@ export function shellForPath(pathname: string): RouteShell {
   if (normalized === "/ref" || normalized.startsWith("/ref/")) {
     return { title: "页面参考库", hideHeader: true };
   }
-  // approvals 详情为弹窗，无独立详情页壳
   return routeShells[normalized] ?? { title: siteConfig.name };
 }

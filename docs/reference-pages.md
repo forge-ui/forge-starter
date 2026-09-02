@@ -18,7 +18,7 @@
 | `/ref/person` | **CRM 人物详情**（多 Tab） | [customers/john-bushmill](https://www.forgeui.org/templates/crm-template/customers/john-bushmill) |
 | `/ref/profile` | 项目成员详情 | project/members/[id] |
 | `/ref/product` | **产品详情**（多 Tab） | ecommerce/products/[id] |
-| `/ref/detail-modal` | 详情弹窗 | approvals |
+| `/ref/detail-modal` | 详情弹窗 | 官网列表 view dialog |
 | `/ref/form-page` | **整页表单** | [crm leads/new](https://www.forgeui.org/templates/crm-template/leads/new) |
 | `/ref/form-modal` | 表单弹窗 | customers Add Modal |
 | `/ref/split` | 主从分屏 | project/clients |
@@ -40,7 +40,7 @@
 | `/ref/billing` | **订阅账单** | 订阅账单 |
 | `/ref/settings` | 设置 | settings/* |
 | `/ref/activity` | 时间线 | crm/activity |
-| `/ref/queue` | 待办队列 | approvals todo |
+| `/ref/queue` | 待办队列 | — |
 | `/ref/empty` | 空态 | accounts empty |
 
 源码：`app/(app)/ref/**` · 目录：`lib/reference/catalog.ts`
@@ -48,7 +48,7 @@
 ## Agent 用法
 
 1. 定角色 → 打开对应 `/ref/...`  
-2. 接业务时抄 **accounts、approvals** 的数据层  
+2. 接业务时抄 **accounts** 的数据层；轻详情接线用本仓 `Modal` + `?id=`  
 3. props 查 `../forge/docs/for-agents/` 与 cases  
 
 **优先级：** 可运行业务样板 > `/ref/*` > monorepo 全文 template。

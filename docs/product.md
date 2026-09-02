@@ -5,7 +5,7 @@
 ## 1. 一句话定位
 
 **用 Forge UI 快速搭建管理后台**：面向人类开发者与 Coding Agent，从 0 搭 **B 端、运营后台、内部系统**。  
-视觉与组件以 **`@forge-ui-official/core`** 为准；内置 skills + 双样板 + `/ref` 画廊，让扩模块又快又稳。
+视觉与组件以 **`@forge-ui-official/core`** 为准；内置 skills + `accounts` 样板 + `/ref` 画廊，让扩模块又快又稳。
 
 | 对外名称 | 说明 |
 |----------|------|
@@ -18,13 +18,13 @@
 | 主战场 | **管理后台、内部系统** |
 | UI | **Forge-first**，页面像官方产品 |
 | Agent | skills 拆后端/页面，**装页面不歪、扩 CRUD 稳** |
-| 开箱能力 | 壳 + 登录 + SMTP + **双 CRUD 样板** + 应用切换 + `/ref` 画廊 |
+| 开箱能力 | 壳 + 登录 + SMTP + **账号 CRUD 样板** + 应用切换 + `/ref` 画廊 |
 
 ## 2. 设计原则
 
 1. **Forge-first**：只从 `@forge-ui-official/core` 取组件；颜色只用 `fg-*`；图标用 `solar-icon-set`。
 2. **Agent 友好**：第一开发界面是 Agent + skills；人读 `AGENTS.md`。
-3. **范例即文档**：`accounts` = 重详情样板；`approvals` = 轻详情弹窗样板；按内容选型。
+3. **范例即文档**：`accounts` = 重详情样板；轻详情对照 `/ref/detail-modal` + 本仓 `Modal` + `?id=`。按内容选型。
 4. **轻量可扩展**：模块边界清晰，按业务逐步加域。
 5. **演示与生产边界清晰**：`AUTH_MODE=demo|local`；登录用户与业务表分表。
 6. **聚焦后台**：优先列表、表单、详情、工作台等高频页面。

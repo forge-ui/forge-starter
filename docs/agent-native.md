@@ -7,7 +7,7 @@ Coding Agent 是第一开发界面，专注 **Forge 管理后台**：skills 拆�
 | 做法 | 价值 |
 |------|------|
 | skill 拆分：后端 vs 页面 | 接口与 UI 边界清晰，Agent 不容易一次抄乱 |
-| 仓库里真页面当抄写样板 | accounts、approvals、`/ref` 可直接对照 |
+| 仓库里真页面当抄写样板 | accounts、`/ref` 可直接对照 |
 | AGENTS 写清规矩 | 颜色、组件、详情形态有据可依 |
 | typecheck + 浏览器点主路径 | 交付质量可感知 |
 
@@ -16,7 +16,7 @@ Coding Agent 是第一开发界面，专注 **Forge 管理后台**：skills 拆�
 | 样板 | 适合 | 路径 |
 |------|------|------|
 | **accounts** | 重详情：Tab、多区块、档案 | 列表 + 表单弹窗 + **全页** `accounts/[id]` |
-| **approvals** | 轻详情：字段少、看完回列表 | 列表 + 表单弹窗 + **详情弹窗** |
+| **轻详情** | 字段少、看完回列表 | `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=` |
 
 详情弹窗还是全页：**按内容选**，用户指定听用户，拿不准就问。  
 禁止 skill 写死「默认全页」或「默认弹窗」。
@@ -25,7 +25,7 @@ Coding Agent 是第一开发界面，专注 **Forge 管理后台**：skills 拆�
 
 开发环境打开 **`/ref/`**：表格列表、卡片列表、全页/弹窗详情、主从分屏、设置、时间线、队列、空态、KPI 等。  
 说明：`docs/reference-pages.md`。生产默认 404（`SHOW_REF_PAGES=true` 可开）。  
-写 UI 时：**/ref 定范式 → accounts/approvals 接业务**。
+写 UI 时：**/ref 定范式 → accounts 接业务**。轻详情不要去找已删除的 approvals。
 
 ## 推荐流程
 

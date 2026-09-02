@@ -18,7 +18,7 @@
 ```text
 1. 定页面角色          → docs/page-roles.md
 2. 本表或 for-agents 选组件
-3. 抄 Starter 样板     → accounts、approvals、dashboard
+3. 抄 Starter 样板     → accounts、dashboard、`/ref/detail-modal`
 4. 查 props            → ../forge/src/app/cases/<name>/page.tsx
 5. 仍没有              → FORGE-GAP
 ```
@@ -38,10 +38,10 @@
 
 | 页面/业务意图 | 先用这些组件 | Starter 抄谁 | monorepo case（查 props） |
 |---------------|--------------|--------------|---------------------------|
-| 列表、管理 | `DataTable` `Button` `ButtonGroup` `TextField` `StatusBadge` `Breadcrumbs` `IconButton` `PlusIcon` | `accounts/page` `approvals/page` | `table` `tab` `toolbar` `button-link` |
+| 列表、管理 | `DataTable` `Button` `ButtonGroup` `TextField` `StatusBadge` `Breadcrumbs` `IconButton` `PlusIcon` | `accounts/page` | `table` `tab` `toolbar` `button-link` |
 | 筛选条 | **单行** `ButtonGroup` + `TextField`（搜索） | 同上 | `tab` `input-field` |
-| 新建/编辑弹窗 | `TextField` `TextArea` `SelectOption` + 本仓 `Modal` | `account-form-dialog` `approval-form-dialog` | `input-field` `modal` |
-| 轻详情（看完回列表） | `StatusBadge` `DescriptionItem`/`字段行` + `Modal` 底栏按钮 | `approval-detail-dialog` | `list` `modal` |
+| 新建/编辑弹窗 | `TextField` `TextArea` `SelectOption` + 本仓 `Modal` | `account-form-dialog` | `input-field` `modal` |
+| 轻详情（看完回列表） | `StatusBadge` `DescriptionItem`/`字段行` + `Modal` 底栏按钮 | `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=` | `list` `modal` |
 | 重详情（档案） | `Breadcrumbs` `StatusBadge` `StatCard` `TabBar` `DataTable` 侧栏字段 | `accounts/[id]` | `page-header` `card` `tab` `list` `table` |
 | 删除确认 | `ConfirmationDialog` **外包** `Modal`/遮罩 | `accounts/page` 删除 | `modal` |
 | 工作台、指标 | `StatCard` `ChartCard` 图表家族 `DataTable` | `dashboard` | `card` `chart` `table` |

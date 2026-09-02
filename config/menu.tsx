@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ClipboardListBoldDuotone,
   HomeSmileBoldDuotone,
   UsersGroupTwoRoundedBoldDuotone,
   WidgetBoldDuotone,
@@ -32,24 +31,16 @@ const MODULE_MENU: Record<AppModuleId, AppLayoutMenuItem> = {
   },
 };
 
-/** OA 审批 — skill new-module demo（非 AppModuleId，固定挂在基础菜单） */
-const APPROVALS_MENU: AppLayoutMenuItem = {
-  icon: <ClipboardListBoldDuotone size={20} />,
-  label: "审批中心",
-  href: "/approvals/",
-};
-
 /** Default full product menu */
 export const menuItems: AppLayoutMenuItem[] = [
   MODULE_MENU.dashboard,
   MODULE_MENU.accounts,
-  APPROVALS_MENU,
   MODULE_MENU.settings,
 ];
 
 export function menuItemsForApp(app: AppEntry | null | undefined): AppLayoutMenuItem[] {
   if (!app || app.kind !== "internal") {
-    return [MODULE_MENU.dashboard, APPROVALS_MENU, MODULE_MENU.settings];
+    return [MODULE_MENU.dashboard, MODULE_MENU.settings];
   }
   const mods = modulesForApp(app);
   const ordered: AppModuleId[] = [];
@@ -57,15 +48,7 @@ export function menuItemsForApp(app: AppEntry | null | undefined): AppLayoutMenu
     if (!ordered.includes(id)) ordered.push(id);
   }
   if (!ordered.includes("settings")) ordered.push("settings");
-  const items = ordered.map((id) => MODULE_MENU[id]);
-  // Insert OA demo after accounts (or after dashboard if accounts missing)
-  const accountsIdx = items.findIndex((i) => i.href === "/accounts/");
-  if (accountsIdx >= 0) {
-    items.splice(accountsIdx + 1, 0, APPROVALS_MENU);
-  } else {
-    items.splice(1, 0, APPROVALS_MENU);
-  }
-  return items;
+  return ordered.map((id) => MODULE_MENU[id]);
 }
 
 export const defaultProfile: AppLayoutProfile = {

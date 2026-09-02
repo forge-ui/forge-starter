@@ -21,10 +21,10 @@
 
 | 角色 | 参照 |
 |------|------|
-| 列表（collection） | `app/(app)/accounts/page.tsx`（重）、`app/(app)/approvals/page.tsx`（轻） |
+| 列表（collection） | `app/(app)/accounts/page.tsx`（重）、`/ref/list-table`（轻对照） |
 | 全页详情（detail） | `app/(app)/accounts/[id]/page.tsx` |
-| 详情弹窗（detail-modal） | `components/approval-detail-dialog.tsx` |
-| 表单弹窗（form-modal） | `components/account-form-dialog.tsx`、`components/approval-form-dialog.tsx` |
+| 详情弹窗（detail-modal） | `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=` |
+| 表单弹窗（form-modal） | `components/account-form-dialog.tsx` |
 | 菜单/壳 | `config/menu.tsx`、`config/site.ts`、`components/app-shell.tsx` |
 | 各角色范式画廊 | `/ref/*`（索引：`lib/reference/catalog.ts`，说明：`docs/reference-pages.md`） |
 | Kit 级规范 | `../forge/docs/for-agents/`、`docs/forge-components.md` |
@@ -46,7 +46,7 @@
 ## R — 路由与页面角色
 
 - **R1** 🔴 每个业务模块必须能明确归入一种页面角色（dashboard / collection / detail / detail-modal / form-modal / form-page / settings），并与 `docs/page-roles.md` 的骨架对应。无法归类或骨架杂交（列表页里嵌全页表单等）判违规。
-- **R2** 🔴 详情形态二选一且成对实现：重详情 = `[id]/page.tsx` 全页（对齐 accounts）；轻详情 = 详情弹窗（对齐 approvals）。同一模块同时铺两套、或该轻做重/该重做轻（字段少却做全页档案）判违规。
+- **R2** 🔴 详情形态二选一且成对实现：重详情 = `[id]/page.tsx` 全页（对齐 accounts）；轻详情 = 详情弹窗（`/ref/detail-modal` + `components/ui/modal.tsx` + `?id=`）。同一模块同时铺两套、或该轻做重/该重做轻（字段少却做全页档案）判违规。
 - **R3** 🔴 表单默认弹窗（form-modal）。独立表单页仅当字段极多（成区块、含上传/分步）且有明确理由。检查每个 `/new` 或 `/edit` 独立页是否有存在的必要。
   修复：改为列表页上的 `*-form-dialog`，原路由保留 redirect（对齐 `accounts/new/page.tsx` 的 `redirect("/accounts/?create=1")` 书签兼容模式）。
 - **R4** 🟡 深链约定：弹窗表单/详情支持 `?create=1` / `?edit=<id>` / `?id=<id>` query 打开，`useEffect` 消费后 `router.replace` 清理。新模块缺深链不算红线，但样板兼容 redirect 页不得指向不存在的 query。
@@ -99,7 +99,7 @@
 - **F2** 🔴 删除等危险操作必须有确认（`ConfirmationDialog` + 宿主，`color="red"`），禁止点删即删。
 - **F3** 🔴 表单校验错误落到字段：`TextField state="error"` + `errorMessage`；不允许只 toast 或 alert。
 - **F4** 🔴 操作反馈用全站 toast（`import { toast } from "@/lib/toast"`），**禁止页面内嵌"创建成功"绿条**。
-- **F5** 🟡 创建成功后的动线：重模块跳全页详情（accounts 模式）或轻模块开详情弹窗（approvals 模式），与该模块详情形态一致。
+- **F5** 🟡 创建成功后的动线：重模块跳全页详情（accounts 模式）或轻模块开详情弹窗（`Modal` + `?id=`），与该模块详情形态一致。
 - **F6** 🔴 不得默认引入 Drawer/Sheet 交互（Kit 未导出）；确有需要标 `FORGE-GAP` 询问。
 
 ## D — 数据与状态
@@ -129,7 +129,7 @@
 
 ## 样板债（禁止照抄的已知问题）
 
-1. `accounts/page.tsx`、`accounts/[id]/page.tsx`、`approvals/page.tsx`、`dashboard/page.tsx`、`settings/apps/page.tsx` 多列 `sortable: true` 但无排序逻辑——违反 C3，新代码禁止照抄。
+1. `accounts/page.tsx`、`accounts/[id]/page.tsx`、`dashboard/page.tsx`、`settings/apps/page.tsx` 多列 `sortable: true` 但无排序逻辑——违反 C3，新代码禁止照抄。
 2. `dashboard/page.tsx` 图表 series/图例仍用裸 hex（`#2563eb` 等）与 `bg-[#…]` 任意值 class——违反 V4，新代码用 `var(--fg-*)`。
 3. `/ref/**` 画廊多页存在 Tailwind 默认色（amber/emerald 等）——违反 V1，抄 `/ref` 范式时颜色必须换成 `fg-*`（绊线对 `/ref` 降级为警告）。
 4. `account-form-dialog.tsx`、`settings-security-panel.tsx` 的校验错误为表单级 `<p>` 汇总文案——违反 F3，新代码必须字段级 `TextField state="error" + errorMessage`，不得以"对齐样板"为由放行。
@@ -140,3 +140,4 @@
 - 2026-08-25：mock 演示模块（无数据库）缺 `?create=1` 深链、创建成功后不自动开详情弹窗，均判"合理低配"（与 users/roles 先例一致）；接真实 API 的模块仍按 R4/F5 原文执行。
 - 2026-08-25：本审计只覆盖规范符合性，不覆盖功能正确性（NaN 边界、分页越界等逻辑 bug 属开发自测与 code review 范畴）。
 - 2026-09-02：Kit `@forge-ui-official/core@0.1.11` 已默认 soft。业务页状态列改回 `StatusBadge`；`StatusText` 弃用。权限/角色等类目仍用纯文本。
+- 2026-09-02：审批中心是临时 new-module demo，已从公共 starter 删除。轻详情对照 `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=`，不要指向已删的 approvals 文件。

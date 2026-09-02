@@ -83,7 +83,7 @@ export const REF_PAGES: RefPageMeta[] = [
     title: "详情 · 弹窗",
     role: "detail-modal",
     summary: "列表点行打开 Modal 详情。",
-    forgeTemplate: "starter approvals",
+    forgeTemplate: "/ref/detail-modal · official list view dialog",
     components: ["DataTable", "Modal", "StatusBadge", "Button"],
   },
   {
@@ -282,7 +282,7 @@ export const REF_PAGES: RefPageMeta[] = [
     title: "待办队列",
     role: "queue",
     summary: "列表 + 行内通过/驳回。",
-    forgeTemplate: "starter approvals todo",
+    forgeTemplate: "/ref/queue",
     components: ["DataTable", "Button", "StatusBadge", "ButtonGroup"],
   },
   {

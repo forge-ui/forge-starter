@@ -35,7 +35,7 @@
 
 | | detail-modal | detail |
 |--|--------------|--------|
-| Starter 样板 | `approvals` | `accounts/[id]` |
+| Starter 样板 | `/ref/detail-modal` + `components/ui/modal.tsx` | `accounts/[id]` |
 | 何时倾向 | 字段少、处理完回列表 | 多区块/Tab/图/关联 |
 | 返回 | 关弹窗 | 页内 `←`/面包屑 |
 | 禁止 | 为「统一」硬弹窗重内容 | 轻内容硬全页；侧栏塞返回 |
@@ -48,13 +48,13 @@
 
 | 角色 | `/ref/*` | 业务可运行样板 |
 |------|----------|----------------|
-| collection-table | `/ref/list-table` | accounts、approvals 列表 |
+| collection-table | `/ref/list-table` | accounts 列表 |
 | collection-cards | `/ref/list-cards` | — |
 | detail | `/ref/detail` | accounts/[id] |
 | person（CRM 人物多 Tab） | `/ref/person` | — john-bushmill |
 | profile（项目成员） | `/ref/profile` | — members/[id] |
 | product（产品多 Tab） | `/ref/product` | — products/[id] |
-| detail-modal | `/ref/detail-modal` | approvals 弹窗 |
+| detail-modal | `/ref/detail-modal` | `Modal` + `?id=` |
 | form-page（整页） | `/ref/form-page` | — leads/new |
 | form-modal | `/ref/form-modal` | *-form-dialog |
 | split | `/ref/split` | — |
@@ -63,7 +63,7 @@
 | files | `/ref/files` | — |
 | settings | `/ref/settings` | settings/* |
 | activity | `/ref/activity` | — |
-| queue | `/ref/queue` | approvals 待办 |
+| queue | `/ref/queue` | — |
 | empty | `/ref/empty` | 各列表空态 |
 | dashboard | `/ref/dashboard-board` · `/ref/dashboard-kpi` · `/ref/dashboard-crm` · `/ref/dashboard-analytics` · `/ref/dashboard-project` | `/dashboard` |
 | invoice 单据 | `/ref/invoice` | — |
@@ -80,9 +80,9 @@
 | 角色 | 官方参考 | Starter 样板 |
 |------|----------|--------------|
 | dashboard | ecommerce-2、crm、analytics | `/dashboard` + `/ref/dashboard-*` |
-| collection | ecommerce/customers | `accounts`、`approvals` 列表 + `/ref/list-table`、`list-cards` |
-| form-modal | customers Add Modal | `account-form-dialog`、`approval-form-dialog` |
-| detail-modal | （Starter 自研） | `approval-detail-dialog` |
+| collection | ecommerce/customers | `accounts` 列表 + `/ref/list-table`、`list-cards` |
+| form-modal | customers Add Modal | `account-form-dialog` |
+| detail-modal | 官网列表 view dialog | `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=` |
 | detail | customers/[id] | `accounts/[id]` |
 | settings | — | `settings/*` |
 | auth | finance/crm 登录 | `app/(auth)/*` |
@@ -112,5 +112,5 @@
 
 ## 选型权威
 
-本表 + monorepo templates + Starter 双样板（approvals、accounts）。  
+本表 + monorepo templates + Starter `accounts` + `/ref`。  
 不依赖仓库外设计插件。

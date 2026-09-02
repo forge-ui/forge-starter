@@ -2,8 +2,9 @@
 name: forge-starter-new-page
 description: >
   Add admin UI only in Forge Starter: list, form modal, detail (modal or full
-  page), menu entry. Chooses layout by cloning accounts (heavy) or approvals
-  (light). Requires API/store already present or created via new-module first.
+  page), menu entry. Chooses layout by cloning accounts (heavy) or
+  /ref/detail-modal + Modal + ?id= (light). Requires API/store already
+  present or created via new-module first.
   Use for dashboard pages or finishing a resource after new-module.
 ---
 
@@ -49,11 +50,11 @@ description: >
 
 | 角色 | 参考页（不进菜单） | 业务可运行样板 |
 |------|-------------------|----------------|
-| collection 表格 | `/ref/list-table` | accounts、approvals |
+| collection 表格 | `/ref/list-table` | accounts |
 | collection 卡片 | `/ref/list-cards` | — |
 | form-modal | `/ref/form-modal` | *-form-dialog |
 | form-page 整页 | `/ref/form-page`（CRM leads/new） | 字段极多时 |
-| detail-modal | `/ref/detail-modal` | approval-detail-dialog |
+| detail-modal | `/ref/detail-modal` | `components/ui/modal.tsx` + `?id=` |
 | detail 业务对象 | `/ref/detail` | accounts/[id] |
 | person CRM 人物 | `/ref/person`（john-bushmill） | — |
 | profile 项目成员 | `/ref/profile`（members/[id]） | — |
@@ -62,7 +63,7 @@ description: >
 | chat | `/ref/chat` | — |
 | files | `/ref/files` | — |
 | split 主从 | `/ref/split` | — |
-| queue | `/ref/queue` | approvals 待办 |
+| queue | `/ref/queue` | — |
 | settings | `/ref/settings` | settings/* |
 | activity | `/ref/activity` | — |
 | dashboard 通用/精简 | `/ref/dashboard-board` · `/ref/dashboard-kpi` | `/dashboard`（ecommerce-2 完整） |
@@ -84,7 +85,7 @@ description: >
 
 ```text
 用户指定？ → 听用户
-字段少、看完回列表？ → approvals（弹窗）
+字段少、看完回列表？ → `/ref/detail-modal` + Modal + `?id=`
 多区块、Tab、档案？ → accounts（全页）
 拿不准？ → 问用户
 ```
@@ -107,8 +108,9 @@ description: >
 
 ### 详情 · 弹窗
 
-- 抄 `components/approval-detail-dialog.tsx`  
+- 抄 `/ref/detail-modal`，宿主用 `components/ui/modal.tsx`  
 - 列表行点击打开；可选 `?id=`；`[id]/page` 可 redirect  
+- 不要去找已删除的 approvals  
 
 ### 详情 · 全页
 
@@ -118,7 +120,7 @@ description: >
 ### 数据层（UI 侧）
 
 - **API 必须已存在**（new-module 产物）；没有 → 停，先 new-module。  
-- **store 默认在本步创建：`components/<res>-store.tsx` + `app/(app)/layout.tsx` Provider（抄 accounts/approvals store）。  
+- **store 默认在本步创建：`components/<res>-store.tsx` + `app/(app)/layout.tsx` Provider（抄 accounts store）。  
 - 也可页内直接 `fetch`，但列表+弹窗+详情共享状态时优先 store。  
 - 业务持久化需要 `DATABASE_URL`；与 `AUTH_MODE=demo` 无关。  
 
@@ -148,4 +150,4 @@ pnpm check   # typecheck + 规范绊线
 
 - 路由、菜单 label  
 - 详情形态 + 理由  
-- 对照样板：accounts 或 approvals  
+- 对照样板：accounts 或 `/ref/detail-modal`  
