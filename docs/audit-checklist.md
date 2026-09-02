@@ -21,10 +21,10 @@
 
 | 角色 | 参照 |
 |------|------|
-| 列表（collection） | `app/(app)/accounts/page.tsx`（重）、`app/(app)/approvals/page.tsx`（轻） |
+| 列表（collection） | `app/(app)/accounts/page.tsx`（重）、`/ref/list-table`（轻对照） |
 | 全页详情（detail） | `app/(app)/accounts/[id]/page.tsx` |
-| 详情弹窗（detail-modal） | `components/approval-detail-dialog.tsx` |
-| 表单弹窗（form-modal） | `components/account-form-dialog.tsx`、`components/approval-form-dialog.tsx` |
+| 详情弹窗（detail-modal） | `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=` |
+| 表单弹窗（form-modal） | `components/account-form-dialog.tsx` |
 | 菜单/壳 | `config/menu.tsx`、`config/site.ts`、`components/app-shell.tsx` |
 | 各角色范式画廊 | `/ref/*`（索引：`lib/reference/catalog.ts`，说明：`docs/reference-pages.md`） |
 | Kit 级规范 | `../forge/docs/for-agents/`、`docs/forge-components.md` |
@@ -46,7 +46,7 @@
 ## R — 路由与页面角色
 
 - **R1** 🔴 每个业务模块必须能明确归入一种页面角色（dashboard / collection / detail / detail-modal / form-modal / form-page / settings），并与 `docs/page-roles.md` 的骨架对应。无法归类或骨架杂交（列表页里嵌全页表单等）判违规。
-- **R2** 🔴 详情形态二选一且成对实现：重详情 = `[id]/page.tsx` 全页（对齐 accounts）；轻详情 = 详情弹窗（对齐 approvals）。同一模块同时铺两套、或该轻做重/该重做轻（字段少却做全页档案）判违规。
+- **R2** 🔴 详情形态二选一且成对实现：重详情 = `[id]/page.tsx` 全页（对齐 accounts）；轻详情 = 详情弹窗（`/ref/detail-modal` + `components/ui/modal.tsx` + `?id=`）。同一模块同时铺两套、或该轻做重/该重做轻（字段少却做全页档案）判违规。
 - **R3** 🔴 表单默认弹窗（form-modal）。独立表单页仅当字段极多（成区块、含上传/分步）且有明确理由。检查每个 `/new` 或 `/edit` 独立页是否有存在的必要。
   修复：改为列表页上的 `*-form-dialog`，原路由保留 redirect（对齐 `accounts/new/page.tsx` 的 `redirect("/accounts/?create=1")` 书签兼容模式）。
 - **R4** 🟡 深链约定：弹窗表单/详情支持 `?create=1` / `?edit=<id>` / `?id=<id>` query 打开，`useEffect` 消费后 `router.replace` 清理。新模块缺深链不算红线，但样板兼容 redirect 页不得指向不存在的 query。
@@ -77,7 +77,7 @@
 - **C2** 🔴 全页数据列表必须用 `DataTable`（或 `FullWidthTable` + `Cell*`），禁止手搓 `<table>`/div-grid 冒充表格。
 - **C3** 🔴 `DataTable` 列的 `sortable: true` 只画 UI 不实现排序——未实现点击排序逻辑时禁止设置（假按钮）。
 - **C4** 🔴 `ConfirmationDialog` 只是内容卡，必须包宿主：`@/components/ui/modal` 或半透明遮罩层（对齐 accounts 删除确认 `fixed inset-0 bg-black/30`）。裸用判违规。
-- **C5** 🔴 状态展示必须带文字（用 `StatusText` 纯文本，见 V6），禁止仅用颜色点/色块表达状态。
+- **C5** 🔴 状态展示必须带文字（语义状态用 Kit `StatusBadge`，见 V6），禁止仅用颜色点/色块表达状态。
 - **C6** 🔴 无行为的装饰按钮/假操作（点了没反应的 Export、更多菜单等）：要么实现，要么删除。假操作还包括"假提交"——提交处理器只 toast 成功 + 跳转、数据不写入任何数据源（连 mock state 都不写），用户在列表看不到结果。
 - **C7** 🟡 组件 props 按 case/样板用法传（常见错误：`DescriptionItem` 误用 `value`（应 `content`）、`TabBar` 误用 `items/value`（应 `tabs`）、给无内容的 slot 传 `null`（应省略 prop）、`DonutChart` 的 `segments.value` 为百分比 0–100 而非 0–1 小数——传小数会导致图形几乎为空且 tsc 不报错）。发现可疑 props 时对照 `docs/forge-components.md` 与 `../forge/src/app/cases/` 源码。
 - **C8** 🔴 不得从 core import 不存在的组件（Toast / Drawer / Sheet 等）。反馈用 `@/lib/toast`。
@@ -89,7 +89,9 @@
 - **V3** 🔴 图标只用 `solar-icon-set`：侧栏 `*BoldDuotone` 20；页头/按钮 `*Linear` 16-18；行内 muted 色用 `color="#71717A"` 或 token。**禁止用 className 给 solar 图标上色**（fill 会硬编码失效），必须走 `color` prop。
 - **V4** 🔴 图表颜色合法形态仅两种：`var(--fg-*)` CSS 变量字符串（`SmoothLineChart` 等 color prop），或组件明确支持的 `bg-fg-*` class（`ChartLegendItem`、`BubbleChart` 等）。禁止裸 hex（样板 dashboard 的 hex 是样板债，禁照抄）与 Tailwind 默认色 class。
 - **V5** 🟡 排版层级与样板一致：页面主标题 `text-display-l font-semibold`，卡片标题/正文/辅助文字的字号与颜色（`text-fg-grey-500` 辅助）不混用。
-- **V6** 🔴 彩色胶囊（`StatusBadge`/`Label` 及手搓的圆角底色 pill）在业务页**一律不用**——包括状态列。状态字段用 `components/ui/status-text.tsx` 的 `StatusText` 纯文本呈现（props 与 `StatusBadge` 同形；red=危险/禁用红字、grey=失效/撤销灰字、其余黑字）；分类、角色、标签等类目字段用 `CellText`/`CellMuted`。给枚举字段配胶囊底色（"彩虹胶囊"）是典型 AI 味，一票违规。绊线 `V6-status-badge` 会机械拦截。口径：确有产品方明确要求使用彩色徽章时需人工批准并记入决策记录；`/ref/` 展廊页的历史用法不在本条范围。
+- **V6** 🔴 语义状态用 Kit `StatusBadge`，默认 `variant="soft"`（浅 `fg-*-50` 底 + 细描边 + 同色字），对齐官网 Transaction。颜色只承载状态语义：green=成功/启用、yellow=待处理、red=失败/禁用/驳回、grey=草稿/锁定/撤销、blue=进行中。一张表最多一列状态胶囊。
+  - **不要用**：`variant="solid"`（实心白字）；`Label`；手搓圆角底色 pill；本仓 `StatusText`；给分类/角色/权限/标签刷彩虹胶囊。类目字段用 `CellText`/`CellMuted`。
+  - 绊线 `V6-status-badge` 拦截 `StatusText` / `variant="solid"` / `<Label`。`/ref/` 展廊不在本条范围。
 
 ## F — 表单与交互 surface
 
@@ -97,7 +99,7 @@
 - **F2** 🔴 删除等危险操作必须有确认（`ConfirmationDialog` + 宿主，`color="red"`），禁止点删即删。
 - **F3** 🔴 表单校验错误落到字段：`TextField state="error"` + `errorMessage`；不允许只 toast 或 alert。
 - **F4** 🔴 操作反馈用全站 toast（`import { toast } from "@/lib/toast"`），**禁止页面内嵌"创建成功"绿条**。
-- **F5** 🟡 创建成功后的动线：重模块跳全页详情（accounts 模式）或轻模块开详情弹窗（approvals 模式），与该模块详情形态一致。
+- **F5** 🟡 创建成功后的动线：重模块跳全页详情（accounts 模式）或轻模块开详情弹窗（`Modal` + `?id=`），与该模块详情形态一致。
 - **F6** 🔴 不得默认引入 Drawer/Sheet 交互（Kit 未导出）；确有需要标 `FORGE-GAP` 询问。
 
 ## D — 数据与状态
@@ -127,7 +129,7 @@
 
 ## 样板债（禁止照抄的已知问题）
 
-1. `accounts/page.tsx`、`accounts/[id]/page.tsx`、`approvals/page.tsx`、`dashboard/page.tsx`、`settings/apps/page.tsx` 多列 `sortable: true` 但无排序逻辑——违反 C3，新代码禁止照抄。
+1. `accounts/page.tsx`、`accounts/[id]/page.tsx`、`dashboard/page.tsx`、`settings/apps/page.tsx` 多列 `sortable: true` 但无排序逻辑——违反 C3，新代码禁止照抄。
 2. `dashboard/page.tsx` 图表 series/图例仍用裸 hex（`#2563eb` 等）与 `bg-[#…]` 任意值 class——违反 V4，新代码用 `var(--fg-*)`。
 3. `/ref/**` 画廊多页存在 Tailwind 默认色（amber/emerald 等）——违反 V1，抄 `/ref` 范式时颜色必须换成 `fg-*`（绊线对 `/ref` 降级为警告）。
 4. `account-form-dialog.tsx`、`settings-security-panel.tsx` 的校验错误为表单级 `<p>` 汇总文案——违反 F3，新代码必须字段级 `TextField state="error" + errorMessage`，不得以"对齐样板"为由放行。
@@ -137,3 +139,5 @@
 - 2026-08-21：页头标准定为 starter 样板模式（h1 + Breadcrumbs + 主按钮）。forge monorepo 模板的 `PageTitleToolbar` 体系不用于本仓业务页（避免两套页头并存）。
 - 2026-08-25：mock 演示模块（无数据库）缺 `?create=1` 深链、创建成功后不自动开详情弹窗，均判"合理低配"（与 users/roles 先例一致）；接真实 API 的模块仍按 R4/F5 原文执行。
 - 2026-08-25：本审计只覆盖规范符合性，不覆盖功能正确性（NaN 边界、分页越界等逻辑 bug 属开发自测与 code review 范畴）。
+- 2026-09-02：Kit `@forge-ui-official/core@0.1.11` 已默认 soft。业务页状态列改回 `StatusBadge`；`StatusText` 弃用。权限/角色等类目仍用纯文本。
+- 2026-09-02：审批中心是临时 new-module demo，已从公共 starter 删除。轻详情对照 `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=`，不要指向已删的 approvals 文件。

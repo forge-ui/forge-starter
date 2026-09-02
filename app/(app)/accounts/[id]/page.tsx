@@ -24,10 +24,10 @@ import {
   IconButton,
   SmoothLineChart,
   StatCard,
+  StatusBadge,
   TabBar,
   type ColumnDef,
 } from "@forge-ui-official/core";
-import { StatusText } from "@/components/ui/status-text";
 import { siteConfig } from "@/config/site";
 import { useAccountsStore } from "@/components/accounts-store";
 import { AccountFormDialog } from "@/components/account-form-dialog";
@@ -164,7 +164,7 @@ export default function AccountDetailPage({
         width: "w-28",
         render: (row) => {
           const meta = resultMeta[row.result];
-          return <StatusText label={meta.label} color={meta.color} />;
+          return <StatusBadge label={meta.label} color={meta.color} />;
         },
       },
       {
@@ -336,7 +336,7 @@ export default function AccountDetailPage({
                         <p className="truncate text-sm font-semibold text-fg-black">{item.name}</p>
                         <p className="text-xs text-fg-grey-700">{item.role}</p>
                       </div>
-                      <StatusText
+                      <StatusBadge
                         label={ACCOUNT_STATUS_META[item.status].label}
                         color={ACCOUNT_STATUS_META[item.status].color}
                       />
@@ -433,10 +433,7 @@ export default function AccountDetailPage({
                   className="flex items-center justify-between rounded-2xl border border-fg-grey-200 px-4 py-3"
                 >
                   <span className="text-sm font-medium text-fg-black">{item.label}</span>
-                  <StatusText
-                    label={item.value}
-                    color={item.value === "禁止" ? "red" : item.value === "只读" ? "yellow" : "green"}
-                  />
+                  <CellText>{item.value}</CellText>
                 </div>
               ))}
             </div>
@@ -473,7 +470,7 @@ export default function AccountDetailPage({
               ) : null}
             </div>
             <p className="text-sm text-fg-grey-700">@{account.username}</p>
-            <StatusText label={meta.label} color={meta.color} />
+            <StatusBadge label={meta.label} color={meta.color} />
           </div>
         </div>
 

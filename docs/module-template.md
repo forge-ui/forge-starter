@@ -8,7 +8,7 @@ Skill：`forge-starter-new-module` → `forge-starter-new-page`。
 | 样板 | UI | 适合 |
 |------|-----|------|
 | `accounts` | 列表 + 表单弹窗 + **全页详情** | 重内容、档案、多区块 |
-| `approvals` | 列表 + 表单弹窗 + **详情弹窗** | 字段少、处理完回列表 |
+| 轻详情 | `/ref/detail-modal` + `Modal` + `?id=` | 字段少、处理完回列表 |
 
 选型：用户指定 → 听用户；否则按内容；拿不准 → 问。理由写进交付说明。
 
@@ -37,11 +37,12 @@ config/menu.tsx
 config/site.ts                    # hideHeader: true
 ```
 
-### 详情弹窗（抄 approvals）
+### 详情弹窗（抄 `/ref/detail-modal`，宿主用本仓 Modal）
 
 ```text
 components/<resource>-detail-dialog.tsx
 # 行点击或 ?id= 打开；可选 [id]/page.tsx redirect → ?id=
+# 不要去找已删除的 approvals
 ```
 
 ### 全页详情（抄 accounts）

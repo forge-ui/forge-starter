@@ -27,7 +27,7 @@ export function ResourceCard({
   iconVariant?: "chip" | "plain";
   /** Overrides default blue chip when iconVariant is chip */
   iconClassName?: string;
-  /** 类目/状态短标签，纯文本呈现（彩色胶囊已弃用，见 audit-checklist V6） */
+  /** 类目短标签，纯文本。不要给 tag 配彩虹胶囊 */
   tag?: string;
   subtitle?: ReactNode;
   footer?: ReactNode;

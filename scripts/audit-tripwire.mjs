@@ -128,12 +128,11 @@ const RULES = [
   {
     id: "V6-status-badge",
     level: "error",
-    doc: "彩色胶囊（StatusBadge/Label）在业务页已弃用，状态用 components/ui/status-text.tsx 纯文本（audit-checklist V6）",
-    pattern: /\bStatusBadge\b|<Label\s/g,
+    doc: "语义状态用 Kit StatusBadge 默认 soft；禁止 variant=\"solid\"、Label、本仓 StatusText（audit-checklist V6）",
+    pattern: /\bStatusText\b|variant=["']solid["']|<Label\s/g,
     files: (f) =>
       !f.includes("app/(app)/ref/")
-      && !f.includes("components/reference/")
-      && !f.endsWith("components/ui/status-text.tsx"),
+      && !f.includes("components/reference/"),
   },
 ];
 
