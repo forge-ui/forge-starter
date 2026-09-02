@@ -15,10 +15,10 @@ import {
   CellText,
   DataTable,
   PlusIcon,
+  StatusBadge,
   TextField,
   type ColumnDef,
 } from "@forge-ui-official/core";
-import { StatusText } from "@/components/ui/status-text";
 import { siteConfig } from "@/config/site";
 import { ApprovalDetailDialog } from "@/components/approval-detail-dialog";
 import { ApprovalFormDialog } from "@/components/approval-form-dialog";
@@ -148,7 +148,7 @@ function ApprovalsPageContent() {
         width: "w-28",
         render: (row) => (
           <div className="flex h-10 items-center">
-            <StatusText
+            <StatusBadge
               label={APPROVAL_STATUS_META[row.status as ApprovalStatus].label}
               color={APPROVAL_STATUS_META[row.status as ApprovalStatus].color}
             />

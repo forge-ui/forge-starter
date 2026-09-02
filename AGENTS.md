@@ -3,7 +3,7 @@
 **用 Forge 搭管理后台的脚手架**：Next.js 16 + Tailwind v4 + `@forge-ui-official/core`。  
 Coding Agent 是第一开发界面：skills 拆开后端与页面，双样板 + `/ref` 画廊保证 UI 不跑偏。
 
-必读：`PRODUCT.md`、`docs/agent-native.md`、`docs/module-template.md`、`docs/page-roles.md`、`docs/forge-components.md`、`docs/audit-checklist.md`。
+必读：`docs/product.md`、`docs/agent-native.md`、`docs/module-template.md`、`docs/page-roles.md`、`docs/forge-components.md`、`docs/audit-checklist.md`。
 
 ## 铁律
 
@@ -25,7 +25,7 @@ Coding Agent 是第一开发界面：skills 拆开后端与页面，双样板 + 
 16. **操作反馈用全站 toast**，禁止页面内嵌「创建成功」绿条：`import { toast } from "@/lib/toast"` → `toast.success/error/info(...)`。宿主已在 `AppShell`。  
 17. 交付：`pnpm check`（typecheck + 规范绊线）；改 UI 后 **浏览器点主路径**（禁止只 curl）。
 18. **任何业务页面新建/修改完成后，必须执行完整规范审计**：按 `.agents/skills/forge-starter-audit/SKILL.md` 四步流程，对照 `docs/audit-checklist.md` 逐条核查并修复。绊线（`pnpm check`）通过 ≠ 合规，审计不可省略——无论代码由谁、用什么流程写出。
-19. **彩色胶囊（`StatusBadge`/`Label`）在业务页一律不用**（含状态列）。状态字段用 `components/ui/status-text.tsx` 的 `StatusText` 纯文本（red=危险红字、grey=失效灰字、其余黑字）；分类/角色/标签用 `CellText` 纯文本。绊线会拦截 `StatusBadge`（audit-checklist V6）。
+19. **语义状态用 Kit `StatusBadge`（默认 soft）**：浅底细边、语义色（绿/黄/红/灰）。禁止 `variant="solid"`、`Label`、手搓 pill、本仓 `StatusText`。分类/角色/标签用 `CellText`，不要彩虹胶囊。一张表最多一列状态胶囊。
 
 ## Forge UI 组件库（必读）
 
@@ -61,7 +61,7 @@ docs/forge-components.md
 | `forge-starter-audit` | 页面写完/改完后的规范审计（**必跑**） | 只审计与修复规范违规；不重构业务逻辑 |
 
 路径：`.agents/skills/<name>/SKILL.md`（canonical）。  
-Skills 只维护 **`.agents/skills/`**。`.claude/skills` 为指向它的 symlink（给 Claude Code 发现用），勿再复制一份。
+Skills 只维护 **`.agents/skills/`**。
 
 人类说「加 xxx 管理」→ 先 `new-module`，再 `new-page`，最后 **`forge-starter-audit`**（可同会话顺序执行）。
 
@@ -80,7 +80,7 @@ components/*-form-dialog.tsx | *-detail-dialog.tsx | *-store.tsx
 components/ui/modal.tsx
 config/site.ts menu.tsx apps.ts
 lib/auth lib/db lib/accounts lib/approvals lib/reference
-docs/agent-native.md module-template.md page-roles.md reference-pages.md forge-components.md
+docs/product.md agent-native.md module-template.md page-roles.md reference-pages.md forge-components.md
 ```
 
 参考页索引：`/ref/` · 说明：`docs/reference-pages.md` · 生产开启：`SHOW_REF_PAGES=true`

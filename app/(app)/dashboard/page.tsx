@@ -30,10 +30,10 @@ import {
   PlusIcon,
   ProgressStatCard,
   SmoothLineChart,
+  StatusBadge,
   type ColumnDef,
   type MapRegion,
 } from "@forge-ui-official/core";
-import { StatusText } from "@/components/ui/status-text";
 import { siteConfig } from "@/config/site";
 import { useAccountsStore } from "@/components/accounts-store";
 import {
@@ -109,7 +109,7 @@ export default function DashboardPage() {
         header: "状态",
         width: "w-[100px]",
         render: (row) => (
-          <StatusText
+          <StatusBadge
             label={ACCOUNT_STATUS_META[row.status].label}
             color={ACCOUNT_STATUS_META[row.status].color}
           />

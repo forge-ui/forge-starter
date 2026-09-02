@@ -38,18 +38,18 @@
 
 | 页面/业务意图 | 先用这些组件 | Starter 抄谁 | monorepo case（查 props） |
 |---------------|--------------|--------------|---------------------------|
-| 列表、管理 | `DataTable` `Button` `ButtonGroup` `TextField` `StatusText`(本仓) `Breadcrumbs` `IconButton` `PlusIcon` | `accounts/page` `approvals/page` | `table` `tab` `toolbar` `button-link` |
+| 列表、管理 | `DataTable` `Button` `ButtonGroup` `TextField` `StatusBadge` `Breadcrumbs` `IconButton` `PlusIcon` | `accounts/page` `approvals/page` | `table` `tab` `toolbar` `button-link` |
 | 筛选条 | **单行** `ButtonGroup` + `TextField`（搜索） | 同上 | `tab` `input-field` |
 | 新建/编辑弹窗 | `TextField` `TextArea` `SelectOption` + 本仓 `Modal` | `account-form-dialog` `approval-form-dialog` | `input-field` `modal` |
-| 轻详情（看完回列表） | `StatusText`(本仓) `DescriptionItem`/`字段行` + `Modal` 底栏按钮 | `approval-detail-dialog` | `list` `modal` |
-| 重详情（档案） | `Breadcrumbs` `StatusText`(本仓) `StatCard` `TabBar` `DataTable` 侧栏字段 | `accounts/[id]` | `page-header` `card` `tab` `list` `table` |
+| 轻详情（看完回列表） | `StatusBadge` `DescriptionItem`/`字段行` + `Modal` 底栏按钮 | `approval-detail-dialog` | `list` `modal` |
+| 重详情（档案） | `Breadcrumbs` `StatusBadge` `StatCard` `TabBar` `DataTable` 侧栏字段 | `accounts/[id]` | `page-header` `card` `tab` `list` `table` |
 | 删除确认 | `ConfirmationDialog` **外包** `Modal`/遮罩 | `accounts/page` 删除 | `modal` |
 | 工作台、指标 | `StatCard` `ChartCard` 图表家族 `DataTable` | `dashboard` | `card` `chart` `table` |
 | **资源工作台** | `WorkspaceSplit` `FolderNav` `ResourceCard` 网格 + toast | `/ref/resource-workspace` | starter 组件 |
 | 设置单卡 | `TextField` `Button` 窄卡片 | `settings/profile` 等 | `input-field` |
 | 空态 | 文案 + `Button`；可选 solar 图标 | 各列表 empty | `button-link` |
 
-> **状态呈现纪律**：彩色胶囊（`StatusBadge`/`Label`）在业务页已弃用（绊线拦截）。状态字段一律用本仓 `components/ui/status-text.tsx` 的 `StatusText` 纯文本（props 与 `StatusBadge` 同形：red=危险红字、grey=失效灰字、其余黑字）；分类/角色/标签用 `CellText`/`CellMuted`。禁止彩虹胶囊与手搓底色 pill。
+> **状态呈现纪律**：语义状态用 Kit `StatusBadge`（默认 `variant="soft"`，浅底+细边+同色字）。禁止 `variant="solid"`、`Label`、手搓 pill、本仓 `StatusText`。分类/角色/标签用 `CellText`/`CellMuted`，不要彩虹胶囊。一张表最多一列状态胶囊。
 
 ### 不要默认上的（除非业务明确要）
 
@@ -88,6 +88,7 @@ import {
   DataTable,
   IconButton,
   PlusIcon,
+  StatusBadge,
   TextField,
   TextArea,
   SelectOption,
@@ -98,7 +99,6 @@ import {
   type ColumnDef,
 } from "@forge-ui-official/core";
 import { Modal } from "@/components/ui/modal";
-import { StatusText } from "@/components/ui/status-text"; // 状态字段纯文本（彩色胶囊已弃用）
 import { ResourceCard } from "@/components/resource-card";
 import { FolderNav, WorkspaceSplit } from "@/components/workspace-split";
 import { toast } from "@/lib/toast";

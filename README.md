@@ -45,7 +45,7 @@ pnpm dev
 - 用 AI 助手从 0 搭第一版 B 端，并保持 Forge 视觉一致  
 - 需要「列表 + 表单 + 详情」标准 CRUD，以及日历、看板、档案等多页范式  
 
-Agent 合约：**`AGENTS.md`**。产品说明：**`PRODUCT.md`**。
+Agent 合约：**`AGENTS.md`**。产品说明：**`docs/product.md`**。
 
 ## Agent 工作流
 
@@ -99,10 +99,9 @@ app/
 components/        # app-shell · *-store · *-dialog · ui/modal
 config/            # site · menu · apps
 lib/               # auth · db · accounts · approvals · reference
-docs/              # 工作流 · 组件选型 · 页面角色 · 参考页目录
+docs/              # 产品说明 · 工作流 · 组件选型 · 页面角色 · 参考页目录
 .agents/skills/    # quick-start · new-module · new-page
-.claude/skills → .agents/skills
-AGENTS.md PRODUCT.md CLAUDE.md
+AGENTS.md
 ```
 
 ## Skills
@@ -145,8 +144,7 @@ DATABASE_URL=postgresql://forge:forge@127.0.0.1:5432/forge_starter
 | 文档 | 用途 |
 |------|------|
 | `AGENTS.md` | Agent 合约（必读） |
-| `PRODUCT.md` | 产品说明与规划 |
-| `CLAUDE.md` | Claude Code 短入口 |
+| `docs/product.md` | 产品说明与规划 |
 | `docs/agent-native.md` | 工作流与 skill 边界 |
 | `docs/forge-components.md` | 角色 → 组件 → 样板 |
 | `docs/page-roles.md` | 页面角色与详情选型 |

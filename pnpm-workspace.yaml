@@ -5,3 +5,4 @@ minimumReleaseAgeExclude:
   - '@forge-ui-official/core@0.1.4'
   - '@forge-ui-official/core@0.1.7'
   - '@forge-ui-official/core@0.1.10'
+  - '@forge-ui-official/core@0.1.11'

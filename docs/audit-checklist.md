@@ -77,7 +77,7 @@
 - **C2** 🔴 全页数据列表必须用 `DataTable`（或 `FullWidthTable` + `Cell*`），禁止手搓 `<table>`/div-grid 冒充表格。
 - **C3** 🔴 `DataTable` 列的 `sortable: true` 只画 UI 不实现排序——未实现点击排序逻辑时禁止设置（假按钮）。
 - **C4** 🔴 `ConfirmationDialog` 只是内容卡，必须包宿主：`@/components/ui/modal` 或半透明遮罩层（对齐 accounts 删除确认 `fixed inset-0 bg-black/30`）。裸用判违规。
-- **C5** 🔴 状态展示必须带文字（用 `StatusText` 纯文本，见 V6），禁止仅用颜色点/色块表达状态。
+- **C5** 🔴 状态展示必须带文字（语义状态用 Kit `StatusBadge`，见 V6），禁止仅用颜色点/色块表达状态。
 - **C6** 🔴 无行为的装饰按钮/假操作（点了没反应的 Export、更多菜单等）：要么实现，要么删除。假操作还包括"假提交"——提交处理器只 toast 成功 + 跳转、数据不写入任何数据源（连 mock state 都不写），用户在列表看不到结果。
 - **C7** 🟡 组件 props 按 case/样板用法传（常见错误：`DescriptionItem` 误用 `value`（应 `content`）、`TabBar` 误用 `items/value`（应 `tabs`）、给无内容的 slot 传 `null`（应省略 prop）、`DonutChart` 的 `segments.value` 为百分比 0–100 而非 0–1 小数——传小数会导致图形几乎为空且 tsc 不报错）。发现可疑 props 时对照 `docs/forge-components.md` 与 `../forge/src/app/cases/` 源码。
 - **C8** 🔴 不得从 core import 不存在的组件（Toast / Drawer / Sheet 等）。反馈用 `@/lib/toast`。
@@ -89,7 +89,9 @@
 - **V3** 🔴 图标只用 `solar-icon-set`：侧栏 `*BoldDuotone` 20；页头/按钮 `*Linear` 16-18；行内 muted 色用 `color="#71717A"` 或 token。**禁止用 className 给 solar 图标上色**（fill 会硬编码失效），必须走 `color` prop。
 - **V4** 🔴 图表颜色合法形态仅两种：`var(--fg-*)` CSS 变量字符串（`SmoothLineChart` 等 color prop），或组件明确支持的 `bg-fg-*` class（`ChartLegendItem`、`BubbleChart` 等）。禁止裸 hex（样板 dashboard 的 hex 是样板债，禁照抄）与 Tailwind 默认色 class。
 - **V5** 🟡 排版层级与样板一致：页面主标题 `text-display-l font-semibold`，卡片标题/正文/辅助文字的字号与颜色（`text-fg-grey-500` 辅助）不混用。
-- **V6** 🔴 彩色胶囊（`StatusBadge`/`Label` 及手搓的圆角底色 pill）在业务页**一律不用**——包括状态列。状态字段用 `components/ui/status-text.tsx` 的 `StatusText` 纯文本呈现（props 与 `StatusBadge` 同形；red=危险/禁用红字、grey=失效/撤销灰字、其余黑字）；分类、角色、标签等类目字段用 `CellText`/`CellMuted`。给枚举字段配胶囊底色（"彩虹胶囊"）是典型 AI 味，一票违规。绊线 `V6-status-badge` 会机械拦截。口径：确有产品方明确要求使用彩色徽章时需人工批准并记入决策记录；`/ref/` 展廊页的历史用法不在本条范围。
+- **V6** 🔴 语义状态用 Kit `StatusBadge`，默认 `variant="soft"`（浅 `fg-*-50` 底 + 细描边 + 同色字），对齐官网 Transaction。颜色只承载状态语义：green=成功/启用、yellow=待处理、red=失败/禁用/驳回、grey=草稿/锁定/撤销、blue=进行中。一张表最多一列状态胶囊。
+  - **不要用**：`variant="solid"`（实心白字）；`Label`；手搓圆角底色 pill；本仓 `StatusText`；给分类/角色/权限/标签刷彩虹胶囊。类目字段用 `CellText`/`CellMuted`。
+  - 绊线 `V6-status-badge` 拦截 `StatusText` / `variant="solid"` / `<Label`。`/ref/` 展廊不在本条范围。
 
 ## F — 表单与交互 surface
 
@@ -137,3 +139,4 @@
 - 2026-08-21：页头标准定为 starter 样板模式（h1 + Breadcrumbs + 主按钮）。forge monorepo 模板的 `PageTitleToolbar` 体系不用于本仓业务页（避免两套页头并存）。
 - 2026-08-25：mock 演示模块（无数据库）缺 `?create=1` 深链、创建成功后不自动开详情弹窗，均判"合理低配"（与 users/roles 先例一致）；接真实 API 的模块仍按 R4/F5 原文执行。
 - 2026-08-25：本审计只覆盖规范符合性，不覆盖功能正确性（NaN 边界、分页越界等逻辑 bug 属开发自测与 code review 范畴）。
+- 2026-09-02：Kit `@forge-ui-official/core@0.1.11` 已默认 soft。业务页状态列改回 `StatusBadge`；`StatusText` 弃用。权限/角色等类目仍用纯文本。

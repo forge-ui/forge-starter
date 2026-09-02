@@ -31,7 +31,7 @@ Coding Agent 是第一开发界面，专注 **Forge 管理后台**：skills 拆�
 
 ```text
 1. clone → pnpm install → .env →（local）db:push
-2. 读 AGENTS.md（含 Forge UI skill 指针）
+2. 读 AGENTS.md；范围与 non-goals 见 `docs/product.md`
 3. 品牌/env → forge-starter-quick-start
 4. 每个业务对象：
      a. forge-starter-new-module  → schema + service + API
@@ -50,7 +50,7 @@ Coding Agent 是第一开发界面，专注 **Forge 管理后台**：skills 拆�
 | 加数据与接口 | `forge-starter-new-module` | **只后端** |
 | 加列表/详情/看板页 | `forge-starter-new-page` | **只 UI** + 菜单 |
 
-路径：`.agents/skills/`（canonical）；`.claude/skills` → symlink，勿双份维护。
+路径：`.agents/skills/`。
 
 ## Forge 组件怎么查
 

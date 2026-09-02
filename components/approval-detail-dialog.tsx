@@ -5,9 +5,8 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { Button, TextArea } from "@forge-ui-official/core";
+import { Button, StatusBadge, TextArea } from "@forge-ui-official/core";
 import { Modal } from "@/components/ui/modal";
-import { StatusText } from "@/components/ui/status-text";
 import { siteConfig } from "@/config/site";
 import { useApprovalsStore } from "@/components/approvals-store";
 import {
@@ -190,7 +189,7 @@ export function ApprovalDetailDialog({ open, approvalId, onClose }: Props) {
                   <span className="text-sm text-fg-grey-500">{typeMeta.label}</span>
                 ) : null}
                 {statusMeta ? (
-                  <StatusText label={statusMeta.label} color={statusMeta.color} />
+                  <StatusBadge label={statusMeta.label} color={statusMeta.color} />
                 ) : null}
               </div>
             </div>
