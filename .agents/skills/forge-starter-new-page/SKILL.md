@@ -99,6 +99,8 @@ description: >
 - `app/(app)/<res>/page.tsx`  
 - Header + **单行** ButtonGroup + 搜索 + DataTable + 空态  
 - 新建按钮 → form dialog  
+- 详情入口 → 名称/标题列的数据可点击，按已选详情形态打开全页或 `?id=` 弹窗；保留筛选上下文，支持键盘操作和可见焦点。对齐 accounts 的名称单元格，保持普通文字样式，不附加箭头。不要用带箭头的 `CellLink` 作为默认详情入口。
+- 操作列只放编辑、删除等真实业务动作；不要另放箭头/眼睛“查看详情”按钮。无其他动作时不生成操作列。
 - `config/menu.tsx` + `config/site.ts`（`hideHeader: true`）  
 
 ### 表单弹窗
