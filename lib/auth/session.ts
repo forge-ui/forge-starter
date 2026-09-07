@@ -1,10 +1,12 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import type { NextResponse } from "next/server";
 import {
   SESSION_COOKIE,
   SESSION_MAX_AGE_SECONDS,
   getAuthSecret,
 } from "./config";
+import { jsonError } from "./http";
 
 export type SessionUser = {
   id: string;
@@ -73,6 +75,19 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   const token = jar.get(SESSION_COOKIE)?.value;
   if (!token) return null;
   return readSessionToken(token);
+}
+
+export type RequireSessionResult =
+  | { ok: true; session: SessionUser }
+  | { ok: false; response: NextResponse };
+
+/** Single gate for protected API routes. Returns 401 JSON when unauthenticated. */
+export async function requireSession(): Promise<RequireSessionResult> {
+  const session = await getSessionUser();
+  if (!session) {
+    return { ok: false, response: jsonError("未登录", 401) };
+  }
+  return { ok: true, session };
 }
 
 export async function verifySessionTokenEdge(token: string | undefined) {

@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, IconButton, StyledLink, TextField } from "@forge-ui-official/core";
 import { EyeLinear, EyeClosedLinear } from "solar-icon-set";
-import { SocialButton, OrDivider } from "../_social-button";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -48,13 +47,6 @@ export default function LoginPage() {
           使用用户名或邮箱登录。演示模式任意账号可进入。
         </p>
       </header>
-
-      <div className="flex flex-col gap-4">
-        <SocialButton provider="google" action="登录" />
-        <SocialButton provider="facebook" action="登录" />
-      </div>
-
-      <OrDivider />
 
       <div className="flex flex-col gap-4">
         <TextField

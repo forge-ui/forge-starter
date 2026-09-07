@@ -6,7 +6,7 @@ import {
 } from "@/lib/accounts/service";
 import { ACCOUNT_ROLES } from "@/lib/accounts/types";
 import { jsonError, jsonOk } from "@/lib/auth/http";
-import { getSessionUser } from "@/lib/auth/session";
+import { requireSession } from "@/lib/auth/session";
 
 const bodySchema = z.object({
   name: z.string().min(1),
@@ -23,8 +23,8 @@ type Ctx = { params: Promise<{ id: string }> };
 
 export async function GET(_request: Request, ctx: Ctx) {
   try {
-    const session = await getSessionUser();
-    if (!session) return jsonError("未登录", 401);
+    const auth = await requireSession();
+    if (!auth.ok) return auth.response;
     const { id } = await ctx.params;
     const account = await getAdminAccountById(id);
     if (!account) return jsonError("账号不存在", 404);
@@ -37,8 +37,8 @@ export async function GET(_request: Request, ctx: Ctx) {
 
 export async function PATCH(request: Request, ctx: Ctx) {
   try {
-    const session = await getSessionUser();
-    if (!session) return jsonError("未登录", 401);
+    const auth = await requireSession();
+    if (!auth.ok) return auth.response;
     const { id } = await ctx.params;
     const json = await request.json();
     const parsed = bodySchema.safeParse(json);
@@ -65,8 +65,8 @@ export async function PATCH(request: Request, ctx: Ctx) {
 
 export async function DELETE(_request: Request, ctx: Ctx) {
   try {
-    const session = await getSessionUser();
-    if (!session) return jsonError("未登录", 401);
+    const auth = await requireSession();
+    if (!auth.ok) return auth.response;
     const { id } = await ctx.params;
     await deleteAdminAccount(id);
     return jsonOk({ deleted: true });

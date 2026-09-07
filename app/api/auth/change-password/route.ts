@@ -2,7 +2,7 @@ import { z } from "zod";
 import { getAuthMode } from "@/lib/auth/config";
 import { jsonError, jsonOk } from "@/lib/auth/http";
 import { validatePasswordStrength } from "@/lib/auth/password";
-import { getSessionUser } from "@/lib/auth/session";
+import { requireSession } from "@/lib/auth/session";
 import { changeUserPassword } from "@/lib/auth/users";
 
 const bodySchema = z.object({
@@ -12,10 +12,9 @@ const bodySchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const session = await getSessionUser();
-    if (!session) {
-      return jsonError("未登录", 401);
-    }
+    const auth = await requireSession();
+    if (!auth.ok) return auth.response;
+    const session = auth.session;
 
     const json = await request.json();
     const parsed = bodySchema.safeParse(json);
