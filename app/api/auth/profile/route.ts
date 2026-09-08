@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { getAuthMode } from "@/lib/auth/config";
 import { jsonError, jsonOk } from "@/lib/auth/http";
-import { getSessionUser, setSessionCookie } from "@/lib/auth/session";
+import { requireSession, setSessionCookie } from "@/lib/auth/session";
 import { toSessionUser, updateUserProfile } from "@/lib/auth/users";
 
 const bodySchema = z.object({
@@ -11,10 +11,9 @@ const bodySchema = z.object({
 
 export async function PATCH(request: Request) {
   try {
-    const session = await getSessionUser();
-    if (!session) {
-      return jsonError("未登录", 401);
-    }
+    const auth = await requireSession();
+    if (!auth.ok) return auth.response;
+    const session = auth.session;
 
     const json = await request.json();
     const parsed = bodySchema.safeParse(json);

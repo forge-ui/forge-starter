@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createAdminAccount, listAdminAccounts } from "@/lib/accounts/service";
 import { ACCOUNT_ROLES } from "@/lib/accounts/types";
 import { jsonError, jsonOk } from "@/lib/auth/http";
-import { getSessionUser } from "@/lib/auth/session";
+import { requireSession } from "@/lib/auth/session";
 
 const bodySchema = z.object({
   name: z.string().min(1),
@@ -17,8 +17,8 @@ const bodySchema = z.object({
 
 export async function GET() {
   try {
-    const session = await getSessionUser();
-    if (!session) return jsonError("未登录", 401);
+    const auth = await requireSession();
+    if (!auth.ok) return auth.response;
     const accounts = await listAdminAccounts();
     return jsonOk({ accounts });
   } catch (error) {
@@ -32,8 +32,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const session = await getSessionUser();
-    if (!session) return jsonError("未登录", 401);
+    const auth = await requireSession();
+    if (!auth.ok) return auth.response;
 
     const json = await request.json();
     const parsed = bodySchema.safeParse(json);

@@ -38,6 +38,22 @@ function isAuthPage(pathname: string) {
   );
 }
 
+function isPublicApiPath(pathname: string) {
+  const path = normalizePath(pathname);
+  return (
+    path === "/api/auth/login"
+    || path === "/api/auth/register"
+    || path === "/api/auth/forgot-password"
+    || path === "/api/auth/reset-password"
+    || path === "/api/auth/logout"
+  );
+}
+
+function isProtectedApiPath(pathname: string) {
+  const path = normalizePath(pathname);
+  return path.startsWith("/api") && !isPublicApiPath(path);
+}
+
 function isProtectedAppPath(pathname: string) {
   const path = normalizePath(pathname);
   if (path.startsWith("/api")) return false;
@@ -74,6 +90,16 @@ export async function middleware(request: NextRequest) {
     if (!refPagesEnabled()) {
       return new NextResponse("Not Found", { status: 404 });
     }
+  }
+
+  // API session check is independent of AUTH_GUARD / AUTH_MODE page redirects.
+  // Demo and local both issue the same session cookie after login.
+  if (isProtectedApiPath(pathname)) {
+    const loggedIn = await hasValidSession(request);
+    if (!loggedIn) {
+      return NextResponse.json({ ok: false, error: "未登录" }, { status: 401 });
+    }
+    return NextResponse.next();
   }
 
   if (!guardEnabled()) {

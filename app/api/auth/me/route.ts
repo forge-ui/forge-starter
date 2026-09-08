@@ -1,11 +1,12 @@
 import { getAuthMode } from "@/lib/auth/config";
 import { jsonOk } from "@/lib/auth/http";
-import { getSessionUser } from "@/lib/auth/session";
+import { requireSession } from "@/lib/auth/session";
 
 export async function GET() {
-  const user = await getSessionUser();
+  const auth = await requireSession();
+  if (!auth.ok) return auth.response;
   return jsonOk({
     mode: getAuthMode(),
-    user,
+    user: auth.session,
   });
 }

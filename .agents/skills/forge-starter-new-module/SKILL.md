@@ -59,7 +59,7 @@ app/api/<res>/route.ts          # GET list, POST create
 app/api/<res>/[id]/route.ts     # GET one, PATCH/DELETE/POST actions
 ```
 
-- `getSessionUser()`，未登录 401  
+- `requireSession()`，未登录 401  
 - `jsonOk`、`jsonError`（`lib/auth/http.ts`）  
 - Zod 校 body  
 

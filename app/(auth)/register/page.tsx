@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, IconButton, StyledLink, TextField } from "@forge-ui-official/core";
 import { EyeLinear, EyeClosedLinear } from "solar-icon-set";
-import { SocialButton, OrDivider } from "../_social-button";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -50,13 +49,6 @@ export default function RegisterPage() {
           本地账号写入 PostgreSQL。演示模式下请直接登录。
         </p>
       </header>
-
-      <div className="flex flex-col gap-4">
-        <SocialButton provider="google" action="注册" />
-        <SocialButton provider="facebook" action="注册" />
-      </div>
-
-      <OrDivider />
 
       <div className="flex flex-col gap-4">
         <TextField label="用户名" placeholder="小写字母、数字、下划线" value={username} onChange={setUsername} autoComplete="username" />
