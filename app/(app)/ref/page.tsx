@@ -23,7 +23,7 @@ export default function RefIndexPage() {
         />
         <p className="mt-2 max-w-2xl text-sm text-fg-grey-600">
           真实可渲染页面，专供 Agent / 开发对照。业务模块请抄这里的结构 + 可运行样板
-          （accounts、approvals），不要当成产品功能。
+          （accounts），不要当成产品功能。
         </p>
       </div>
 
@@ -56,12 +56,6 @@ export default function RefIndexPage() {
               /accounts
             </Link>
             {" "}重详情 CRUD
-          </li>
-          <li>
-            <Link href="/approvals/" className="text-fg-blue hover:underline">
-              /approvals
-            </Link>
-            {" "}轻详情弹窗
           </li>
           <li>
             <Link href="/dashboard/" className="text-fg-blue hover:underline">

@@ -47,7 +47,7 @@ lib/<res>/types.ts
 lib/<res>/service.ts
 ```
 
-参考：`lib/accounts/service.ts` 或 `lib/approvals/service.ts`（业务规则，不抄 UI）。
+参考：`lib/accounts/service.ts`（业务规则，不抄 UI）。
 
 - 校验与中文 `throw new Error("…")`  
 - 列表/详情/写操作按需  
@@ -86,4 +86,4 @@ pnpm db:push   # 业务表必须 Postgres；demo 登录模式不能代替 DATABA
 - 表名、API 路径与方法  
 - **下一步**：`forge-starter-new-page`（含 store + 列表/表单/详情 UI）  
   - 重详情 → 对照 `accounts`  
-  - 轻详情 → 对照 `approvals`  
+  - 轻详情 → 对照 `/ref/detail-modal` + `components/ui/modal.tsx`  

@@ -15,7 +15,7 @@
 | 亮点 | 你得到什么 |
 |------|------------|
 | **官方级 Forge 体验** | 统一用 `@forge-ui-official/core`，颜色与布局跟官方后台一致 |
-| **双详情样板** | `accounts` 全页档案 + `approvals` 弹窗处理，两种常见后台形态直接抄 |
+| **可抄样板** | `accounts` 全页档案；轻详情对照 `/ref/detail-modal` + 本仓 `Modal` |
 | **AI 友好流水线** | skills 拆开「数据接口」和「页面菜单」，Agent 不容易一次抄乱 |
 | **`/ref` 布局画廊** | 几十种真路由页面：列表、人物/产品多 Tab、表单、日历、对话、看板… 对着抄布局 |
 | **从 0 能跑** | 登录注册、工作台、设置、应用切换；接上 Postgres 就能落库 CRUD |
@@ -37,7 +37,7 @@ pnpm dev
 
 打开 `http://localhost:3000`。默认 `AUTH_MODE=demo`，任意账号可登录，方便先看界面。
 
-> 账号管理、审批等业务数据需要 Postgres：配置 `DATABASE_URL` 后执行 `pnpm db:push`。`demo` 模式只简化登录，业务表仍走数据库。
+> 账号管理等业务数据需要 Postgres：配置 `DATABASE_URL` 后执行 `pnpm db:push`。`demo` 模式只简化登录，业务表仍走数据库。
 
 ## 适合做什么
 
@@ -45,7 +45,7 @@ pnpm dev
 - 用 AI 助手从 0 搭第一版 B 端，并保持 Forge 视觉一致  
 - 需要「列表 + 表单 + 详情」标准 CRUD，以及日历、看板、档案等多页范式  
 
-Agent 合约：**`AGENTS.md`**。产品说明：**`PRODUCT.md`**。
+Agent 合约：**`AGENTS.md`**。产品说明：**`docs/product.md`**。
 
 ## Agent 工作流
 
@@ -62,7 +62,7 @@ Agent 合约：**`AGENTS.md`**。产品说明：**`PRODUCT.md`**。
 **详情怎么选：**
 
 - 内容多、有 Tab、档案 → 抄 **`accounts`**（全页详情）  
-- 字段少、处理完回列表 → 抄 **`approvals`**（详情弹窗）  
+- 字段少、处理完回列表 → 抄 **`/ref/detail-modal`** + `components/ui/modal.tsx` + `?id=`  
 - 不确定 → 问产品、用户  
 
 **选组件：** 可运行样板 → `/ref/*` → forge monorepo cases（有旁路时）
@@ -72,7 +72,6 @@ Agent 合约：**`AGENTS.md`**。产品说明：**`PRODUCT.md`**。
 | 路径 | 形态 |
 |------|------|
 | `/accounts` · `/accounts/[id]` | 列表 + 弹窗表单 + **全页详情** |
-| `/approvals` | 列表 + 新建弹窗 + **详情弹窗** |
 | `/dashboard` | 工作台 |
 | `/settings/*` | 个人资料、改密、应用、通知偏好 |
 | **`/ref/`** | **布局参考画廊**（真路由，开发默认开、默认不进侧栏） |
@@ -94,15 +93,14 @@ Agent 合约：**`AGENTS.md`**。产品说明：**`PRODUCT.md`**。
 ```text
 app/
   (auth)/          # 登录 · 注册 · 找回、重置密码
-  (app)/           # 工作台 · 账号 · 审批 · 设置 · ref/*
-  api/             # auth · accounts · approvals
+  (app)/           # 工作台 · 账号 · 设置 · ref/*
+  api/             # auth · accounts
 components/        # app-shell · *-store · *-dialog · ui/modal
 config/            # site · menu · apps
-lib/               # auth · db · accounts · approvals · reference
-docs/              # 工作流 · 组件选型 · 页面角色 · 参考页目录
+lib/               # auth · db · accounts · reference
+docs/              # 产品说明 · 工作流 · 组件选型 · 页面角色 · 参考页目录
 .agents/skills/    # quick-start · new-module · new-page
-.claude/skills → .agents/skills
-AGENTS.md PRODUCT.md CLAUDE.md
+AGENTS.md
 ```
 
 ## Skills
@@ -145,8 +143,7 @@ DATABASE_URL=postgresql://forge:forge@127.0.0.1:5432/forge_starter
 | 文档 | 用途 |
 |------|------|
 | `AGENTS.md` | Agent 合约（必读） |
-| `PRODUCT.md` | 产品说明与规划 |
-| `CLAUDE.md` | Claude Code 短入口 |
+| `docs/product.md` | 产品说明与规划 |
 | `docs/agent-native.md` | 工作流与 skill 边界 |
 | `docs/forge-components.md` | 角色 → 组件 → 样板 |
 | `docs/page-roles.md` | 页面角色与详情选型 |

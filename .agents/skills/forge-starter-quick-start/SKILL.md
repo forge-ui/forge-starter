@@ -53,10 +53,10 @@ Bootstrap **branding + shell** only。不装支付/CMS/OAuth。
 ```text
 | 模块 | 建议路由 | 详情形态 | 理由 | 下一步 skill |
 | 客户 | /customers | 全页 accounts | 档案+关联 | module → page |
-| 订单 | /orders | 弹窗 approvals | 字段少 | module → page |
+| 订单 | /orders | 弹窗 /ref/detail-modal | 字段少 | module → page |
 ```
 
-详情形态：`accounts`（重）| `approvals`（轻）| 待确认。  
+详情形态：`accounts`（重）| `/ref/detail-modal`（轻）| 待确认。  
 组件选型提示用户/下一 agent 读：`docs/forge-components.md`。
 
 ## Checklist
