@@ -81,7 +81,7 @@ components/*-form-dialog.tsx | *-store.tsx
 components/ui/modal.tsx
 config/site.ts menu.tsx apps.ts
 lib/auth lib/db lib/accounts lib/reference
-docs/product.md agent-native.md module-template.md page-roles.md reference-pages.md forge-components.md
+docs/product.md agent-native.md setup.md module-template.md page-roles.md reference-pages.md forge-components.md
 ```
 
 参考页索引：`/ref/` · 说明：`docs/reference-pages.md` · 生产开启：`SHOW_REF_PAGES=true`

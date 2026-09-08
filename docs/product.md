@@ -1,6 +1,6 @@
 # Forge Starter — 产品说明
 
-范围与拍板。怎么写代码、扩模块见 **`AGENTS.md`**。
+范围与拍板。怎么把项目跑起来见 **`docs/setup.md`**。怎么写代码、扩模块见 **`AGENTS.md`**。
 
 ## 1. 一句话定位
 
@@ -18,7 +18,7 @@
 | 主战场 | **管理后台、内部系统** |
 | UI | **Forge-first**，页面像官方产品 |
 | Agent | skills 拆后端/页面，**装页面不歪、扩 CRUD 稳** |
-| 开箱能力 | 壳 + 登录 + SMTP + **账号 CRUD 样板** + 应用切换 + `/ref` 画廊 |
+| 开箱能力 | 壳 + 登录 + SMTP + **账号 CRUD 样板**；应用登记在浏览器（侧栏可切，外部认证占位） |
 
 ## 2. 设计原则
 
@@ -97,4 +97,4 @@
 3. 不引入第二套 UI 库。
 4. 人读本文与 `AGENTS.md` 能判断「做什么、不做什么」。
 
-写法、skill 边界、交付检查：**`AGENTS.md`** · `docs/agent-native.md`。
+安装与环境：**`docs/setup.md`**。写法、skill 边界、交付检查：**`AGENTS.md`** · `docs/agent-native.md`。
