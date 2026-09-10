@@ -21,7 +21,7 @@
 | 角色 | 关键词 | 主结构 |
 |------|--------|--------|
 | **dashboard** | 工作台、指标、趋势 | 指标卡 + 图 + 次级列表 |
-| **collection** | 列表、筛选 | Header + **单行**筛选/搜索 + DataTable |
+| **collection** | 列表、筛选 | Header + **一条**筛选/搜索工具带 + DataTable（Starter：`ButtonGroup`+搜索；官方：`PageTitleToolbar`+`Toolbar`） |
 | **form-modal** | 新建/编辑字段不多 | Modal 表单 |
 | **detail-modal** | 轻详情、短处理 | 列表上叠 Modal |
 | **detail** | 重详情、档案 | 主栏 + 侧栏 + Tab/时间线 |
@@ -93,7 +93,7 @@
 2. `color={siteConfig.accent}`  
 3. CRUD：collection + form-modal + **（detail-modal 或 detail）** + API  
 4. `hideHeader: true` 时壳 `onBack` **不渲染**  
-5. collection 筛选单行，禁止双行 pills  
+5. collection 筛选/搜索一条工具带，禁止双行 pills；页头可用 Starter 紧凑或 `PageTitleToolbar`，不要手搓
 6. 假按钮删掉或接真逻辑  
 7. 浏览器验收，不只 curl  
 

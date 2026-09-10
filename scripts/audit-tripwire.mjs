@@ -126,10 +126,20 @@ const RULES = [
     files: (f) => !f.includes("app/(app)/ref/"),
   },
   {
+    id: "H6-pageheader-in-page",
+    level: "error",
+    doc: "PageHeader 是 AppLayout 顶栏，业务 page 禁止当正文页头（audit-checklist H6）",
+    pattern: /\bPageHeader\b/g,
+    files: (f) =>
+      f.includes("app/(app)/")
+      && f.endsWith("page.tsx")
+      && !f.includes("app/(app)/ref/"),
+  },
+  {
     id: "V6-status-badge",
     level: "error",
-    doc: "语义状态用 Kit StatusBadge 默认 soft；禁止 variant=\"solid\"、Label、本仓 StatusText（audit-checklist V6）",
-    pattern: /\bStatusText\b|variant=["']solid["']|<Label\s/g,
+    doc: "语义状态用 Kit StatusBadge 默认 soft；禁止 StatusBadge variant=\"solid\"、Kit Label、本仓 StatusText（audit-checklist V6）",
+    pattern: /\bStatusText\b|<StatusBadge[\s\S]{0,160}?variant=["']solid["']|<Label\s/g,
     files: (f) =>
       !f.includes("app/(app)/ref/")
       && !f.includes("components/reference/"),

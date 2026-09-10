@@ -3,8 +3,14 @@
 > 本清单是 `/forge-starter-audit` skill 的执行依据，也是本仓页面规范的**单一事实来源**。
 > 适用对象：本仓（及由 forge-starter 衍生的业务仓）中所有 `app/(app)/**` 业务页面。
 >
-> **使用方式**：审计者（LLM）必须逐条核查，每条输出 `通过 / 违规 / 不适用` 三态之一；
-> 判定为「违规」时必须给出**文件路径 + 行号证据**；禁止跳条、禁止笼统输出"整体符合规范"。
+> **审计问的是「有没有偏离 Forge 样式规范」，不是「有没有抄成 accounts」。**
+> 先定页面角色并选定对照页（见 skill 第 0 步与下表），再按该对照的 case/模板核组件、token、内容区。
+> 不得因为用了 `PageTitleToolbar` / `Toolbar` 而判违规。页内把 `PageHeader` 当正文标题栏按 H6 判违规。
+> 「对齐样板」一律指第 0 步选定的对照页；`accounts` 只是表格列表 + 全页详情的本仓捷径。
+>
+> **使用方式**：先按 skill **由外到内四层**取证（S 页面结构 → O 内容区最外层 → N 节/区块外壳 → C 组件），再逐条勾本清单。
+> 每条输出 `通过 / 违规 / 不适用`；违规必须给**文件路径 + 行号**。禁止跳条、禁止笼统"整体符合"、禁止先看「用了 DataTable」就给过。
+> 详情页的嵌套表 C2 可能「不适用」，仍必须审 L7/L8。
 >
 > **严重级**：🔴 红线（必须修复，多数可直接改）；🟡 判断（列出证据与建议，标注"建议复核"，除非明显才直接改）。
 >
@@ -17,17 +23,24 @@
 
 ---
 
-## 标准参照（黄金样板）
+## 标准参照（按角色选，不是唯一形态）
 
-| 角色 | 参照 |
-|------|------|
-| 列表（collection） | `app/(app)/accounts/page.tsx`（重）、`/ref/list-table`（轻对照） |
-| 全页详情（detail） | `app/(app)/accounts/[id]/page.tsx` |
-| 详情弹窗（detail-modal） | `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=` |
-| 表单弹窗（form-modal） | `components/account-form-dialog.tsx` |
-| 菜单/壳 | `config/menu.tsx`、`config/site.ts`、`components/app-shell.tsx` |
-| 各角色范式画廊 | `/ref/*`（索引：`lib/reference/catalog.ts`，说明：`docs/reference-pages.md`） |
-| Kit 级规范 | `../forge/docs/for-agents/`、`docs/forge-components.md` |
+选最像的一档。打不开旁路 monorepo 时用本仓 `/ref/*`。
+
+| 角色 | 主对照 | Kit case |
+|------|--------|----------|
+| collection 表格 | 本仓 `accounts/page.tsx` **或** `/ref/list-table` **或** 官方 wallets/customers（`PageTitleToolbar` + `Toolbar`） | `toolbar` `table` |
+| collection 卡片 | `/ref/list-cards` | — |
+| 资源工作台 | `/ref/resource-workspace` | — |
+| detail 全页 | `accounts/[id]` **或** 官方 CRM `customers/[id]`（`PageTitleToolbar`）**或** ecommerce `customers/[id]`（h1+面包屑） | `toolbar` `card` `tab`（壳顶栏才查 `page-header`） |
+| detail-modal | `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=` | `modal` `list` |
+| form-modal | `account-form-dialog` **或** `/ref/form-modal` | `modal` `input-field` |
+| form-page | `/ref/form-page` | `input-field` |
+| dashboard | `/dashboard` + `/ref/dashboard-*`；官方 `dashboards/ecommerce-2` | `card` `chart` |
+| settings | `settings/*`、`/ref/settings` | `input-field` |
+| 菜单/壳 | `config/menu.tsx`、`config/site.ts`、`components/app-shell.tsx` | — |
+| 各角色范式画廊 | `/ref/*`（索引：`lib/reference/catalog.ts`） | — |
+| Kit 级规范 | `../forge/docs/for-agents/`、`docs/forge-components.md` | `/cases/` |
 
 ---
 
@@ -46,7 +59,7 @@
 ## R — 路由与页面角色
 
 - **R1** 🔴 每个业务模块必须能明确归入一种页面角色（dashboard / collection / detail / detail-modal / form-modal / form-page / settings），并与 `docs/page-roles.md` 的骨架对应。无法归类或骨架杂交（列表页里嵌全页表单等）判违规。
-- **R2** 🔴 详情形态二选一且成对实现：重详情 = `[id]/page.tsx` 全页（对齐 accounts）；轻详情 = 详情弹窗（`/ref/detail-modal` + `components/ui/modal.tsx` + `?id=`）。同一模块同时铺两套、或该轻做重/该重做轻（字段少却做全页档案）判违规。
+- **R2** 🔴 详情形态二选一且成对实现：重详情 = `[id]/page.tsx` 全页（对照该角色的 detail 参照；本仓捷径是 `accounts/[id]`）；轻详情 = 详情弹窗（`/ref/detail-modal` + `components/ui/modal.tsx` + `?id=`）。同一模块同时铺两套、或该轻做重/该重做轻（字段少却做全页档案）判违规。
 - **R3** 🔴 表单默认弹窗（form-modal）。独立表单页仅当字段极多（成区块、含上传/分步）且有明确理由。检查每个 `/new` 或 `/edit` 独立页是否有存在的必要。
   修复：改为列表页上的 `*-form-dialog`，原路由保留 redirect（对齐 `accounts/new/page.tsx` 的 `redirect("/accounts/?create=1")` 书签兼容模式）。
 - **R4** 🟡 深链约定：弹窗表单/详情支持 `?create=1` / `?edit=<id>` / `?id=<id>` query 打开，`useEffect` 消费后 `router.replace` 清理。新模块缺深链不算红线，但样板兼容 redirect 页不得指向不存在的 query。
@@ -54,29 +67,59 @@
 
 ## H — 页头与面包屑
 
-- **H1** 🔴 业务页页头必须对齐样板结构：左侧 `h1.text-display-l.font-semibold` + 下方 `Breadcrumbs`，右侧主操作 `Button`（`color={siteConfig.accent}`）。参照 `accounts/page.tsx` 262-282 行。口径：只读/受限操作的列表页可无右侧主按钮——**禁止为凑页头结构造功能**（如无业务意义的"重置/导出"按钮）。
-  违规形态：无页头；手搓其他标题排版；同页出现两套页头；用 AppLayout `pageTitle` 与页内页头叠加。
-- **H2** 🔴 `Breadcrumbs` 用法：`color={siteConfig.accent}`；`items` 为 `{ label, href? }` 数组；**末项为当前页、不带 `href`**；祖先项必须带真实 `href`。
+先认两套 chrome，**不是同一个组件**：
+
+| 组件 | 是什么 | 面包屑 | 返回 |
+|------|--------|--------|------|
+| `PageTitleToolbar` | **正文页头**。模板 `CrmPageHeader` / Finance / Misc 都是它。Case：`/cases/toolbar` | **必须在组件内部**（标题下） | 面包屑祖先项带 `href` |
+| `PageHeader` | **AppLayout 顶栏**。`title` = 返回+标题+操作；`search` = 搜索+widget。Case：`/cases/page-header` | **没有这个 prop** | `showBackButton` + `onBack` |
+| `h1` + `Breadcrumbs` | Starter 紧凑（accounts / ecommerce 手写） | 紧挨 h1 下方 | 面包屑祖先项 |
+
+Starter 业务页默认 `hideHeader: true`，正文页头走 **A 或 B**。不要把 `PageHeader` 当业务标题栏。
+
+- **H1** 🔴 业务页必须有 Forge 页头，用 Kit 组件实现。同一页只选一套，禁止叠两套（含壳 `pageTitle` 与页内页头叠加）。合法形态：
+  - **A. Starter 紧凑**：`h1.text-display-l.font-semibold` + `Breadcrumbs` + 右侧主操作 `Button`（`color={siteConfig.accent}`）。
+  - **B. Kit 正文页头**：`PageTitleToolbar`（列表/详情/看板都可用）。**面包屑写进这个组件**，不要写在它外面再挂一行。
+    - core `≥ 0.1.12`：`variant` 对上角色（`collection` / `overview` / `detail` / `action`）+ `breadcrumbItems` + 结构化 action，对照 `/cases/toolbar`。
+    - core `≤ 0.1.11`：只有 `title` + `breadcrumbs={<Breadcrumbs … />}` + `actions`。视觉与模板相同，**不得因没写 `variant` 判违规**。
+  - **C. 壳顶栏**：`AppLayout` / `AppShell` 的 `PageHeader variant="title"`（`hideHeader` 未开）。只用于「顶栏返回+标题」。面包屑若需要，走 AppLayout 的 `breadcrumbs` 槽，**页内不得再画 h1 / `PageTitleToolbar`**。
+  **不要**用 `PageHeader variant="search"` 当列表/详情页头。
+  口径：只读/受限操作的列表可无右侧主按钮——**禁止为凑结构造功能**。选了 B/C 不得再要求必须长得像 accounts 的 h1。
+  违规：无页头；手搓 `h1`/`<input>`/`<button>`/`span` 仿标题或面包屑；裸 hex 字号（如 `text-[28px] text-[#000A19]`）；用 `PageHeader` 冒充正文页头。
+- **H2** 🔴 `Breadcrumbs` 用法：`color={siteConfig.accent}`；`items` 为 `{ label, href? }` 数组；**末项为当前页、不带 `href`**；祖先项必须带真实 `href`。选 B 时面包屑必须作为 `PageTitleToolbar` 的 `breadcrumbs` / `breadcrumbItems`，禁止标题栏一套、下面再单独一行面包屑。
 - **H3** 🔴 动态路由 `[id]` 页面的面包屑末项 label 必须来自路由参数对应的**实体数据**（如 `account.name`）或页面类型文案（如"账号详情"），且中间层必须含列表页（如 `工作台 > 账号管理 > {account.name}`）。
   违规形态：末项硬编码与实体无关的字符串、直接渲染裸 `params.id`（uuid）、缺列表层级。
 - **H4** 🔴 面包屑首层为工作台/首页（对齐样板 `{ label: "工作台", href: "/dashboard/" }`），层级与菜单结构一致，不得虚构不存在的中间层。
-- **H5** 🔴 全页详情的返回动线：顶栏/页内提供返回（对齐 accounts `[id]`），**禁止在侧栏 meta 卡塞"返回列表"**。
+- **H5** 🔴 全页详情的返回动线跟第 0 步选的 chrome：A/B 靠面包屑祖先项，**不要求**圆形返回按钮；C 必须 `showBackButton` + `onBack`。**禁止在侧栏 meta 卡塞「返回列表」**。`hideHeader: true` 时壳 `onBack` 不渲染，不能当返回动线。
+- **H6** 🔴 `PageHeader` 只属于 AppLayout 顶栏，禁止当内容卡。
+  违规：页内 `import { PageHeader }` 再包 `rounded-xl border bg-white`（`/cases/page-header` 的白框只是展廊）；把 `StatusBadge`、版本选择、跨模块跳转塞进 `primaryAction` / `secondaryAction`；壳顶栏已显示时页内再画一套标题。
+  口径：沉浸式工作台若产品确认可用页内 `PageHeader`，仍禁止再包装饰白卡片、禁止把状态胶囊当 action。状态、元信息、章节 CTA 放正文。
 
 ## L — 布局与骨架
 
 - **L1** 🔴 登录后页面必须处于 `AppShell`（`app/(app)/layout.tsx` 已包）内，页面自身**不得**再渲染 sidebar / topbar / 第二套 `AppLayout`，不得手搓 `<aside>` 导航。
 - **L2** 🔴 页面根容器为纵向 stack（样板：`flex flex-col gap-5` 或 `gap-6`），不得在根部再加大内边距（`p-6`/`p-8`）——壳已管 padding。
-- **L3** 🔴 列表页骨架顺序：页头 → 单行筛选（`ButtonGroup` pills + 右侧搜索 `TextField`）→ `DataTable` → 分页/空态 → 各弹窗。**筛选禁止两行 pills**。
-- **L4** 🔴 全页详情骨架：主栏（Tab/区块/表格）+ 侧栏 meta 卡的两栏结构（对齐 accounts `[id]`）；侧栏只放元信息与轻操作。
+- **L3** 🔴 列表页：页头 → **一条**筛选/搜索工具带 → 列表主体 → 分页/空态 → 弹窗。工具带必须用 Kit，禁止两行 pills。合法工具带任选：
+  - Starter：单行 `ButtonGroup` + 右侧 `TextField`。
+  - 官方：`Toolbar` + `ToolbarSearchInput`（搜索在工具条左侧）+ 可选 `ToolbarPillTabs` / `ToolbarActions`。
+  口径：搜索出现在 `PageTitleToolbar` 标题行右侧不算官方推荐，但整段都是 Kit 且 token 正确时标 🟡，建议收到 `Toolbar`，**不因「不像 accounts」判红线**。手搓圆角搜索框 / 原生 button 仍是 C1 红线。
+- **L4** 🔴 全页详情骨架对照第 0 步选定的 detail 参照。本仓捷径 `accounts/[id]` 是主栏 + 侧栏 meta 两栏；官方 CRM / ecommerce `customers/[id]` 若按所选模板是单栏/不同分区，算合理差异，**不因「没有 accounts 侧栏」判红线**。侧栏若存在则只放元信息与轻操作，禁止塞「返回列表」。详情页头走 H1 的 A 或 B，不要对照 `PageHeader`。
 - **L5** 🟡 Dashboard 骨架：指标卡行（StatCard 家族）→ 图表区 → 次级列表/榜单；栅格用 `grid` 并保证等高（`items-stretch`），不同断点合理折行。与 `/ref/dashboard-*` 对照，明显偏离时列出差异。
-- **L6** 🟡 视觉密度与对齐：卡片圆角/留白与样板一致（样板空态卡 `rounded-[28px] border-dashed`）；同行卡片高度不齐、区块间距忽大忽小判违规。结合截图判断。
+- **L6** 🟡 视觉密度与对齐对照 **Forge case/模板**（圆角、间距、字号），不是只对照 accounts 的 `rounded-[28px]`。同行卡片高度不齐、区块间距忽大忽小、手搓任意 radius/hex 边框判违规。结合截图判断。
+- **L7** 🔴 `DataTable` 列宽必须让每一列内容完整可见，剩余宽度不得堆在单一列形成大块空白。`DataTable` 是 `w-full` + `table-layout: auto`：`flex: true` 等于该列吃掉所有剩宽，只允许给「需要吃剩宽且单元格已 truncate」的列。日期、状态、数字、短名给够固定或百分比 `width`，禁止被裁成 `2026-07-..`。多列时优先用百分比把剩宽摊开，不要靠把 `flex` 从首列挪到末列来「修复」。
+  截图核：首列与末列都不得出现明显空洞；末列日期/操作完整可见。C2 过关（用了 DataTable）不等于本条过关。
+  口径：详情里的嵌套 `DataTable`（关联资源、阶段/作业）同样适用，不因角色是 detail、C2 不适用而免审。
+- **L8** 🔴 `DataTable` 禁止再包一层装饰白卡片。合法是节标题 + 可选 CTA + 表，直接落在页 stack 上。
+  违规：`rounded-card` / `rounded-xl border bg-white p-5` 包住 `DataTable`（`/cases/table` 的白框只是展廊）。
+  口径：官方模板用 `Panel`/`rounded-card` 包的是描述、History、文件列表，**不是** `DataTable`。指标卡用 `StatCard`/`ProgressStatCard` 自身外形，不要再套一层。C2 过关 ≠ 本条过关。`accounts/[id]` 会话表外包白卡是样板债，新代码禁止照抄。
 
 ## C — 组件用法
 
 - **C1** 🔴 UI 组件只从 `@forge-ui-official/core` import；本仓自有的仅 `@/components/ui/modal`、`@/lib/toast` 等既有封装。**禁止** MUI / Ant / shadcn / 自研重复轮子。Kit 缺能力标 `FORGE-GAP` 并停下询问，不就地手搓。
-- **C2** 🔴 全页数据列表必须用 `DataTable`（或 `FullWidthTable` + `Cell*`），禁止手搓 `<table>`/div-grid 冒充表格。
+- **C2** 🔴 角色为 collection **表格** 时，全页数据列表必须用 `DataTable`（或 `FullWidthTable` + `Cell*`），禁止手搓 `<table>`/div-grid 冒充表格。
+  口径：collection **卡片** / 资源工作台对照 `/ref/list-cards`、`/ref/resource-workspace`，用 `ResourceCard` 网格，本条不适用。手搓 `<table>` 冒充全页数据表仍是红线。详情嵌套表本条可标不适用，但必须继续审 L7/L8。
 - **C3** 🔴 `DataTable` 列的 `sortable: true` 只画 UI 不实现排序——未实现点击排序逻辑时禁止设置（假按钮）。
-- **C4** 🔴 `ConfirmationDialog` 只是内容卡，必须包宿主：`@/components/ui/modal` 或半透明遮罩层（对齐 accounts 删除确认 `fixed inset-0 bg-black/30`）。裸用判违规。
+- **C4** 🔴 `ConfirmationDialog` 只是内容卡，必须包宿主：`@/components/ui/modal` 或半透明遮罩层。本仓例子：accounts 删除确认的 `fixed inset-0 bg-black/30`。裸用判违规。
 - **C5** 🔴 状态展示必须带文字（语义状态用 Kit `StatusBadge`，见 V6），禁止仅用颜色点/色块表达状态。
 - **C6** 🔴 无行为的装饰按钮/假操作（点了没反应的 Export、更多菜单等）：要么实现，要么删除。假操作还包括"假提交"——提交处理器只 toast 成功 + 跳转、数据不写入任何数据源（连 mock state 都不写），用户在列表看不到结果。
 - **C7** 🟡 组件 props 按 case/样板用法传（常见错误：`DescriptionItem` 误用 `value`（应 `content`）、`TabBar` 误用 `items/value`（应 `tabs`）、给无内容的 slot 传 `null`（应省略 prop）、`DonutChart` 的 `segments.value` 为百分比 0–100 而非 0–1 小数——传小数会导致图形几乎为空且 tsc 不报错）。发现可疑 props 时对照 `docs/forge-components.md` 与 `../forge/src/app/cases/` 源码。
@@ -89,10 +132,10 @@
 - **V2** 🔴 业务控件颜色统一 `color={siteConfig.accent}`（Button / Breadcrumbs / ButtonGroup / TextField / DataTable 等），不得各页各配色。口径：`siteConfig.accent` 的合法值只有 `"purple" | "blue" | "black"`（Kit 的 `AccentColor`/`AppLayoutAccentColor` 类型），写 `green`/`red` 等会直接导致壳层类型报错——改主题色只能在这三个值里选，其它色彩诉求走 `fg-*` token，不改 accent。
 - **V3** 🔴 图标只用 `solar-icon-set`：侧栏 `*BoldDuotone` 20；页头/按钮 `*Linear` 16-18；行内 muted 色用 `color="#71717A"` 或 token。**禁止用 className 给 solar 图标上色**（fill 会硬编码失效），必须走 `color` prop。
 - **V4** 🔴 图表颜色合法形态仅两种：`var(--fg-*)` CSS 变量字符串（`SmoothLineChart` 等 color prop），或组件明确支持的 `bg-fg-*` class（`ChartLegendItem`、`BubbleChart` 等）。禁止裸 hex（样板 dashboard 的 hex 是样板债，禁照抄）与 Tailwind 默认色 class。
-- **V5** 🟡 排版层级与样板一致：页面主标题 `text-display-l font-semibold`，卡片标题/正文/辅助文字的字号与颜色（`text-fg-grey-500` 辅助）不混用。
+- **V5** 🟡 排版跟**该页所选页头体系**：A 用 `text-display-l font-semibold`；B/C 跟 `PageTitleToolbar` / `PageHeader` case 的字号。不要一页混两套标题尺度，也不要手搓 `text-[28px]` + 裸 hex。卡片标题/正文/辅助用 `fg-*`（辅助 `text-fg-grey-500`）。
 - **V6** 🔴 语义状态用 Kit `StatusBadge`，默认 `variant="soft"`（浅 `fg-*-50` 底 + 细描边 + 同色字），对齐官网 Transaction。颜色只承载状态语义：green=成功/启用、yellow=待处理、red=失败/禁用/驳回、grey=草稿/锁定/撤销、blue=进行中。一张表最多一列状态胶囊。
   - **不要用**：`variant="solid"`（实心白字）；`Label`；手搓圆角底色 pill；本仓 `StatusText`；给分类/角色/权限/标签刷彩虹胶囊。类目字段用 `CellText`/`CellMuted`。
-  - 绊线 `V6-status-badge` 拦截 `StatusText` / `variant="solid"` / `<Label`。`/ref/` 展廊不在本条范围。
+  - 绊线 `V6-status-badge` 拦截 `StatusText`、`StatusBadge` 的 `variant="solid"`、Kit `<Label`。`/ref/` 展廊不在本条范围。
 
 ## F — 表单与交互 surface
 
@@ -100,12 +143,12 @@
 - **F2** 🔴 删除等危险操作必须有确认（`ConfirmationDialog` + 宿主，`color="red"`），禁止点删即删。
 - **F3** 🔴 表单校验错误落到字段：`TextField state="error"` + `errorMessage`；不允许只 toast 或 alert。
 - **F4** 🔴 操作反馈用全站 toast（`import { toast } from "@/lib/toast"`），**禁止页面内嵌"创建成功"绿条**。
-- **F5** 🟡 创建成功后的动线：重模块跳全页详情（accounts 模式）或轻模块开详情弹窗（`Modal` + `?id=`），与该模块详情形态一致。
+- **F5** 🟡 创建成功后的动线与该模块详情形态一致：全页详情则跳 `[id]`，轻详情则开弹窗（`Modal` + `?id=`）。本仓两种例子分别是 accounts 与 `/ref/detail-modal`。
 - **F6** 🔴 不得默认引入 Drawer/Sheet 交互（Kit 未导出）；确有需要标 `FORGE-GAP` 询问。
 
 ## D — 数据与状态
 
-- **D1** 🔴 列表页三态齐全：`error`（可重试）→ `loading` → 空态 → 数据。空态必须区分"真无数据（引导新建）"与"筛选无结果（清除筛选）"，对齐 accounts 310+ 行。口径：纯同步 mock 数据页（无异步数据源）的 `error`/`loading` 两态判**不适用**，空态双分支仍必须做；无新建能力的只读列表，"真无数据"分支给业务合理的说明或引导即可（不强求"引导新建"，也不得为此造假按钮）。
+- **D1** 🔴 列表页三态齐全：`error`（可重试）→ `loading` → 空态 → 数据。空态必须区分"真无数据（引导新建）"与"筛选无结果（清除筛选）"。对照第 0 步选定的列表参照做双分支，不要对行号。口径：纯同步 mock 数据页（无异步数据源）的 `error`/`loading` 两态判**不适用**，空态双分支仍必须做；无新建能力的只读列表，"真无数据"分支给业务合理的说明或引导即可（不强求"引导新建"，也不得为此造假按钮）。
 - **D2** 🔴 全页详情处理 `loading && !entity`（加载中）与 `!entity`（不存在 + 返回列表）两态。
 - **D3** 🔴 业务数据走 `lib/<resource>/service.ts` + `app/api/<resource>/**` + client store（`components/<resource>-store.tsx`，Provider 挂 `app/(app)/layout.tsx`）；页面不得内联持久化逻辑或假内存 CRUD 冒充落库。演示页可用 `_data.ts` mock，但必须显式标注。口径：项目或用户任务**显式声明为 mock 演示仓**时，本条与铁律 8 的持久化要求不适用——此时 mock 放 `lib/<resource>/mock-data.ts` + 页面 state，文件头标注演示约定，且不得暗示数据已持久化；未显式声明的一律按本条原文执行。
 - **D4** 🔴 业务表独立建（`lib/db/schema.ts`），**禁止**把业务实体混进登录表 `users`。
@@ -121,9 +164,9 @@
 
 ## Q — 交付验证
 
-- **Q1** 🔴 `pnpm typecheck` 通过。
+- **Q1** 🔴 `pnpm check`（typecheck + 绊线）通过。
 - **Q2** 🔴 UI 变更后必须浏览器实际打开主路径验证（截图留档），禁止只 curl。
-- **Q3** 🟡 与对应黄金样板做整体结构 diff（区块顺序、组件选型、状态处理），列出所有偏差并逐个判定"合理业务差异 / 违规"。
+- **Q3** 🟡 对照物必须来自 skill 第 0 步。先认定 H1 的 A/B/C，再与**该对照页 / case** 做结构 diff（区块顺序、组件选型、状态处理）。每个偏差判定「合理业务差异 / 违规」。**不得把「没用 accounts 的 h1」当成违规。写不出对照物本条判违规。**
 - **Q4** 🟡 浏览器验证时同时检查 console / Next dev overlay：本次改动不得新增 console error 或 React 警告；发现范围外的既有警告记入报告"建议复核"，不擅自修。
 
 ---
@@ -134,11 +177,18 @@
 2. `dashboard/page.tsx` 图表 series/图例仍用裸 hex（`#2563eb` 等）与 `bg-[#…]` 任意值 class——违反 V4，新代码用 `var(--fg-*)`。
 3. `/ref/**` 画廊多页存在 Tailwind 默认色（amber/emerald 等）——违反 V1，抄 `/ref` 范式时颜色必须换成 `fg-*`（绊线对 `/ref` 降级为警告）。
 4. `account-form-dialog.tsx`、`settings-security-panel.tsx` 的校验错误为表单级 `<p>` 汇总文案——违反 F3，新代码必须字段级 `TextField state="error" + errorMessage`，不得以"对齐样板"为由放行。
+5. `accounts/[id]/page.tsx` 会话 `DataTable` 包在 `rounded-card border bg-white` 里——违反 L8。详情主栏的描述/侧栏 meta 可以继续用分区卡，**表必须直接落 stack**，不得以「对齐 accounts 详情」为由放行。
 
 ## 决策记录
 
-- 2026-08-21：页头标准定为 starter 样板模式（h1 + Breadcrumbs + 主按钮）。forge monorepo 模板的 `PageTitleToolbar` 体系不用于本仓业务页（避免两套页头并存）。
+- 2026-09-10：L4 去掉「PageHeader 详情」说法（详情对照 A/B，不是壳顶栏）。`accounts/[id]` 表外套白卡列入样板债，L8 新代码不得照抄。
+- 2026-09-10：审计改为 **由外到内四层**（skill）再勾清单。由衍生仓详情「用了 DataTable 却套白卡 / 假进度卡 / 手搓流程胶囊」漏检反哺。新增 **L8**；L7 明确覆盖详情嵌套表。H1-B 以 npm `≥0.1.12` 的 `variant` API 为标准，`≤0.1.11` 仍认 legacy。
+- 2026-08-21（**已废止**）：曾写「业务页禁用 PageTitleToolbar、只许 h1 + Breadcrumbs」。2026-09-02 改为按 Forge 组件/token/内容区审，PageTitleToolbar 合法。
+- 2026-09-02：审计以 Forge 样式规范为准，不以「是否抄成 accounts」为准。页头合法形态见 H1（A 紧凑 / B PageTitleToolbar / C PageHeader title）。同一页只许一套，禁止与壳页头叠加。
 - 2026-08-25：mock 演示模块（无数据库）缺 `?create=1` 深链、创建成功后不自动开详情弹窗，均判"合理低配"（与 users/roles 先例一致）；接真实 API 的模块仍按 R4/F5 原文执行。
 - 2026-08-25：本审计只覆盖规范符合性，不覆盖功能正确性（NaN 边界、分页越界等逻辑 bug 属开发自测与 code review 范畴）。
 - 2026-09-02：Kit `@forge-ui-official/core@0.1.11` 已默认 soft。业务页状态列改回 `StatusBadge`；`StatusText` 弃用。权限/角色等类目仍用纯文本。
 - 2026-09-02：审批中心是临时 new-module demo，已从公共 starter 删除。轻详情对照 `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=`，不要指向已删的 approvals 文件。
+- 2026-09-09：审计必须先定角色再选对照页（skill 第 0 步）。`accounts` 不是全站基线；卡片列表对照 `/ref/list-cards`，看板对照 dashboard / ecommerce-2。L4/C2 按所选角色适用，不因「不像 accounts」打红线。
+- 2026-09-09：重写 **H1**、收紧 **H2/H5**、新增 **H6**：`PageHeader`（AppLayout 顶栏）≠ `PageTitleToolbar`（正文页头+面包屑）。由衍生仓详情误把 `PageHeader` 当业务页头、包白卡片反哺。core `0.1.9` 无 `variant`/`breadcrumbItems` 不算 B 违规。
+- 2026-09-09：新增 **L7**：`DataTable` 列宽与剩宽分配。由衍生仓列表审计漏检（首列 `flex` 挤爆日期列）及错误修复（把 `flex` 挪到末列造成右侧空洞）反哺。L6 只管卡片密度，不覆盖本条。
