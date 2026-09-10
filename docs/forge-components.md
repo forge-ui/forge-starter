@@ -46,8 +46,9 @@
 
 | 页面/业务意图 | 先用这些组件 | Starter 抄谁 | monorepo case（查 props） |
 |---------------|--------------|--------------|---------------------------|
-| 列表、管理 | `DataTable` `Button` `ButtonGroup` `TextField` `StatusBadge` `Breadcrumbs` `IconButton` `PlusIcon` | `accounts/page` | `table` `tab` `toolbar` `button-link` |
-| 筛选条 | **单行** `ButtonGroup` + `TextField`（搜索） | 同上 | `tab` `input-field` |
+| 列表、管理 | `DataTable` `StatusBadge` `Button`；页头见下行 | `accounts/page` 或官方 wallets/customers | `table` `toolbar` `button-link` |
+| 列表页头 + 工具带 | **任选一套**：Starter `h1`+`Breadcrumbs`+`Button` 再单行 `ButtonGroup`+`TextField`；**或** Kit `PageTitleToolbar` + `Toolbar`/`ToolbarSearchInput`/`ToolbarPillTabs` | 同上 | `toolbar` |
+| 筛选条 | 一条工具带，禁止两行 pills。Starter：`ButtonGroup`+`TextField`。官方：`Toolbar`+`ToolbarSearchInput` | 同上 | `tab` `input-field` `toolbar` |
 | 新建/编辑弹窗 | `TextField` `TextArea` `SelectOption` + 本仓 `Modal` | `account-form-dialog` | `input-field` `modal` |
 | 轻详情（看完回列表） | `StatusBadge` `DescriptionItem`/`字段行` + `Modal` 底栏按钮 | `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=` | `list` `modal` |
 | 重详情（档案） | `Breadcrumbs` `StatusBadge` `StatCard` `TabBar` `DataTable` 侧栏字段 | `accounts/[id]` | `page-header` `card` `tab` `list` `table` |
