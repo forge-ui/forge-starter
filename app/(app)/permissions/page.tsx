@@ -146,7 +146,7 @@ function PermissionsPageContent() {
         render: (row) => (
           <button
             type="button"
-            className="flex h-10 min-w-0 flex-col justify-center text-left"
+            className="flex h-10 min-w-0 flex-col justify-center text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg-grey-300"
             onClick={() => openDetail(row.id)}
           >
             <span className="truncate text-sm font-semibold text-fg-black">{row.name}</span>
@@ -162,7 +162,7 @@ function PermissionsPageContent() {
       },
       {
         key: "action",
-        header: "操作",
+        header: "动作",
         width: "w-24",
         render: (row) => <CellMuted>{RBAC_ACTION_META[row.action].label}</CellMuted>,
       },
