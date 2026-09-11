@@ -31,6 +31,7 @@ import {
   type AppEntry,
   type AppKind,
 } from "@/config/apps";
+import { getDefaultAppRegistry } from "@/lib/apps/defaults";
 import { loadAppRegistry, saveAppRegistry } from "@/lib/apps/registry";
 import { AppFormDialog } from "@/components/app-form-dialog";
 
@@ -47,7 +48,7 @@ function kindLabel(kind: AppKind) {
 }
 
 export default function SettingsAppsPage() {
-  const [apps, setApps] = useState<AppEntry[]>([]);
+  const [apps, setApps] = useState<AppEntry[]>(() => getDefaultAppRegistry());
   const [search, setSearch] = useState("");
   const [filterIndex, setFilterIndex] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -100,7 +101,7 @@ export default function SettingsAppsPage() {
       {
         key: "name",
         header: "应用",
-        sortable: true,
+        sortable: false,
         flex: true,
         // Avoid CellText (flex-1) beside badges — it shoves badges to the cell edge.
         render: (row) => (

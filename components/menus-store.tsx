@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { apiFetch, parseApiJson } from "@/lib/api/browser";
 import type { MenuInput, MenuRecord } from "@/lib/menus/types";
 
 type MenusStoreValue = {
@@ -25,14 +26,10 @@ type MenusStoreValue = {
 
 const MenusStoreContext = createContext<MenusStoreValue | null>(null);
 
-async function parseJson(res: Response) {
-  return (await res.json()) as {
-    ok: boolean;
-    error?: string;
-    menus?: MenuRecord[];
-    menu?: MenuRecord;
-  };
-}
+type MenusResponse = {
+  menus?: MenuRecord[];
+  menu?: MenuRecord;
+};
 
 export function MenusStoreProvider({ children }: { children: ReactNode }) {
   const [menus, setMenus] = useState<MenuRecord[]>([]);
@@ -42,8 +39,8 @@ export function MenusStoreProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/menus/");
-      const data = await parseJson(res);
+      const res = await apiFetch("/api/menus/");
+      const data = await parseApiJson<MenusResponse>(res);
       if (!res.ok || !data.ok) {
         setError(data.error ?? "加载菜单失败");
         setMenus([]);
@@ -69,12 +66,12 @@ export function MenusStoreProvider({ children }: { children: ReactNode }) {
   );
 
   const createMenu = useCallback(async (input: MenuInput) => {
-    const res = await fetch("/api/menus/", {
+    const res = await apiFetch("/api/menus/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),
     });
-    const data = await parseJson(res);
+    const data = await parseApiJson<MenusResponse>(res);
     if (!res.ok || !data.ok || !data.menu) {
       throw new Error(data.error ?? "创建失败");
     }
@@ -83,12 +80,12 @@ export function MenusStoreProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   const updateMenu = useCallback(async (id: string, input: MenuInput) => {
-    const res = await fetch(`/api/menus/${id}/`, {
+    const res = await apiFetch(`/api/menus/${id}/`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),
     });
-    const data = await parseJson(res);
+    const data = await parseApiJson<MenusResponse>(res);
     if (!res.ok || !data.ok || !data.menu) {
       throw new Error(data.error ?? "更新失败");
     }
@@ -97,8 +94,8 @@ export function MenusStoreProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   const deleteMenu = useCallback(async (id: string) => {
-    const res = await fetch(`/api/menus/${id}/`, { method: "DELETE" });
-    const data = await parseJson(res);
+    const res = await apiFetch(`/api/menus/${id}/`, { method: "DELETE" });
+    const data = await parseApiJson<MenusResponse>(res);
     if (!res.ok || !data.ok) {
       throw new Error(data.error ?? "删除失败");
     }

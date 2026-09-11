@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { apiFetch, parseApiJson } from "@/lib/api/browser";
 import type { PermissionInput, PermissionRecord } from "@/lib/permissions/types";
 import { RBAC_RESOURCES } from "@/lib/rbac/constants";
 
@@ -26,14 +27,10 @@ type PermissionsStoreValue = {
 
 const PermissionsStoreContext = createContext<PermissionsStoreValue | null>(null);
 
-async function parseJson(res: Response) {
-  return (await res.json()) as {
-    ok: boolean;
-    error?: string;
-    permissions?: PermissionRecord[];
-    permission?: PermissionRecord;
-  };
-}
+type PermissionsResponse = {
+  permissions?: PermissionRecord[];
+  permission?: PermissionRecord;
+};
 
 export function PermissionsStoreProvider({ children }: { children: ReactNode }) {
   const [permissions, setPermissions] = useState<PermissionRecord[]>([]);
@@ -43,8 +40,8 @@ export function PermissionsStoreProvider({ children }: { children: ReactNode }) 
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/permissions/");
-      const data = await parseJson(res);
+      const res = await apiFetch("/api/permissions/");
+      const data = await parseApiJson<PermissionsResponse>(res);
       if (!res.ok || !data.ok) {
         setError(data.error ?? "加载权限失败");
         setPermissions([]);
@@ -70,12 +67,12 @@ export function PermissionsStoreProvider({ children }: { children: ReactNode }) 
   );
 
   const createPermission = useCallback(async (input: PermissionInput) => {
-    const res = await fetch("/api/permissions/", {
+    const res = await apiFetch("/api/permissions/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),
     });
-    const data = await parseJson(res);
+    const data = await parseApiJson<PermissionsResponse>(res);
     if (!res.ok || !data.ok || !data.permission) {
       throw new Error(data.error ?? "创建失败");
     }
@@ -87,12 +84,12 @@ export function PermissionsStoreProvider({ children }: { children: ReactNode }) 
   }, []);
 
   const updatePermission = useCallback(async (id: string, input: PermissionInput) => {
-    const res = await fetch(`/api/permissions/${id}/`, {
+    const res = await apiFetch(`/api/permissions/${id}/`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),
     });
-    const data = await parseJson(res);
+    const data = await parseApiJson<PermissionsResponse>(res);
     if (!res.ok || !data.ok || !data.permission) {
       throw new Error(data.error ?? "更新失败");
     }
@@ -101,8 +98,8 @@ export function PermissionsStoreProvider({ children }: { children: ReactNode }) 
   }, []);
 
   const deletePermission = useCallback(async (id: string) => {
-    const res = await fetch(`/api/permissions/${id}/`, { method: "DELETE" });
-    const data = await parseJson(res);
+    const res = await apiFetch(`/api/permissions/${id}/`, { method: "DELETE" });
+    const data = await parseApiJson<PermissionsResponse>(res);
     if (!res.ok || !data.ok) {
       throw new Error(data.error ?? "删除失败");
     }

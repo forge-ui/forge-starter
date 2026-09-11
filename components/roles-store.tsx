@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { apiFetch, parseApiJson } from "@/lib/api/browser";
 import type { RoleInput, RoleRecord } from "@/lib/roles/types";
 
 type RolesStoreValue = {
@@ -25,14 +26,10 @@ type RolesStoreValue = {
 
 const RolesStoreContext = createContext<RolesStoreValue | null>(null);
 
-async function parseJson(res: Response) {
-  return (await res.json()) as {
-    ok: boolean;
-    error?: string;
-    roles?: RoleRecord[];
-    role?: RoleRecord;
-  };
-}
+type RolesResponse = {
+  roles?: RoleRecord[];
+  role?: RoleRecord;
+};
 
 export function RolesStoreProvider({ children }: { children: ReactNode }) {
   const [roles, setRoles] = useState<RoleRecord[]>([]);
@@ -42,8 +39,8 @@ export function RolesStoreProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/roles/");
-      const data = await parseJson(res);
+      const res = await apiFetch("/api/roles/");
+      const data = await parseApiJson<RolesResponse>(res);
       if (!res.ok || !data.ok) {
         setError(data.error ?? "加载角色失败");
         setRoles([]);
@@ -69,12 +66,12 @@ export function RolesStoreProvider({ children }: { children: ReactNode }) {
   );
 
   const createRole = useCallback(async (input: RoleInput) => {
-    const res = await fetch("/api/roles/", {
+    const res = await apiFetch("/api/roles/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),
     });
-    const data = await parseJson(res);
+    const data = await parseApiJson<RolesResponse>(res);
     if (!res.ok || !data.ok || !data.role) {
       throw new Error(data.error ?? "创建失败");
     }
@@ -83,12 +80,12 @@ export function RolesStoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateRole = useCallback(async (id: string, input: RoleInput) => {
-    const res = await fetch(`/api/roles/${id}/`, {
+    const res = await apiFetch(`/api/roles/${id}/`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),
     });
-    const data = await parseJson(res);
+    const data = await parseApiJson<RolesResponse>(res);
     if (!res.ok || !data.ok || !data.role) {
       throw new Error(data.error ?? "更新失败");
     }
@@ -97,8 +94,8 @@ export function RolesStoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const deleteRole = useCallback(async (id: string) => {
-    const res = await fetch(`/api/roles/${id}/`, { method: "DELETE" });
-    const data = await parseJson(res);
+    const res = await apiFetch(`/api/roles/${id}/`, { method: "DELETE" });
+    const data = await parseApiJson<RolesResponse>(res);
     if (!res.ok || !data.ok) {
       throw new Error(data.error ?? "删除失败");
     }

@@ -14,6 +14,7 @@ import {
   homePathForApp,
   type AppEntry,
 } from "@/config/apps";
+import { getDefaultAppRegistry } from "@/lib/apps/defaults";
 import {
   loadActiveAppId,
   loadAppRegistry,
@@ -77,7 +78,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const shell = useMemo(() => shellForPath(pathname), [pathname]);
   const [profile, setProfile] = useState<AppLayoutProfile>(defaultProfile);
-  const [apps, setApps] = useState<AppEntry[]>([]);
+  const [apps, setApps] = useState<AppEntry[]>(() => getDefaultAppRegistry());
   const [activeAppId, setActiveAppId] = useState(DEFAULT_APP_ID);
 
   const syncRegistry = useCallback(() => {
