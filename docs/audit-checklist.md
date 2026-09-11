@@ -37,7 +37,7 @@
 | form-modal | `account-form-dialog` **或** `/ref/form-modal` | `modal` `input-field` |
 | form-page | `/ref/form-page` | `input-field` |
 | dashboard | `/dashboard` + `/ref/dashboard-*`；官方 `dashboards/ecommerce-2` | `card` `chart` `grid` |
-| settings | `settings/*`、`/ref/settings` | `input-field` |
+| settings | `settings/apps`、头像菜单弹窗、`/ref/settings` | `input-field` `modal` |
 | 菜单/壳 | `config/menu.tsx`、`config/site.ts`、`components/app-shell.tsx` | — |
 | 各角色范式画廊 | `/ref/*`（索引：`lib/reference/catalog.ts`） | — |
 | Kit 级规范 | `../forge/docs/for-agents/`、`docs/forge-components.md` | `/cases/` |
@@ -195,12 +195,13 @@ Starter 业务页默认 `hideHeader: true`，正文页头走 **A 或 B**。不�
 1. `accounts/page.tsx`、`accounts/[id]/page.tsx`、`dashboard/page.tsx`、`settings/apps/page.tsx` 多列 `sortable: true` 但无排序逻辑——违反 C3，新代码禁止照抄。
 2. `dashboard/page.tsx` 图表 series/图例仍用裸 hex（`#2563eb` 等）与 `bg-[#…]` 任意值 class——违反 V4，新代码用 `var(--fg-*)`。
 3. `/ref/**` 画廊多页存在 Tailwind 默认色（amber/emerald 等）——违反 V1，抄 `/ref` 范式时颜色必须换成 `fg-*`（绊线对 `/ref` 降级为警告）。
-4. `account-form-dialog.tsx`、`settings-security-panel.tsx` 的校验错误为表单级 `<p>` 汇总文案——违反 F3，新代码必须字段级 `TextField state="error" + errorMessage`，不得以"对齐样板"为由放行。
+4. `account-form-dialog.tsx` 的校验错误为表单级 `<p>` 汇总文案——违反 F3，新代码必须字段级 `TextField state="error" + errorMessage`，不得以"对齐样板"为由放行。资料/改密弹窗已按字段级错误改过。
 5. `accounts/[id]/page.tsx` 会话 `DataTable` 包在 `rounded-card border bg-white` 里——违反 L8。详情主栏的描述/侧栏 meta 可以继续用分区卡，**表必须直接落 stack**，不得以「对齐 accounts 详情」为由放行。
 6. `/ref/**` 画廊仍用 Tailwind `grid grid-cols-*` 做页面分栏——违反 L9。抄 `/ref` 范式时必须换成 `Grid`/`GridItem`。业务样板 `dashboard`、`accounts/[id]` 已迁，不要回抄画廊。
 
 ## 决策记录
 
+- 2026-09-11：头像菜单「编辑资料 / 修改密码 / 系统设置」改为 `settings-account-dialog` form-modal，停在当前页。旧 `/settings/profile|security|notifications` 只 redirect 到 `?dialog=`。
 - 2026-09-11：L9 补用法：视口断点 ≠ 内容宽；`gap` 是像素；嵌套栅格相对父列，主栏内禁止再套页面 `4+8`。账号详情概览改为主栏内 `5+7`。
 - 2026-09-11：新增 **L9**：页面分栏用 Kit `Grid`/`GridItem`（npm `0.1.13`）。未导出则不适用，禁止虚构 import。不把 `className="grid"` 写进绊线。一维工具带仍 Flex。
 - 2026-09-10：新增 **C10**：详情指标卡不得只重复本页已有字段。由衍生仓详情侧栏进度卡（数字与阶段列表重复、subtitle 抄行业）漏检反哺。

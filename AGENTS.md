@@ -73,7 +73,7 @@ app/(auth)/              登录注册找回
 app/(app)/dashboard      工作台
 app/(app)/accounts       ★ 重样板：列表 + 表单弹窗 + 全页详情
 app/(app)/ref/**         ★ AI 参考页（真实路由，不进菜单；生产默认关）
-app/(app)/settings       profile、security、apps
+app/(app)/settings       apps；资料/改密/系统设置走头像菜单弹窗
 app/api/auth|accounts
 components/app-shell.tsx
 components/*-form-dialog.tsx | *-store.tsx

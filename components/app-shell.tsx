@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   AppLayout,
   type AppLayoutProfile,
@@ -26,6 +26,16 @@ import {
   type ProfileUpdatedDetail,
 } from "@/lib/auth/profile-events";
 import { ToastProvider } from "@/components/ui/toast-provider";
+import {
+  SettingsAccountDialog,
+  type SettingsAccountDialogKind,
+} from "@/components/settings-account-dialog";
+
+const ACCOUNT_DIALOG_KINDS = ["profile", "security", "notifications"] as const;
+
+function isAccountDialogKind(value: string | null): value is SettingsAccountDialogKind {
+  return ACCOUNT_DIALOG_KINDS.includes(value as SettingsAccountDialogKind);
+}
 
 type MeResponse = {
   ok: boolean;
@@ -75,10 +85,12 @@ function openAppTarget(app: AppEntry, router: ReturnType<typeof useRouter>) {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const shell = useMemo(() => shellForPath(pathname), [pathname]);
   const [profile, setProfile] = useState<AppLayoutProfile>(defaultProfile);
   const [apps, setApps] = useState<AppEntry[]>([]);
   const [activeAppId, setActiveAppId] = useState(DEFAULT_APP_ID);
+  const [accountDialog, setAccountDialog] = useState<SettingsAccountDialogKind | null>(null);
 
   const syncRegistry = useCallback(() => {
     const list = loadAppRegistry();
@@ -200,15 +212,15 @@ export function AppShell({ children }: { children: ReactNode }) {
           return;
         }
         if (label.includes("编辑资料")) {
-          router.push("/settings/profile/");
+          setAccountDialog("profile");
           return;
         }
         if (label.includes("修改密码")) {
-          router.push("/settings/security/");
+          setAccountDialog("security");
           return;
         }
         if (label.includes("系统设置")) {
-          router.push("/settings/notifications/");
+          setAccountDialog("notifications");
         }
         return;
       }
@@ -232,7 +244,17 @@ export function AppShell({ children }: { children: ReactNode }) {
 
     document.addEventListener("click", onDocumentClick, true);
     return () => document.removeEventListener("click", onDocumentClick, true);
-  }, [logout, router, selectApp, apps]);
+  }, [logout, selectApp, apps]);
+
+  const dialogParam = searchParams.get("dialog");
+  useEffect(() => {
+    if (!isAccountDialogKind(dialogParam)) return;
+    setAccountDialog(dialogParam);
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("dialog");
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname);
+  }, [dialogParam, pathname, router, searchParams]);
 
   return (
     <AppLayout
@@ -270,6 +292,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       showKebab={false}
     >
       {children}
+      <SettingsAccountDialog kind={accountDialog} onClose={() => setAccountDialog(null)} />
       <ToastProvider />
     </AppLayout>
   );

@@ -1,7 +1,5 @@
-"use client";
-
-import { SettingsProfilePanel } from "@/components/settings-profile-panel";
+import { redirect } from "next/navigation";
 
 export default function SettingsProfilePage() {
-  return <SettingsProfilePanel />;
+  redirect("/settings/apps/?dialog=profile");
 }

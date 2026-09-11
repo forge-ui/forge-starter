@@ -55,7 +55,7 @@
 | 删除确认 | `ConfirmationDialog` **外包** `Modal`/遮罩 | `accounts/page` 删除 | `modal` |
 | 工作台、指标 | `StatCard` `ChartCard` 图表家族 `DataTable`；分栏 `Grid`/`GridItem`（core `≥0.1.13`，默认 12 列 / 16px） | `dashboard` | `card` `chart` `table` `grid` |
 | **资源工作台** | `WorkspaceSplit` `FolderNav` `ResourceCard` + `Grid` 卡组 + toast | `/ref/resource-workspace` | `grid` |
-| 设置单卡 | `TextField` `Button` 窄卡片 | `settings/profile` 等 | `input-field` |
+| 设置单卡 | 头像菜单三项（资料/改密/系统偏好）用 `Modal` 表单，不要整页；应用管理仍是 collection | `settings-account-dialog`、`settings/apps` | `input-field` `modal` |
 | 空态 | 文案 + `Button`；可选 solar 图标 | 各列表 empty | `button-link` |
 
 > **状态呈现纪律**：语义状态用 Kit `StatusBadge`（默认 `variant="soft"`，浅底+细边+同色字）。禁止 `variant="solid"`、`Label`、手搓 pill、本仓 `StatusText`。分类/角色/标签用 `CellText`/`CellMuted`，不要彩虹胶囊。一张表最多一列状态胶囊。
