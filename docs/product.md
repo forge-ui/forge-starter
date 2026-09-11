@@ -62,7 +62,8 @@
 | 认证 | 登录、注册、找回、重置、profile 改资料改密 |
 | 工作台 | ecommerce-2 布局，指标接业务账号 |
 | 账号管理 | **CRUD 样板**：DataTable 列表 + Modal 新建编辑 + 详情 + `/api/accounts` |
-| 应用管理 | 应用列表 CRUD；内部应用多选菜单；外链/外部系统认证占位 |
+| 应用管理 | 应用列表 CRUD；内部应用多选菜单（含角色/菜单/权限）；外链/外部系统认证占位 |
+| 角色 / 菜单 / 权限 | RBAC 演示：列表 + Modal 表单 + 详情弹窗；角色绑定权限；菜单目录对齐侧栏模块 ID |
 | Agent skills | `.agents/skills/*` |
 
 ### 4.1 数据边界
@@ -71,6 +72,7 @@
 |------|------|------|
 | 登录用户 | Postgres `users` | 认证 |
 | 业务账号 | Postgres `admin_accounts` | 账号管理 CRUD 样板 |
+| 角色 / 权限 / 菜单 | Postgres `rbac_roles` · `rbac_permissions` · `rbac_menus` | RBAC 演示目录；侧栏仍由 `config/menu.tsx` + 应用 `modules` 过滤 |
 | 应用注册表 | localStorage | 侧栏应用切换（非登录库） |
 
 ### 4.2 Non-goals

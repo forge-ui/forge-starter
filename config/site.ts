@@ -14,6 +14,9 @@ export type RouteShell = {
 export const routeShells: Record<string, RouteShell> = {
   "/dashboard": { title: "工作台", hideHeader: true },
   "/accounts": { title: "账号管理", hideHeader: true },
+  "/roles": { title: "角色", hideHeader: true },
+  "/menus": { title: "菜单", hideHeader: true },
+  "/permissions": { title: "权限", hideHeader: true },
   "/settings": { title: "设置", hideHeader: true },
   "/settings/profile": { title: "个人资料", hideHeader: true },
   "/settings/security": { title: "修改密码", hideHeader: true },

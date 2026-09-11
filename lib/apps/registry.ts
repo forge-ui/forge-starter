@@ -5,6 +5,7 @@ import {
   DEFAULT_APP_ENTRIES,
   DEFAULT_APP_ID,
   MENU_PRESET_META,
+  isAppModuleId,
   type AppAuthMode,
   type AppEntry,
   type AppKind,
@@ -22,8 +23,6 @@ const PRESETS: MenuPresetId[] = [
   "accounts-only",
   "custom",
 ];
-const MODULES: AppModuleId[] = ["dashboard", "accounts", "settings"];
-
 function asKind(v: unknown): AppKind {
   return typeof v === "string" && (KINDS as string[]).includes(v)
     ? (v as AppKind)
@@ -50,9 +49,7 @@ function asPreset(v: unknown): MenuPresetId {
 
 function asModules(v: unknown): AppModuleId[] {
   if (!Array.isArray(v)) return ["dashboard"];
-  return v.filter(
-    (m): m is AppModuleId => typeof m === "string" && (MODULES as string[]).includes(m),
-  );
+  return v.filter((m): m is AppModuleId => typeof m === "string" && isAppModuleId(m));
 }
 
 /** Migrate legacy flat entries (name + href only) */

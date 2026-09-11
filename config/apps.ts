@@ -15,8 +15,29 @@ export type AppOpenMode = "same_tab" | "new_tab";
  */
 export type AppAuthMode = "none" | "passthrough" | "oidc" | "platform";
 
-/** Built-in nav modules for internal apps */
-export type AppModuleId = "dashboard" | "accounts" | "settings";
+/**
+ * Built-in nav modules for internal apps.
+ *
+ * Sidebar contract:
+ * - Routes + icons live in `config/menu.tsx` (`MODULE_MENU`).
+ * - An internal app's `modules` chooses which of these appear.
+ * - The 菜单 CRUD (`rbac_menus`) catalogs the same codes (plus optional extras).
+ *   Extra rows do **not** render in the sidebar until added here and in MODULE_MENU.
+ */
+export const APP_MODULE_IDS = [
+  "dashboard",
+  "accounts",
+  "roles",
+  "menus",
+  "permissions",
+  "settings",
+] as const;
+
+export type AppModuleId = (typeof APP_MODULE_IDS)[number];
+
+export function isAppModuleId(value: string): value is AppModuleId {
+  return (APP_MODULE_IDS as readonly string[]).includes(value);
+}
 
 /** @deprecated kept for localStorage migration only */
 export type MenuPresetId = "accounts-admin" | "dashboard-only" | "accounts-only" | "custom";
@@ -73,6 +94,9 @@ export const APP_MODULE_META: Record<
 > = {
   dashboard: { label: "工作台", href: "/dashboard/" },
   accounts: { label: "账号管理", href: "/accounts/" },
+  roles: { label: "角色", href: "/roles/" },
+  menus: { label: "菜单", href: "/menus/" },
+  permissions: { label: "权限", href: "/permissions/" },
   settings: { label: "应用管理", href: "/settings/apps/" },
 };
 
@@ -83,7 +107,7 @@ export const MENU_PRESET_META: Record<
 > = {
   "accounts-admin": {
     label: "Forge Starter 基础后台（完整）",
-    modules: ["dashboard", "accounts", "settings"],
+    modules: [...APP_MODULE_IDS],
   },
   "dashboard-only": {
     label: "仅工作台",
@@ -108,7 +132,7 @@ export const DEFAULT_APP_ENTRIES: AppEntry[] = [
     href: "/dashboard/",
     openMode: "same_tab",
     authMode: "platform",
-    modules: ["dashboard", "accounts", "settings"],
+    modules: [...APP_MODULE_IDS],
     isCurrentProduct: true,
   },
 ];

@@ -1,12 +1,16 @@
 "use client";
 
 import {
+  HamburgerMenuBoldDuotone,
   HomeSmileBoldDuotone,
+  ShieldKeyholeBoldDuotone,
+  ShieldUserBoldDuotone,
   UsersGroupTwoRoundedBoldDuotone,
   WidgetBoldDuotone,
 } from "solar-icon-set";
 import type { AppLayoutMenuItem, AppLayoutProfile } from "@forge-ui-official/core";
 import {
+  APP_MODULE_IDS,
   modulesForApp,
   type AppEntry,
   type AppModuleId,
@@ -24,6 +28,21 @@ const MODULE_MENU: Record<AppModuleId, AppLayoutMenuItem> = {
     label: "账号管理",
     href: "/accounts/",
   },
+  roles: {
+    icon: <ShieldUserBoldDuotone size={20} />,
+    label: "角色",
+    href: "/roles/",
+  },
+  menus: {
+    icon: <HamburgerMenuBoldDuotone size={20} />,
+    label: "菜单",
+    href: "/menus/",
+  },
+  permissions: {
+    icon: <ShieldKeyholeBoldDuotone size={20} />,
+    label: "权限",
+    href: "/permissions/",
+  },
   settings: {
     icon: <WidgetBoldDuotone size={20} />,
     label: "应用管理",
@@ -32,23 +51,15 @@ const MODULE_MENU: Record<AppModuleId, AppLayoutMenuItem> = {
 };
 
 /** Default full product menu */
-export const menuItems: AppLayoutMenuItem[] = [
-  MODULE_MENU.dashboard,
-  MODULE_MENU.accounts,
-  MODULE_MENU.settings,
-];
+export const menuItems: AppLayoutMenuItem[] = APP_MODULE_IDS.map((id) => MODULE_MENU[id]);
 
 export function menuItemsForApp(app: AppEntry | null | undefined): AppLayoutMenuItem[] {
   if (!app || app.kind !== "internal") {
     return [MODULE_MENU.dashboard, MODULE_MENU.settings];
   }
-  const mods = modulesForApp(app);
-  const ordered: AppModuleId[] = [];
-  for (const id of mods) {
-    if (!ordered.includes(id)) ordered.push(id);
-  }
-  if (!ordered.includes("settings")) ordered.push("settings");
-  return ordered.map((id) => MODULE_MENU[id]);
+  const selected = new Set(modulesForApp(app));
+  selected.add("settings");
+  return APP_MODULE_IDS.filter((id) => selected.has(id)).map((id) => MODULE_MENU[id]);
 }
 
 export const defaultProfile: AppLayoutProfile = {
