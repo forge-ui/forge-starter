@@ -53,7 +53,6 @@ function LoginForm() {
   return (
     <form
       action={loginAction}
-      method="post"
       onSubmit={handleSubmit}
       className="flex w-full max-w-[400px] flex-col gap-8"
     >
