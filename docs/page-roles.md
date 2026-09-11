@@ -20,11 +20,11 @@
 
 | 角色 | 关键词 | 主结构 |
 |------|--------|--------|
-| **dashboard** | 工作台、指标、趋势 | 指标卡 + 图 + 次级列表 |
+| **dashboard** | 工作台、指标、趋势 | 指标卡 + 图 + 次级列表；分栏用 Kit `Grid`（core `≥0.1.13`） |
 | **collection** | 列表、筛选 | Header + **一条**筛选/搜索工具带 + DataTable（Starter：`ButtonGroup`+搜索；官方：`PageTitleToolbar`+`Toolbar`） |
 | **form-modal** | 新建/编辑字段不多 | Modal 表单 |
 | **detail-modal** | 轻详情、短处理 | 列表上叠 Modal |
-| **detail** | 重详情、档案 | 主栏 + 侧栏 + Tab/时间线 |
+| **detail** | 重详情、档案 | 主栏 + 侧栏 + Tab/时间线；主次栏用 `Grid`/`GridItem`（core `≥0.1.13`） |
 | **form-page** | 字段极多 | 页内长表单（少用） |
 | **settings** | 资料、偏好 | 窄卡片或 collection |
 | **auth** | 登录注册 | `app/(auth)` |

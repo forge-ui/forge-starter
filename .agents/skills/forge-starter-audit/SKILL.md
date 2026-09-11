@@ -33,13 +33,13 @@ description: 页面规范审计。任何业务页面写完/改完后必须执行
 | 被审角色 | 主对照（选最像的一档，不要默认 accounts） | Kit case |
 |----------|------------------------------------------|----------|
 | collection 表格 | 本仓 `accounts/page` **或** `/ref/list-table` **或** 官方 wallets/customers | `toolbar` `table` |
-| collection 卡片 | `/ref/list-cards` | — |
-| 资源工作台 | `/ref/resource-workspace` | — |
-| detail 全页 | `accounts/[id]` **或** 官方 CRM `customers/[id]`（`PageTitleToolbar`）**或** ecommerce `customers/[id]` | `toolbar` `card` `tab`（仅 C 才查 `page-header`） |
+| collection 卡片 | `/ref/list-cards` | `grid` |
+| 资源工作台 | `/ref/resource-workspace` | `grid` |
+| detail 全页 | `accounts/[id]` **或** 官方 CRM `customers/[id]`（`PageTitleToolbar`）**或** ecommerce `customers/[id]` | `toolbar` `card` `tab` `grid`（仅 C 才查 `page-header`） |
 | detail-modal | `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=` | `modal` `list` |
 | form-modal | `account-form-dialog` **或** `/ref/form-modal` | `modal` `input-field` |
 | form-page | `/ref/form-page` | `input-field` |
-| dashboard | `/dashboard` + `/ref/dashboard-*`；官方 `dashboards/ecommerce-2` | `card` `chart` |
+| dashboard | `/dashboard` + `/ref/dashboard-*`；官方 `dashboards/ecommerce-2` | `card` `chart` `grid` |
 | settings | `settings/*`、`/ref/settings` | `input-field` |
 | auth | `app/(auth)` | — |
 
@@ -57,10 +57,10 @@ description: 页面规范审计。任何业务页面写完/改完后必须执行
 
 | 层 | 看什么 | 典型漏检 | 主要映射 |
 |----|--------|----------|----------|
-| **S 页面结构** | 整页区块顺序是否等于该角色骨架（见 `docs/page-roles.md`） | 详情做成胶囊导航墙；列表缺工具带或两行 pills | R1 L3 L4 L5 H1 |
+| **S 页面结构** | 整页区块顺序是否等于该角色骨架（见 `docs/page-roles.md`）。页头正下方每一块都要能说出「这是什么」 | 详情做成胶囊导航墙；页头下孤飘「进行中」；列表缺工具带或两行 pills | R1 L3 L4 L5 H1 **H7** |
 | **O 内容区最外层** | AppLayout 右侧正文根：只应是纵向 stack。禁止第二套壳、根再 `p-6`、整页包白卡、页内 `PageHeader` 冒充标题栏 | 把 Kit `PageHeader` 当内容卡 | L1 L2 H6 |
-| **N 节/区块** | 每个 h2 区块的外壳。节标题 + 可选 CTA + 主体直接落 stack。禁止给 `DataTable` 再套装饰白卡；禁止手搓 pill 栅格冒充步骤/导航 | 表外包 `rounded-card border bg-white`；一排 secondary Button 当流程 | L6 L7 **L8** C1 |
-| **C 组件** | 选对组件 + props + token。嵌套表也要审，C2 对 detail「不适用」≠ 表免审 | `ProgressStatCard` 画假进度；`flex` 吃剩宽 | C* V* F* L7 |
+| **N 节/区块** | 每个 h2 区块的外壳。`DataTable` 节：标题 + 可选 CTA + 表直接落 stack，禁止外套白卡。描述 / History / 文件 / 阶段列表等正文：官方 `Panel`/`rounded-card`，行内用 `ListItem`/`DescriptionItem`，禁止整页宽进度条、禁止手搓 pill 栅格。页面分栏 / 等宽卡组核 **L9**（有 `Grid` 必须用；嵌套栅格相对父列，主栏内不要再套页面 `4+8`；`gap` 是像素） | 表外包白卡；正文列表裸铺长条；一排 secondary Button 当流程；手搓页面栅格；主栏里套整页 4+8 | L6 L7 **L8** **L9** C1 |
+| **C 组件** | 选对组件 + props + token。嵌套表也要审，C2 对 detail「不适用」≠ 表免审 | `ProgressStatCard` 画假进度或只重复本页已有字段；`flex` 吃剩宽 | C* V* F* L7 |
 
 截图也按这四层看：先整页骨架，再内容根，再每一节外壳，最后才盯单元格。范围内**每张** `DataTable`（含详情嵌套表）都必须截到并核 L7/L8。
 
@@ -79,9 +79,9 @@ description: 页面规范审计。任何业务页面写完/改完后必须执行
 
 仍按 S→O→N→C。问三件事，不要问「像不像 accounts」：
 
-1. **该用 Forge 组件却手搓了吗？**（页头、搜索、按钮、表格、状态）对照 `/cases/` 与 `docs/forge-components.md`。
+1. **该用 Forge 组件却手搓了吗？**（页头、搜索、按钮、表格、状态、页面分栏）对照 `/cases/` 与 `docs/forge-components.md`。已导出 `Grid` 却写 `grid-cols-*` → L9。
 2. **颜色 / 圆角 / 尺寸 / 字体跑出 `fg-*` 和 Kit case 了吗？**
-3. **内容区边距、间距、栅格乱了吗？**（根再 `p-6`、两行 pills、密度忽大忽小、表外套白卡）
+3. **内容区边距、间距、栅格乱了吗？**（根再 `p-6`、两行 pills、密度忽大忽小、表外套白卡、页面分栏没用 `Grid`）
 
 结构 diff：对照页的 页头 → 工具带/指标 → 各节外壳 → 表/卡内部 → 状态 → 弹窗。每个偏差判定合理业务差异 / 违规。清单未覆盖的新模式 → 报告「清单反哺建议」。
 
@@ -92,7 +92,7 @@ description: 页面规范审计。任何业务页面写完/改完后必须执行
 **截图通道**（按优先级）：① 环境自带的浏览器工具（IDE 内置浏览器 / playwright / puppeteer CLI）直接访问 dev server；② 无头 Chromium 命令行截图（`--headless --screenshot=... --window-size=1440,900 http://127.0.0.1:<port>/<path>`）。**不要**依赖 forge-design 浏览器插件的桥接来截审计页面——它面向用户当前正在看的 Chrome 标签，审计场景下通常截不到目标页。两种通道都不可用时，本步降级为跳过，但必须在报告"重验记录"中显式声明"视觉审查未执行（原因）"，不得静默略过。
 
 1. 确认 dev server 运行（端口与 `AUTH_MODE` 以项目 `.env` / `package.json` 为准，勿凭空假设），浏览器打开被审模块主路径（列表、详情、弹窗打开态）
-2. 截图按 S→O→N→C：整页骨架、内容根有没有白卡/PageHeader、每一节外壳、最后才是单元格。范围内每张 `DataTable` 都要截到并核 L7/L8。再看手搓控件、颜色/圆角/字号、卡片对齐/等高、空态/加载态
+2. 截图按 S→O→N→C：整页骨架、内容根有没有白卡/PageHeader、每一节外壳、最后才是单元格。范围内每张 `DataTable` 都要截到并核 L7/L8。再看手搓控件、颜色/圆角/字号、卡片对齐/等高、空态/加载态。**指着每一颗 `StatusBadge` 问「这是谁的状态」**（H7）；答不出就修，不得因 V6 用了 `StatusBadge` 就放过。
 3. 同时检查 console 与 Next dev overlay（清单 Q4）：本次改动不得新增 console error / React 警告；范围外的既有警告记入"建议复核"
 4. 与第 0 步对照页 / case 比视觉印象，不要只跟 accounts 比像素
 

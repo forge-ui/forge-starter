@@ -10,7 +10,7 @@
 >
 > **使用方式**：先按 skill **由外到内四层**取证（S 页面结构 → O 内容区最外层 → N 节/区块外壳 → C 组件），再逐条勾本清单。
 > 每条输出 `通过 / 违规 / 不适用`；违规必须给**文件路径 + 行号**。禁止跳条、禁止笼统"整体符合"、禁止先看「用了 DataTable」就给过。
-> 详情页的嵌套表 C2 可能「不适用」，仍必须审 L7/L8。
+> 详情页的嵌套表 C2 可能「不适用」，仍必须审 L7/L8。页面分栏另核 **L9**（已安装 core 导出 `Grid` 才红线）。
 >
 > **严重级**：🔴 红线（必须修复，多数可直接改）；🟡 判断（列出证据与建议，标注"建议复核"，除非明显才直接改）。
 >
@@ -30,13 +30,13 @@
 | 角色 | 主对照 | Kit case |
 |------|--------|----------|
 | collection 表格 | 本仓 `accounts/page.tsx` **或** `/ref/list-table` **或** 官方 wallets/customers（`PageTitleToolbar` + `Toolbar`） | `toolbar` `table` |
-| collection 卡片 | `/ref/list-cards` | — |
-| 资源工作台 | `/ref/resource-workspace` | — |
-| detail 全页 | `accounts/[id]` **或** 官方 CRM `customers/[id]`（`PageTitleToolbar`）**或** ecommerce `customers/[id]`（h1+面包屑） | `toolbar` `card` `tab`（壳顶栏才查 `page-header`） |
+| collection 卡片 | `/ref/list-cards` | `grid` |
+| 资源工作台 | `/ref/resource-workspace` | `grid` |
+| detail 全页 | `accounts/[id]` **或** 官方 CRM `customers/[id]`（`PageTitleToolbar`）**或** ecommerce `customers/[id]`（h1+面包屑） | `toolbar` `card` `tab` `grid`（壳顶栏才查 `page-header`） |
 | detail-modal | `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=` | `modal` `list` |
 | form-modal | `account-form-dialog` **或** `/ref/form-modal` | `modal` `input-field` |
 | form-page | `/ref/form-page` | `input-field` |
-| dashboard | `/dashboard` + `/ref/dashboard-*`；官方 `dashboards/ecommerce-2` | `card` `chart` |
+| dashboard | `/dashboard` + `/ref/dashboard-*`；官方 `dashboards/ecommerce-2` | `card` `chart` `grid` |
 | settings | `settings/*`、`/ref/settings` | `input-field` |
 | 菜单/壳 | `config/menu.tsx`、`config/site.ts`、`components/app-shell.tsx` | — |
 | 各角色范式画廊 | `/ref/*`（索引：`lib/reference/catalog.ts`） | — |
@@ -93,7 +93,9 @@ Starter 业务页默认 `hideHeader: true`，正文页头走 **A 或 B**。不�
 - **H5** 🔴 全页详情的返回动线跟第 0 步选的 chrome：A/B 靠面包屑祖先项，**不要求**圆形返回按钮；C 必须 `showBackButton` + `onBack`。**禁止在侧栏 meta 卡塞「返回列表」**。`hideHeader: true` 时壳 `onBack` 不渲染，不能当返回动线。
 - **H6** 🔴 `PageHeader` 只属于 AppLayout 顶栏，禁止当内容卡。
   违规：页内 `import { PageHeader }` 再包 `rounded-xl border bg-white`（`/cases/page-header` 的白框只是展廊）；把 `StatusBadge`、版本选择、跨模块跳转塞进 `primaryAction` / `secondaryAction`；壳顶栏已显示时页内再画一套标题。
-  口径：沉浸式工作台若产品确认可用页内 `PageHeader`，仍禁止再包装饰白卡片、禁止把状态胶囊当 action。状态、元信息、章节 CTA 放正文。
+  口径：沉浸式工作台若产品确认可用页内 `PageHeader`，仍禁止再包装饰白卡片、禁止把状态胶囊当 action。状态、元信息、章节 CTA 放正文。**「放正文」≠ 页头和卡片之间单独飘一颗没字段名的胶囊**，见 H7。
+- **H7** 🔴 语义状态必须能读出「这是谁的什么状态」。合法：字段行（`DescriptionItem label="状态"` + `StatusBadge`）；表的状态列（列头即 label）；官方身份条里和标题/主体绑在同一行（logo + 名 + badge）。
+  违规：页头与正文卡之间单独一颗没有字段名的 `StatusBadge`；把官方身份条拆光只剩一颗「进行中」。V6 用对组件 ≠ 本条过关。截图核：指着胶囊问「这是谁的状态」，答不出就修。
 
 ## L — 布局与骨架
 
@@ -104,27 +106,43 @@ Starter 业务页默认 `hideHeader: true`，正文页头走 **A 或 B**。不�
   - 官方：`Toolbar` + `ToolbarSearchInput`（搜索在工具条左侧）+ 可选 `ToolbarPillTabs` / `ToolbarActions`。
   口径：搜索出现在 `PageTitleToolbar` 标题行右侧不算官方推荐，但整段都是 Kit 且 token 正确时标 🟡，建议收到 `Toolbar`，**不因「不像 accounts」判红线**。手搓圆角搜索框 / 原生 button 仍是 C1 红线。
 - **L4** 🔴 全页详情骨架对照第 0 步选定的 detail 参照。本仓捷径 `accounts/[id]` 是主栏 + 侧栏 meta 两栏；官方 CRM / ecommerce `customers/[id]` 若按所选模板是单栏/不同分区，算合理差异，**不因「没有 accounts 侧栏」判红线**。侧栏若存在则只放元信息与轻操作，禁止塞「返回列表」。详情页头走 H1 的 A 或 B，不要对照 `PageHeader`。
-- **L5** 🟡 Dashboard 骨架：指标卡行（StatCard 家族）→ 图表区 → 次级列表/榜单；栅格用 `grid` 并保证等高（`items-stretch`），不同断点合理折行。与 `/ref/dashboard-*` 对照，明显偏离时列出差异。
+- **L5** 🟡 Dashboard 骨架：指标卡行（StatCard 家族）→ 图表区 → 次级列表/榜单；分栏走 **L9**（有 `Grid` 用 `Grid` + 行内 stretch，不要手搓 `grid-cols-*`）。与 `/ref/dashboard-*` / 官方 ecommerce-2 对照，明显偏离时列出差异。
 - **L6** 🟡 视觉密度与对齐对照 **Forge case/模板**（圆角、间距、字号），不是只对照 accounts 的 `rounded-[28px]`。同行卡片高度不齐、区块间距忽大忽小、手搓任意 radius/hex 边框判违规。结合截图判断。
 - **L7** 🔴 `DataTable` 列宽必须让每一列内容完整可见，剩余宽度不得堆在单一列形成大块空白。`DataTable` 是 `w-full` + `table-layout: auto`：`flex: true` 等于该列吃掉所有剩宽，只允许给「需要吃剩宽且单元格已 truncate」的列。日期、状态、数字、短名给够固定或百分比 `width`，禁止被裁成 `2026-07-..`。多列时优先用百分比把剩宽摊开，不要靠把 `flex` 从首列挪到末列来「修复」。
   截图核：首列与末列都不得出现明显空洞；末列日期/操作完整可见。C2 过关（用了 DataTable）不等于本条过关。
   口径：详情里的嵌套 `DataTable`（关联资源、阶段/作业）同样适用，不因角色是 detail、C2 不适用而免审。
 - **L8** 🔴 `DataTable` 禁止再包一层装饰白卡片。合法是节标题 + 可选 CTA + 表，直接落在页 stack 上。
   违规：`rounded-card` / `rounded-xl border bg-white p-5` 包住 `DataTable`（`/cases/table` 的白框只是展廊）。
-  口径：官方模板用 `Panel`/`rounded-card` 包的是描述、History、文件列表，**不是** `DataTable`。指标卡用 `StatCard`/`ProgressStatCard` 自身外形，不要再套一层。C2 过关 ≠ 本条过关。`accounts/[id]` 会话表外包白卡是样板债，新代码禁止照抄。
+  口径：官方模板用 `Panel`/`rounded-card` 包的是描述、History、文件列表、阶段/作业这类**正文列表**，**不是** `DataTable`。这些区块裸铺在 stack 上、或用整页宽 `ProgressBar` 撑面积，都偏离官方。指标卡用 `StatCard`/`ProgressStatCard` 自身外形，不要再套一层。C2 过关 ≠ 本条过关。`accounts/[id]` 会话表外包白卡是样板债，新代码禁止照抄。
+- **L9** 🔴 页面级分栏 / 等宽卡片组必须用 Kit `Grid` + `GridItem`（core **`≥ 0.1.13`**，对照 `/cases/grid`；旁路规范 `../forge/skills/forge-react/references/layout-grid.md`）。
+  适用：看板指标行、详情主次栏、卡片 collection、带辅栏的表单页、等宽卡组。默认 12 列；`gap` 只许像素 `0/4/8/12/16/20/24/32/48`（默认 16）。卡片走已有 `width="full"`，不要写死卡宽。
+  违规：已安装 core 能 `import { Grid, GridItem }` 时，仍用 Tailwind `grid grid-cols-*` / `style.gridTemplateColumns` 铺页面分栏；给 Grid 再加一层页面 padding（壳已管，见 L2）；把工具带 / `ButtonGroup` 改成 Grid；把 Modal / 确认遮罩当作 Grid 直接子节点（会占一列）。
+  口径：
+  - 已安装 core **未导出** `Grid` → 本条标**不适用**，可继续 Tailwind `grid`，**禁止虚构 import**（C8）。本仓已升 `^0.1.13`，业务页分栏按本条收。
+  - 两种写法不要混：等宽卡组改 `columns`（如 `{ base: 1, sm: 2, lg: 3 }`）；主次栏保持 12 列、用 `GridItem span`。
+  - **嵌套栅格相对父列，不是整页 12 列。** 外层已是 `span 8` 的主栏里，禁止再套页面级 `4+8`（实际只剩主栏的 1/3）。主栏内辅栏+图用 `5+7` / `6+6`，或 `columns={{ base: 1, xl: 2 }}`。
+  - `gap={4}` 是 **4px**，不是 Tailwind `gap-4`（16px）。页面级优先 `16` 或 `24`。
+  - `GridItem` 默认 `span="full"`。不写 span 会占满一行；直接子节点（StatCard）才各占一格。
+  - 一维排列（工具带、按钮组、页头 action）继续 Flex，不要每个 `div` 都换成 Grid。
+  - 弹窗里两列表单字段、`dl` 键值、日历热力等微排版不算页面级栅格。
+  - 不要全局 `auto-rows-fr` 或统一死最小高度；等高按行，用 `alignItems`（默认 stretch）。
+  - 断点是**视口**不是内容区。`lg`=1024 时侧栏展开后正文可能只有 ~700px，仍会折成多列——截图必须带侧栏展开。
+  - `/ref/**` 画廊里的 Tailwind 栅格仍是样板债，抄范式时必须换成 `Grid`。业务样板 `dashboard`、`accounts/[id]` 已迁 Grid。
+  截图核（改分栏时）：375 / 768 / 1024 / 1440，**侧栏展开**时内容区无整页横滚。
 
 ## C — 组件用法
 
-- **C1** 🔴 UI 组件只从 `@forge-ui-official/core` import；本仓自有的仅 `@/components/ui/modal`、`@/lib/toast` 等既有封装。**禁止** MUI / Ant / shadcn / 自研重复轮子。Kit 缺能力标 `FORGE-GAP` 并停下询问，不就地手搓。
+- **C1** 🔴 UI 组件只从 `@forge-ui-official/core` import；本仓自有的仅 `@/components/ui/modal`、`@/lib/toast` 等既有封装。**禁止** MUI / Ant / shadcn / 自研重复轮子。Kit 缺能力标 `FORGE-GAP` 并停下询问，不就地手搓。页面分栏已有 `Grid` 时，手搓 Tailwind 栅格按 **L9**，不要另开 FORGE-GAP。
 - **C2** 🔴 角色为 collection **表格** 时，全页数据列表必须用 `DataTable`（或 `FullWidthTable` + `Cell*`），禁止手搓 `<table>`/div-grid 冒充表格。
-  口径：collection **卡片** / 资源工作台对照 `/ref/list-cards`、`/ref/resource-workspace`，用 `ResourceCard` 网格，本条不适用。手搓 `<table>` 冒充全页数据表仍是红线。详情嵌套表本条可标不适用，但必须继续审 L7/L8。
+  口径：collection **卡片** / 资源工作台对照 `/ref/list-cards`、`/ref/resource-workspace`，用 `ResourceCard` + **L9** 栅格，本条不适用。手搓 `<table>` 冒充全页数据表仍是红线。详情嵌套表本条可标不适用，但必须继续审 L7/L8。
 - **C3** 🔴 `DataTable` 列的 `sortable: true` 只画 UI 不实现排序——未实现点击排序逻辑时禁止设置（假按钮）。
 - **C4** 🔴 `ConfirmationDialog` 只是内容卡，必须包宿主：`@/components/ui/modal` 或半透明遮罩层。本仓例子：accounts 删除确认的 `fixed inset-0 bg-black/30`。裸用判违规。
 - **C5** 🔴 状态展示必须带文字（语义状态用 Kit `StatusBadge`，见 V6），禁止仅用颜色点/色块表达状态。
 - **C6** 🔴 无行为的装饰按钮/假操作（点了没反应的 Export、更多菜单等）：要么实现，要么删除。假操作还包括"假提交"——提交处理器只 toast 成功 + 跳转、数据不写入任何数据源（连 mock state 都不写），用户在列表看不到结果。
 - **C7** 🟡 组件 props 按 case/样板用法传（常见错误：`DescriptionItem` 误用 `value`（应 `content`）、`TabBar` 误用 `items/value`（应 `tabs`）、给无内容的 slot 传 `null`（应省略 prop）、`DonutChart` 的 `segments.value` 为百分比 0–100 而非 0–1 小数——传小数会导致图形几乎为空且 tsc 不报错）。发现可疑 props 时对照 `docs/forge-components.md` 与 `../forge/src/app/cases/` 源码。
-- **C8** 🔴 不得从 core import 不存在的组件（Toast / Drawer / Sheet 等）。反馈用 `@/lib/toast`。
+- **C8** 🔴 不得从 core import 不存在的组件（Toast / Drawer / Sheet 等）。反馈用 `@/lib/toast`。未导出的 `Grid`/`GridItem` 同样禁止 import；已导出则页面分栏走 L9。
 - **C9** 🔴 表格存在详情时，名称/标题列的数据必须是可点击的详情入口，按模块选型打开全页或详情弹窗，并支持键盘操作。禁止在操作列重复放箭头/眼睛“查看详情”按钮，也不要给普通名称详情入口附加箭头。操作列只承载编辑、删除等真实业务动作，无其他动作则省略整列。核查列 render、点击后的实体、关闭/返回后的筛选上下文。口径：实际外部链接或有明确业务含义的跳转可以保留箭头，但不得当作通用详情默认样式；无详情能力的表格名称保持普通文字，本条不适用。
+- **C10** 🟡 详情页 `StatCard`/`ProgressStatCard` 必须提供本页其它区块没有的信息。违规：subtitle 复用行业/负责人；总进度与旁边阶段列表同一数字；只有数字、没有独立含义的指标卡。看板 L5 的指标行不适用本条。
 
 ## V — 视觉 token（颜色 / 图标 / 排版）
 
@@ -136,6 +154,7 @@ Starter 业务页默认 `hideHeader: true`，正文页头走 **A 或 B**。不�
 - **V6** 🔴 语义状态用 Kit `StatusBadge`，默认 `variant="soft"`（浅 `fg-*-50` 底 + 细描边 + 同色字），对齐官网 Transaction。颜色只承载状态语义：green=成功/启用、yellow=待处理、red=失败/禁用/驳回、grey=草稿/锁定/撤销、blue=进行中。一张表最多一列状态胶囊。
   - **不要用**：`variant="solid"`（实心白字）；`Label`；手搓圆角底色 pill；本仓 `StatusText`；给分类/角色/权限/标签刷彩虹胶囊。类目字段用 `CellText`/`CellMuted`。
   - 绊线 `V6-status-badge` 拦截 `StatusText`、`StatusBadge` 的 `variant="solid"`、Kit `<Label`。`/ref/` 展廊不在本条范围。
+  - 组件用对了还要核 **H7**（孤胶囊、没字段名）。
 
 ## F — 表单与交互 surface
 
@@ -178,9 +197,15 @@ Starter 业务页默认 `hideHeader: true`，正文页头走 **A 或 B**。不�
 3. `/ref/**` 画廊多页存在 Tailwind 默认色（amber/emerald 等）——违反 V1，抄 `/ref` 范式时颜色必须换成 `fg-*`（绊线对 `/ref` 降级为警告）。
 4. `account-form-dialog.tsx`、`settings-security-panel.tsx` 的校验错误为表单级 `<p>` 汇总文案——违反 F3，新代码必须字段级 `TextField state="error" + errorMessage`，不得以"对齐样板"为由放行。
 5. `accounts/[id]/page.tsx` 会话 `DataTable` 包在 `rounded-card border bg-white` 里——违反 L8。详情主栏的描述/侧栏 meta 可以继续用分区卡，**表必须直接落 stack**，不得以「对齐 accounts 详情」为由放行。
+6. `/ref/**` 画廊仍用 Tailwind `grid grid-cols-*` 做页面分栏——违反 L9。抄 `/ref` 范式时必须换成 `Grid`/`GridItem`。业务样板 `dashboard`、`accounts/[id]` 已迁，不要回抄画廊。
 
 ## 决策记录
 
+- 2026-09-11：L9 补用法：视口断点 ≠ 内容宽；`gap` 是像素；嵌套栅格相对父列，主栏内禁止再套页面 `4+8`。账号详情概览改为主栏内 `5+7`。
+- 2026-09-11：新增 **L9**：页面分栏用 Kit `Grid`/`GridItem`（npm `0.1.13`）。未导出则不适用，禁止虚构 import。不把 `className="grid"` 写进绊线。一维工具带仍 Flex。
+- 2026-09-10：新增 **C10**：详情指标卡不得只重复本页已有字段。由衍生仓详情侧栏进度卡（数字与阶段列表重复、subtitle 抄行业）漏检反哺。
+- 2026-09-10：新增 **H7**：状态胶囊必须能读出「谁的状态」。由衍生仓详情页头下孤飘「进行中」漏检反哺。H6「状态放正文」被执行成无 label 的裸徽章，V6 过关不能代替本条。
+- 2026-09-10：L8 口径补正：描述 / History / 文件 / 阶段列表必须用官方 Panel 卡；禁止把「表不准套卡」理解成正文列表也裸铺，禁止用整页宽进度条撑面积。
 - 2026-09-10：L4 去掉「PageHeader 详情」说法（详情对照 A/B，不是壳顶栏）。`accounts/[id]` 表外套白卡列入样板债，L8 新代码不得照抄。
 - 2026-09-10：审计改为 **由外到内四层**（skill）再勾清单。由衍生仓详情「用了 DataTable 却套白卡 / 假进度卡 / 手搓流程胶囊」漏检反哺。新增 **L8**；L7 明确覆盖详情嵌套表。H1-B 以 npm `≥0.1.12` 的 `variant` API 为标准，`≤0.1.11` 仍认 legacy。
 - 2026-08-21（**已废止**）：曾写「业务页禁用 PageTitleToolbar、只许 h1 + Breadcrumbs」。2026-09-02 改为按 Forge 组件/token/内容区审，PageTitleToolbar 合法。
