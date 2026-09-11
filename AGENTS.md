@@ -17,7 +17,7 @@ Coding Agent 是第一开发界面：skills 拆开后端与页面，双样板 + 
 8. **`AUTH_MODE=demo` 只绕过登录用户库，不提供业务持久化。** 任何 CRUD（accounts/新模块）都需要 `DATABASE_URL` + `pnpm db:push`。不要写「无 Postgres 也能做完整业务 CRUD」。  
 9. **后端与页面分开做**：先 module（数据+API），再 page（UI）。不要一条指令无脑抄 accounts 全套且写死详情形态。  
 10. 详情 **无全局默认**：重 → `accounts` 全页；轻 → 官方列表 view dialog + 本仓 `components/ui/modal.tsx` + `?id=`（`/ref/detail-modal`）；拿不准问用户。不要指向已删除的 approvals。  
-11. 列表筛选 **一行** `ButtonGroup` + 搜索；禁止两行 pills。  
+11. 列表筛选/搜索 **一条工具带**（Starter：`ButtonGroup`+`TextField`；官方：`Toolbar`+`ToolbarSearchInput`）；禁止两行 pills。页头可用 `PageTitleToolbar`，不要写死只能 h1。  
 12. **`DataTable` 的 `sortable` 只画排序 UI，不会自动排序。** 未实现点击排序逻辑时 **禁止** 设 `sortable: true`（假按钮）。  
 13. `ConfirmationDialog` 只是内容卡：必须用本仓 `components/ui/modal.tsx`（或等价宿主）包一层；对齐 `accounts` 删除确认。  
 14. 侧栏/摘要卡禁止塞「返回列表」；`hideHeader: true` 时壳 `onBack` 不渲染。  
@@ -26,7 +26,6 @@ Coding Agent 是第一开发界面：skills 拆开后端与页面，双样板 + 
 17. 交付：`pnpm check`（typecheck + 规范绊线）；改 UI 后 **浏览器点主路径**（禁止只 curl）。
 18. **任何业务页面新建/修改完成后，必须执行完整规范审计**：按 `.agents/skills/forge-starter-audit/SKILL.md` 四步流程，对照 `docs/audit-checklist.md` 逐条核查并修复。绊线（`pnpm check`）通过 ≠ 合规，审计不可省略——无论代码由谁、用什么流程写出。
 19. **语义状态用 Kit `StatusBadge`（默认 soft）**：浅底细边、语义色（绿/黄/红/灰）。禁止 `variant="solid"`、`Label`、手搓 pill、本仓 `StatusText`。分类/角色/标签用 `CellText`，不要彩虹胶囊。一张表最多一列状态胶囊。
-
 20. **表格详情入口放在名称/标题列的数据上**：点击名称打开所选的全页详情或详情弹窗，支持键盘操作，并保留筛选上下文。不要另设箭头或眼睛图标作为重复的“查看详情”操作。操作列仅放编辑、删除等实际业务动作；没有这些动作就省略整列。`DataTable` 不会自动生成操作列；可选 `CellLink` 带箭头，不作为普通名称详情入口的默认样式。
 
 ## Forge UI 组件库（必读）
