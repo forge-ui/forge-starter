@@ -27,7 +27,6 @@ export type AppAuthMode = "none" | "passthrough" | "oidc" | "platform";
 export const APP_MODULE_IDS = [
   "dashboard",
   "accounts",
-  "approvals",
   "roles",
   "menus",
   "permissions",
@@ -110,7 +109,6 @@ export const APP_MODULE_META: Record<
 > = {
   dashboard: { label: "工作台", href: "/dashboard/" },
   accounts: { label: "账号管理", href: "/accounts/" },
-  approvals: { label: "审批中心", href: "/approvals/" },
   roles: { label: "角色", href: "/roles/" },
   menus: { label: "菜单", href: "/menus/" },
   permissions: { label: "权限", href: "/permissions/" },

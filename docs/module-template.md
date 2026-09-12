@@ -3,13 +3,13 @@
 **后端切片**与 **页面切片**分开做。  
 Skill：`forge-starter-new-module` → `forge-starter-new-page`。
 
-## 双样板（无默认）
+## 样板（无默认）
 
 | 样板 | UI | 适合 |
 |------|-----|------|
 | `accounts` | 列表 + 表单弹窗 + **全页详情** | 重内容、档案、多区块 |
-| `approvals` | 列表 + 表单弹窗 + **详情弹窗** | 字段少、处理完回列表 |
 
+轻详情（字段少、看完回列表）**暂无第二业务样板**，对照 `/ref/detail-modal` + 本仓 `Modal` + `?id=`。  
 选型：用户指定 → 听用户；否则按内容；拿不准 → 问。理由写进交付说明。
 
 ## A. 后端切片（new-module）
@@ -43,7 +43,7 @@ config/site.ts                    # hideHeader: true（页头，不是侧栏）
 默认应用种子勾齐新 id。`rbac_menus` 可选，只写目录不进 `APP_MODULE_IDS` 侧栏仍看不见。  
 加菜单后须清 Local Storage **`forge-starter:app-registry`**（或种子默认勾齐）。
 
-### 详情弹窗（抄 `approvals` / `/ref/detail-modal`，宿主用本仓 Modal）
+### 详情弹窗（抄 `/ref/detail-modal`，宿主用本仓 Modal；暂无第二业务样板）
 
 ```text
 components/<resource>-detail-dialog.tsx

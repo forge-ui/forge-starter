@@ -127,24 +127,6 @@ export const rbacMenus = pgTable(
   (table) => [uniqueIndex("rbac_menus_code_uidx").on(table.code)],
 );
 
-/** OA approval requests (single-step light-template workflow). */
-export const approvalRequests = pgTable("approval_requests", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  type: text("type").notNull(),
-  title: text("title").notNull(),
-  status: text("status").notNull().default("pending"),
-  applicantName: text("applicant_name").notNull(),
-  applicantUsername: text("applicant_username").notNull(),
-  applicantEmail: text("applicant_email").notNull().default(""),
-  formData: text("form_data").notNull().default("{}"),
-  approverName: text("approver_name"),
-  approverUsername: text("approver_username"),
-  approverComment: text("approver_comment").notNull().default(""),
-  decidedAt: timestamp("decided_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-});
-
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type AdminAccountRow = typeof adminAccounts.$inferSelect;
@@ -152,5 +134,3 @@ export type NewAdminAccountRow = typeof adminAccounts.$inferInsert;
 export type RbacRoleRow = typeof rbacRoles.$inferSelect;
 export type RbacPermissionRow = typeof rbacPermissions.$inferSelect;
 export type RbacMenuRow = typeof rbacMenus.$inferSelect;
-export type ApprovalRequestRow = typeof approvalRequests.$inferSelect;
-export type NewApprovalRequestRow = typeof approvalRequests.$inferInsert;

@@ -21,9 +21,6 @@ const SPECS: Omit<SeedPermissionSpec, "code">[] = [
   { resource: "accounts", action: "create", name: "新建账号", description: "创建业务账号" },
   { resource: "accounts", action: "update", name: "编辑账号", description: "修改业务账号" },
   { resource: "accounts", action: "delete", name: "删除账号", description: "删除业务账号" },
-  { resource: "approvals", action: "read", name: "查看审批", description: "浏览审批列表与详情" },
-  { resource: "approvals", action: "create", name: "发起审批", description: "提交审批申请" },
-  { resource: "approvals", action: "update", name: "处理审批", description: "通过、驳回或撤销审批" },
   { resource: "settings", action: "read", name: "查看应用", description: "打开应用管理" },
   { resource: "settings", action: "update", name: "配置应用", description: "新建或编辑内部/外部应用" },
   { resource: "roles", action: "read", name: "查看角色", description: "浏览角色与授权" },
@@ -55,11 +52,10 @@ export const SEED_ROLES: SeedRoleSpec[] = [
   {
     name: "运营",
     code: "operator",
-    description: "账号、审批与应用日常操作，不含 RBAC 写权限",
+    description: "账号与应用日常操作，不含 RBAC 写权限",
     grant: (code) =>
       code === "dashboard:read"
       || code.startsWith("accounts:")
-      || code.startsWith("approvals:")
       || code === "settings:read"
       || code === "settings:update",
   },

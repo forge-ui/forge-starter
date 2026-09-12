@@ -110,7 +110,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         href: "/dashboard/",
         openMode: "same_tab" as const,
         authMode: "platform" as const,
-        modules: ["dashboard", "accounts", "approvals", "roles", "menus", "permissions", "settings"],
+        modules: ["dashboard", "accounts", "roles", "menus", "permissions", "settings"],
         isCurrentProduct: true,
       }
     );

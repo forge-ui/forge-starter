@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  DocumentAddBoldDuotone,
   HamburgerMenuBoldDuotone,
   HomeSmileBoldDuotone,
   ShieldKeyholeBoldDuotone,
@@ -28,11 +27,6 @@ const MODULE_MENU: Record<AppModuleId, AppLayoutMenuItem> = {
     icon: <UsersGroupTwoRoundedBoldDuotone size={20} />,
     label: "账号管理",
     href: "/accounts/",
-  },
-  approvals: {
-    icon: <DocumentAddBoldDuotone size={20} />,
-    label: "审批中心",
-    href: "/approvals/",
   },
   roles: {
     icon: <ShieldUserBoldDuotone size={20} />,

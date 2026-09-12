@@ -43,7 +43,7 @@ Compose 默认库与 `.env.example` 一致：`postgresql://forge:forge@127.0.0.1
 | 角色码 | 演示登录用户名（及别名） | 侧栏可见 | 写操作 |
 |--------|--------------------------|----------|--------|
 | `super_admin` | `admin` / `super_admin` / `管理员`；**任意未识别用户名** | 全部模块 | 全部 |
-| `operator` | `operator` / `运营` | 工作台、账号、审批、应用 | 账号 / 审批可写；无 RBAC 目录 |
+| `operator` | `operator` / `运营` | 工作台、账号、应用 | 账号可写；无 RBAC 目录 |
 | `auditor` | `auditor` / `审计` | 全部模块 | 只读（无发起/通过/改配置） |
 | `readonly` | `readonly` / `只读` | 工作台、账号 | 无 |
 
@@ -54,7 +54,7 @@ Compose 默认库与 `.env.example` 一致：`postgresql://forge:forge@127.0.0.1
 - 库里没有该角色、或读库失败 → 回退该码的种子授权；未知码回退超级管理员。
 - 停用角色 → 侧栏为空、权限为空。
 
-API 一律先 `requireSession`（未登录 401）。账号 / 审批 / 角色 / 菜单 / 权限再加 `requirePermission`（无权限 403）。无 `:read` 的模块 store 不预拉，避免工作台刷 403。
+API 一律先 `requireSession`（未登录 401）。账号 / 角色 / 菜单 / 权限再加 `requirePermission`（无权限 403）。无 `:read` 的模块 store 不预拉，避免工作台刷 403。
 
 `demo` **只**绕过登录用户库，**不**提供业务表内存存储。账号管理等 CRUD 没有 Postgres 跑不起来。
 
@@ -98,11 +98,11 @@ API 一律先 `requireSession`（未登录 401）。账号 / 审批 / 角色 / �
 ```text
 app/
   (auth)/            登录 · 注册 · 找回、重置密码
-  (app)/             工作台 · 账号 · 审批 · 角色 · 菜单 · 权限 · 设置 · ref/*
-  api/               auth · accounts · approvals · roles · menus · permissions
+  (app)/             工作台 · 账号 · 角色 · 菜单 · 权限 · 设置 · ref/*
+  api/               auth · accounts · roles · menus · permissions
 components/          app-shell · *-store · *-dialog · ui/modal
 config/              site · menu · apps
-lib/                 auth · db · accounts · approvals · roles · menus · permissions · rbac · apps · mail · reference
+lib/                 auth · db · accounts · roles · menus · permissions · rbac · apps · mail · reference
 docs/                产品说明 · 工作流 · 安装环境 · 组件选型
 .agents/skills/      quick-start · new-module · new-page · audit
 AGENTS.md

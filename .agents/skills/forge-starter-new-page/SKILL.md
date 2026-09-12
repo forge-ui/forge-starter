@@ -3,7 +3,8 @@ name: forge-starter-new-page
 description: >
   Add admin UI only in Forge Starter: list, form modal, detail (modal or full
   page), menu entry. Chooses layout by cloning accounts (heavy) or
-  /ref/detail-modal + Modal + ?id= (light). Requires API/store already
+  /ref/detail-modal + Modal + ?id= (light; no second business template).
+  Requires API/store already
   present or created via new-module first.
   Use for dashboard pages or finishing a resource after new-module.
 ---
@@ -55,7 +56,7 @@ description: >
 | collection 卡片 | `/ref/list-cards` | — |
 | form-modal | `/ref/form-modal` | *-form-dialog |
 | form-page 整页 | `/ref/form-page`（CRM leads/new） | 字段极多时 |
-| detail-modal | `/ref/detail-modal` | **approvals**（轻样板）+ `Modal` + `?id=` |
+| detail-modal | `/ref/detail-modal` | 暂无第二业务样板（`Modal` + `?id=`） |
 | detail 业务对象 | `/ref/detail` | accounts/[id] |
 | person CRM 人物 | `/ref/person`（john-bushmill） | — |
 | profile 项目成员 | `/ref/profile`（members/[id]） | — |
@@ -86,7 +87,7 @@ description: >
 
 ```text
 用户指定？ → 听用户
-字段少、看完回列表？ → approvals（轻样板）+ `/ref/detail-modal` + Modal + `?id=`
+字段少、看完回列表？ → `/ref/detail-modal` + Modal + `?id=`（暂无第二业务样板）
 多区块、Tab、档案？ → accounts（全页）
 拿不准？ → 问用户
 ```
@@ -119,7 +120,7 @@ description: >
 
 ### 详情 · 弹窗
 
-- 抄 **`approvals`**（业务轻样板）或 `/ref/detail-modal`，宿主用 `components/ui/modal.tsx`  
+- 抄 `/ref/detail-modal`，宿主用 `components/ui/modal.tsx`（暂无第二业务样板）  
 - 列表行点击打开；保留 `?id=`；`[id]/page` redirect → `?id=`  
 
 ### 详情 · 全页
@@ -161,6 +162,6 @@ pnpm check   # typecheck + 规范绊线
 
 - 路由、菜单 label  
 - 详情形态 + 理由  
-- 对照样板：accounts（重）或 approvals（轻）  
+- 对照样板：accounts（重）或 `/ref/detail-modal`（轻，暂无第二业务样板）  
 - 菜单三处：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用是否勾齐新 id；是否已清 `forge-starter:app-registry`  
 - 无权限直链是否 `replace` 回工作台（不要只藏侧栏）  

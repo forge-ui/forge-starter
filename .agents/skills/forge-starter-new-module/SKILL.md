@@ -92,4 +92,4 @@ pnpm db:push   # 业务表必须 Postgres；demo 登录模式不能代替 DATABA
 - **下一步**：`forge-starter-new-page`（store + 列表/表单/详情 UI，并挂应用模块）  
   - 菜单三处：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用种子勾齐新 id  
   - 重详情 → 对照 `accounts`  
-  - 轻详情 → 对照 `approvals` / `/ref/detail-modal` + `components/ui/modal.tsx`  
+  - 轻详情 → 对照 `/ref/detail-modal` + `components/ui/modal.tsx`（暂无第二业务样板）  

@@ -1,3 +1,4 @@
+import { eq, inArray } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { rbacMenus, rbacPermissions, rbacRolePermissions, rbacRoles } from "@/lib/db/schema";
 import { APP_MODULE_IDS, APP_MODULE_META } from "@/config/apps";
@@ -85,7 +86,19 @@ async function ensureMenus() {
   );
 }
 
+async function removeRetiredApprovals() {
+  const db = getDb();
+  const retired = await db.select().from(rbacPermissions).where(eq(rbacPermissions.resource, "approvals"));
+  if (retired.length) {
+    const ids = retired.map((row) => row.id);
+    await db.delete(rbacRolePermissions).where(inArray(rbacRolePermissions.permissionId, ids));
+    await db.delete(rbacPermissions).where(eq(rbacPermissions.resource, "approvals"));
+  }
+  await db.delete(rbacMenus).where(eq(rbacMenus.code, "approvals"));
+}
+
 async function seedIfNeeded() {
+  await removeRetiredApprovals();
   await ensurePermissions();
   await ensureRoles();
   await ensureMenus();
