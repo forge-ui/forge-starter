@@ -9,3 +9,17 @@ body {
   background: #ffffff;
   color: #000000;
 }
+
+/*
+ * Kit StatusBadge (0.1.11) wraps the pill in a block flex + justify-center shell.
+ * In a DataTable <td> that shell stretches with the column (w-full tables grow
+ * compact width hints), so the pill is centered while headers stay text-left.
+ * The same shell is used by CellStatusDot (gap-2). Shrink-wrap to the pill so
+ * header and cell share a start axis. Do not target gap-1 (CellProgressValue)
+ * or gap-3 (CellKebabMenu).
+ */
+[data-forge-table-content] td > .h-10.flex.justify-center.items-center.gap-2 {
+  justify-content: flex-start;
+  width: max-content;
+  max-width: 100%;
+}

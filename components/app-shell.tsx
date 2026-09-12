@@ -14,6 +14,7 @@ import {
   homePathForApp,
   type AppEntry,
 } from "@/config/apps";
+import { getDefaultAppRegistry } from "@/lib/apps/defaults";
 import {
   loadActiveAppId,
   loadAppRegistry,
@@ -81,7 +82,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const shell = useMemo(() => shellForPath(pathname), [pathname]);
   const [profile, setProfile] = useState<AppLayoutProfile>(defaultProfile);
-  const [apps, setApps] = useState<AppEntry[]>([]);
+  const [apps, setApps] = useState<AppEntry[]>(() => getDefaultAppRegistry());
   const [activeAppId, setActiveAppId] = useState(DEFAULT_APP_ID);
   const [accountDialog, setAccountDialog] = useState<SettingsAccountDialogKind | null>(null);
 
@@ -113,7 +114,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         href: "/dashboard/",
         openMode: "same_tab" as const,
         authMode: "platform" as const,
-        modules: ["dashboard", "accounts", "settings"],
+        modules: ["dashboard", "accounts", "roles", "menus", "permissions", "settings"],
         isCurrentProduct: true,
       }
     );

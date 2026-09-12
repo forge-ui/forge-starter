@@ -4,42 +4,64 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, IconButton, StyledLink, TextField } from "@forge-ui-official/core";
 import { EyeLinear, EyeClosedLinear } from "solar-icon-set";
+import { apiFetch, parseApiJson } from "@/lib/api/browser";
 import type { AuthMode } from "@/lib/auth/config";
+import { loginAction } from "./actions";
 
-export function LoginForm({ mode }: { mode: AuthMode }) {
+export function LoginForm({
+  mode,
+  initialError = null,
+}: {
+  mode: AuthMode;
+  initialError?: string | null;
+}) {
   const router = useRouter();
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError);
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
+    const fd = new FormData(form);
+    const nextLogin = String(fd.get("login") ?? login).trim();
+    const nextPassword = String(fd.get("password") ?? password);
+    if (!nextLogin || !nextPassword) {
+      setError("请输入用户名或邮箱和密码");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/auth/login/", {
+      const res = await apiFetch("/api/auth/login/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ login, password }),
+        body: JSON.stringify({ login: nextLogin, password: nextPassword }),
       });
-      const data = await res.json();
+      const data = await parseApiJson<{ ok?: boolean; error?: string; redirectTo?: string }>(res);
       if (!res.ok || !data.ok) {
         setError(data.error ?? "登录失败");
         return;
       }
       router.replace(data.redirectTo ?? "/dashboard/");
       router.refresh();
-    } catch {
-      setError("网络错误，请重试");
+    } catch (err) {
+      const aborted = err instanceof DOMException && err.name === "AbortError";
+      setError(aborted ? "登录超时，请重试" : "网络错误，请重试");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex w-full max-w-[400px] flex-col gap-8">
+    <form
+      action={loginAction}
+      onSubmit={handleSubmit}
+      className="flex w-full max-w-[400px] flex-col gap-8"
+    >
       <header className="flex flex-col gap-3 text-center">
         <h1 className="font-display text-2xl font-semibold tracking-fg text-fg-black">
           欢迎回来
@@ -53,6 +75,7 @@ export function LoginForm({ mode }: { mode: AuthMode }) {
 
       <div className="flex flex-col gap-4">
         <TextField
+          name="login"
           label="用户名或邮箱"
           placeholder="输入用户名或邮箱..."
           value={login}
@@ -61,6 +84,7 @@ export function LoginForm({ mode }: { mode: AuthMode }) {
         />
 
         <TextField
+          name="password"
           label="密码"
           type={showPassword ? "text" : "password"}
           placeholder="输入密码..."
@@ -80,7 +104,6 @@ export function LoginForm({ mode }: { mode: AuthMode }) {
               size="sm"
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? "隐藏密码" : "显示密码"}
-              className="!h-5 !w-5 !p-0"
             >
               {showPassword ? (
                 <EyeLinear size={20} color="var(--fg-grey-700)" />

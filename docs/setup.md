@@ -77,11 +77,11 @@ Compose 默认库与 `.env.example` 一致：`postgresql://forge:forge@127.0.0.1
 ```text
 app/
   (auth)/            登录 · 注册 · 找回、重置密码
-  (app)/             工作台 · 账号 · 设置 · ref/*
-  api/               auth · accounts
+  (app)/             工作台 · 账号 · 角色 · 菜单 · 权限 · 设置 · ref/*
+  api/               auth · accounts · roles · menus · permissions
 components/          app-shell · *-store · *-dialog · ui/modal
 config/              site · menu · apps
-lib/                 auth · db · accounts · apps · mail · reference
+lib/                 auth · db · accounts · roles · menus · permissions · rbac · apps · mail · reference
 docs/                产品说明 · 工作流 · 安装环境 · 组件选型
 .agents/skills/      quick-start · new-module · new-page · audit
 AGENTS.md

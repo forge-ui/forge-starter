@@ -72,14 +72,15 @@ Skills 只维护 **`.agents/skills/`**。
 app/(auth)/              登录注册找回
 app/(app)/dashboard      工作台
 app/(app)/accounts       ★ 重样板：列表 + 表单弹窗 + 全页详情
+app/(app)/roles · menus · permissions  RBAC 演示：列表 + 表单弹窗 + 详情弹窗
 app/(app)/ref/**         ★ AI 参考页（真实路由，不进菜单；生产默认关）
 app/(app)/settings       apps；资料/改密/系统设置走头像菜单弹窗
-app/api/auth|accounts
+app/api/auth|accounts|roles|menus|permissions
 components/app-shell.tsx
 components/*-form-dialog.tsx | *-store.tsx
 components/ui/modal.tsx
 config/site.ts menu.tsx apps.ts
-lib/auth lib/db lib/accounts lib/reference
+lib/auth lib/db lib/accounts lib/roles lib/menus lib/permissions lib/rbac lib/reference
 docs/product.md agent-native.md setup.md module-template.md page-roles.md reference-pages.md forge-components.md
 ```
 

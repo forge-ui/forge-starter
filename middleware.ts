@@ -126,5 +126,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|images/|.*\\..*).*)"],
+  // Exclude all /_next/* (static, image, AND turbopack/webpack HMR).
+  // Matching /_next/webpack-hmr wraps the WebSocket upgrade as HTTP and
+  // prevents client hydration — login, stores, and localStorage never run.
+  matcher: ["/((?!_next/|favicon.ico|images/|.*\\..*).*)"],
 };

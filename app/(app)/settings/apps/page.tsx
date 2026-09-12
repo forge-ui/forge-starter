@@ -31,6 +31,7 @@ import {
   type AppEntry,
   type AppKind,
 } from "@/config/apps";
+import { getDefaultAppRegistry } from "@/lib/apps/defaults";
 import { loadAppRegistry, saveAppRegistry } from "@/lib/apps/registry";
 import { AppFormDialog } from "@/components/app-form-dialog";
 
@@ -47,7 +48,7 @@ function kindLabel(kind: AppKind) {
 }
 
 export default function SettingsAppsPage() {
-  const [apps, setApps] = useState<AppEntry[]>([]);
+  const [apps, setApps] = useState<AppEntry[]>(() => getDefaultAppRegistry());
   const [search, setSearch] = useState("");
   const [filterIndex, setFilterIndex] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
