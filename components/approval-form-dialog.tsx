@@ -51,6 +51,7 @@ export function ApprovalFormDialog({ open, onClose, onCreated }: Props) {
   const [type, setType] = useState<ApprovalType>("leave");
   const [title, setTitle] = useState("");
   const [fields, setFields] = useState<Record<string, string>>({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -58,11 +59,40 @@ export function ApprovalFormDialog({ open, onClose, onCreated }: Props) {
     setType("leave");
     setTitle("");
     setFields({});
+    setFieldErrors({});
     setSaving(false);
   }, [open]);
 
   function setField(key: string, value: string) {
     setFields((prev) => ({ ...prev, [key]: value }));
+    setFieldErrors((prev) => ({ ...prev, [key]: "" }));
+  }
+
+  function validate(form: ApprovalFormPayload): Record<string, string> {
+    const errors: Record<string, string> = {};
+    const d = form.data as Record<string, string>;
+    if (type === "leave") {
+      if (!d.leaveType?.trim()) errors.leaveType = "请选择请假类型";
+      if (!d.startDate?.trim()) errors.startDate = "请填写开始日期";
+      if (!d.endDate?.trim()) errors.endDate = "请填写结束日期";
+      if (!d.reason?.trim()) errors.reason = "请填写请假事由";
+    } else if (type === "expense") {
+      if (!d.amount?.trim()) errors.amount = "请填写报销金额";
+      if (!d.category?.trim()) errors.category = "请选择费用类别";
+      if (!d.description?.trim()) errors.description = "请填写费用说明";
+    } else if (type === "purchase") {
+      if (!d.itemName?.trim()) errors.itemName = "请填写采购物品";
+      if (!d.quantity?.trim()) errors.quantity = "请填写数量";
+      if (!d.budget?.trim()) errors.budget = "请填写预算金额";
+    } else if (type === "overtime") {
+      if (!d.workDate?.trim()) errors.workDate = "请填写加班日期";
+      if (!d.hours?.trim()) errors.hours = "请填写加班时长";
+      if (!d.reason?.trim()) errors.reason = "请填写加班原因";
+    } else {
+      if (!d.summary?.trim()) errors.summary = "请填写申请摘要";
+      if (!d.detail?.trim()) errors.detail = "请填写详细说明";
+    }
+    return errors;
   }
 
   function buildForm(): ApprovalFormPayload {
@@ -127,9 +157,15 @@ export function ApprovalFormDialog({ open, onClose, onCreated }: Props) {
   }
 
   async function submit() {
+    const form = buildForm();
+    const errors = validate(form);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
     setSaving(true);
     try {
-      const item = await create({ type, title, form: buildForm() });
+      const item = await create({ type, title, form });
       toast.success("审批已提交");
       setSaving(false);
       onClose();
@@ -153,6 +189,7 @@ export function ApprovalFormDialog({ open, onClose, onCreated }: Props) {
             onChange={(v) => {
               setType(v as ApprovalType);
               setFields({});
+              setFieldErrors({});
             }}
           />
           <TextField
@@ -173,12 +210,17 @@ export function ApprovalFormDialog({ open, onClose, onCreated }: Props) {
                 value={fields.leaveType ?? ""}
                 onChange={(v) => setField("leaveType", v)}
               />
+              {fieldErrors.leaveType ? (
+                <p className="text-sm text-fg-red">{fieldErrors.leaveType}</p>
+              ) : null}
               <TextField
                 color={siteConfig.accent}
                 label="开始日期"
                 value={fields.startDate ?? ""}
                 onChange={(v) => setField("startDate", v)}
                 placeholder="YYYY-MM-DD"
+                state={fieldErrors.startDate ? "error" : undefined}
+                errorMessage={fieldErrors.startDate}
               />
               <TextField
                 color={siteConfig.accent}
@@ -186,6 +228,8 @@ export function ApprovalFormDialog({ open, onClose, onCreated }: Props) {
                 value={fields.endDate ?? ""}
                 onChange={(v) => setField("endDate", v)}
                 placeholder="YYYY-MM-DD"
+                state={fieldErrors.endDate ? "error" : undefined}
+                errorMessage={fieldErrors.endDate}
               />
               <TextField
                 color={siteConfig.accent}
@@ -200,6 +244,8 @@ export function ApprovalFormDialog({ open, onClose, onCreated }: Props) {
                 rows={3}
                 value={fields.reason ?? ""}
                 onChange={(v) => setField("reason", v)}
+                state={fieldErrors.reason ? "error" : undefined}
+                errorMessage={fieldErrors.reason}
               />
             </>
           ) : null}
@@ -212,6 +258,8 @@ export function ApprovalFormDialog({ open, onClose, onCreated }: Props) {
                 value={fields.amount ?? ""}
                 onChange={(v) => setField("amount", v)}
                 placeholder="如 320.00"
+                state={fieldErrors.amount ? "error" : undefined}
+                errorMessage={fieldErrors.amount}
               />
               <SelectOption
                 color={siteConfig.accent}
@@ -221,6 +269,9 @@ export function ApprovalFormDialog({ open, onClose, onCreated }: Props) {
                 value={fields.category ?? ""}
                 onChange={(v) => setField("category", v)}
               />
+              {fieldErrors.category ? (
+                <p className="text-sm text-fg-red">{fieldErrors.category}</p>
+              ) : null}
               <TextField
                 color={siteConfig.accent}
                 label="发生日期"
@@ -234,6 +285,8 @@ export function ApprovalFormDialog({ open, onClose, onCreated }: Props) {
                 rows={3}
                 value={fields.description ?? ""}
                 onChange={(v) => setField("description", v)}
+                state={fieldErrors.description ? "error" : undefined}
+                errorMessage={fieldErrors.description}
               />
             </>
           ) : null}
@@ -245,18 +298,24 @@ export function ApprovalFormDialog({ open, onClose, onCreated }: Props) {
                 label="物品名称"
                 value={fields.itemName ?? ""}
                 onChange={(v) => setField("itemName", v)}
+                state={fieldErrors.itemName ? "error" : undefined}
+                errorMessage={fieldErrors.itemName}
               />
               <TextField
                 color={siteConfig.accent}
                 label="数量"
                 value={fields.quantity ?? ""}
                 onChange={(v) => setField("quantity", v)}
+                state={fieldErrors.quantity ? "error" : undefined}
+                errorMessage={fieldErrors.quantity}
               />
               <TextField
                 color={siteConfig.accent}
                 label="预算（元）"
                 value={fields.budget ?? ""}
                 onChange={(v) => setField("budget", v)}
+                state={fieldErrors.budget ? "error" : undefined}
+                errorMessage={fieldErrors.budget}
               />
               <TextField
                 color={siteConfig.accent}
@@ -282,12 +341,16 @@ export function ApprovalFormDialog({ open, onClose, onCreated }: Props) {
                 value={fields.workDate ?? ""}
                 onChange={(v) => setField("workDate", v)}
                 placeholder="YYYY-MM-DD"
+                state={fieldErrors.workDate ? "error" : undefined}
+                errorMessage={fieldErrors.workDate}
               />
               <TextField
                 color={siteConfig.accent}
                 label="时长（小时）"
                 value={fields.hours ?? ""}
                 onChange={(v) => setField("hours", v)}
+                state={fieldErrors.hours ? "error" : undefined}
+                errorMessage={fieldErrors.hours}
               />
               <TextArea
                 color={siteConfig.accent}
@@ -295,6 +358,8 @@ export function ApprovalFormDialog({ open, onClose, onCreated }: Props) {
                 rows={3}
                 value={fields.reason ?? ""}
                 onChange={(v) => setField("reason", v)}
+                state={fieldErrors.reason ? "error" : undefined}
+                errorMessage={fieldErrors.reason}
               />
             </>
           ) : null}
@@ -306,6 +371,8 @@ export function ApprovalFormDialog({ open, onClose, onCreated }: Props) {
                 label="摘要"
                 value={fields.summary ?? ""}
                 onChange={(v) => setField("summary", v)}
+                state={fieldErrors.summary ? "error" : undefined}
+                errorMessage={fieldErrors.summary}
               />
               <SelectOption
                 color={siteConfig.accent}
@@ -321,6 +388,8 @@ export function ApprovalFormDialog({ open, onClose, onCreated }: Props) {
                 rows={4}
                 value={fields.detail ?? ""}
                 onChange={(v) => setField("detail", v)}
+                state={fieldErrors.detail ? "error" : undefined}
+                errorMessage={fieldErrors.detail}
               />
             </>
           ) : null}

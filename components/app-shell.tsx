@@ -8,6 +8,7 @@ import {
   type Team,
 } from "@forge-ui-official/core";
 import { defaultProfile, menuItemsForApp } from "@/config/menu";
+import { useAccess } from "@/components/access-store";
 import {
   APPS_UPDATED_EVENT,
   DEFAULT_APP_ID,
@@ -32,18 +33,6 @@ import {
   SettingsAccountDialog,
   type SettingsAccountDialogKind,
 } from "@/components/settings-account-dialog";
-
-type MeResponse = {
-  ok: boolean;
-  user: null | {
-    id: string;
-    username: string;
-    email: string;
-    displayName: string;
-  };
-  role?: { code: string; name: string };
-  allowedModules?: AppModuleId[];
-};
 
 function profileFromUser(
   user: {
@@ -87,10 +76,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const shell = useMemo(() => shellForPath(pathname), [pathname]);
+  const { user, roleName, allowedModules, refresh: refreshAccess } = useAccess();
   const [profile, setProfile] = useState<AppLayoutProfile>(defaultProfile);
   const [apps, setApps] = useState<AppEntry[]>(() => getDefaultAppRegistry());
   const [activeAppId, setActiveAppId] = useState(DEFAULT_APP_ID);
-  const [allowedModules, setAllowedModules] = useState<AppModuleId[] | null>(null);
   const [accountDialog, setAccountDialog] = useState<SettingsAccountDialogKind | null>(null);
 
   const syncRegistry = useCallback(() => {
@@ -152,22 +141,11 @@ export function AppShell({ children }: { children: ReactNode }) {
     [router, allowedModules],
   );
 
-  const refreshProfile = useCallback(async () => {
-    try {
-      const res = await fetch("/api/auth/me/");
-      const data = (await res.json()) as MeResponse;
-      if (data?.user) {
-        setProfile(profileFromUser(data.user, data.role?.name));
-        setAllowedModules(data.allowedModules ?? []);
-      }
-    } catch {
-      // keep previous profile
-    }
-  }, []);
-
   useEffect(() => {
-    void refreshProfile();
-  }, [refreshProfile, pathname]);
+    if (user) {
+      setProfile(profileFromUser(user, roleName ?? undefined));
+    }
+  }, [user, roleName]);
 
   useEffect(() => {
     function onProfileUpdated(event: Event) {
@@ -182,11 +160,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           role: prev.role,
         }));
       }
-      void refreshProfile();
+      void refreshAccess();
     }
     window.addEventListener(PROFILE_UPDATED_EVENT, onProfileUpdated);
     return () => window.removeEventListener(PROFILE_UPDATED_EVENT, onProfileUpdated);
-  }, [refreshProfile]);
+  }, [refreshAccess]);
 
   const logout = useCallback(async () => {
     await fetch("/api/auth/logout/", { method: "POST" });

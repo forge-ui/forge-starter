@@ -11,6 +11,7 @@ import {
 } from "react";
 import { apiFetch, parseApiJson } from "@/lib/api/browser";
 import type { PermissionInput, PermissionRecord } from "@/lib/permissions/types";
+import { useAccess } from "@/components/access-store";
 import { RBAC_RESOURCES } from "@/lib/rbac/constants";
 
 type PermissionsStoreValue = {
@@ -33,6 +34,7 @@ type PermissionsResponse = {
 };
 
 export function PermissionsStoreProvider({ children }: { children: ReactNode }) {
+  const { ready, canRead } = useAccess();
   const [permissions, setPermissions] = useState<PermissionRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,8 +60,15 @@ export function PermissionsStoreProvider({ children }: { children: ReactNode }) 
   }, []);
 
   useEffect(() => {
+    if (!ready) return;
+    if (!canRead("permissions")) {
+      setPermissions([]);
+      setError(null);
+      setLoading(false);
+      return;
+    }
     void refresh();
-  }, [refresh]);
+  }, [ready, canRead, refresh]);
 
   const getById = useCallback(
     (id: string) => permissions.find((item) => item.id === id),

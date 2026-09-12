@@ -15,6 +15,7 @@ import type {
   ApprovalDecideInput,
   ApprovalRequest,
 } from "@/lib/approvals/types";
+import { useAccess } from "@/components/access-store";
 
 type ApprovalsStoreValue = {
   items: ApprovalRequest[];
@@ -38,6 +39,7 @@ type ApprovalsResponse = {
 };
 
 export function ApprovalsStoreProvider({ children }: { children: ReactNode }) {
+  const { ready, canRead } = useAccess();
   const [items, setItems] = useState<ApprovalRequest[]>([]);
   const [me, setMe] = useState("");
   const [loading, setLoading] = useState(true);
@@ -68,8 +70,15 @@ export function ApprovalsStoreProvider({ children }: { children: ReactNode }) {
   }, [scope]);
 
   useEffect(() => {
+    if (!ready) return;
+    if (!canRead("approvals")) {
+      setItems([]);
+      setError(null);
+      setLoading(false);
+      return;
+    }
     void refresh("all");
-  }, [refresh]);
+  }, [ready, canRead, refresh]);
 
   const getById = useCallback(
     (id: string) => items.find((item) => item.id === id),
