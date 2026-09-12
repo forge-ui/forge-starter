@@ -52,7 +52,7 @@ Coding Agent 是第一开发界面，专注 **Forge 管理后台**：skills 拆�
 
 用户指定听用户；否则按内容；拿不准就问。  
 禁止 skill 写死「默认全页」或「默认弹窗」。  
-文件地图：`docs/module-template.md`。新菜单必须进 `APP_MODULE_IDS` + `MODULE_MENU`，见 `AGENTS.md`。
+文件地图：`docs/module-template.md`。新菜单必须写**菜单三处**（`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`），默认应用种子勾齐新 id；加完清 `forge-starter:app-registry`。见 `AGENTS.md`。别只改 `menu.tsx`。
 
 ## 可运行样板
 

@@ -66,24 +66,19 @@ Skills 只维护 **`.agents/skills/`**。
 
 人类说「加 xxx 管理」→ 先 `new-module`，再 `new-page`，最后 **`forge-starter-audit`**（可同会话顺序执行）。
 
-## 新菜单必须登记（侧栏三层过滤）
+## 菜单三处（扩业务必做）
 
-侧栏 = **`APP_MODULE_IDS` ∩ 当前应用 `modules` ∩ 登录用户角色的 `:read`**。只改 `config/menu.tsx` **不会**出现在侧栏。
+新模块要进侧栏，必须同时改这三处：
 
-新模块进菜单时必须同时改：
+1. `config/apps.ts` → `APP_MODULE_IDS`  
+2. `config/apps.ts` → `APP_MODULE_META`  
+3. `config/menu.tsx` → `MODULE_MENU`（`BoldDuotone` `size={20}`）
 
-1. **`config/apps.ts`**：`APP_MODULE_IDS` + `APP_MODULE_META`（类型白名单 + 应用管理勾选源）。默认应用 `modules` 用 `[...APP_MODULE_IDS]`。
-2. **`config/menu.tsx`**：`MODULE_MENU`（icon `BoldDuotone` `size={20}` + href）。
-3. **`config/site.ts`**：`routeShells`（业务页 `hideHeader: true`）。
-4. **`lib/rbac/constants.ts`**：`RBAC_RESOURCES` + `RBAC_RESOURCE_META`（权限资源与模块 ID 对齐）。
-5. **`lib/rbac/defaults.ts`**：种子权限与各角色 `grant`（侧栏看 `{module}:read`）。
-6. **`rbac_menus` 目录**：`ensureRbacDefaults()` 会 **补插** 缺失的内置 `APP_MODULE_IDS` 行。自定义菜单 CRUD 行 **不会**进侧栏，除非同时完成 1–2。
+默认应用种子勾齐新 id（`modules: [...APP_MODULE_IDS]` 或把新 id 写进 `DEFAULT_APP_ENTRIES`）。  
+`rbac_menus` 可选，只是目录：不进 `APP_MODULE_IDS` 侧栏仍看不见。  
+加菜单后须清浏览器 Local Storage **`forge-starter:app-registry`**（或确认种子默认应用已勾齐），否则同事还是旧勾选。
 
-应用勾选在浏览器 `localStorage` 键 **`forge-starter:app-registry`**：
-
-- 只改 `menu.tsx`、不进 `APP_MODULE_IDS`：`asModules` 会丢掉未知 ID，应用管理也勾不到。
-- 当前产品 `accounts-admin` 会按代码种子刷新 `modules`；同事仍看不见时，清该 key 或在应用管理勾齐新模块。
-- 自己建的内部应用 **不会**自动勾新模块，必须手动勾选或清缓存后重种默认应用。
+侧栏实际可见 = 菜单三处 ∩ 当前应用勾选 ∩ 登录角色 `{module}:read`。
 
 ## 仓库地图
 
@@ -122,9 +117,10 @@ docs/product.md agent-native.md setup.md module-template.md page-roles.md refere
 
 ## 扩业务最短路径
 
-1. `new-module`：types + service + schema + `db:push` + API。  
-2. `new-page`：读 page-roles → 选全页（accounts）或轻弹窗（approvals / `/ref/detail-modal`）→ 列表/弹窗/详情 + **APP_MODULE_IDS + menu + 种子/目录**。  
-3. `pnpm typecheck` + 浏览器点通。  
+1. `new-module`：types + service + schema + `db:push` + API（**API 齐 ≠ 侧栏有**）。  
+2. `new-page`：读 page-roles → 选全页（accounts）或轻弹窗（approvals）→ 列表/弹窗/详情 + **菜单三处**（`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`），默认应用种子勾齐新 id。  
+3. 加菜单后清 Local Storage `forge-starter:app-registry`（或种子默认勾齐）。  
+4. `pnpm typecheck` + 浏览器从侧栏点通。  
 
 详见 `docs/module-template.md`。
 

@@ -12,7 +12,8 @@ description: >
 **service + API**，不写页面。
 
 地图：`docs/module-template.md` §A。  
-UI 下一步：`forge-starter-new-page`。
+**API 齐 ≠ 侧栏有。** 本步不挂应用模块。  
+UI 下一步：`forge-starter-new-page`（菜单三处）。
 
 ## When to use
 
@@ -60,15 +61,11 @@ app/api/<res>/[id]/route.ts     # GET one, PATCH/DELETE/POST actions
 ```
 
 - `requireSession()`，未登录 401  
-- 进侧栏的模块：`requirePermission("<res>", "read"|"create"|"update"|"delete")`（`lib/rbac/access.ts`），先 session 再角色权限；403 无权限  
+- 进侧栏的模块（new-page 挂上之后）：`requirePermission("<res>", "read"|"create"|"update"|"delete")`（`lib/rbac/access.ts`），先 session 再角色权限；403 无权限  
 - `jsonOk`、`jsonError`（`lib/auth/http.ts`）  
 - Zod 校 body  
 
-进侧栏时本步还要登记权限资源（页面菜单在 new-page）：
-
-- `lib/rbac/constants.ts`：`RBAC_RESOURCES` + `RBAC_RESOURCE_META`（资源码 = 模块 ID）
-- `lib/rbac/defaults.ts`：种子权限 `{res}:read|create|…` 与各角色 `grant`（侧栏可见看 `:read`）
-- **不要**只往 `rbac_menus` 插一行就当侧栏好了——目录不会渲染菜单
+本步 **不** 挂侧栏。权限资源可先登记到 `RBAC_RESOURCES` / `defaults.ts`，菜单三处留给 new-page。
 
 ### 4. store 归属
 
@@ -91,6 +88,8 @@ pnpm db:push   # 业务表必须 Postgres；demo 登录模式不能代替 DATABA
 告诉用户：
 
 - 表名、API 路径与方法  
-- **下一步**：`forge-starter-new-page`（含 store + 列表/表单/详情 UI）  
+- **API 齐 ≠ 侧栏有。** 本步没有挂应用模块。  
+- **下一步**：`forge-starter-new-page`（store + 列表/表单/详情 UI，并挂应用模块）  
+  - 菜单三处：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用种子勾齐新 id  
   - 重详情 → 对照 `accounts`  
-  - 轻详情 → 对照 `/ref/detail-modal` + `components/ui/modal.tsx`  
+  - 轻详情 → 对照 `approvals` / `/ref/detail-modal` + `components/ui/modal.tsx`  

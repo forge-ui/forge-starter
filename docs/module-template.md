@@ -25,6 +25,7 @@ components/<resource>-store.tsx   # 可选；列表页若 client fetch 需要
 
 - session 守卫、`jsonOk`/`jsonError`、Zod、中文错误  
 - **不**在此 skill 里规定详情全页或弹窗  
+- **API 齐 ≠ 侧栏有**；挂应用模块是 new-page 的菜单三处
 
 ## B. 页面切片（new-page）
 
@@ -33,13 +34,14 @@ components/<resource>-store.tsx   # 可选；列表页若 client fetch 需要
 ```text
 app/(app)/<resource>/page.tsx     # 列表（collection）
 components/<resource>-form-dialog.tsx
-config/apps.ts                    # APP_MODULE_IDS + APP_MODULE_META（必做）
-config/menu.tsx                   # MODULE_MENU
-config/site.ts                    # hideHeader: true
-lib/rbac/constants.ts + defaults.ts   # 资源 + 种子 :read
+# 菜单三处（缺一不可）
+config/apps.ts                    # 1 APP_MODULE_IDS  2 APP_MODULE_META
+config/menu.tsx                   # 3 MODULE_MENU
+config/site.ts                    # hideHeader: true（页头，不是侧栏）
 ```
 
-只改 `menu.tsx` 会跟应用勾选脱节。当前产品种子用 `[...APP_MODULE_IDS]`；同事浏览器 `forge-starter:app-registry` 若仍是旧勾选，清缓存或在应用管理勾齐。`rbac_menus` 是目录（种子补插内置 code），自定义行不进侧栏。
+默认应用种子勾齐新 id。`rbac_menus` 可选，只写目录不进 `APP_MODULE_IDS` 侧栏仍看不见。  
+加菜单后须清 Local Storage **`forge-starter:app-registry`**（或种子默认勾齐）。
 
 ### 详情弹窗（抄 `approvals` / `/ref/detail-modal`，宿主用本仓 Modal）
 
@@ -94,4 +96,6 @@ Modal 宿主：`components/ui/modal.tsx`。
 - [ ] 先有 API/service，再接页面（或同会话严格按此序）  
 - [ ] 详情形态有选择与理由  
 - [ ] 筛选单行  
-- [ ] typecheck + 浏览器主路径  
+- [ ] **菜单三处**：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用勾齐新 id  
+- [ ] 加菜单后已清 Local Storage `forge-starter:app-registry`（或种子默认勾齐）  
+- [ ] typecheck + 浏览器从侧栏点通  

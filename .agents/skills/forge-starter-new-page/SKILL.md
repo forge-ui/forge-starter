@@ -22,6 +22,7 @@ description: >
 ## 禁止
 
 - 在本 skill 里从零加 schema/service（应先 new-module）  
+- 只改 `config/menu.tsx` 就声称已挂侧栏（必须写菜单三处）  
 - 两行筛选 pills  
 - 侧栏塞「返回列表」  
 - 写死「默认全页详情」或「默认弹窗」  
@@ -101,13 +102,14 @@ description: >
 - 新建按钮 → form dialog  
 - 详情入口 → 名称/标题列的数据可点击，按已选详情形态打开全页或 `?id=` 弹窗；保留筛选上下文，支持键盘操作和可见焦点。对齐 accounts 的名称单元格，保持普通文字样式，不附加箭头。不要用带箭头的 `CellLink` 作为默认详情入口。
 - 操作列只放编辑、删除等真实业务动作；不要另放箭头/眼睛“查看详情”按钮。无其他动作时不生成操作列。
-- **菜单登记（缺一不可，只改 `menu.tsx` 不够）**  
-  1. `config/apps.ts`：`APP_MODULE_IDS` + `APP_MODULE_META`（应用勾选白名单）  
-  2. `config/menu.tsx`：`MODULE_MENU`（`BoldDuotone` `size={20}`）  
-  3. `config/site.ts`：`routeShells` + `hideHeader: true`  
-  4. `lib/rbac/constants.ts` + `lib/rbac/defaults.ts`：资源与种子 `:read`（侧栏按角色藏菜单）  
-  5. `rbac_menus`：种子会补插缺失的内置 `code`；**自定义目录行不会进侧栏**  
-  6. 应用登记在 `localStorage` 键 `forge-starter:app-registry`。当前产品 `accounts-admin` 会按 `[...APP_MODULE_IDS]` 刷新；同事看不见新侧栏 → 清该 key 或在应用管理勾齐。自己建的内部应用不会自动勾新模块。
+- **菜单三处（缺一不可，侧栏才看得见）**  
+  1. `config/apps.ts`：`APP_MODULE_IDS` 加上新 id  
+  2. `config/apps.ts`：`APP_MODULE_META`（label + href）  
+  3. `config/menu.tsx`：`MODULE_MENU`（`BoldDuotone` `size={20}`）  
+  默认应用种子必须勾齐新 id（`DEFAULT_APP_ENTRIES` 用 `[...APP_MODULE_IDS]`，或把新 id 写进 `modules`）。  
+  `rbac_menus` **可选**：只是目录。只写目录、不进 `APP_MODULE_IDS`，侧栏仍看不见。  
+  加完后清浏览器 Local Storage 键 `forge-starter:app-registry`（或确认种子默认应用已勾齐）；同事旧勾选不会自动出现新项。  
+  业务页另加 `config/site.ts` `routeShells`（通常 `hideHeader: true`）。需要按角色藏菜单时再补 `RBAC_RESOURCES` + 种子 `:read`。
 
 ### 表单弹窗
 
@@ -144,7 +146,7 @@ pnpm check   # typecheck + 规范绊线
 
 **浏览器**（必做）：
 
-1. 菜单进入列表  
+1. 从侧栏点进列表（菜单三处已齐、默认应用勾齐；必要时清 `forge-starter:app-registry`）  
 2. 筛选只有一行  
 3. 新建 → 持久化（刷新还在）  
 4. 打开详情（弹窗或全页），主操作可用  
@@ -159,4 +161,4 @@ pnpm check   # typecheck + 规范绊线
 - 路由、菜单 label  
 - 详情形态 + 理由  
 - 对照样板：accounts（重）或 approvals（轻）  
-- 是否已写入 `APP_MODULE_IDS` + `MODULE_MENU` + 种子/目录，以及如何处理 `forge-starter:app-registry`  
+- 菜单三处：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用是否勾齐新 id；是否已清 `forge-starter:app-registry`  
