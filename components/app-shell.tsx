@@ -13,6 +13,7 @@ import {
   DEFAULT_APP_ID,
   homePathForApp,
   type AppEntry,
+  type AppModuleId,
 } from "@/config/apps";
 import { getDefaultAppRegistry } from "@/lib/apps/defaults";
 import {
@@ -40,17 +41,22 @@ type MeResponse = {
     email: string;
     displayName: string;
   };
+  role?: { code: string; name: string };
+  allowedModules?: AppModuleId[];
 };
 
-function profileFromUser(user: {
-  username: string;
-  email: string;
-  displayName: string;
-}): AppLayoutProfile {
+function profileFromUser(
+  user: {
+    username: string;
+    email: string;
+    displayName: string;
+  },
+  roleName?: string,
+): AppLayoutProfile {
   return {
     avatar: `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(user.username)}`,
     name: user.displayName,
-    role: user.email,
+    role: roleName || user.email,
   };
 }
 
@@ -84,6 +90,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<AppLayoutProfile>(defaultProfile);
   const [apps, setApps] = useState<AppEntry[]>(() => getDefaultAppRegistry());
   const [activeAppId, setActiveAppId] = useState(DEFAULT_APP_ID);
+  const [allowedModules, setAllowedModules] = useState<AppModuleId[] | null>(null);
   const [accountDialog, setAccountDialog] = useState<SettingsAccountDialogKind | null>(null);
 
   const syncRegistry = useCallback(() => {
@@ -114,7 +121,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         href: "/dashboard/",
         openMode: "same_tab" as const,
         authMode: "platform" as const,
-        modules: ["dashboard", "accounts", "roles", "menus", "permissions", "settings"],
+        modules: ["dashboard", "accounts", "approvals", "roles", "menus", "permissions", "settings"],
         isCurrentProduct: true,
       }
     );
@@ -126,8 +133,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 
   const shellMenuItems = useMemo(
-    () => menuItemsForApp(activeApp),
-    [activeApp],
+    () => menuItemsForApp(activeApp, allowedModules),
+    [activeApp, allowedModules],
   );
 
   const selectApp = useCallback(
@@ -136,13 +143,13 @@ export function AppShell({ children }: { children: ReactNode }) {
       saveActiveAppId(app.id);
 
       if (app.kind === "internal") {
-        router.push(homePathForApp(app));
+        router.push(homePathForApp(app, allowedModules));
         return;
       }
 
       openAppTarget(app, router);
     },
-    [router],
+    [router, allowedModules],
   );
 
   const refreshProfile = useCallback(async () => {
@@ -150,7 +157,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       const res = await fetch("/api/auth/me/");
       const data = (await res.json()) as MeResponse;
       if (data?.user) {
-        setProfile(profileFromUser(data.user));
+        setProfile(profileFromUser(data.user, data.role?.name));
+        setAllowedModules(data.allowedModules ?? []);
       }
     } catch {
       // keep previous profile
@@ -171,7 +179,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               ? `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(detail.username)}`
               : prev.avatar,
           name: detail.displayName ?? prev.name,
-          role: detail.email ?? prev.role,
+          role: prev.role,
         }));
       }
       void refreshProfile();

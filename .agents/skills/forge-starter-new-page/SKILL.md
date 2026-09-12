@@ -54,7 +54,7 @@ description: >
 | collection 卡片 | `/ref/list-cards` | — |
 | form-modal | `/ref/form-modal` | *-form-dialog |
 | form-page 整页 | `/ref/form-page`（CRM leads/new） | 字段极多时 |
-| detail-modal | `/ref/detail-modal` | `components/ui/modal.tsx` + `?id=` |
+| detail-modal | `/ref/detail-modal` | **approvals**（轻样板）+ `Modal` + `?id=` |
 | detail 业务对象 | `/ref/detail` | accounts/[id] |
 | person CRM 人物 | `/ref/person`（john-bushmill） | — |
 | profile 项目成员 | `/ref/profile`（members/[id]） | — |
@@ -85,7 +85,7 @@ description: >
 
 ```text
 用户指定？ → 听用户
-字段少、看完回列表？ → `/ref/detail-modal` + Modal + `?id=`
+字段少、看完回列表？ → approvals（轻样板）+ `/ref/detail-modal` + Modal + `?id=`
 多区块、Tab、档案？ → accounts（全页）
 拿不准？ → 问用户
 ```
@@ -101,7 +101,13 @@ description: >
 - 新建按钮 → form dialog  
 - 详情入口 → 名称/标题列的数据可点击，按已选详情形态打开全页或 `?id=` 弹窗；保留筛选上下文，支持键盘操作和可见焦点。对齐 accounts 的名称单元格，保持普通文字样式，不附加箭头。不要用带箭头的 `CellLink` 作为默认详情入口。
 - 操作列只放编辑、删除等真实业务动作；不要另放箭头/眼睛“查看详情”按钮。无其他动作时不生成操作列。
-- `config/menu.tsx` + `config/site.ts`（`hideHeader: true`）  
+- **菜单登记（缺一不可，只改 `menu.tsx` 不够）**  
+  1. `config/apps.ts`：`APP_MODULE_IDS` + `APP_MODULE_META`（应用勾选白名单）  
+  2. `config/menu.tsx`：`MODULE_MENU`（`BoldDuotone` `size={20}`）  
+  3. `config/site.ts`：`routeShells` + `hideHeader: true`  
+  4. `lib/rbac/constants.ts` + `lib/rbac/defaults.ts`：资源与种子 `:read`（侧栏按角色藏菜单）  
+  5. `rbac_menus`：种子会补插缺失的内置 `code`；**自定义目录行不会进侧栏**  
+  6. 应用登记在 `localStorage` 键 `forge-starter:app-registry`。当前产品 `accounts-admin` 会按 `[...APP_MODULE_IDS]` 刷新；同事看不见新侧栏 → 清该 key 或在应用管理勾齐。自己建的内部应用不会自动勾新模块。
 
 ### 表单弹窗
 
@@ -110,9 +116,8 @@ description: >
 
 ### 详情 · 弹窗
 
-- 抄 `/ref/detail-modal`，宿主用 `components/ui/modal.tsx`  
-- 列表行点击打开；可选 `?id=`；`[id]/page` 可 redirect  
-- 不要去找已删除的 approvals  
+- 抄 **`approvals`**（业务轻样板）或 `/ref/detail-modal`，宿主用 `components/ui/modal.tsx`  
+- 列表行点击打开；保留 `?id=`；`[id]/page` redirect → `?id=`  
 
 ### 详情 · 全页
 
@@ -153,4 +158,5 @@ pnpm check   # typecheck + 规范绊线
 
 - 路由、菜单 label  
 - 详情形态 + 理由  
-- 对照样板：accounts 或 `/ref/detail-modal`  
+- 对照样板：accounts（重）或 approvals（轻）  
+- 是否已写入 `APP_MODULE_IDS` + `MODULE_MENU` + 种子/目录，以及如何处理 `forge-starter:app-registry`  

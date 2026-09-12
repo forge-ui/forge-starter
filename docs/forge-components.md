@@ -50,7 +50,7 @@
 | 列表页头 + 工具带 | **任选一套**：Starter `h1`+`Breadcrumbs`+`Button` 再单行 `ButtonGroup`+`TextField`；**或** Kit `PageTitleToolbar` + `Toolbar`/`ToolbarSearchInput`/`ToolbarPillTabs` | 同上 | `toolbar` |
 | 筛选条 | 一条工具带，禁止两行 pills。Starter：`ButtonGroup`+`TextField`。官方：`Toolbar`+`ToolbarSearchInput` | 同上 | `tab` `input-field` `toolbar` |
 | 新建/编辑弹窗 | `TextField` `TextArea` `SelectOption` + 本仓 `Modal` | `account-form-dialog` | `input-field` `modal` |
-| 轻详情（看完回列表） | `StatusBadge` `DescriptionItem`/`字段行` + `Modal` 底栏按钮 | `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=` | `list` `modal` |
+| 轻详情（看完回列表） | `StatusBadge` `DescriptionItem` + `Modal` 底栏按钮 | **approvals** + `/ref/detail-modal` + `Modal` + `?id=` | `list` `modal` |
 | 重详情（档案） | `Breadcrumbs` `StatusBadge` `StatCard` `TabBar` `DataTable` 侧栏字段；页级主次栏 `span` 8+4。主栏内辅栏+图用 `5+7` / `6+6`，不要再套页面 `4+8` | `accounts/[id]` | `grid` `card` `tab` `list` `table` |
 | 删除确认 | `ConfirmationDialog` **外包** `Modal`/遮罩 | `accounts/page` 删除 | `modal` |
 | 工作台、指标 | `StatCard` `ChartCard` 图表家族 `DataTable`；分栏 `Grid`/`GridItem`（core `≥0.1.13`，默认 12 列 / 16px） | `dashboard` | `card` `chart` `table` `grid` |

@@ -16,7 +16,7 @@ Coding Agent 是第一开发界面：skills 拆开后端与页面，双样板 + 
 7. 登录表 `users` ≠ 业务表（如 `admin_accounts`），不要混接。  
 8. **`AUTH_MODE=demo` 只绕过登录用户库，不提供业务持久化。** 任何 CRUD（accounts/新模块）都需要 `DATABASE_URL` + `pnpm db:push`。不要写「无 Postgres 也能做完整业务 CRUD」。  
 9. **后端与页面分开做**：先 module（数据+API），再 page（UI）。不要一条指令无脑抄 accounts 全套且写死详情形态。  
-10. 详情 **无全局默认**：重 → `accounts` 全页；轻 → 官方列表 view dialog + 本仓 `components/ui/modal.tsx` + `?id=`（`/ref/detail-modal`）；拿不准问用户。不要指向已删除的 approvals。  
+10. 详情 **无全局默认**：重 → `accounts` 全页；轻 → `approvals` 列表 + 表单/详情弹窗（`/ref/detail-modal` + 本仓 `Modal` + `?id=`）；拿不准问用户。
 11. 列表筛选/搜索 **一条工具带**（Starter：`ButtonGroup`+`TextField`；官方：`Toolbar`+`ToolbarSearchInput`）；禁止两行 pills。页头可用 `PageTitleToolbar`，不要写死只能 h1。  
 12. **`DataTable` 的 `sortable` 只画排序 UI，不会自动排序。** 未实现点击排序逻辑时 **禁止** 设 `sortable: true`（假按钮）。  
 13. `ConfirmationDialog` 只是内容卡：必须用本仓 `components/ui/modal.tsx`（或等价宿主）包一层；对齐 `accounts` 删除确认。  
@@ -66,21 +66,41 @@ Skills 只维护 **`.agents/skills/`**。
 
 人类说「加 xxx 管理」→ 先 `new-module`，再 `new-page`，最后 **`forge-starter-audit`**（可同会话顺序执行）。
 
+## 新菜单必须登记（侧栏三层过滤）
+
+侧栏 = **`APP_MODULE_IDS` ∩ 当前应用 `modules` ∩ 登录用户角色的 `:read`**。只改 `config/menu.tsx` **不会**出现在侧栏。
+
+新模块进菜单时必须同时改：
+
+1. **`config/apps.ts`**：`APP_MODULE_IDS` + `APP_MODULE_META`（类型白名单 + 应用管理勾选源）。默认应用 `modules` 用 `[...APP_MODULE_IDS]`。
+2. **`config/menu.tsx`**：`MODULE_MENU`（icon `BoldDuotone` `size={20}` + href）。
+3. **`config/site.ts`**：`routeShells`（业务页 `hideHeader: true`）。
+4. **`lib/rbac/constants.ts`**：`RBAC_RESOURCES` + `RBAC_RESOURCE_META`（权限资源与模块 ID 对齐）。
+5. **`lib/rbac/defaults.ts`**：种子权限与各角色 `grant`（侧栏看 `{module}:read`）。
+6. **`rbac_menus` 目录**：`ensureRbacDefaults()` 会 **补插** 缺失的内置 `APP_MODULE_IDS` 行。自定义菜单 CRUD 行 **不会**进侧栏，除非同时完成 1–2。
+
+应用勾选在浏览器 `localStorage` 键 **`forge-starter:app-registry`**：
+
+- 只改 `menu.tsx`、不进 `APP_MODULE_IDS`：`asModules` 会丢掉未知 ID，应用管理也勾不到。
+- 当前产品 `accounts-admin` 会按代码种子刷新 `modules`；同事仍看不见时，清该 key 或在应用管理勾齐新模块。
+- 自己建的内部应用 **不会**自动勾新模块，必须手动勾选或清缓存后重种默认应用。
+
 ## 仓库地图
 
 ```
 app/(auth)/              登录注册找回
 app/(app)/dashboard      工作台
 app/(app)/accounts       ★ 重样板：列表 + 表单弹窗 + 全页详情
-app/(app)/roles · menus · permissions  RBAC 演示：列表 + 表单弹窗 + 详情弹窗
+app/(app)/approvals      ★ 轻样板：列表 + 表单弹窗 + 详情弹窗
+app/(app)/roles · menus · permissions  RBAC 目录：列表 + 表单/详情弹窗
 app/(app)/ref/**         ★ AI 参考页（真实路由，不进菜单；生产默认关）
 app/(app)/settings       apps；资料/改密/系统设置走头像菜单弹窗
-app/api/auth|accounts|roles|menus|permissions
+app/api/auth|accounts|approvals|roles|menus|permissions
 components/app-shell.tsx
 components/*-form-dialog.tsx | *-store.tsx
 components/ui/modal.tsx
 config/site.ts menu.tsx apps.ts
-lib/auth lib/db lib/accounts lib/roles lib/menus lib/permissions lib/rbac lib/reference
+lib/auth lib/db lib/accounts lib/approvals lib/roles lib/menus lib/permissions lib/rbac lib/reference
 docs/product.md agent-native.md setup.md module-template.md page-roles.md reference-pages.md forge-components.md
 ```
 
@@ -95,7 +115,7 @@ docs/product.md agent-native.md setup.md module-template.md page-roles.md refere
 | 工作台 | `dashboard` | `dashboards/ecommerce-2` |
 | 列表 | `accounts` 列表 | `ecommerce/customers` |
 | 表单弹窗 | `account-form-dialog` | customers Add Modal |
-| 详情弹窗 | `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=` | 官网列表 view dialog |
+| 详情弹窗 | `approvals` + `/ref/detail-modal` + `Modal` + `?id=` | 官网列表 view dialog |
 | 全页详情 | `accounts/[id]` | `ecommerce/customers/[id]` |
 
 模板源码：`../forge/src/app/templates/...`（若存在）。
@@ -103,7 +123,7 @@ docs/product.md agent-native.md setup.md module-template.md page-roles.md refere
 ## 扩业务最短路径
 
 1. `new-module`：types + service + schema + `db:push` + API。  
-2. `new-page`：读 page-roles → 选全页（accounts）或轻弹窗（`/ref/detail-modal`）→ 列表/弹窗/详情 + menu。  
+2. `new-page`：读 page-roles → 选全页（accounts）或轻弹窗（approvals / `/ref/detail-modal`）→ 列表/弹窗/详情 + **APP_MODULE_IDS + menu + 种子/目录**。  
 3. `pnpm typecheck` + 浏览器点通。  
 
 详见 `docs/module-template.md`。

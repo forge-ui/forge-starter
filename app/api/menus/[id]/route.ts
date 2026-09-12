@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { jsonError, jsonOk } from "@/lib/auth/http";
-import { requireSession } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/rbac/access";
 import { deleteMenu, getMenuById, updateMenu } from "@/lib/menus/service";
 
 const bodySchema = z.object({
@@ -17,7 +17,7 @@ type Ctx = { params: Promise<{ id: string }> };
 
 export async function GET(_request: Request, ctx: Ctx) {
   try {
-    const auth = await requireSession();
+    const auth = await requirePermission("menus", "read");
     if (!auth.ok) return auth.response;
     const { id } = await ctx.params;
     const menu = await getMenuById(id);
@@ -31,7 +31,7 @@ export async function GET(_request: Request, ctx: Ctx) {
 
 export async function PATCH(request: Request, ctx: Ctx) {
   try {
-    const auth = await requireSession();
+    const auth = await requirePermission("menus", "update");
     if (!auth.ok) return auth.response;
     const { id } = await ctx.params;
     const json = await request.json();
@@ -57,7 +57,7 @@ export async function PATCH(request: Request, ctx: Ctx) {
 
 export async function DELETE(_request: Request, ctx: Ctx) {
   try {
-    const auth = await requireSession();
+    const auth = await requirePermission("menus", "delete");
     if (!auth.ok) return auth.response;
     const { id } = await ctx.params;
     await deleteMenu(id);

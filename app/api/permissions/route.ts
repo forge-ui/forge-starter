@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { jsonError, jsonOk } from "@/lib/auth/http";
-import { requireSession } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/rbac/access";
 import { RBAC_ACTIONS, RBAC_RESOURCES } from "@/lib/rbac/constants";
 import { createPermission, listPermissions } from "@/lib/permissions/service";
 
@@ -19,7 +19,7 @@ function dbUnavailable(error: unknown) {
 
 export async function GET() {
   try {
-    const auth = await requireSession();
+    const auth = await requirePermission("permissions", "read");
     if (!auth.ok) return auth.response;
     const permissions = await listPermissions();
     return jsonOk({ permissions });
@@ -34,7 +34,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const auth = await requireSession();
+    const auth = await requirePermission("permissions", "create");
     if (!auth.ok) return auth.response;
     const json = await request.json();
     const parsed = bodySchema.safeParse(json);

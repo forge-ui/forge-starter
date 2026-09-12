@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  DocumentAddBoldDuotone,
   HamburgerMenuBoldDuotone,
   HomeSmileBoldDuotone,
   ShieldKeyholeBoldDuotone,
@@ -28,6 +29,11 @@ const MODULE_MENU: Record<AppModuleId, AppLayoutMenuItem> = {
     label: "账号管理",
     href: "/accounts/",
   },
+  approvals: {
+    icon: <DocumentAddBoldDuotone size={20} />,
+    label: "审批中心",
+    href: "/approvals/",
+  },
   roles: {
     icon: <ShieldUserBoldDuotone size={20} />,
     label: "角色",
@@ -53,13 +59,25 @@ const MODULE_MENU: Record<AppModuleId, AppLayoutMenuItem> = {
 /** Default full product menu */
 export const menuItems: AppLayoutMenuItem[] = APP_MODULE_IDS.map((id) => MODULE_MENU[id]);
 
-export function menuItemsForApp(app: AppEntry | null | undefined): AppLayoutMenuItem[] {
+export function menuItemsForApp(
+  app: AppEntry | null | undefined,
+  allowedModules?: readonly AppModuleId[] | null,
+): AppLayoutMenuItem[] {
+  let ids: AppModuleId[];
   if (!app || app.kind !== "internal") {
-    return [MODULE_MENU.dashboard, MODULE_MENU.settings];
+    ids = ["dashboard", "settings"];
+  } else {
+    const selected = new Set(modulesForApp(app));
+    selected.add("settings");
+    ids = APP_MODULE_IDS.filter((id) => selected.has(id));
   }
-  const selected = new Set(modulesForApp(app));
-  selected.add("settings");
-  return APP_MODULE_IDS.filter((id) => selected.has(id)).map((id) => MODULE_MENU[id]);
+
+  if (allowedModules == null) {
+    return ids.includes("dashboard") ? [MODULE_MENU.dashboard] : [];
+  }
+
+  const allowed = new Set(allowedModules);
+  return ids.filter((id) => allowed.has(id)).map((id) => MODULE_MENU[id]);
 }
 
 export const defaultProfile: AppLayoutProfile = {

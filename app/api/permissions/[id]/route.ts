@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { jsonError, jsonOk } from "@/lib/auth/http";
-import { requireSession } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/rbac/access";
 import { RBAC_ACTIONS, RBAC_RESOURCES } from "@/lib/rbac/constants";
 import {
   deletePermission,
@@ -20,7 +20,7 @@ type Ctx = { params: Promise<{ id: string }> };
 
 export async function GET(_request: Request, ctx: Ctx) {
   try {
-    const auth = await requireSession();
+    const auth = await requirePermission("permissions", "read");
     if (!auth.ok) return auth.response;
     const { id } = await ctx.params;
     const permission = await getPermissionById(id);
@@ -34,7 +34,7 @@ export async function GET(_request: Request, ctx: Ctx) {
 
 export async function PATCH(request: Request, ctx: Ctx) {
   try {
-    const auth = await requireSession();
+    const auth = await requirePermission("permissions", "update");
     if (!auth.ok) return auth.response;
     const { id } = await ctx.params;
     const json = await request.json();
@@ -58,7 +58,7 @@ export async function PATCH(request: Request, ctx: Ctx) {
 
 export async function DELETE(_request: Request, ctx: Ctx) {
   try {
-    const auth = await requireSession();
+    const auth = await requirePermission("permissions", "delete");
     if (!auth.ok) return auth.response;
     const { id } = await ctx.params;
     await deletePermission(id);

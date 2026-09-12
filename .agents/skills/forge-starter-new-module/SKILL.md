@@ -60,8 +60,15 @@ app/api/<res>/[id]/route.ts     # GET one, PATCH/DELETE/POST actions
 ```
 
 - `requireSession()`，未登录 401  
+- 进侧栏的模块：`requirePermission("<res>", "read"|"create"|"update"|"delete")`（`lib/rbac/access.ts`），先 session 再角色权限；403 无权限  
 - `jsonOk`、`jsonError`（`lib/auth/http.ts`）  
 - Zod 校 body  
+
+进侧栏时本步还要登记权限资源（页面菜单在 new-page）：
+
+- `lib/rbac/constants.ts`：`RBAC_RESOURCES` + `RBAC_RESOURCE_META`（资源码 = 模块 ID）
+- `lib/rbac/defaults.ts`：种子权限 `{res}:read|create|…` 与各角色 `grant`（侧栏可见看 `:read`）
+- **不要**只往 `rbac_menus` 插一行就当侧栏好了——目录不会渲染菜单
 
 ### 4. store 归属
 

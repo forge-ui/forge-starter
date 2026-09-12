@@ -113,6 +113,8 @@ function safeParse(raw: string | null): unknown[] | null {
 /**
  * Always pin built-in catalog apps from DEFAULT_APP_ENTRIES.
  * localStorage may predate new seeds — merge by id without wiping user-added apps.
+ * Host product (`accounts-admin`) modules are overwritten from `[...APP_MODULE_IDS]`.
+ * User-created internal apps keep their saved modules (will not auto-check new ones).
  */
 /** Former seed apps removed from the product — drop on load. */
 const REMOVED_SEED_IDS = new Set(["procurement"]);

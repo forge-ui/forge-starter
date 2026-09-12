@@ -31,6 +31,7 @@ Compose 默认库与 `.env.example` 一致：`postgresql://forge:forge@127.0.0.1
 | | `AUTH_MODE=demo`（默认） | `AUTH_MODE=local` |
 |--|--------------------------|-------------------|
 | 登录 | 任意用户名/邮箱 + 密码即可进后台 | 走 Postgres `users` 表，需先注册 |
+| 侧栏角色 | 用户名 `operator` / `auditor` / `readonly` 按种子角色藏菜单；其余为超级管理员（全开）。无库时回退种子授权 | `users.role_code`（默认 `super_admin`）；注册时若用户名是种子角色码则写入该码。改角色需改库字段，不是业务账号 `admin_accounts.role` |
 | `AUTH_SECRET` | 未设时用内置演示密钥 | **必填**，至少 16 位（`.env.example` 建议更长） |
 | 业务 CRUD | **仍要** `DATABASE_URL` + `pnpm db:push` | 同左 |
 | 登录守卫 | 默认不强制（可用 `AUTH_GUARD=true` 打开） | 默认强制登录 |
@@ -77,14 +78,14 @@ Compose 默认库与 `.env.example` 一致：`postgresql://forge:forge@127.0.0.1
 ```text
 app/
   (auth)/            登录 · 注册 · 找回、重置密码
-  (app)/             工作台 · 账号 · 角色 · 菜单 · 权限 · 设置 · ref/*
-  api/               auth · accounts · roles · menus · permissions
+  (app)/             工作台 · 账号 · 审批 · 角色 · 菜单 · 权限 · 设置 · ref/*
+  api/               auth · accounts · approvals · roles · menus · permissions
 components/          app-shell · *-store · *-dialog · ui/modal
 config/              site · menu · apps
-lib/                 auth · db · accounts · roles · menus · permissions · rbac · apps · mail · reference
+lib/                 auth · db · accounts · approvals · roles · menus · permissions · rbac · apps · mail · reference
 docs/                产品说明 · 工作流 · 安装环境 · 组件选型
 .agents/skills/      quick-start · new-module · new-page · audit
 AGENTS.md
 ```
 
-登录用户在 `users`，业务账号在 `admin_accounts`，不要混接。应用登记在浏览器 `localStorage`，不是登录库。
+登录用户在 `users`，业务账号在 `admin_accounts`，不要混接。应用登记在浏览器 `localStorage` 键 `forge-starter:app-registry`。加模块后当前产品会按 `APP_MODULE_IDS` 刷新勾选；自己建的内部应用要手动勾，或清该 key。

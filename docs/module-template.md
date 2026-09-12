@@ -8,7 +8,7 @@ Skill：`forge-starter-new-module` → `forge-starter-new-page`。
 | 样板 | UI | 适合 |
 |------|-----|------|
 | `accounts` | 列表 + 表单弹窗 + **全页详情** | 重内容、档案、多区块 |
-| 轻详情 | `/ref/detail-modal` + `Modal` + `?id=` | 字段少、处理完回列表 |
+| `approvals` | 列表 + 表单弹窗 + **详情弹窗** | 字段少、处理完回列表 |
 
 选型：用户指定 → 听用户；否则按内容；拿不准 → 问。理由写进交付说明。
 
@@ -33,16 +33,19 @@ components/<resource>-store.tsx   # 可选；列表页若 client fetch 需要
 ```text
 app/(app)/<resource>/page.tsx     # 列表（collection）
 components/<resource>-form-dialog.tsx
-config/menu.tsx
+config/apps.ts                    # APP_MODULE_IDS + APP_MODULE_META（必做）
+config/menu.tsx                   # MODULE_MENU
 config/site.ts                    # hideHeader: true
+lib/rbac/constants.ts + defaults.ts   # 资源 + 种子 :read
 ```
 
-### 详情弹窗（抄 `/ref/detail-modal`，宿主用本仓 Modal）
+只改 `menu.tsx` 会跟应用勾选脱节。当前产品种子用 `[...APP_MODULE_IDS]`；同事浏览器 `forge-starter:app-registry` 若仍是旧勾选，清缓存或在应用管理勾齐。`rbac_menus` 是目录（种子补插内置 code），自定义行不进侧栏。
+
+### 详情弹窗（抄 `approvals` / `/ref/detail-modal`，宿主用本仓 Modal）
 
 ```text
 components/<resource>-detail-dialog.tsx
-# 行点击或 ?id= 打开；可选 [id]/page.tsx redirect → ?id=
-# 不要去找已删除的 approvals
+# 行点击或 ?id= 打开；[id]/page.tsx redirect → ?id=
 ```
 
 ### 全页详情（抄 accounts）

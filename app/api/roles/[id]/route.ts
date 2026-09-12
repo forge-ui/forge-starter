@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { jsonError, jsonOk } from "@/lib/auth/http";
-import { requireSession } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/rbac/access";
 import { deleteRole, getRoleById, updateRole } from "@/lib/roles/service";
 
 const bodySchema = z.object({
@@ -15,7 +15,7 @@ type Ctx = { params: Promise<{ id: string }> };
 
 export async function GET(_request: Request, ctx: Ctx) {
   try {
-    const auth = await requireSession();
+    const auth = await requirePermission("roles", "read");
     if (!auth.ok) return auth.response;
     const { id } = await ctx.params;
     const role = await getRoleById(id);
@@ -29,7 +29,7 @@ export async function GET(_request: Request, ctx: Ctx) {
 
 export async function PATCH(request: Request, ctx: Ctx) {
   try {
-    const auth = await requireSession();
+    const auth = await requirePermission("roles", "update");
     if (!auth.ok) return auth.response;
     const { id } = await ctx.params;
     const json = await request.json();
@@ -53,7 +53,7 @@ export async function PATCH(request: Request, ctx: Ctx) {
 
 export async function DELETE(_request: Request, ctx: Ctx) {
   try {
-    const auth = await requireSession();
+    const auth = await requirePermission("roles", "delete");
     if (!auth.ok) return auth.response;
     const { id } = await ctx.params;
     await deleteRole(id);

@@ -68,7 +68,7 @@ export function LoginForm({
         </h1>
         <p className="text-base text-fg-grey-700">
           {mode === "demo"
-            ? "使用用户名或邮箱登录。演示模式任意账号可进入。"
+            ? "演示模式任意账号可进入。用户名 operator / auditor / readonly 会按角色藏菜单，其余账号为超级管理员。"
             : "使用用户名或邮箱登录。"}
         </p>
       </header>

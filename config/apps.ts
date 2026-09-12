@@ -23,10 +23,12 @@ export type AppAuthMode = "none" | "passthrough" | "oidc" | "platform";
  * - An internal app's `modules` chooses which of these appear.
  * - The 菜单 CRUD (`rbac_menus`) catalogs the same codes (plus optional extras).
  *   Extra rows do **not** render in the sidebar until added here and in MODULE_MENU.
+ * - Login role then hides modules the user cannot `:read`.
  */
 export const APP_MODULE_IDS = [
   "dashboard",
   "accounts",
+  "approvals",
   "roles",
   "menus",
   "permissions",
@@ -94,6 +96,7 @@ export const APP_MODULE_META: Record<
 > = {
   dashboard: { label: "工作台", href: "/dashboard/" },
   accounts: { label: "账号管理", href: "/accounts/" },
+  approvals: { label: "审批中心", href: "/approvals/" },
   roles: { label: "角色", href: "/roles/" },
   menus: { label: "菜单", href: "/menus/" },
   permissions: { label: "权限", href: "/permissions/" },
@@ -163,11 +166,17 @@ export function modulesLabel(app: AppEntry): string {
     .join("、") || "—";
 }
 
-export function homePathForApp(app: AppEntry): string {
+export function homePathForApp(
+  app: AppEntry,
+  allowedModules?: readonly AppModuleId[] | null,
+): string {
   if (app.kind === "internal") {
     const mods = modulesForApp(app);
-    const first = mods[0] ?? "dashboard";
-    return APP_MODULE_META[first].href;
+    const first =
+      (allowedModules?.length
+        ? mods.find((id) => allowedModules.includes(id)) ?? allowedModules[0]
+        : mods[0]) ?? "dashboard";
+    return APP_MODULE_META[first]?.href ?? "/dashboard/";
   }
   return app.href?.trim() || "/dashboard/";
 }

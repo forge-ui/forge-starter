@@ -11,6 +11,7 @@ export const RBAC_STATUS_META: Record<
 export const RBAC_RESOURCES = [
   "dashboard",
   "accounts",
+  "approvals",
   "settings",
   "roles",
   "menus",
@@ -22,6 +23,7 @@ export type RbacResource = (typeof RBAC_RESOURCES)[number];
 export const RBAC_RESOURCE_META: Record<RbacResource, { label: string }> = {
   dashboard: { label: "工作台" },
   accounts: { label: "账号" },
+  approvals: { label: "审批" },
   settings: { label: "应用" },
   roles: { label: "角色" },
   menus: { label: "菜单" },

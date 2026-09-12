@@ -35,7 +35,7 @@
 
 | | detail-modal | detail |
 |--|--------------|--------|
-| Starter 样板 | `/ref/detail-modal` + `components/ui/modal.tsx` | `accounts/[id]` |
+| Starter 样板 | `approvals` + `/ref/detail-modal` + `Modal` | `accounts/[id]` |
 | 何时倾向 | 字段少、处理完回列表 | 多区块/Tab/图/关联 |
 | 返回 | 关弹窗 | 页内 `←`/面包屑 |
 | 禁止 | 为「统一」硬弹窗重内容 | 轻内容硬全页；侧栏塞返回 |
@@ -54,7 +54,7 @@
 | person（CRM 人物多 Tab） | `/ref/person` | — john-bushmill |
 | profile（项目成员） | `/ref/profile` | — members/[id] |
 | product（产品多 Tab） | `/ref/product` | — products/[id] |
-| detail-modal | `/ref/detail-modal` | `Modal` + `?id=` |
+| detail-modal | `/ref/detail-modal` | **approvals** + `Modal` + `?id=` |
 | form-page（整页） | `/ref/form-page` | — leads/new |
 | form-modal | `/ref/form-modal` | *-form-dialog |
 | split | `/ref/split` | — |
@@ -82,7 +82,7 @@
 | dashboard | ecommerce-2、crm、analytics | `/dashboard` + `/ref/dashboard-*` |
 | collection | ecommerce/customers | `accounts` 列表 + `/ref/list-table`、`list-cards` |
 | form-modal | customers Add Modal | `account-form-dialog` |
-| detail-modal | 官网列表 view dialog | `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=` |
+| detail-modal | 官网列表 view dialog | `approvals` + `/ref/detail-modal` + `Modal` + `?id=` |
 | detail | customers/[id] | `accounts/[id]` |
 | settings | — | `settings/apps` + `settings-account-dialog` |
 | auth | finance/crm 登录 | `app/(auth)/*` |
