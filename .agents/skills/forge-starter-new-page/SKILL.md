@@ -64,7 +64,7 @@ description: >
 | files | `/ref/files` | — |
 | split 主从 | `/ref/split` | — |
 | queue | `/ref/queue` | — |
-| settings | `/ref/settings` | settings/* |
+| settings | `/ref/settings` | `settings/apps` + 头像菜单弹窗 |
 | activity | `/ref/activity` | — |
 | dashboard 通用/精简 | `/ref/dashboard-board` · `/ref/dashboard-kpi` | `/dashboard`（ecommerce-2 完整） |
 | dashboard CRM | `/ref/dashboard-crm` | monorepo `dashboards/crm` |

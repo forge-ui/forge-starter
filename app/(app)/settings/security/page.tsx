@@ -1,7 +1,5 @@
-"use client";
-
-import { SettingsSecurityPanel } from "@/components/settings-security-panel";
+import { redirect } from "next/navigation";
 
 export default function SettingsSecurityPage() {
-  return <SettingsSecurityPanel />;
+  redirect("/settings/apps/");
 }

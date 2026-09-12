@@ -40,7 +40,7 @@ description: 页面规范审计。任何业务页面写完/改完后必须执行
 | form-modal | `account-form-dialog` **或** `/ref/form-modal` | `modal` `input-field` |
 | form-page | `/ref/form-page` | `input-field` |
 | dashboard | `/dashboard` + `/ref/dashboard-*`；官方 `dashboards/ecommerce-2` | `card` `chart` `grid` |
-| settings | `settings/*`、`/ref/settings` | `input-field` |
+| settings | `settings/apps`、头像菜单弹窗、`/ref/settings` | `input-field` `modal` |
 | auth | `app/(auth)` | — |
 
 选 B 时打开 `/cases/toolbar` 与 CRM/Finance 模板页头，**不要**强行对照 accounts 的 h1，也**不要**对照 `/cases/page-header`（那是壳顶栏）。  

@@ -144,7 +144,6 @@ export default function AccountDetailPage({
       {
         key: "device",
         header: "设备",
-        sortable: true,
         width: "w-52",
         render: (row) => <CellText>{row.device}</CellText>,
       },
