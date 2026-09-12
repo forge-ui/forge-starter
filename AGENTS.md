@@ -1,7 +1,7 @@
 # Forge Starter — Agent 合约（必读）
 
 **用 Forge 搭管理后台的脚手架**：Next.js 16 + Tailwind v4 + `@forge-ui-official/core`。  
-Coding Agent 是第一开发界面：skills 拆开后端与页面，双样板 + `/ref` 画廊保证 UI 不跑偏。
+Coding Agent 是第一开发界面：skills 拆开后端与页面，`accounts` 重样板 + `/ref` 画廊保证 UI 不跑偏。
 
 必读：`docs/product.md`、`docs/agent-native.md`、`docs/module-template.md`、`docs/page-roles.md`、`docs/forge-components.md`、`docs/audit-checklist.md`。
 
@@ -16,7 +16,7 @@ Coding Agent 是第一开发界面：skills 拆开后端与页面，双样板 + 
 7. 登录表 `users` ≠ 业务表（如 `admin_accounts`），不要混接。  
 8. **`AUTH_MODE=demo` 只绕过登录用户库，不提供业务持久化。** 任何 CRUD（accounts/新模块）都需要 `DATABASE_URL` + `pnpm db:push`。不要写「无 Postgres 也能做完整业务 CRUD」。  
 9. **后端与页面分开做**：先 module（数据+API），再 page（UI）。不要一条指令无脑抄 accounts 全套且写死详情形态。  
-10. 详情 **无全局默认**：重 → `accounts` 全页；轻 → 官方列表 view dialog + 本仓 `components/ui/modal.tsx` + `?id=`（`/ref/detail-modal`）；拿不准问用户。不要指向已删除的 approvals。  
+10. 详情 **无全局默认**：重 → `accounts` 全页；轻 → `/ref/detail-modal` + 本仓 `Modal` + `?id=`（**暂无第二业务样板**）；拿不准问用户。
 11. 列表筛选/搜索 **一条工具带**（Starter：`ButtonGroup`+`TextField`；官方：`Toolbar`+`ToolbarSearchInput`）；禁止两行 pills。页头可用 `PageTitleToolbar`，不要写死只能 h1。  
 12. **`DataTable` 的 `sortable` 只画排序 UI，不会自动排序。** 未实现点击排序逻辑时 **禁止** 设 `sortable: true`（假按钮）。  
 13. `ConfirmationDialog` 只是内容卡：必须用本仓 `components/ui/modal.tsx`（或等价宿主）包一层；对齐 `accounts` 删除确认。  
@@ -66,13 +66,28 @@ Skills 只维护 **`.agents/skills/`**。
 
 人类说「加 xxx 管理」→ 先 `new-module`，再 `new-page`，最后 **`forge-starter-audit`**（可同会话顺序执行）。
 
+## 菜单三处（扩业务必做）
+
+新模块要进侧栏，必须同时改这三处：
+
+1. `config/apps.ts` → `APP_MODULE_IDS`  
+2. `config/apps.ts` → `APP_MODULE_META`  
+3. `config/menu.tsx` → `MODULE_MENU`（`BoldDuotone` `size={20}`）
+
+默认应用种子勾齐新 id（`modules: [...APP_MODULE_IDS]` 或把新 id 写进 `DEFAULT_APP_ENTRIES`）。  
+`rbac_menus` 可选，只是目录：不进 `APP_MODULE_IDS` 侧栏仍看不见。  
+加菜单后须清浏览器 Local Storage **`forge-starter:app-registry`**（或确认种子默认应用已勾齐），否则同事还是旧勾选。
+
+侧栏实际可见 = 菜单三处 ∩ 当前应用勾选 ∩ 登录角色 `{module}:read`。  
+无 `{module}:read` 时直链业务页必须壳层 `replace` 回工作台，别只藏侧栏或停在空态/403 列表。
+
 ## 仓库地图
 
 ```
 app/(auth)/              登录注册找回
 app/(app)/dashboard      工作台
 app/(app)/accounts       ★ 重样板：列表 + 表单弹窗 + 全页详情
-app/(app)/roles · menus · permissions  RBAC 演示：列表 + 表单弹窗 + 详情弹窗
+app/(app)/roles · menus · permissions  RBAC 目录：列表 + 表单/详情弹窗
 app/(app)/ref/**         ★ AI 参考页（真实路由，不进菜单；生产默认关）
 app/(app)/settings       apps；资料/改密/系统设置走头像菜单弹窗
 app/api/auth|accounts|roles|menus|permissions
@@ -95,16 +110,17 @@ docs/product.md agent-native.md setup.md module-template.md page-roles.md refere
 | 工作台 | `dashboard` | `dashboards/ecommerce-2` |
 | 列表 | `accounts` 列表 | `ecommerce/customers` |
 | 表单弹窗 | `account-form-dialog` | customers Add Modal |
-| 详情弹窗 | `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=` | 官网列表 view dialog |
+| 详情弹窗 | `/ref/detail-modal` + `Modal` + `?id=`（暂无第二业务样板） | 官网列表 view dialog |
 | 全页详情 | `accounts/[id]` | `ecommerce/customers/[id]` |
 
 模板源码：`../forge/src/app/templates/...`（若存在）。
 
 ## 扩业务最短路径
 
-1. `new-module`：types + service + schema + `db:push` + API。  
-2. `new-page`：读 page-roles → 选全页（accounts）或轻弹窗（`/ref/detail-modal`）→ 列表/弹窗/详情 + menu。  
-3. `pnpm typecheck` + 浏览器点通。  
+1. `new-module`：types + service + schema + `db:push` + API（**API 齐 ≠ 侧栏有**）。  
+2. `new-page`：读 page-roles → 选全页（accounts）或轻弹窗（`/ref/detail-modal`，暂无第二业务样板）→ 列表/弹窗/详情 + **菜单三处**（`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`），默认应用种子勾齐新 id。  
+3. 加菜单后清 Local Storage `forge-starter:app-registry`（或种子默认勾齐）。无权限直链由壳 `replace` 回工作台。  
+4. `pnpm typecheck` + 浏览器从侧栏点通。  
 
 详见 `docs/module-template.md`。
 

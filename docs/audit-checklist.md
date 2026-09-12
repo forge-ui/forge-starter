@@ -38,7 +38,7 @@
 | form-page | `/ref/form-page` | `input-field` |
 | dashboard | `/dashboard` + `/ref/dashboard-*`；官方 `dashboards/ecommerce-2` | `card` `chart` `grid` |
 | settings | `settings/apps`、头像菜单弹窗、`/ref/settings` | `input-field` `modal` |
-| 菜单/壳 | `config/menu.tsx`、`config/site.ts`、`components/app-shell.tsx` | — |
+| 菜单/壳 | `config/apps.ts`（`APP_MODULE_IDS` + `APP_MODULE_META`）、`config/menu.tsx`（`MODULE_MENU`）、`config/site.ts`、`components/app-shell.tsx` | — |
 | 各角色范式画廊 | `/ref/*`（索引：`lib/reference/catalog.ts`） | — |
 | Kit 级规范 | `../forge/docs/for-agents/`、`docs/forge-components.md` | `/cases/` |
 
@@ -51,7 +51,7 @@
 - **M2** 🔴 菜单 icon 必须是 `solar-icon-set` 的 **`*BoldDuotone`** 变体、`size={20}`。检查 `config/menu.tsx` 全部 import 与 JSX。
   错误示例：`<UserLinear size={20} />`、`<UsersGroupTwoRoundedBold className="w-5" />`。
   修复：换成对应 BoldDuotone 变体 + `size={20}`，颜色不传（跟 accent）。
-- **M3** 🔴 菜单只能改 `config/menu.tsx`（应用模块另加 `config/apps.ts`），新路由需在 `config/site.ts` 的 `routeShells` 注册（业务页通常 `hideHeader: true`）。检查是否有页面绕开 config 在别处（layout、页面内）拼菜单。漏注册的典型症状：兜底壳页头与页内 h1 叠成两套页头。
+- **M3** 🔴 新模块必须改**菜单三处**：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`（`config/apps.ts` + `config/menu.tsx`）。默认应用种子勾齐新 id。禁止只改 `menu.tsx`。`rbac_menus` 可选，只写目录不进 `APP_MODULE_IDS` 侧栏仍看不见。加菜单后须清 Local Storage `forge-starter:app-registry`（或种子默认勾齐）。无 `{module}:read` 直链业务页必须壳层 `replace` 回工作台，禁止只藏侧栏或停在空态/403 列表。新路由需在 `config/site.ts` 的 `routeShells` 注册（业务页通常 `hideHeader: true`）。检查是否有页面绕开 config 在别处（layout、页面内）拼菜单。漏注册的典型症状：兜底壳页头与页内 h1 叠成两套页头。
 - **M4** 🔴 不得出现 `href: "#"` 或指向不存在路由的占位菜单项。逐个 `href` 与 `app/(app)/**` 目录对账。
 - **M5** 🟡 菜单结构合理性：模块分组、顺序、命名是否符合业务动线；个人资料/安全设置类应走 profile 菜单而非主菜单。给出建议，标注"建议复核"。
 - **M6** 🔴 菜单 `href` 尾斜杠风格与样板一致（样板用 `"/accounts/"` 带尾斜杠）。
@@ -215,7 +215,9 @@ Starter 业务页默认 `hideHeader: true`，正文页头走 **A 或 B**。不�
 - 2026-08-25：mock 演示模块（无数据库）缺 `?create=1` 深链、创建成功后不自动开详情弹窗，均判"合理低配"（与 users/roles 先例一致）；接真实 API 的模块仍按 R4/F5 原文执行。
 - 2026-08-25：本审计只覆盖规范符合性，不覆盖功能正确性（NaN 边界、分页越界等逻辑 bug 属开发自测与 code review 范畴）。
 - 2026-09-02：Kit `@forge-ui-official/core@0.1.11` 已默认 soft。业务页状态列改回 `StatusBadge`；`StatusText` 弃用。权限/角色等类目仍用纯文本。
-- 2026-09-02：审批中心是临时 new-module demo，已从公共 starter 删除。轻详情对照 `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=`，不要指向已删的 approvals 文件。
+- 2026-09-12：轻详情对照 `/ref/detail-modal` + `Modal` + `?id=`（**暂无第二业务样板**，不要指向已删的 approvals）。
+- 2026-09-12：新菜单必须写**菜单三处**（`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`）；默认应用勾齐新 id；`rbac_menus` 只是目录。加完清 `forge-starter:app-registry`。侧栏再按登录角色 `:read` 过滤。
+- 2026-09-12：审批中心再次从公共 starter 删除，勿当轻样板对照。
 - 2026-09-09：审计必须先定角色再选对照页（skill 第 0 步）。`accounts` 不是全站基线；卡片列表对照 `/ref/list-cards`，看板对照 dashboard / ecommerce-2。L4/C2 按所选角色适用，不因「不像 accounts」打红线。
 - 2026-09-09：重写 **H1**、收紧 **H2/H5**、新增 **H6**：`PageHeader`（AppLayout 顶栏）≠ `PageTitleToolbar`（正文页头+面包屑）。由衍生仓详情误把 `PageHeader` 当业务页头、包白卡片反哺。core `0.1.9` 无 `variant`/`breadcrumbItems` 不算 B 违规。
 - 2026-09-09：新增 **L7**：`DataTable` 列宽与剩宽分配。由衍生仓列表审计漏检（首列 `flex` 挤爆日期列）及错误修复（把 `flex` 挪到末列造成右侧空洞）反哺。L6 只管卡片密度，不覆盖本条。

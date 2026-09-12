@@ -3,13 +3,13 @@
 **后端切片**与 **页面切片**分开做。  
 Skill：`forge-starter-new-module` → `forge-starter-new-page`。
 
-## 双样板（无默认）
+## 样板（无默认）
 
 | 样板 | UI | 适合 |
 |------|-----|------|
 | `accounts` | 列表 + 表单弹窗 + **全页详情** | 重内容、档案、多区块 |
-| 轻详情 | `/ref/detail-modal` + `Modal` + `?id=` | 字段少、处理完回列表 |
 
+轻详情（字段少、看完回列表）**暂无第二业务样板**，对照 `/ref/detail-modal` + 本仓 `Modal` + `?id=`。  
 选型：用户指定 → 听用户；否则按内容；拿不准 → 问。理由写进交付说明。
 
 ## A. 后端切片（new-module）
@@ -25,6 +25,7 @@ components/<resource>-store.tsx   # 可选；列表页若 client fetch 需要
 
 - session 守卫、`jsonOk`/`jsonError`、Zod、中文错误  
 - **不**在此 skill 里规定详情全页或弹窗  
+- **API 齐 ≠ 侧栏有**；挂应用模块是 new-page 的菜单三处
 
 ## B. 页面切片（new-page）
 
@@ -33,16 +34,20 @@ components/<resource>-store.tsx   # 可选；列表页若 client fetch 需要
 ```text
 app/(app)/<resource>/page.tsx     # 列表（collection）
 components/<resource>-form-dialog.tsx
-config/menu.tsx
-config/site.ts                    # hideHeader: true
+# 菜单三处（缺一不可）
+config/apps.ts                    # 1 APP_MODULE_IDS  2 APP_MODULE_META
+config/menu.tsx                   # 3 MODULE_MENU
+config/site.ts                    # hideHeader: true（页头，不是侧栏）
 ```
 
-### 详情弹窗（抄 `/ref/detail-modal`，宿主用本仓 Modal）
+默认应用种子勾齐新 id。`rbac_menus` 可选，只写目录不进 `APP_MODULE_IDS` 侧栏仍看不见。  
+加菜单后须清 Local Storage **`forge-starter:app-registry`**（或种子默认勾齐）。
+
+### 详情弹窗（抄 `/ref/detail-modal`，宿主用本仓 Modal；暂无第二业务样板）
 
 ```text
 components/<resource>-detail-dialog.tsx
-# 行点击或 ?id= 打开；可选 [id]/page.tsx redirect → ?id=
-# 不要去找已删除的 approvals
+# 行点击或 ?id= 打开；[id]/page.tsx redirect → ?id=
 ```
 
 ### 全页详情（抄 accounts）
@@ -91,4 +96,7 @@ Modal 宿主：`components/ui/modal.tsx`。
 - [ ] 先有 API/service，再接页面（或同会话严格按此序）  
 - [ ] 详情形态有选择与理由  
 - [ ] 筛选单行  
-- [ ] typecheck + 浏览器主路径  
+- [ ] **菜单三处**：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用勾齐新 id  
+- [ ] 加菜单后已清 Local Storage `forge-starter:app-registry`（或种子默认勾齐）  
+- [ ] 无 `{module}:read` 直链业务页会 `replace` 回工作台（壳层，不只藏侧栏）  
+- [ ] typecheck + 浏览器从侧栏点通  

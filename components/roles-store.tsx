@@ -11,6 +11,7 @@ import {
 } from "react";
 import { apiFetch, parseApiJson } from "@/lib/api/browser";
 import type { RoleInput, RoleRecord } from "@/lib/roles/types";
+import { useAccess } from "@/components/access-store";
 
 type RolesStoreValue = {
   roles: RoleRecord[];
@@ -32,6 +33,7 @@ type RolesResponse = {
 };
 
 export function RolesStoreProvider({ children }: { children: ReactNode }) {
+  const { ready, canRead } = useAccess();
   const [roles, setRoles] = useState<RoleRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,8 +59,15 @@ export function RolesStoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (!ready) return;
+    if (!canRead("roles")) {
+      setRoles([]);
+      setError(null);
+      setLoading(false);
+      return;
+    }
     void refresh();
-  }, [refresh]);
+  }, [ready, canRead, refresh]);
 
   const getById = useCallback(
     (id: string) => roles.find((item) => item.id === id),

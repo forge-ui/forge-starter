@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { jsonError, jsonOk } from "@/lib/auth/http";
-import { requireSession } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/rbac/access";
 import { createRole, listRoles } from "@/lib/roles/service";
 
 const bodySchema = z.object({
@@ -18,7 +18,7 @@ function dbUnavailable(error: unknown) {
 
 export async function GET() {
   try {
-    const auth = await requireSession();
+    const auth = await requirePermission("roles", "read");
     if (!auth.ok) return auth.response;
     const roles = await listRoles();
     return jsonOk({ roles });
@@ -33,7 +33,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const auth = await requireSession();
+    const auth = await requirePermission("roles", "create");
     if (!auth.ok) return auth.response;
     const json = await request.json();
     const parsed = bodySchema.safeParse(json);

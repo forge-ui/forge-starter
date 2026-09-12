@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import type { AccountInput, AdminAccount } from "@/lib/accounts/types";
+import { useAccess } from "@/components/access-store";
 
 type AccountsStoreValue = {
   accounts: AdminAccount[];
@@ -35,6 +36,7 @@ async function parseJson(res: Response) {
 }
 
 export function AccountsStoreProvider({ children }: { children: ReactNode }) {
+  const { ready, canRead } = useAccess();
   const [accounts, setAccounts] = useState<AdminAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -60,8 +62,15 @@ export function AccountsStoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (!ready) return;
+    if (!canRead("accounts")) {
+      setAccounts([]);
+      setError(null);
+      setLoading(false);
+      return;
+    }
     void refresh();
-  }, [refresh]);
+  }, [ready, canRead, refresh]);
 
   const getById = useCallback(
     (id: string) => accounts.find((item) => item.id === id),

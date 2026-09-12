@@ -1,6 +1,7 @@
 import { getAuthMode } from "@/lib/auth/config";
 import { setSessionCookie } from "@/lib/auth/session";
 import { authenticateUser, toSessionUser } from "@/lib/auth/users";
+import { resolveLoginRoleCode } from "@/lib/rbac/defaults";
 
 export type SignInResult =
   | { ok: true; redirectTo: string; mode: "demo" | "local" }
@@ -14,11 +15,13 @@ export async function signInWithPassword(login: string, password: string): Promi
   const mode = getAuthMode();
   if (mode === "demo") {
     const isEmail = identifier.includes("@");
+    const username = isEmail ? identifier.split("@")[0] || "demo" : identifier.toLowerCase();
     await setSessionCookie({
       id: "demo-user",
-      username: isEmail ? identifier.split("@")[0] || "demo" : identifier.toLowerCase(),
+      username,
       email: isEmail ? identifier.toLowerCase() : `${identifier.toLowerCase()}@demo.local`,
       displayName: isEmail ? identifier.split("@")[0] || "演示用户" : identifier,
+      roleCode: resolveLoginRoleCode(username),
     });
     return { ok: true, mode: "demo", redirectTo: "/dashboard/" };
   }

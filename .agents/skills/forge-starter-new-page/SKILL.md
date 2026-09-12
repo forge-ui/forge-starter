@@ -3,7 +3,8 @@ name: forge-starter-new-page
 description: >
   Add admin UI only in Forge Starter: list, form modal, detail (modal or full
   page), menu entry. Chooses layout by cloning accounts (heavy) or
-  /ref/detail-modal + Modal + ?id= (light). Requires API/store already
+  /ref/detail-modal + Modal + ?id= (light; no second business template).
+  Requires API/store already
   present or created via new-module first.
   Use for dashboard pages or finishing a resource after new-module.
 ---
@@ -22,6 +23,7 @@ description: >
 ## 禁止
 
 - 在本 skill 里从零加 schema/service（应先 new-module）  
+- 只改 `config/menu.tsx` 就声称已挂侧栏（必须写菜单三处）  
 - 两行筛选 pills  
 - 侧栏塞「返回列表」  
 - 写死「默认全页详情」或「默认弹窗」  
@@ -54,7 +56,7 @@ description: >
 | collection 卡片 | `/ref/list-cards` | — |
 | form-modal | `/ref/form-modal` | *-form-dialog |
 | form-page 整页 | `/ref/form-page`（CRM leads/new） | 字段极多时 |
-| detail-modal | `/ref/detail-modal` | `components/ui/modal.tsx` + `?id=` |
+| detail-modal | `/ref/detail-modal` | 暂无第二业务样板（`Modal` + `?id=`） |
 | detail 业务对象 | `/ref/detail` | accounts/[id] |
 | person CRM 人物 | `/ref/person`（john-bushmill） | — |
 | profile 项目成员 | `/ref/profile`（members/[id]） | — |
@@ -85,7 +87,7 @@ description: >
 
 ```text
 用户指定？ → 听用户
-字段少、看完回列表？ → `/ref/detail-modal` + Modal + `?id=`
+字段少、看完回列表？ → `/ref/detail-modal` + Modal + `?id=`（暂无第二业务样板）
 多区块、Tab、档案？ → accounts（全页）
 拿不准？ → 问用户
 ```
@@ -101,7 +103,15 @@ description: >
 - 新建按钮 → form dialog  
 - 详情入口 → 名称/标题列的数据可点击，按已选详情形态打开全页或 `?id=` 弹窗；保留筛选上下文，支持键盘操作和可见焦点。对齐 accounts 的名称单元格，保持普通文字样式，不附加箭头。不要用带箭头的 `CellLink` 作为默认详情入口。
 - 操作列只放编辑、删除等真实业务动作；不要另放箭头/眼睛“查看详情”按钮。无其他动作时不生成操作列。
-- `config/menu.tsx` + `config/site.ts`（`hideHeader: true`）  
+- **菜单三处（缺一不可，侧栏才看得见）**  
+  1. `config/apps.ts`：`APP_MODULE_IDS` 加上新 id  
+  2. `config/apps.ts`：`APP_MODULE_META`（label + href）  
+  3. `config/menu.tsx`：`MODULE_MENU`（`BoldDuotone` `size={20}`）  
+  默认应用种子必须勾齐新 id（`DEFAULT_APP_ENTRIES` 用 `[...APP_MODULE_IDS]`，或把新 id 写进 `modules`）。  
+  `rbac_menus` **可选**：只是目录。只写目录、不进 `APP_MODULE_IDS`，侧栏仍看不见。  
+  加完后清浏览器 Local Storage 键 `forge-starter:app-registry`（或确认种子默认应用已勾齐）；同事旧勾选不会自动出现新项。  
+  业务页另加 `config/site.ts` `routeShells`（通常 `hideHeader: true`）。需要按角色藏菜单时再补 `RBAC_RESOURCES` + 种子 `:read`。  
+  无 `{module}:read` 进页时壳层 `replace` 回工作台（`AppShell` + `moduleIdForPath`），别只藏侧栏或停在空态/403 列表。
 
 ### 表单弹窗
 
@@ -110,9 +120,8 @@ description: >
 
 ### 详情 · 弹窗
 
-- 抄 `/ref/detail-modal`，宿主用 `components/ui/modal.tsx`  
-- 列表行点击打开；可选 `?id=`；`[id]/page` 可 redirect  
-- 不要去找已删除的 approvals  
+- 抄 `/ref/detail-modal`，宿主用 `components/ui/modal.tsx`（暂无第二业务样板）  
+- 列表行点击打开；保留 `?id=`；`[id]/page` redirect → `?id=`  
 
 ### 详情 · 全页
 
@@ -139,7 +148,7 @@ pnpm check   # typecheck + 规范绊线
 
 **浏览器**（必做）：
 
-1. 菜单进入列表  
+1. 从侧栏点进列表（菜单三处已齐、默认应用勾齐；必要时清 `forge-starter:app-registry`）  
 2. 筛选只有一行  
 3. 新建 → 持久化（刷新还在）  
 4. 打开详情（弹窗或全页），主操作可用  
@@ -153,4 +162,6 @@ pnpm check   # typecheck + 规范绊线
 
 - 路由、菜单 label  
 - 详情形态 + 理由  
-- 对照样板：accounts 或 `/ref/detail-modal`  
+- 对照样板：accounts（重）或 `/ref/detail-modal`（轻，暂无第二业务样板）  
+- 菜单三处：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用是否勾齐新 id；是否已清 `forge-starter:app-registry`  
+- 无权限直链是否 `replace` 回工作台（不要只藏侧栏）  

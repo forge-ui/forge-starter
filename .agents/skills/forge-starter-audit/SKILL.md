@@ -45,7 +45,7 @@ description: 页面规范审计。任何业务页面写完/改完后必须执行
 
 选 B 时打开 `/cases/toolbar` 与 CRM/Finance 模板页头，**不要**强行对照 accounts 的 h1，也**不要**对照 `/cases/page-header`（那是壳顶栏）。  
 核 H6：业务 `page.tsx` 是否 `import { PageHeader }`；有则默认违规，除非清单点名的沉浸式工作台。
-轻详情不要去找已删除的 approvals。
+轻详情对照 `/ref/detail-modal`（暂无第二业务样板）。
 
 报告开头必须写出：`角色 / chrome A|B|C / 对照页 / case`。
 

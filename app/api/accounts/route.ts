@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createAdminAccount, listAdminAccounts } from "@/lib/accounts/service";
 import { ACCOUNT_ROLES } from "@/lib/accounts/types";
 import { jsonError, jsonOk } from "@/lib/auth/http";
-import { requireSession } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/rbac/access";
 
 const bodySchema = z.object({
   name: z.string().min(1),
@@ -17,7 +17,7 @@ const bodySchema = z.object({
 
 export async function GET() {
   try {
-    const auth = await requireSession();
+    const auth = await requirePermission("accounts", "read");
     if (!auth.ok) return auth.response;
     const accounts = await listAdminAccounts();
     return jsonOk({ accounts });
@@ -32,7 +32,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const auth = await requireSession();
+    const auth = await requirePermission("accounts", "create");
     if (!auth.ok) return auth.response;
 
     const json = await request.json();

@@ -48,17 +48,17 @@ Coding Agent 是第一开发界面，专注 **Forge 管理后台**：skills 拆�
 | 样板 | 适合 | 路径 |
 |------|------|------|
 | **accounts** | 重详情：Tab、多区块、档案 | 列表 + 表单弹窗 + **全页** `accounts/[id]` |
-| **轻详情** | 字段少、看完回列表 | `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=` |
+| 轻详情 | 字段少、看完回列表 | **暂无第二业务样板**；对照 `/ref/detail-modal` + `Modal` + `?id=` |
 
 用户指定听用户；否则按内容；拿不准就问。  
 禁止 skill 写死「默认全页」或「默认弹窗」。  
-轻详情不要去找已删除的 approvals。文件地图：`docs/module-template.md`。
+文件地图：`docs/module-template.md`。新菜单必须写**菜单三处**（`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`），默认应用种子勾齐新 id；加完清 `forge-starter:app-registry`。无 `{module}:read` 直链业务页壳层 `replace` 回工作台，别只藏侧栏。见 `AGENTS.md`。别只改 `menu.tsx`。
 
 ## 可运行样板
 
 | 路径 | 形态 |
 |------|------|
-| `/accounts` · `/accounts/[id]` | 列表 + 弹窗表单 + **全页详情** |
+| `/accounts` · `/accounts/[id]` | 列表 + 弹窗表单 + **全页详情**（重样板） |
 | `/dashboard` | 工作台 |
 | `/settings/apps` | 应用管理（collection）；资料/改密/系统偏好在头像菜单弹窗 |
 | `/ref/` | 布局参考画廊（真路由，开发默认开、默认不进侧栏） |

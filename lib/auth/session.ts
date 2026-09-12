@@ -13,6 +13,8 @@ export type SessionUser = {
   username: string;
   email: string;
   displayName: string;
+  /** Login-side RBAC role code. Demo resolves from username; local persists on `users.role_code`. */
+  roleCode: string;
 };
 
 function secretKey() {
@@ -24,6 +26,7 @@ export async function createSessionToken(user: SessionUser) {
     username: user.username,
     email: user.email,
     displayName: user.displayName,
+    roleCode: user.roleCode,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(user.id)
@@ -40,8 +43,12 @@ export async function readSessionToken(token: string): Promise<SessionUser | nul
     const email = typeof payload.email === "string" ? payload.email : null;
     const displayName =
       typeof payload.displayName === "string" ? payload.displayName : username;
+    const roleCode =
+      typeof payload.roleCode === "string" && payload.roleCode.trim()
+        ? payload.roleCode.trim()
+        : "super_admin";
     if (!id || !username || !email || !displayName) return null;
-    return { id, username, email, displayName };
+    return { id, username, email, displayName, roleCode };
   } catch {
     return null;
   }

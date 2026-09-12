@@ -11,6 +11,7 @@ import {
 } from "react";
 import { apiFetch, parseApiJson } from "@/lib/api/browser";
 import type { MenuInput, MenuRecord } from "@/lib/menus/types";
+import { useAccess } from "@/components/access-store";
 
 type MenusStoreValue = {
   menus: MenuRecord[];
@@ -32,6 +33,7 @@ type MenusResponse = {
 };
 
 export function MenusStoreProvider({ children }: { children: ReactNode }) {
+  const { ready, canRead } = useAccess();
   const [menus, setMenus] = useState<MenuRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,8 +59,15 @@ export function MenusStoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (!ready) return;
+    if (!canRead("menus")) {
+      setMenus([]);
+      setError(null);
+      setLoading(false);
+      return;
+    }
     void refresh();
-  }, [refresh]);
+  }, [ready, canRead, refresh]);
 
   const getById = useCallback(
     (id: string) => menus.find((item) => item.id === id),

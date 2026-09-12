@@ -8,10 +8,12 @@ import {
   type Team,
 } from "@forge-ui-official/core";
 import { defaultProfile, menuItemsForApp } from "@/config/menu";
+import { useAccess } from "@/components/access-store";
 import {
   APPS_UPDATED_EVENT,
   DEFAULT_APP_ID,
   homePathForApp,
+  moduleIdForPath,
   type AppEntry,
 } from "@/config/apps";
 import { getDefaultAppRegistry } from "@/lib/apps/defaults";
@@ -32,25 +34,18 @@ import {
   type SettingsAccountDialogKind,
 } from "@/components/settings-account-dialog";
 
-type MeResponse = {
-  ok: boolean;
-  user: null | {
-    id: string;
+function profileFromUser(
+  user: {
     username: string;
     email: string;
     displayName: string;
-  };
-};
-
-function profileFromUser(user: {
-  username: string;
-  email: string;
-  displayName: string;
-}): AppLayoutProfile {
+  },
+  roleName?: string,
+): AppLayoutProfile {
   return {
     avatar: `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(user.username)}`,
     name: user.displayName,
-    role: user.email,
+    role: roleName || user.email,
   };
 }
 
@@ -81,6 +76,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const shell = useMemo(() => shellForPath(pathname), [pathname]);
+  const { user, roleName, allowedModules, ready, canRead, refresh: refreshAccess } = useAccess();
   const [profile, setProfile] = useState<AppLayoutProfile>(defaultProfile);
   const [apps, setApps] = useState<AppEntry[]>(() => getDefaultAppRegistry());
   const [activeAppId, setActiveAppId] = useState(DEFAULT_APP_ID);
@@ -126,8 +122,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 
   const shellMenuItems = useMemo(
-    () => menuItemsForApp(activeApp),
-    [activeApp],
+    () => menuItemsForApp(activeApp, allowedModules),
+    [activeApp, allowedModules],
   );
 
   const selectApp = useCallback(
@@ -136,30 +132,20 @@ export function AppShell({ children }: { children: ReactNode }) {
       saveActiveAppId(app.id);
 
       if (app.kind === "internal") {
-        router.push(homePathForApp(app));
+        router.push(homePathForApp(app, allowedModules));
         return;
       }
 
       openAppTarget(app, router);
     },
-    [router],
+    [router, allowedModules],
   );
 
-  const refreshProfile = useCallback(async () => {
-    try {
-      const res = await fetch("/api/auth/me/");
-      const data = (await res.json()) as MeResponse;
-      if (data?.user) {
-        setProfile(profileFromUser(data.user));
-      }
-    } catch {
-      // keep previous profile
-    }
-  }, []);
-
   useEffect(() => {
-    void refreshProfile();
-  }, [refreshProfile, pathname]);
+    if (user) {
+      setProfile(profileFromUser(user, roleName ?? undefined));
+    }
+  }, [user, roleName]);
 
   useEffect(() => {
     function onProfileUpdated(event: Event) {
@@ -171,14 +157,26 @@ export function AppShell({ children }: { children: ReactNode }) {
               ? `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(detail.username)}`
               : prev.avatar,
           name: detail.displayName ?? prev.name,
-          role: detail.email ?? prev.role,
+          role: prev.role,
         }));
       }
-      void refreshProfile();
+      void refreshAccess();
     }
     window.addEventListener(PROFILE_UPDATED_EVENT, onProfileUpdated);
     return () => window.removeEventListener(PROFILE_UPDATED_EVENT, onProfileUpdated);
-  }, [refreshProfile]);
+  }, [refreshAccess]);
+
+  const forbiddenModule = useMemo(() => {
+    if (!ready || allowedModules == null) return null;
+    const moduleId = moduleIdForPath(pathname);
+    if (!moduleId || moduleId === "dashboard") return null;
+    return canRead(moduleId) ? null : moduleId;
+  }, [ready, allowedModules, pathname, canRead]);
+
+  useEffect(() => {
+    if (!forbiddenModule) return;
+    router.replace("/dashboard/");
+  }, [forbiddenModule, router]);
 
   const logout = useCallback(async () => {
     await fetch("/api/auth/logout/", { method: "POST" });
@@ -263,7 +261,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       showDatePicker={false}
       showKebab={false}
     >
-      {children}
+      {forbiddenModule ? null : children}
       <SettingsAccountDialog kind={accountDialog} onClose={() => setAccountDialog(null)} />
       <ToastProvider />
     </AppLayout>

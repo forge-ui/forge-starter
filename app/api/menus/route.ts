@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { jsonError, jsonOk } from "@/lib/auth/http";
-import { requireSession } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/rbac/access";
 import { createMenu, listMenus } from "@/lib/menus/service";
 
 const bodySchema = z.object({
@@ -20,7 +20,7 @@ function dbUnavailable(error: unknown) {
 
 export async function GET() {
   try {
-    const auth = await requireSession();
+    const auth = await requirePermission("menus", "read");
     if (!auth.ok) return auth.response;
     const menus = await listMenus();
     return jsonOk({ menus });
@@ -35,7 +35,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const auth = await requireSession();
+    const auth = await requirePermission("menus", "create");
     if (!auth.ok) return auth.response;
     const json = await request.json();
     const parsed = bodySchema.safeParse(json);

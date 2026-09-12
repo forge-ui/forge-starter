@@ -61,9 +61,9 @@
 | App Shell | `AppLayout`；应用切换器；隐藏未实现的通知/消息 widget |
 | 认证 | 登录、注册、找回、重置、profile 改资料改密 |
 | 工作台 | ecommerce-2 布局，指标接业务账号 |
-| 账号管理 | **CRUD 样板**：DataTable 列表 + Modal 新建编辑 + 详情 + `/api/accounts` |
-| 应用管理 | 应用列表 CRUD；内部应用多选菜单（含角色/菜单/权限）；外链/外部系统认证占位 |
-| 角色 / 菜单 / 权限 | RBAC 演示：列表 + Modal 表单 + 详情弹窗；角色绑定权限；菜单目录对齐侧栏模块 ID |
+| 账号管理 | **重样板**：DataTable 列表 + Modal 新建编辑 + **全页详情** + `/api/accounts` |
+| 应用管理 | 应用列表 CRUD；内部应用多选菜单（`APP_MODULE_IDS`）；外链/外部系统认证占位 |
+| 角色 / 菜单 / 权限 | RBAC 目录：列表 + Modal；侧栏 = 菜单三处 ∩ 应用勾选 ∩ 角色 `:read`。种子角色见 `docs/setup.md`（demo 未识别用户名 / local 默认 = 超级管理员） |
 | Agent skills | `.agents/skills/*` |
 
 ### 4.1 数据边界
@@ -72,8 +72,9 @@
 |------|------|------|
 | 登录用户 | Postgres `users` | 认证 |
 | 业务账号 | Postgres `admin_accounts` | 账号管理 CRUD 样板 |
-| 角色 / 权限 / 菜单 | Postgres `rbac_roles` · `rbac_permissions` · `rbac_menus` | RBAC 演示目录；侧栏仍由 `config/menu.tsx` + 应用 `modules` 过滤 |
-| 应用注册表 | localStorage | 侧栏应用切换（非登录库） |
+| 角色 / 权限 / 菜单 | Postgres `rbac_roles` · `rbac_permissions` · `rbac_menus` | RBAC 目录；侧栏 = 模块白名单 ∩ 应用勾选 ∩ 角色 `:read` |
+| 登录用户角色 | `users.role_code`（local）；demo 按用户名映射种子角色 | 侧栏可见模块 |
+| 应用注册表 | localStorage `forge-starter:app-registry` | 侧栏应用切换（非登录库） |
 
 ### 4.2 Non-goals
 

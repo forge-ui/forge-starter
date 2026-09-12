@@ -3,6 +3,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { getDb } from "@/lib/db";
 import { passwordResetTokens, users, type User } from "@/lib/db/schema";
 import { hashPassword, verifyPassword } from "./password";
+import { resolveLoginRoleCode } from "@/lib/rbac/defaults";
 import type { SessionUser } from "./session";
 
 function normalizeEmail(email: string) {
@@ -19,6 +20,7 @@ export function toSessionUser(user: User): SessionUser {
     username: user.username,
     email: user.email,
     displayName: user.displayName,
+    roleCode: user.roleCode || resolveLoginRoleCode(user.username),
   };
 }
 
@@ -58,6 +60,7 @@ export async function createUser(input: {
         email,
         passwordHash,
         displayName: input.displayName?.trim() || username,
+        roleCode: resolveLoginRoleCode(username),
       })
       .returning();
     return row;

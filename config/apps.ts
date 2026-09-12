@@ -18,11 +18,11 @@ export type AppAuthMode = "none" | "passthrough" | "oidc" | "platform";
 /**
  * Built-in nav modules for internal apps.
  *
- * Sidebar contract:
- * - Routes + icons live in `config/menu.tsx` (`MODULE_MENU`).
- * - An internal app's `modules` chooses which of these appear.
- * - The 菜单 CRUD (`rbac_menus`) catalogs the same codes (plus optional extras).
- *   Extra rows do **not** render in the sidebar until added here and in MODULE_MENU.
+ * Sidebar contract（菜单三处，缺一不可）:
+ * - `APP_MODULE_IDS` + `APP_MODULE_META`（本文件）+ `MODULE_MENU`（`config/menu.tsx`）。
+ * - Default app seed must include the new id (`modules: [...APP_MODULE_IDS]`).
+ * - `rbac_menus` is optional catalog only; catalog-only rows stay hidden.
+ * - Login role then hides modules the user cannot `:read`.
  */
 export const APP_MODULE_IDS = [
   "dashboard",
@@ -37,6 +37,21 @@ export type AppModuleId = (typeof APP_MODULE_IDS)[number];
 
 export function isAppModuleId(value: string): value is AppModuleId {
   return (APP_MODULE_IDS as readonly string[]).includes(value);
+}
+
+/** Map a logged-in app path to its module. `/ref/**` and personal settings are not gated. */
+export function moduleIdForPath(pathname: string): AppModuleId | null {
+  const normalized =
+    pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+  if (!normalized || normalized === "/ref" || normalized.startsWith("/ref/")) return null;
+  if (normalized === "/settings/profile" || normalized === "/settings/security" || normalized === "/settings/notifications") {
+    return null;
+  }
+  const matches = APP_MODULE_IDS.filter((id) => {
+    const href = APP_MODULE_META[id].href.replace(/\/$/, "");
+    return normalized === href || normalized.startsWith(`${href}/`);
+  });
+  return matches.sort((a, b) => APP_MODULE_META[b].href.length - APP_MODULE_META[a].href.length)[0] ?? null;
 }
 
 /** @deprecated kept for localStorage migration only */
@@ -163,11 +178,17 @@ export function modulesLabel(app: AppEntry): string {
     .join("、") || "—";
 }
 
-export function homePathForApp(app: AppEntry): string {
+export function homePathForApp(
+  app: AppEntry,
+  allowedModules?: readonly AppModuleId[] | null,
+): string {
   if (app.kind === "internal") {
     const mods = modulesForApp(app);
-    const first = mods[0] ?? "dashboard";
-    return APP_MODULE_META[first].href;
+    const first =
+      (allowedModules?.length
+        ? mods.find((id) => allowedModules.includes(id)) ?? allowedModules[0]
+        : mods[0]) ?? "dashboard";
+    return APP_MODULE_META[first]?.href ?? "/dashboard/";
   }
   return app.href?.trim() || "/dashboard/";
 }

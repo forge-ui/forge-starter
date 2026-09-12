@@ -15,6 +15,8 @@ export const users = pgTable(
     email: text("email").notNull(),
     passwordHash: text("password_hash").notNull(),
     displayName: text("display_name").notNull(),
+    /** Login-side RBAC role code (`rbac_roles.code`). Not the business `admin_accounts.role`. */
+    roleCode: text("role_code").notNull().default("super_admin"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
   },
@@ -61,9 +63,9 @@ export const adminAccounts = pgTable(
 );
 
 /**
- * RBAC demo tables — not login users.
- * Sidebar still reads `config/menu.tsx` + `AppEntry.modules`;
- * these rows are the admin catalog (roles / permissions / menus).
+ * RBAC catalog — not login users.
+ * Sidebar = `config/menu.tsx` ∩ 当前应用 `modules` ∩ 登录用户角色的 `:read` 权限。
+ * `rbac_menus` 只是目录：自定义行不会进侧栏，除非同时写入 APP_MODULE_IDS + MODULE_MENU。
  */
 export const rbacRoles = pgTable(
   "rbac_roles",

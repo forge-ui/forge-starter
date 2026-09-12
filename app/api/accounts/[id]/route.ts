@@ -6,7 +6,7 @@ import {
 } from "@/lib/accounts/service";
 import { ACCOUNT_ROLES } from "@/lib/accounts/types";
 import { jsonError, jsonOk } from "@/lib/auth/http";
-import { requireSession } from "@/lib/auth/session";
+import { requirePermission } from "@/lib/rbac/access";
 
 const bodySchema = z.object({
   name: z.string().min(1),
@@ -23,7 +23,7 @@ type Ctx = { params: Promise<{ id: string }> };
 
 export async function GET(_request: Request, ctx: Ctx) {
   try {
-    const auth = await requireSession();
+    const auth = await requirePermission("accounts", "read");
     if (!auth.ok) return auth.response;
     const { id } = await ctx.params;
     const account = await getAdminAccountById(id);
@@ -37,7 +37,7 @@ export async function GET(_request: Request, ctx: Ctx) {
 
 export async function PATCH(request: Request, ctx: Ctx) {
   try {
-    const auth = await requireSession();
+    const auth = await requirePermission("accounts", "update");
     if (!auth.ok) return auth.response;
     const { id } = await ctx.params;
     const json = await request.json();
@@ -65,7 +65,7 @@ export async function PATCH(request: Request, ctx: Ctx) {
 
 export async function DELETE(_request: Request, ctx: Ctx) {
   try {
-    const auth = await requireSession();
+    const auth = await requirePermission("accounts", "delete");
     if (!auth.ok) return auth.response;
     const { id } = await ctx.params;
     await deleteAdminAccount(id);
