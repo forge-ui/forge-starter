@@ -192,7 +192,7 @@ Starter 业务页默认 `hideHeader: true`，正文页头走 **A 或 B**。不�
 
 ## 样板债（禁止照抄的已知问题）
 
-1. `accounts/page.tsx`、`accounts/[id]/page.tsx`、`dashboard/page.tsx`、`settings/apps/page.tsx` 多列 `sortable: true` 但无排序逻辑——违反 C3，新代码禁止照抄。
+1. ~~业务表 `sortable: true` 无排序~~ **已修**（2026-09-11）。`/ref/**` 画廊若仍带假排序，抄范式时不要带回。
 2. `dashboard/page.tsx` 图表 series/图例仍用裸 hex（`#2563eb` 等）与 `bg-[#…]` 任意值 class——违反 V4，新代码用 `var(--fg-*)`。
 3. `/ref/**` 画廊多页存在 Tailwind 默认色（amber/emerald 等）——违反 V1，抄 `/ref` 范式时颜色必须换成 `fg-*`（绊线对 `/ref` 降级为警告）。
 4. `account-form-dialog.tsx` 的校验错误为表单级 `<p>` 汇总文案——违反 F3，新代码必须字段级 `TextField state="error" + errorMessage`，不得以"对齐样板"为由放行。资料/改密弹窗已按字段级错误改过。
@@ -201,7 +201,8 @@ Starter 业务页默认 `hideHeader: true`，正文页头走 **A 或 B**。不�
 
 ## 决策记录
 
-- 2026-09-11：头像菜单「编辑资料 / 修改密码 / 系统设置」改为 `settings-account-dialog` form-modal，停在当前页。旧 `/settings/profile|security|notifications` 只 redirect 到 `?dialog=`。
+- 2026-09-11：收一轮样板债：业务表去掉假 `sortable`；登录/注册文案跟 `AUTH_MODE`；详情顶栏/返回进 `routeShells`；旧设置页只跳 `/settings/apps/`，不再用 `?dialog=`。
+- 2026-09-11：头像菜单「编辑资料 / 修改密码 / 系统设置」改为 `settings-account-dialog` form-modal，停在当前页。
 - 2026-09-11：L9 补用法：视口断点 ≠ 内容宽；`gap` 是像素；嵌套栅格相对父列，主栏内禁止再套页面 `4+8`。账号详情概览改为主栏内 `5+7`。
 - 2026-09-11：新增 **L9**：页面分栏用 Kit `Grid`/`GridItem`（npm `0.1.13`）。未导出则不适用，禁止虚构 import。不把 `className="grid"` 写进绊线。一维工具带仍 Flex。
 - 2026-09-10：新增 **C10**：详情指标卡不得只重复本页已有字段。由衍生仓详情侧栏进度卡（数字与阶段列表重复、subtitle 抄行业）漏检反哺。

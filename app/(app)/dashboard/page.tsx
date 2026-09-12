@@ -12,6 +12,7 @@ import {
   AltArrowRightLinear,
   ArrowRightUpLinear,
   BoxBoldDuotone,
+  PenLinear,
 } from "solar-icon-set";
 import {
   BarChartStatCard,
@@ -25,6 +26,7 @@ import {
   DataTable,
   Grid,
   GridItem,
+  IconButton,
   KebabMenu,
   LineChartStatCard,
   ListGroup,
@@ -74,7 +76,6 @@ export default function DashboardPage() {
       {
         key: "user",
         header: "账号",
-        sortable: true,
         flex: true,
         render: (row) => (
           <button type="button" className="text-left" onClick={() => router.push(`/accounts/${row.id}/`)}>
@@ -122,13 +123,15 @@ export default function DashboardPage() {
         header: "",
         width: "w-[60px]",
         render: (row) => (
-          <KebabMenu
-            accent={siteConfig.accent}
-            items={[
-              { label: "查看", onSelect: () => router.push(`/accounts/${row.id}/`) },
-              { label: "编辑", onSelect: () => router.push(`/accounts/?edit=${row.id}`) },
-            ]}
-          />
+          <IconButton
+            variant="ghost"
+            shape="square"
+            size="sm"
+            aria-label="编辑"
+            onClick={() => router.push(`/accounts/?edit=${row.id}`)}
+          >
+            <PenLinear size={16} />
+          </IconButton>
         ),
       },
     ],

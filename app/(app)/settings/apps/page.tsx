@@ -100,7 +100,6 @@ export default function SettingsAppsPage() {
       {
         key: "name",
         header: "应用",
-        sortable: true,
         flex: true,
         // Avoid CellText (flex-1) beside badges — it shoves badges to the cell edge.
         render: (row) => (

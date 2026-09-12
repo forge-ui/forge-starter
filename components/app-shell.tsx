@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   AppLayout,
   type AppLayoutProfile,
@@ -30,12 +30,6 @@ import {
   SettingsAccountDialog,
   type SettingsAccountDialogKind,
 } from "@/components/settings-account-dialog";
-
-const ACCOUNT_DIALOG_KINDS = ["profile", "security", "notifications"] as const;
-
-function isAccountDialogKind(value: string | null): value is SettingsAccountDialogKind {
-  return ACCOUNT_DIALOG_KINDS.includes(value as SettingsAccountDialogKind);
-}
 
 type MeResponse = {
   ok: boolean;
@@ -85,7 +79,6 @@ function openAppTarget(app: AppEntry, router: ReturnType<typeof useRouter>) {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const shell = useMemo(() => shellForPath(pathname), [pathname]);
   const [profile, setProfile] = useState<AppLayoutProfile>(defaultProfile);
   const [apps, setApps] = useState<AppEntry[]>([]);
@@ -146,10 +139,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         return;
       }
 
-      // link / external
-      if (app.authMode === "platform" || app.authMode === "passthrough" || app.authMode === "oidc") {
-        // Placeholder: real SSO later; still navigate for demo
-      }
       openAppTarget(app, router);
     },
     [router],
@@ -246,16 +235,6 @@ export function AppShell({ children }: { children: ReactNode }) {
     return () => document.removeEventListener("click", onDocumentClick, true);
   }, [logout, selectApp, apps]);
 
-  const dialogParam = searchParams.get("dialog");
-  useEffect(() => {
-    if (!isAccountDialogKind(dialogParam)) return;
-    setAccountDialog(dialogParam);
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("dialog");
-    const qs = params.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname);
-  }, [dialogParam, pathname, router, searchParams]);
-
   return (
     <AppLayout
       mode="light"
@@ -269,16 +248,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       profile={profile}
       hideSidebarWidgets
       pageTitle={shell.title}
-      pageHeaderVariant={
-        /\/accounts\/[^/]+\/?$/.test(pathname) && !pathname.endsWith("/accounts/")
-          ? "detail"
-          : "home"
-      }
-      onBack={
-        /\/accounts\/[^/]+/.test(pathname) && !pathname.endsWith("/accounts/")
-          ? () => router.push("/accounts/")
-          : undefined
-      }
+      pageHeaderVariant={shell.headerVariant ?? "home"}
+      onBack={shell.backHref ? () => router.push(shell.backHref!) : undefined}
       primaryAction={
         shell.primaryAction
           ? {

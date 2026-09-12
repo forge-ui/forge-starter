@@ -122,7 +122,6 @@ function AccountsPageContent() {
       {
         key: "name",
         header: "账号",
-        sortable: true,
         width: "w-60",
         render: (row) => (
           <button
@@ -148,7 +147,6 @@ function AccountsPageContent() {
       {
         key: "role",
         header: "角色",
-        sortable: true,
         width: "w-32",
         render: (row) => <CellText>{row.role}</CellText>,
       },
@@ -161,14 +159,12 @@ function AccountsPageContent() {
       {
         key: "loginCount",
         header: "登录次数",
-        sortable: true,
         width: "w-28",
         render: (row) => <CellText>{row.loginCount.toLocaleString()}</CellText>,
       },
       {
         key: "status",
         header: "状态",
-        sortable: true,
         width: "w-28",
         render: (row) => {
           const meta = ACCOUNT_STATUS_META[row.status as AccountStatus];
