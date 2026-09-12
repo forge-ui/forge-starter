@@ -31,10 +31,30 @@ Compose 默认库与 `.env.example` 一致：`postgresql://forge:forge@127.0.0.1
 | | `AUTH_MODE=demo`（默认） | `AUTH_MODE=local` |
 |--|--------------------------|-------------------|
 | 登录 | 任意用户名/邮箱 + 密码即可进后台 | 走 Postgres `users` 表，需先注册 |
-| 侧栏角色 | 用户名 `operator` / `auditor` / `readonly` 按种子角色藏菜单；其余为超级管理员（全开）。无库时回退种子授权 | `users.role_code`（默认 `super_admin`）；注册时若用户名是种子角色码则写入该码。改角色需改库字段，不是业务账号 `admin_accounts.role` |
+| 侧栏角色 | 见下方种子角色表。用户名 `admin` / `operator` / `auditor` / `readonly`（及中文别名）映射种子角色；**其余用户名默认超级管理员（全开）**。无库时回退种子授权 | `users.role_code`（**默认 `super_admin`**）；注册时若用户名是种子角色码则写入该码。改角色需改库字段，不是业务账号 `admin_accounts.role` |
 | `AUTH_SECRET` | 未设时用内置演示密钥 | **必填**，至少 16 位（`.env.example` 建议更长） |
 | 业务 CRUD | **仍要** `DATABASE_URL` + `pnpm db:push` | 同左 |
 | 登录守卫 | 默认不强制（可用 `AUTH_GUARD=true` 打开） | 默认强制登录 |
+
+### 种子角色与侧栏（管理员 / 合理默认）
+
+侧栏可见 = **菜单三处** ∩ 当前应用勾选 ∩ 角色 `{module}:read`。无 `:read` 的模块不出现。不是完整 IAM（没有用户-角色管理 UI）。
+
+| 角色码 | 演示登录用户名（及别名） | 侧栏可见 | 写操作 |
+|--------|--------------------------|----------|--------|
+| `super_admin` | `admin` / `super_admin` / `管理员`；**任意未识别用户名** | 全部模块 | 全部 |
+| `operator` | `operator` / `运营` | 工作台、账号、审批、应用 | 账号 / 审批可写；无 RBAC 目录 |
+| `auditor` | `auditor` / `审计` | 全部模块 | 只读（无发起/通过/改配置） |
+| `readonly` | `readonly` / `只读` | 工作台、账号 | 无 |
+
+管理员默认：
+
+- **demo**：用户名对不上上表 → `super_admin`，方便开箱试用。
+- **local**：`users.role_code` 默认 `super_admin`；注册用户名若是种子角色码则写入该码。
+- 库里没有该角色、或读库失败 → 回退该码的种子授权；未知码回退超级管理员。
+- 停用角色 → 侧栏为空、权限为空。
+
+API 一律先 `requireSession`（未登录 401）。账号 / 审批 / 角色 / 菜单 / 权限再加 `requirePermission`（无权限 403）。无 `:read` 的模块 store 不预拉，避免工作台刷 403。
 
 `demo` **只**绕过登录用户库，**不**提供业务表内存存储。账号管理等 CRUD 没有 Postgres 跑不起来。
 

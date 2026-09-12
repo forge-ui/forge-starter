@@ -11,6 +11,7 @@ import {
 } from "react";
 import { apiFetch, parseApiJson } from "@/lib/api/browser";
 import type { AppModuleId } from "@/config/apps";
+import type { RbacAction, RbacResource } from "@/lib/rbac/constants";
 
 type AccessUser = {
   id: string;
@@ -26,6 +27,7 @@ type AccessValue = {
   roleCode: string | null;
   allowedModules: AppModuleId[] | null;
   canRead: (moduleId: AppModuleId) => boolean;
+  can: (resource: RbacResource, action: RbacAction) => boolean;
   refresh: () => Promise<void>;
 };
 
@@ -35,6 +37,7 @@ type MeResponse = {
   user?: AccessUser | null;
   role?: { code: string; name: string };
   allowedModules?: AppModuleId[];
+  permissions?: string[];
 };
 
 export function AccessStoreProvider({ children }: { children: ReactNode }) {
@@ -43,6 +46,7 @@ export function AccessStoreProvider({ children }: { children: ReactNode }) {
   const [roleName, setRoleName] = useState<string | null>(null);
   const [roleCode, setRoleCode] = useState<string | null>(null);
   const [allowedModules, setAllowedModules] = useState<AppModuleId[] | null>(null);
+  const [permissions, setPermissions] = useState<string[]>([]);
 
   const refresh = useCallback(async () => {
     try {
@@ -53,15 +57,18 @@ export function AccessStoreProvider({ children }: { children: ReactNode }) {
         setRoleName(data.role?.name ?? null);
         setRoleCode(data.role?.code ?? null);
         setAllowedModules(data.allowedModules ?? []);
+        setPermissions(data.permissions ?? []);
       } else {
         setUser(null);
         setRoleName(null);
         setRoleCode(null);
         setAllowedModules([]);
+        setPermissions([]);
       }
     } catch {
       setUser(null);
       setAllowedModules([]);
+      setPermissions([]);
     } finally {
       setReady(true);
     }
@@ -76,9 +83,15 @@ export function AccessStoreProvider({ children }: { children: ReactNode }) {
     [allowedModules],
   );
 
+  const can = useCallback(
+    (resource: RbacResource, action: RbacAction) =>
+      permissions.includes(`${resource}:${action}`),
+    [permissions],
+  );
+
   const value = useMemo(
-    () => ({ ready, user, roleName, roleCode, allowedModules, canRead, refresh }),
-    [ready, user, roleName, roleCode, allowedModules, canRead, refresh],
+    () => ({ ready, user, roleName, roleCode, allowedModules, canRead, can, refresh }),
+    [ready, user, roleName, roleCode, allowedModules, canRead, can, refresh],
   );
 
   return <AccessContext.Provider value={value}>{children}</AccessContext.Provider>;

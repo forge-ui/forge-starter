@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button, DescriptionItem, StatusBadge, TextArea } from "@forge-ui-official/core";
 import { Modal } from "@/components/ui/modal";
 import { siteConfig } from "@/config/site";
+import { useAccess } from "@/components/access-store";
 import { useApprovalsStore } from "@/components/approvals-store";
 import { toast } from "@/lib/toast";
 import { apiFetch, parseApiJson } from "@/lib/api/browser";
@@ -61,7 +62,9 @@ type Props = {
 };
 
 export function ApprovalDetailDialog({ approvalId, onClose }: Props) {
+  const { can } = useAccess();
   const { me, getById, decide, cancel } = useApprovalsStore();
+  const canUpdate = can("approvals", "update");
   const cached = approvalId ? getById(approvalId) : undefined;
   const [item, setItem] = useState<ApprovalRequest | null>(cached ?? null);
   const [comment, setComment] = useState("");
@@ -94,12 +97,14 @@ export function ApprovalDetailDialog({ approvalId, onClose }: Props) {
   }, [approvalId, getById]);
 
   const canApprove =
-    item
+    canUpdate
+    && item
     && item.status === "pending"
     && me
     && item.applicantUsername !== me;
   const canCancel =
-    item
+    canUpdate
+    && item
     && item.status === "pending"
     && me
     && item.applicantUsername === me;

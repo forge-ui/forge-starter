@@ -64,7 +64,7 @@
 | 账号管理 | **重样板**：DataTable 列表 + Modal 新建编辑 + **全页详情** + `/api/accounts` |
 | 审批中心 | **轻样板**：列表 + Modal 发起/详情 + `/api/approvals` |
 | 应用管理 | 应用列表 CRUD；内部应用多选菜单（`APP_MODULE_IDS`）；外链/外部系统认证占位 |
-| 角色 / 菜单 / 权限 | RBAC 目录：列表 + Modal；侧栏再按登录用户角色 `:read` 过滤 |
+| 角色 / 菜单 / 权限 | RBAC 目录：列表 + Modal；侧栏 = 菜单三处 ∩ 应用勾选 ∩ 角色 `:read`。种子角色见 `docs/setup.md`（demo 未识别用户名 / local 默认 = 超级管理员） |
 | Agent skills | `.agents/skills/*` |
 
 ### 4.1 数据边界

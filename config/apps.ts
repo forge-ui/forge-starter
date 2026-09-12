@@ -18,11 +18,10 @@ export type AppAuthMode = "none" | "passthrough" | "oidc" | "platform";
 /**
  * Built-in nav modules for internal apps.
  *
- * Sidebar contract:
- * - Routes + icons live in `config/menu.tsx` (`MODULE_MENU`).
- * - An internal app's `modules` chooses which of these appear.
- * - The 菜单 CRUD (`rbac_menus`) catalogs the same codes (plus optional extras).
- *   Extra rows do **not** render in the sidebar until added here and in MODULE_MENU.
+ * Sidebar contract（菜单三处，缺一不可）:
+ * - `APP_MODULE_IDS` + `APP_MODULE_META`（本文件）+ `MODULE_MENU`（`config/menu.tsx`）。
+ * - Default app seed must include the new id (`modules: [...APP_MODULE_IDS]`).
+ * - `rbac_menus` is optional catalog only; catalog-only rows stay hidden.
  * - Login role then hides modules the user cannot `:read`.
  */
 export const APP_MODULE_IDS = [
