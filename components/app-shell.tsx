@@ -27,6 +27,10 @@ import {
   type ProfileUpdatedDetail,
 } from "@/lib/auth/profile-events";
 import { ToastProvider } from "@/components/ui/toast-provider";
+import {
+  SettingsAccountDialog,
+  type SettingsAccountDialogKind,
+} from "@/components/settings-account-dialog";
 
 type MeResponse = {
   ok: boolean;
@@ -80,6 +84,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<AppLayoutProfile>(defaultProfile);
   const [apps, setApps] = useState<AppEntry[]>(() => getDefaultAppRegistry());
   const [activeAppId, setActiveAppId] = useState(DEFAULT_APP_ID);
+  const [accountDialog, setAccountDialog] = useState<SettingsAccountDialogKind | null>(null);
 
   const syncRegistry = useCallback(() => {
     const list = loadAppRegistry();
@@ -135,10 +140,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         return;
       }
 
-      // link / external
-      if (app.authMode === "platform" || app.authMode === "passthrough" || app.authMode === "oidc") {
-        // Placeholder: real SSO later; still navigate for demo
-      }
       openAppTarget(app, router);
     },
     [router],
@@ -201,15 +202,15 @@ export function AppShell({ children }: { children: ReactNode }) {
           return;
         }
         if (label.includes("编辑资料")) {
-          router.push("/settings/profile/");
+          setAccountDialog("profile");
           return;
         }
         if (label.includes("修改密码")) {
-          router.push("/settings/security/");
+          setAccountDialog("security");
           return;
         }
         if (label.includes("系统设置")) {
-          router.push("/settings/notifications/");
+          setAccountDialog("notifications");
         }
         return;
       }
@@ -233,7 +234,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
     document.addEventListener("click", onDocumentClick, true);
     return () => document.removeEventListener("click", onDocumentClick, true);
-  }, [logout, router, selectApp, apps]);
+  }, [logout, selectApp, apps]);
 
   return (
     <AppLayout
@@ -248,16 +249,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       profile={profile}
       hideSidebarWidgets
       pageTitle={shell.title}
-      pageHeaderVariant={
-        /\/accounts\/[^/]+\/?$/.test(pathname) && !pathname.endsWith("/accounts/")
-          ? "detail"
-          : "home"
-      }
-      onBack={
-        /\/accounts\/[^/]+/.test(pathname) && !pathname.endsWith("/accounts/")
-          ? () => router.push("/accounts/")
-          : undefined
-      }
+      pageHeaderVariant={shell.headerVariant ?? "home"}
+      onBack={shell.backHref ? () => router.push(shell.backHref!) : undefined}
       primaryAction={
         shell.primaryAction
           ? {
@@ -271,6 +264,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       showKebab={false}
     >
       {children}
+      <SettingsAccountDialog kind={accountDialog} onClose={() => setAccountDialog(null)} />
       <ToastProvider />
     </AppLayout>
   );

@@ -46,15 +46,16 @@
 
 | 页面/业务意图 | 先用这些组件 | Starter 抄谁 | monorepo case（查 props） |
 |---------------|--------------|--------------|---------------------------|
-| 列表、管理 | `DataTable` `Button` `ButtonGroup` `TextField` `StatusBadge` `Breadcrumbs` `IconButton` `PlusIcon` | `accounts/page` | `table` `tab` `toolbar` `button-link` |
-| 筛选条 | **单行** `ButtonGroup` + `TextField`（搜索） | 同上 | `tab` `input-field` |
+| 列表、管理 | `DataTable` `StatusBadge` `Button`；页头见下行 | `accounts/page` 或官方 wallets/customers | `table` `toolbar` `button-link` |
+| 列表页头 + 工具带 | **任选一套**：Starter `h1`+`Breadcrumbs`+`Button` 再单行 `ButtonGroup`+`TextField`；**或** Kit `PageTitleToolbar` + `Toolbar`/`ToolbarSearchInput`/`ToolbarPillTabs` | 同上 | `toolbar` |
+| 筛选条 | 一条工具带，禁止两行 pills。Starter：`ButtonGroup`+`TextField`。官方：`Toolbar`+`ToolbarSearchInput` | 同上 | `tab` `input-field` `toolbar` |
 | 新建/编辑弹窗 | `TextField` `TextArea` `SelectOption` + 本仓 `Modal` | `account-form-dialog` | `input-field` `modal` |
 | 轻详情（看完回列表） | `StatusBadge` `DescriptionItem`/`字段行` + `Modal` 底栏按钮 | `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=` | `list` `modal` |
-| 重详情（档案） | `Breadcrumbs` `StatusBadge` `StatCard` `TabBar` `DataTable` 侧栏字段 | `accounts/[id]` | `page-header` `card` `tab` `list` `table` |
+| 重详情（档案） | `Breadcrumbs` `StatusBadge` `StatCard` `TabBar` `DataTable` 侧栏字段；页级主次栏 `span` 8+4。主栏内辅栏+图用 `5+7` / `6+6`，不要再套页面 `4+8` | `accounts/[id]` | `grid` `card` `tab` `list` `table` |
 | 删除确认 | `ConfirmationDialog` **外包** `Modal`/遮罩 | `accounts/page` 删除 | `modal` |
-| 工作台、指标 | `StatCard` `ChartCard` 图表家族 `DataTable` | `dashboard` | `card` `chart` `table` |
-| **资源工作台** | `WorkspaceSplit` `FolderNav` `ResourceCard` 网格 + toast | `/ref/resource-workspace` | starter 组件 |
-| 设置单卡 | `TextField` `Button` 窄卡片 | `settings/profile` 等 | `input-field` |
+| 工作台、指标 | `StatCard` `ChartCard` 图表家族 `DataTable`；分栏 `Grid`/`GridItem`（core `≥0.1.13`，默认 12 列 / 16px） | `dashboard` | `card` `chart` `table` `grid` |
+| **资源工作台** | `WorkspaceSplit` `FolderNav` `ResourceCard` + `Grid` 卡组 + toast | `/ref/resource-workspace` | `grid` |
+| 设置单卡 | 头像菜单三项（资料/改密/系统偏好）用 `Modal` 表单，不要整页；应用管理仍是 collection | `settings-account-dialog`、`settings/apps` | `input-field` `modal` |
 | 空态 | 文案 + `Button`；可选 solar 图标 | 各列表 empty | `button-link` |
 
 > **状态呈现纪律**：语义状态用 Kit `StatusBadge`（默认 `variant="soft"`，浅底+细边+同色字）。禁止 `variant="solid"`、`Label`、手搓 pill、本仓 `StatusText`。分类/角色/标签用 `CellText`/`CellMuted`，不要彩虹胶囊。一张表最多一列状态胶囊。
@@ -64,6 +65,8 @@
 | 组件/能力 | 原因 |
 |-----------|------|
 | `DataTable.sortable: true` | **不会自动排序**，未实现逻辑=假按钮 |
+| 把工具带改成 `Grid` | 一维排列继续 Flex / `Toolbar`；`Grid` 只管页面分栏 |
+| `gap={4}` 当 `gap-4` | Grid 的 gap 是像素；页面级用 16 或 24 |
 | 自拼 sidebar、topbar | 用本仓 `AppShell`、Kit `AppLayout` |
 | Drawer | Kit 可能未导出；先 FORGE-GAP |
 | 页面内嵌成功绿条 / 红条 | **禁止**；用全站 `toast`（见下） |
@@ -104,8 +107,11 @@ import {
   StatCard,
   TabBar,
   DescriptionItem,
+  Grid,
+  GridItem,
   type ColumnDef,
 } from "@forge-ui-official/core";
+// Grid/GridItem：core ≥0.1.13。弹窗/确认层不要放进 Grid 当子节点。
 import { Modal } from "@/components/ui/modal";
 import { ResourceCard } from "@/components/resource-card";
 import { FolderNav, WorkspaceSplit } from "@/components/workspace-split";

@@ -20,13 +20,13 @@
 
 | 角色 | 关键词 | 主结构 |
 |------|--------|--------|
-| **dashboard** | 工作台、指标、趋势 | 指标卡 + 图 + 次级列表 |
-| **collection** | 列表、筛选 | Header + **单行**筛选/搜索 + DataTable |
+| **dashboard** | 工作台、指标、趋势 | 指标卡 + 图 + 次级列表；分栏用 Kit `Grid`（core `≥0.1.13`） |
+| **collection** | 列表、筛选 | Header + **一条**筛选/搜索工具带 + DataTable（Starter：`ButtonGroup`+搜索；官方：`PageTitleToolbar`+`Toolbar`） |
 | **form-modal** | 新建/编辑字段不多 | Modal 表单 |
 | **detail-modal** | 轻详情、短处理 | 列表上叠 Modal |
-| **detail** | 重详情、档案 | 主栏 + 侧栏 + Tab/时间线 |
+| **detail** | 重详情、档案 | 主栏 + 侧栏 + Tab/时间线；主次栏用 `Grid`/`GridItem`（core `≥0.1.13`） |
 | **form-page** | 字段极多 | 页内长表单（少用） |
-| **settings** | 资料、偏好 | 窄卡片或 collection |
+| **settings** | 资料、偏好 | 应用管理走 collection；资料/改密/系统偏好走头像菜单 form-modal |
 | **auth** | 登录注册 | `app/(auth)` |
 
 ### detail-modal 与 detail
@@ -61,7 +61,7 @@
 | calendar | `/ref/calendar` | — |
 | chat | `/ref/chat` | — |
 | files | `/ref/files` | — |
-| settings | `/ref/settings` | settings/* |
+| settings | `/ref/settings` | `settings/apps` + 头像菜单弹窗 |
 | activity | `/ref/activity` | — |
 | queue | `/ref/queue` | — |
 | empty | `/ref/empty` | 各列表空态 |
@@ -84,7 +84,7 @@
 | form-modal | customers Add Modal | `account-form-dialog` |
 | detail-modal | 官网列表 view dialog | `/ref/detail-modal` + `components/ui/modal.tsx` + `?id=` |
 | detail | customers/[id] | `accounts/[id]` |
-| settings | — | `settings/*` |
+| settings | — | `settings/apps` + `settings-account-dialog` |
 | auth | finance/crm 登录 | `app/(auth)/*` |
 
 ## Starter 铁律
@@ -93,7 +93,7 @@
 2. `color={siteConfig.accent}`  
 3. CRUD：collection + form-modal + **（detail-modal 或 detail）** + API  
 4. `hideHeader: true` 时壳 `onBack` **不渲染**  
-5. collection 筛选单行，禁止双行 pills  
+5. collection 筛选/搜索一条工具带，禁止双行 pills；页头可用 Starter 紧凑或 `PageTitleToolbar`，不要手搓
 6. 假按钮删掉或接真逻辑  
 7. 浏览器验收，不只 curl  
 

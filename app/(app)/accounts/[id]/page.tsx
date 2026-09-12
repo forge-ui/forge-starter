@@ -21,6 +21,8 @@ import {
   ChartCard,
   ConfirmationDialog,
   DataTable,
+  Grid,
+  GridItem,
   IconButton,
   SmoothLineChart,
   StatCard,
@@ -142,7 +144,6 @@ export default function AccountDetailPage({
       {
         key: "device",
         header: "设备",
-        sortable: true,
         width: "w-52",
         render: (row) => <CellText>{row.device}</CellText>,
       },
@@ -213,7 +214,7 @@ export default function AccountDetailPage({
   ];
 
   return (
-    <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
+    <>
       <AccountFormDialog
         open={editOpen}
         onClose={() => setEditOpen(false)}
@@ -243,8 +244,9 @@ export default function AccountDetailPage({
         </div>
       ) : null}
 
+      <Grid gap={24} alignItems="start">
       {/* Main column — ecommerce/customers/[id] pattern */}
-      <div className="min-w-0 flex-1 space-y-6">
+      <GridItem span={{ base: "full", xl: 8 }} className="min-w-0 space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex flex-col gap-1">
             <h1 className="text-display-l font-semibold leading-9 tracking-fg text-fg-black">
@@ -274,7 +276,7 @@ export default function AccountDetailPage({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <Grid columns={{ base: 1, md: 3 }} gap={16}>
           <StatCard
             title="登录次数"
             value={String(account.loginCount)}
@@ -282,6 +284,7 @@ export default function AccountDetailPage({
             trendDirection="up"
             subtitle={`最近 ${account.lastLogin}`}
             theme="white"
+            width="full"
           />
           <StatCard
             title="账号状态"
@@ -290,6 +293,7 @@ export default function AccountDetailPage({
             trendDirection={account.status === "active" ? "up" : "down"}
             subtitle={account.role}
             theme="white"
+            width="full"
           />
           <StatCard
             title="所属部门"
@@ -298,8 +302,9 @@ export default function AccountDetailPage({
             trendDirection="up"
             subtitle={`创建于 ${account.created}`}
             theme="white"
+            width="full"
           />
-        </div>
+        </Grid>
 
         <div className="border-b border-fg-grey-200">
           <TabBar
@@ -310,7 +315,8 @@ export default function AccountDetailPage({
         </div>
 
         {activeTab === "概览" ? (
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
+          <Grid gap={16} alignItems="start">
+            <GridItem span={{ base: "full", xl: 5 }}>
             <div className="rounded-card border border-fg-grey-200 bg-white p-5">
               <div className="mb-4">
                 <h3 className="text-base font-semibold text-fg-black">同部门账号</h3>
@@ -345,7 +351,9 @@ export default function AccountDetailPage({
                 )}
               </div>
             </div>
+            </GridItem>
 
+            <GridItem span={{ base: "full", xl: 7 }}>
             <ChartCard
               title="登录趋势"
               subtitle="近 12 个月示意"
@@ -394,7 +402,8 @@ export default function AccountDetailPage({
                 />
               </div>
             </ChartCard>
-          </div>
+            </GridItem>
+          </Grid>
         ) : null}
 
         {activeTab === "登录记录" ? (
@@ -448,10 +457,11 @@ export default function AccountDetailPage({
             </p>
           </div>
         ) : null}
-      </div>
+      </GridItem>
 
       {/* Sidebar — customer detail pattern */}
-      <aside className="w-full shrink-0 rounded-card border border-fg-grey-200 bg-white p-6 self-start xl:w-[336px]">
+      <GridItem span={{ base: "full", xl: 4 }}>
+      <aside className="w-full rounded-card border border-fg-grey-200 bg-white p-6">
         <div className="relative -mx-6 -mt-6 h-[120px] rounded-t-card bg-gradient-to-r from-fg-blue via-fg-blue-300 to-fg-blue-100" />
 
         <div className="-mt-12 flex flex-col items-center gap-3">
@@ -474,7 +484,7 @@ export default function AccountDetailPage({
           </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-3">
+        <div className="mt-5 flex gap-3">
           <Button color={siteConfig.accent} variant="tertiary" iconLeft={<PhoneCallingLinear size={16} />}>
             电话
           </Button>
@@ -551,6 +561,8 @@ export default function AccountDetailPage({
           ))}
         </div>
       </aside>
-    </div>
+      </GridItem>
+      </Grid>
+    </>
   );
 }

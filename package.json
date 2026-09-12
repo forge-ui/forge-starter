@@ -1,6 +1,6 @@
 {
   "name": "forge-starter",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "private": true,
   "description": "用 Forge UI 快速搭建管理后台。开箱样板 + AI skills + 布局画廊，给人和编程助手一起用。",
   "scripts": {
@@ -17,7 +17,7 @@
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.8",
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
-    "@forge-ui-official/core": "^0.1.11",
+    "@forge-ui-official/core": "^0.1.13",
     "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.2",
     "jose": "^6.2.8",

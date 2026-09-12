@@ -12,6 +12,7 @@ import {
   AltArrowRightLinear,
   ArrowRightUpLinear,
   BoxBoldDuotone,
+  PenLinear,
 } from "solar-icon-set";
 import {
   BarChartStatCard,
@@ -23,6 +24,9 @@ import {
   CellTextSubtitle,
   ChartListItem,
   DataTable,
+  Grid,
+  GridItem,
+  IconButton,
   KebabMenu,
   LineChartStatCard,
   ListGroup,
@@ -72,7 +76,6 @@ export default function DashboardPage() {
       {
         key: "user",
         header: "账号",
-        sortable: true,
         flex: true,
         render: (row) => (
           <button type="button" className="text-left" onClick={() => router.push(`/accounts/${row.id}/`)}>
@@ -120,13 +123,15 @@ export default function DashboardPage() {
         header: "",
         width: "w-[60px]",
         render: (row) => (
-          <KebabMenu
-            accent={siteConfig.accent}
-            items={[
-              { label: "查看", onSelect: () => router.push(`/accounts/${row.id}/`) },
-              { label: "编辑", onSelect: () => router.push(`/accounts/?edit=${row.id}`) },
-            ]}
-          />
+          <IconButton
+            variant="ghost"
+            shape="square"
+            size="sm"
+            aria-label="编辑"
+            onClick={() => router.push(`/accounts/?edit=${row.id}`)}
+          >
+            <PenLinear size={16} />
+          </IconButton>
         ),
       },
     ],
@@ -135,7 +140,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 [&>*]:!w-full">
+      <Grid columns={{ base: 1, lg: 3 }} gap={24}>
         <ProgressStatCard
           title="账号总数"
           subtitle="管理后台"
@@ -170,10 +175,11 @@ export default function DashboardPage() {
           barColor="blue"
           bars={[4, 8, 12, 20, 14, 10, Math.max((pending + locked) * 4, 8)]}
         />
-      </div>
+      </Grid>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="flex flex-col gap-5 rounded-3xl border border-fg-grey-200 bg-white p-6 lg:col-span-2">
+      <Grid gap={24}>
+        <GridItem span={{ base: "full", lg: 8 }}>
+        <div className="flex flex-col gap-5 rounded-3xl border border-fg-grey-200 bg-white p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h3 className="text-lg font-semibold text-fg-black">状态趋势</h3>
@@ -226,7 +232,9 @@ export default function DashboardPage() {
             height="h-[260px]"
           />
         </div>
+        </GridItem>
 
+        <GridItem span={{ base: "full", lg: 4 }}>
         <div className="flex flex-col gap-5 rounded-3xl border border-fg-grey-200 bg-white p-6">
           <div className="flex items-start justify-between">
             <div>
@@ -255,9 +263,10 @@ export default function DashboardPage() {
             <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#f97316]" /> 锁定</span>
           </div>
         </div>
-      </div>
+        </GridItem>
+      </Grid>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <Grid columns={{ base: 1, lg: 3 }} gap={24}>
         <MapCard
           title="区域分布"
           subtitle="账号示意"
@@ -327,7 +336,7 @@ export default function DashboardPage() {
             </div>
           }
         />
-      </div>
+      </Grid>
 
       <div className="flex flex-col gap-5 rounded-3xl border border-fg-grey-200 bg-white p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">

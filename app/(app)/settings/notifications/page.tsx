@@ -1,7 +1,5 @@
-"use client";
-
-import { SettingsNotificationsPanel } from "@/components/settings-notifications-panel";
+import { redirect } from "next/navigation";
 
 export default function SettingsNotificationsPage() {
-  return <SettingsNotificationsPanel />;
+  redirect("/settings/apps/");
 }

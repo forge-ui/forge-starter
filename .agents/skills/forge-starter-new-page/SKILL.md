@@ -64,7 +64,7 @@ description: >
 | files | `/ref/files` | — |
 | split 主从 | `/ref/split` | — |
 | queue | `/ref/queue` | — |
-| settings | `/ref/settings` | settings/* |
+| settings | `/ref/settings` | `settings/apps` + 头像菜单弹窗 |
 | activity | `/ref/activity` | — |
 | dashboard 通用/精简 | `/ref/dashboard-board` · `/ref/dashboard-kpi` | `/dashboard`（ecommerce-2 完整） |
 | dashboard CRM | `/ref/dashboard-crm` | monorepo `dashboards/crm` |
@@ -97,7 +97,7 @@ description: >
 ### 列表
 
 - `app/(app)/<res>/page.tsx`  
-- Header + **单行** ButtonGroup + 搜索 + DataTable + 空态  
+- Header + **一条**筛选/搜索工具带 + DataTable + 空态。页头任选：Starter `h1`+`Breadcrumbs`+`Button`，或 Kit `PageTitleToolbar`（查 `/cases/toolbar`）。工具带任选：`ButtonGroup`+`TextField`，或 `Toolbar`+`ToolbarSearchInput`。禁止手搓页头/搜索。卡片列表的列用 `Grid`/`GridItem`（core `≥0.1.13`，查 `/cases/grid`），不要 Tailwind `grid-cols-*`。
 - 新建按钮 → form dialog  
 - 详情入口 → 名称/标题列的数据可点击，按已选详情形态打开全页或 `?id=` 弹窗；保留筛选上下文，支持键盘操作和可见焦点。对齐 accounts 的名称单元格，保持普通文字样式，不附加箭头。不要用带箭头的 `CellLink` 作为默认详情入口。
 - 操作列只放编辑、删除等真实业务动作；不要另放箭头/眼睛“查看详情”按钮。无其他动作时不生成操作列。
@@ -118,6 +118,7 @@ description: >
 
 - 抄 `app/(app)/accounts/[id]/page.tsx`  
 - 顶栏主操作；侧栏只 meta；页内 `←` 或面包屑  
+- 主次分栏用 `Grid`/`GridItem`（core `≥0.1.13`）。页级 8+4；主栏内辅栏+图用 `5+7` / `6+6`，不要再套页面 `4+8`。`gap` 是像素。  
 
 ### 数据层（UI 侧）
 

@@ -8,6 +8,8 @@ export type RouteShell = {
   title: string;
   primaryAction?: { label: string; href: string };
   hideHeader?: boolean;
+  headerVariant?: "home" | "detail";
+  backHref?: string;
 };
 
 /** Keys without trailing slash */
@@ -18,10 +20,7 @@ export const routeShells: Record<string, RouteShell> = {
   "/menus": { title: "菜单", hideHeader: true },
   "/permissions": { title: "权限", hideHeader: true },
   "/settings": { title: "设置", hideHeader: true },
-  "/settings/profile": { title: "个人资料", hideHeader: true },
-  "/settings/security": { title: "修改密码", hideHeader: true },
   "/settings/apps": { title: "应用管理", hideHeader: true },
-  "/settings/notifications": { title: "系统设置", hideHeader: true },
   "/ref": { title: "页面参考库", hideHeader: true },
 };
 
@@ -30,9 +29,13 @@ export function shellForPath(pathname: string): RouteShell {
     ? pathname.slice(0, -1)
     : pathname;
   if (normalized.match(/^\/accounts\/[^/]+$/)) {
-    return { title: "账号详情", hideHeader: true };
+    return {
+      title: "账号详情",
+      hideHeader: true,
+      headerVariant: "detail",
+      backHref: "/accounts/",
+    };
   }
-  // AI reference gallery (not in product menu)
   if (normalized === "/ref" || normalized.startsWith("/ref/")) {
     return { title: "页面参考库", hideHeader: true };
   }
