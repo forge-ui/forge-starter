@@ -78,7 +78,8 @@ Skills 只维护 **`.agents/skills/`**。
 `rbac_menus` 可选，只是目录：不进 `APP_MODULE_IDS` 侧栏仍看不见。  
 加菜单后须清浏览器 Local Storage **`forge-starter:app-registry`**（或确认种子默认应用已勾齐），否则同事还是旧勾选。
 
-侧栏实际可见 = 菜单三处 ∩ 当前应用勾选 ∩ 登录角色 `{module}:read`。
+侧栏实际可见 = 菜单三处 ∩ 当前应用勾选 ∩ 登录角色 `{module}:read`。  
+无 `{module}:read` 时直链业务页必须壳层 `replace` 回工作台，别只藏侧栏或停在空态/403 列表。
 
 ## 仓库地图
 
@@ -119,7 +120,7 @@ docs/product.md agent-native.md setup.md module-template.md page-roles.md refere
 
 1. `new-module`：types + service + schema + `db:push` + API（**API 齐 ≠ 侧栏有**）。  
 2. `new-page`：读 page-roles → 选全页（accounts）或轻弹窗（approvals）→ 列表/弹窗/详情 + **菜单三处**（`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`），默认应用种子勾齐新 id。  
-3. 加菜单后清 Local Storage `forge-starter:app-registry`（或种子默认勾齐）。  
+3. 加菜单后清 Local Storage `forge-starter:app-registry`（或种子默认勾齐）。无权限直链由壳 `replace` 回工作台。  
 4. `pnpm typecheck` + 浏览器从侧栏点通。  
 
 详见 `docs/module-template.md`。

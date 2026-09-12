@@ -40,6 +40,21 @@ export function isAppModuleId(value: string): value is AppModuleId {
   return (APP_MODULE_IDS as readonly string[]).includes(value);
 }
 
+/** Map a logged-in app path to its module. `/ref/**` and personal settings are not gated. */
+export function moduleIdForPath(pathname: string): AppModuleId | null {
+  const normalized =
+    pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+  if (!normalized || normalized === "/ref" || normalized.startsWith("/ref/")) return null;
+  if (normalized === "/settings/profile" || normalized === "/settings/security" || normalized === "/settings/notifications") {
+    return null;
+  }
+  const matches = APP_MODULE_IDS.filter((id) => {
+    const href = APP_MODULE_META[id].href.replace(/\/$/, "");
+    return normalized === href || normalized.startsWith(`${href}/`);
+  });
+  return matches.sort((a, b) => APP_MODULE_META[b].href.length - APP_MODULE_META[a].href.length)[0] ?? null;
+}
+
 /** @deprecated kept for localStorage migration only */
 export type MenuPresetId = "accounts-admin" | "dashboard-only" | "accounts-only" | "custom";
 

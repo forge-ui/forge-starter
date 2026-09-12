@@ -42,9 +42,8 @@ const filterTabs = [
 function ApprovalsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { ready, canRead, can } = useAccess();
+  const { can } = useAccess();
   const { items, me, loading, error, refresh, counts } = useApprovalsStore();
-  const canView = canRead("approvals");
   const canCreate = can("approvals", "create");
   const [filterIndex, setFilterIndex] = useState(0);
   const [search, setSearch] = useState("");
@@ -208,45 +207,32 @@ function ApprovalsPageContent() {
         ) : null}
       </div>
 
-      {canView ? (
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <ButtonGroup
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <ButtonGroup
+          color={siteConfig.accent}
+          shape="pill"
+          items={filterTabs.map((tab) => {
+            if (tab.value === "all") return { label: `全部 ${counts.all ?? 0}` };
+            if (tab.value === "todo") return { label: `待我审批 ${counts.todo ?? 0}` };
+            if (tab.value === "mine") return { label: `我发起的 ${counts.mine ?? 0}` };
+            if (tab.value === "approved") return { label: `已通过 ${counts.approved ?? 0}` };
+            return { label: `已驳回 ${counts.rejected ?? 0}` };
+          })}
+          activeIndex={filterIndex}
+          onChange={setFilterIndex}
+        />
+        <div className="w-full max-w-sm">
+          <TextField
             color={siteConfig.accent}
-            shape="pill"
-            items={filterTabs.map((tab) => {
-              if (tab.value === "all") return { label: `全部 ${counts.all ?? 0}` };
-              if (tab.value === "todo") return { label: `待我审批 ${counts.todo ?? 0}` };
-              if (tab.value === "mine") return { label: `我发起的 ${counts.mine ?? 0}` };
-              if (tab.value === "approved") return { label: `已通过 ${counts.approved ?? 0}` };
-              return { label: `已驳回 ${counts.rejected ?? 0}` };
-            })}
-            activeIndex={filterIndex}
-            onChange={setFilterIndex}
+            value={search}
+            onChange={setSearch}
+            placeholder="搜索标题、申请人、类型…"
+            iconLeft={<MagniferLinear size={16} />}
           />
-          <div className="w-full max-w-sm">
-            <TextField
-              color={siteConfig.accent}
-              value={search}
-              onChange={setSearch}
-              placeholder="搜索标题、申请人、类型…"
-              iconLeft={<MagniferLinear size={16} />}
-            />
-          </div>
         </div>
-      ) : null}
+      </div>
 
-      {!ready ? (
-        <div className="rounded-[28px] border border-fg-grey-200 bg-white py-16 text-center text-sm text-fg-grey-500">
-          加载中…
-        </div>
-      ) : !canView ? (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-[28px] border border-dashed border-fg-grey-200 bg-white py-16">
-          <p className="text-lg font-semibold text-fg-black">没有权限查看审批</p>
-          <p className="max-w-md text-center text-sm text-fg-grey-500">
-            当前角色看不到此模块。侧栏也不会出现审批中心。
-          </p>
-        </div>
-      ) : error ? (
+      {error ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-[28px] border border-dashed border-fg-grey-200 bg-white py-16">
           <p className="text-lg font-semibold text-fg-black">无法加载审批</p>
           <p className="max-w-md text-center text-sm text-fg-grey-500">{error}</p>

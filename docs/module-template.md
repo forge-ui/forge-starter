@@ -98,4 +98,5 @@ Modal 宿主：`components/ui/modal.tsx`。
 - [ ] 筛选单行  
 - [ ] **菜单三处**：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用勾齐新 id  
 - [ ] 加菜单后已清 Local Storage `forge-starter:app-registry`（或种子默认勾齐）  
+- [ ] 无 `{module}:read` 直链业务页会 `replace` 回工作台（壳层，不只藏侧栏）  
 - [ ] typecheck + 浏览器从侧栏点通  

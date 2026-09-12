@@ -109,7 +109,8 @@ description: >
   默认应用种子必须勾齐新 id（`DEFAULT_APP_ENTRIES` 用 `[...APP_MODULE_IDS]`，或把新 id 写进 `modules`）。  
   `rbac_menus` **可选**：只是目录。只写目录、不进 `APP_MODULE_IDS`，侧栏仍看不见。  
   加完后清浏览器 Local Storage 键 `forge-starter:app-registry`（或确认种子默认应用已勾齐）；同事旧勾选不会自动出现新项。  
-  业务页另加 `config/site.ts` `routeShells`（通常 `hideHeader: true`）。需要按角色藏菜单时再补 `RBAC_RESOURCES` + 种子 `:read`。
+  业务页另加 `config/site.ts` `routeShells`（通常 `hideHeader: true`）。需要按角色藏菜单时再补 `RBAC_RESOURCES` + 种子 `:read`。  
+  无 `{module}:read` 进页时壳层 `replace` 回工作台（`AppShell` + `moduleIdForPath`），别只藏侧栏或停在空态/403 列表。
 
 ### 表单弹窗
 
@@ -162,3 +163,4 @@ pnpm check   # typecheck + 规范绊线
 - 详情形态 + 理由  
 - 对照样板：accounts（重）或 approvals（轻）  
 - 菜单三处：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用是否勾齐新 id；是否已清 `forge-starter:app-registry`  
+- 无权限直链是否 `replace` 回工作台（不要只藏侧栏）  

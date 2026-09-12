@@ -51,7 +51,7 @@
 - **M2** 🔴 菜单 icon 必须是 `solar-icon-set` 的 **`*BoldDuotone`** 变体、`size={20}`。检查 `config/menu.tsx` 全部 import 与 JSX。
   错误示例：`<UserLinear size={20} />`、`<UsersGroupTwoRoundedBold className="w-5" />`。
   修复：换成对应 BoldDuotone 变体 + `size={20}`，颜色不传（跟 accent）。
-- **M3** 🔴 新模块必须改**菜单三处**：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`（`config/apps.ts` + `config/menu.tsx`）。默认应用种子勾齐新 id。禁止只改 `menu.tsx`。`rbac_menus` 可选，只写目录不进 `APP_MODULE_IDS` 侧栏仍看不见。加菜单后须清 Local Storage `forge-starter:app-registry`（或种子默认勾齐）。新路由需在 `config/site.ts` 的 `routeShells` 注册（业务页通常 `hideHeader: true`）。检查是否有页面绕开 config 在别处（layout、页面内）拼菜单。漏注册的典型症状：兜底壳页头与页内 h1 叠成两套页头。
+- **M3** 🔴 新模块必须改**菜单三处**：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`（`config/apps.ts` + `config/menu.tsx`）。默认应用种子勾齐新 id。禁止只改 `menu.tsx`。`rbac_menus` 可选，只写目录不进 `APP_MODULE_IDS` 侧栏仍看不见。加菜单后须清 Local Storage `forge-starter:app-registry`（或种子默认勾齐）。无 `{module}:read` 直链业务页必须壳层 `replace` 回工作台，禁止只藏侧栏或停在空态/403 列表。新路由需在 `config/site.ts` 的 `routeShells` 注册（业务页通常 `hideHeader: true`）。检查是否有页面绕开 config 在别处（layout、页面内）拼菜单。漏注册的典型症状：兜底壳页头与页内 h1 叠成两套页头。
 - **M4** 🔴 不得出现 `href: "#"` 或指向不存在路由的占位菜单项。逐个 `href` 与 `app/(app)/**` 目录对账。
 - **M5** 🟡 菜单结构合理性：模块分组、顺序、命名是否符合业务动线；个人资料/安全设置类应走 profile 菜单而非主菜单。给出建议，标注"建议复核"。
 - **M6** 🔴 菜单 `href` 尾斜杠风格与样板一致（样板用 `"/accounts/"` 带尾斜杠）。

@@ -13,8 +13,8 @@ import {
   APPS_UPDATED_EVENT,
   DEFAULT_APP_ID,
   homePathForApp,
+  moduleIdForPath,
   type AppEntry,
-  type AppModuleId,
 } from "@/config/apps";
 import { getDefaultAppRegistry } from "@/lib/apps/defaults";
 import {
@@ -76,7 +76,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const shell = useMemo(() => shellForPath(pathname), [pathname]);
-  const { user, roleName, allowedModules, refresh: refreshAccess } = useAccess();
+  const { user, roleName, allowedModules, ready, canRead, refresh: refreshAccess } = useAccess();
   const [profile, setProfile] = useState<AppLayoutProfile>(defaultProfile);
   const [apps, setApps] = useState<AppEntry[]>(() => getDefaultAppRegistry());
   const [activeAppId, setActiveAppId] = useState(DEFAULT_APP_ID);
@@ -166,6 +166,18 @@ export function AppShell({ children }: { children: ReactNode }) {
     return () => window.removeEventListener(PROFILE_UPDATED_EVENT, onProfileUpdated);
   }, [refreshAccess]);
 
+  const forbiddenModule = useMemo(() => {
+    if (!ready || allowedModules == null) return null;
+    const moduleId = moduleIdForPath(pathname);
+    if (!moduleId || moduleId === "dashboard") return null;
+    return canRead(moduleId) ? null : moduleId;
+  }, [ready, allowedModules, pathname, canRead]);
+
+  useEffect(() => {
+    if (!forbiddenModule) return;
+    router.replace("/dashboard/");
+  }, [forbiddenModule, router]);
+
   const logout = useCallback(async () => {
     await fetch("/api/auth/logout/", { method: "POST" });
     router.replace("/login/");
@@ -249,7 +261,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       showDatePicker={false}
       showKebab={false}
     >
-      {children}
+      {forbiddenModule ? null : children}
       <SettingsAccountDialog kind={accountDialog} onClose={() => setAccountDialog(null)} />
       <ToastProvider />
     </AppLayout>
