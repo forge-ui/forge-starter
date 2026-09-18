@@ -59,6 +59,8 @@
 | 空态 | 文案 + `Button`；可选 solar 图标 | 各列表 empty | `button-link` |
 
 > **状态呈现纪律**：语义状态用 Kit `StatusBadge`（默认 `variant="soft"`，浅底+细边+同色字）。禁止 `variant="solid"`、`Label`、手搓 pill、本仓 `StatusText`。分类/角色/标签用 `CellText`/`CellMuted`，不要彩虹胶囊。一张表最多一列状态胶囊。
+>
+> **字色分层**（Forge `--text-*`，审计 V7）：标题 / 实体名 / 主键值 / `CellText` / `DescriptionItem` content → `text-fg-black`；字段 label / `CellMuted` / 副行 → `text-fg-grey-700`；disabled、空态、时间戳才 `text-fg-grey-500`。说明性正文最浅到 `text-fg-grey-700`，不要整页浅灰。
 
 ### 不要默认上的（除非业务明确要）
 

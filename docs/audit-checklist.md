@@ -146,15 +146,26 @@ Starter 业务页默认 `hideHeader: true`，正文页头走 **A 或 B**。不�
 
 ## V — 视觉 token（颜色 / 图标 / 排版）
 
-- **V1** 🔴 颜色只用 `fg-*` token（`text-fg-grey-700`、`bg-fg-grey-50`、CSS `var(--fg-violet)`），**禁止 Tailwind 默认色**（`text-blue-500`、`bg-gray-100`…）与未经确认的裸 hex。例外白名单（仅限 solar 图标 `color` prop、样板已确认）：`#71717A`（行内 muted）、`#EA580C`（删除确认危险图标）；白名单外的 hex 一律违规。
+- **V1** 🔴 颜色只用 `fg-*` token（`text-fg-black`、`bg-fg-grey-50`、CSS `var(--fg-violet)`），**禁止 Tailwind 默认色**（`text-blue-500`、`bg-gray-100`…）与未经确认的裸 hex。例外白名单（仅限 solar 图标 `color` prop、样板已确认）：`#71717A`（行内 muted）、`#EA580C`（删除确认危险图标）；白名单外的 hex 一律违规。本条只验「是不是 token」；字色深浅对不对另核 **V7**。
 - **V2** 🔴 业务控件颜色统一 `color={siteConfig.accent}`（Button / Breadcrumbs / ButtonGroup / TextField / DataTable 等），不得各页各配色。口径：`siteConfig.accent` 的合法值只有 `"purple" | "blue" | "black"`（Kit 的 `AccentColor`/`AppLayoutAccentColor` 类型），写 `green`/`red` 等会直接导致壳层类型报错——改主题色只能在这三个值里选，其它色彩诉求走 `fg-*` token，不改 accent。
 - **V3** 🔴 图标只用 `solar-icon-set`：侧栏 `*BoldDuotone` 20；页头/按钮 `*Linear` 16-18；行内 muted 色用 `color="#71717A"` 或 token。**禁止用 className 给 solar 图标上色**（fill 会硬编码失效），必须走 `color` prop。
 - **V4** 🔴 图表颜色合法形态仅两种：`var(--fg-*)` CSS 变量字符串（`SmoothLineChart` 等 color prop），或组件明确支持的 `bg-fg-*` class（`ChartLegendItem`、`BubbleChart` 等）。禁止裸 hex（样板 dashboard 的 hex 是样板债，禁照抄）与 Tailwind 默认色 class。
-- **V5** 🟡 排版跟**该页所选页头体系**：A 用 `text-display-l font-semibold`；B/C 跟 `PageTitleToolbar` / `PageHeader` case 的字号。不要一页混两套标题尺度，也不要手搓 `text-[28px]` + 裸 hex。卡片标题/正文/辅助用 `fg-*`（辅助 `text-fg-grey-500`）。
+- **V5** 🟡 排版跟**该页所选页头体系**：A 用 `text-display-l font-semibold`；B/C 跟 `PageTitleToolbar` / `PageHeader` case 的字号。不要一页混两套标题尺度，也不要手搓 `text-[28px]` + 裸 hex。本条只管字号尺度；字色层级见 **V7**。
 - **V6** 🔴 语义状态用 Kit `StatusBadge`，默认 `variant="soft"`（浅 `fg-*-50` 底 + 细描边 + 同色字），对齐官网 Transaction。颜色只承载状态语义：green=成功/启用、yellow=待处理、red=失败/禁用/驳回、grey=草稿/锁定/撤销、blue=进行中。一张表最多一列状态胶囊。
   - **不要用**：`variant="solid"`（实心白字）；`Label`；手搓圆角底色 pill；本仓 `StatusText`；给分类/角色/权限/标签刷彩虹胶囊。类目字段用 `CellText`/`CellMuted`。
   - 绊线 `V6-status-badge` 拦截 `StatusText`、`StatusBadge` 的 `variant="solid"`、Kit `<Label`。`/ref/` 展廊不在本条范围。
   - 组件用对了还要核 **H7**（孤胶囊、没字段名）。
+- **V7** 🔴 字色按 Forge 语义层级，禁止把标题/正文写成浅灰。对照 `../forge/skills/forge-react/references/tokens.md` 与 Kit 组件（`CellText` / `CellMuted` / `DescriptionItem`）：
+
+  | 角色 | Token | Class | 用在哪 |
+  |------|-------|-------|--------|
+  | 主文字 | `--text-primary` = `fg-black` | `text-fg-black` | 页标题、节/卡标题、实体名、主键值、表主单元格（或直接 `CellText`）、`DescriptionItem` 的 `content` |
+  | 次要 | `--text-secondary` = `fg-grey-900` | `text-fg-grey-900` | 少用；并列次值、需要比 muted 更深但不抢主文字时 |
+  | 辅助 | `--text-muted` = `fg-grey-700` | `text-fg-grey-700` | 字段 label、表头、`CellMuted`、主标题下的副行、说明性正文的**最浅下限** |
+  | 禁用/提示 | `--text-disabled` = `fg-grey-500` | `text-fg-grey-500` | **只**用于 disabled、placeholder、空态/加载提示、时间戳等极次要 caption |
+
+  违规：标题或主键值用 `text-fg-grey-500/600`；整段正文（备注、描述、说明）写成 `text-fg-grey-500/600`；一页主文字全是浅灰，对比度像未选中。`text-fg-grey-600` 不是语义 token，业务页不要用。
+  口径：说明性正文优先 `text-fg-black`，允许 `text-fg-grey-700`（对齐 accounts 备注 / Kit `--text-muted`），**不得再浅**。看板节标题下的一句 caption、官方模板问候行可用 `text-fg-grey-500`。V1 过关（用了 `fg-*`）≠ 本条过关。截图核：指着标题和正文问「这是不是该读的字」，发灰就修。
 
 ## F — 表单与交互 surface
 
@@ -217,6 +228,7 @@ Starter 业务页默认 `hideHeader: true`，正文页头走 **A 或 B**。不�
 - 2026-09-02：Kit `@forge-ui-official/core@0.1.11` 已默认 soft。业务页状态列改回 `StatusBadge`；`StatusText` 弃用。权限/角色等类目仍用纯文本。
 - 2026-09-12：轻详情对照 `/ref/detail-modal` + `Modal` + `?id=`（**暂无第二业务样板**，不要指向已删的 approvals）。
 - 2026-09-12：新菜单必须写**菜单三处**（`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`）；默认应用勾齐新 id；`rbac_menus` 只是目录。加完清 `forge-starter:app-registry`。侧栏再按登录角色 `:read` 过滤。
+- 2026-09-18：新增 **V7**：字色按 Forge `--text-primary/secondary/muted/disabled` 分层。由「新页面正文也写成浅灰、V1 只验 token 家族漏检」反哺。V5 不再把辅助色写成 `text-fg-grey-500`（那是 `--text-disabled`）。
 - 2026-09-12：审批中心再次从公共 starter 删除，勿当轻样板对照。
 - 2026-09-09：审计必须先定角色再选对照页（skill 第 0 步）。`accounts` 不是全站基线；卡片列表对照 `/ref/list-cards`，看板对照 dashboard / ecommerce-2。L4/C2 按所选角色适用，不因「不像 accounts」打红线。
 - 2026-09-09：重写 **H1**、收紧 **H2/H5**、新增 **H6**：`PageHeader`（AppLayout 顶栏）≠ `PageTitleToolbar`（正文页头+面包屑）。由衍生仓详情误把 `PageHeader` 当业务页头、包白卡片反哺。core `0.1.9` 无 `variant`/`breadcrumbItems` 不算 B 违规。

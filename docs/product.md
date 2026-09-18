@@ -22,7 +22,7 @@
 
 ## 2. 设计原则
 
-1. **Forge-first**：只从 `@forge-ui-official/core` 取组件；颜色只用 `fg-*`；图标用 `solar-icon-set`。
+1. **Forge-first**：只从 `@forge-ui-official/core` 取组件；颜色只用 `fg-*`；字色按 `--text-primary/muted/disabled` 分层（主文字黑，不是一律浅灰）；图标用 `solar-icon-set`。
 2. **Agent 友好**：第一开发界面是 Agent + skills；人读 `AGENTS.md`。
 3. **范例即文档**：`accounts` = 重详情样板；轻详情对照 `/ref/detail-modal` + 本仓 `Modal` + `?id=`。按内容选型。
 4. **轻量可扩展**：模块边界清晰，按业务逐步加域。

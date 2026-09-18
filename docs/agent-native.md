@@ -89,7 +89,7 @@ Coding Agent 是第一开发界面，专注 **Forge 管理后台**：skills 拆�
 ## 质量门禁
 
 - 像 Forge 官方后台，不像玩具 UI  
-- 颜色用 `fg-*`；业务控件 `color={siteConfig.accent}`  
+- 颜色用 `fg-*`；业务控件 `color={siteConfig.accent}`；字色分层见审计 V7（主文字黑，辅助 `grey-700`，`grey-500` 只给空态/禁用）  
 - 列表筛选 **一行** pills + 搜索  
 - 侧栏摘要卡 **不** 塞「返回列表」  
 - 操作反馈用全站 `toast`，禁止页内绿条  
