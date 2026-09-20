@@ -10,7 +10,7 @@ Coding Agent 是第一开发界面：skills 拆开后端与页面，`accounts` �
 1. 组件只 `import { … } from "@forge-ui-official/core"`。  
 2. 颜色只用 `fg-*`；业务控件 `color={siteConfig.accent}`（默认 `blue`）。字色分层：标题/主键值/`CellText` 用 `text-fg-black`；label/`CellMuted`/副行用 `text-fg-grey-700`；`text-fg-grey-500` 只给 disabled、空态、时间戳。禁止正文也写成浅灰。  
 3. 图标 `solar-icon-set`；侧栏主菜单 `BoldDuotone`、`size={20}`。  
-4. 登录后页面在 `AppLayout`（`components/app-shell.tsx`）。  
+4. 登录后页面在 `AppLayout`（`components/app-shell.tsx`）。右侧内容面顶/右/底 gutter 等距且锁在首屏，溢出在面内滚（L10），不要整页滚掉底边距。  
 5. **禁止** MUI、Ant、全量 shadcn 替代 Forge；缺能力 `FORGE-GAP` 并询问。  
 6. 认证：用户名或邮箱 + 密码；库 **PostgreSQL only**；邮件 **仅 SMTP**。  
 7. 登录表 `users` ≠ 业务表（如 `admin_accounts`），不要混接。  
@@ -137,7 +137,7 @@ docs/product.md agent-native.md setup.md module-template.md page-roles.md refere
 ## 提交前
 
 - [ ] 无密钥  
-- [ ] 无 Tailwind 默认色顶替 `fg-*`；标题/正文不是浅灰（V7）  
+- [ ] 无 Tailwind 默认色顶替 `fg-*`；标题/正文不是浅灰（V7）；内容面底 gutter 在首屏（L10）  
 - [ ] 无手搓已有 Forge 组件  
 - [ ] `pnpm check`（typecheck + 绊线）  
 - [ ] UI 变更已浏览器点过  

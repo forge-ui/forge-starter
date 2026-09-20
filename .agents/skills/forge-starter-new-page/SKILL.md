@@ -29,6 +29,7 @@ description: >
 - 写死「默认全页详情」或「默认弹窗」  
 - 第二 UI 库、Tailwind 默认色、假按钮  
 - 标题/正文写成 `text-fg-grey-500`（那是 disabled；主文字 `text-fg-black`，辅助 `text-fg-grey-700`）  
+- 内容面贴死视口底、整页滚动才露出底边距（L10：壳列锁视口，面内滚）  
 - **`sortable: true` 却未实现排序**（DataTable 不会自动排序）  
 - 只 curl 验收  
 

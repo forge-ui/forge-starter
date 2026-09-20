@@ -100,7 +100,7 @@ Starter 业务页默认 `hideHeader: true`，正文页头走 **A 或 B**。不�
 ## L — 布局与骨架
 
 - **L1** 🔴 登录后页面必须处于 `AppShell`（`app/(app)/layout.tsx` 已包）内，页面自身**不得**再渲染 sidebar / topbar / 第二套 `AppLayout`，不得手搓 `<aside>` 导航。
-- **L2** 🔴 页面根容器为纵向 stack（样板：`flex flex-col gap-5` 或 `gap-6`），不得在根部再加大内边距（`p-6`/`p-8`）——壳已管 padding。
+- **L2** 🔴 页面根容器为纵向 stack（样板：`flex flex-col gap-5` 或 `gap-6`），不得在根部再加大内边距（`p-6`/`p-8`）——壳已管 padding。壳的底边距必须留在首屏，见 **L10**。
 - **L3** 🔴 列表页：页头 → **一条**筛选/搜索工具带 → 列表主体 → 分页/空态 → 弹窗。工具带必须用 Kit，禁止两行 pills。合法工具带任选：
   - Starter：单行 `ButtonGroup` + 右侧 `TextField`。
   - 官方：`Toolbar` + `ToolbarSearchInput`（搜索在工具条左侧）+ 可选 `ToolbarPillTabs` / `ToolbarActions`。
@@ -129,6 +129,11 @@ Starter 业务页默认 `hideHeader: true`，正文页头走 **A 或 B**。不�
   - 断点是**视口**不是内容区。`lg`=1024 时侧栏展开后正文可能只有 ~700px，仍会折成多列——截图必须带侧栏展开。
   - `/ref/**` 画廊里的 Tailwind 栅格仍是样板债，抄范式时必须换成 `Grid`。业务样板 `dashboard`、`accounts/[id]` 已迁 Grid。
   截图核（改分栏时）：375 / 768 / 1024 / 1440，**侧栏展开**时内容区无整页横滚。
+- **L10** 🔴 右侧内容壳的四周 gutter 必须始终可见：顶、右、底与 Kit `AppLayout` 一致（外层 `data-forge-app-content` 的 `md:p-2`，内层主列 `p-4 sm:p-5`），**禁止**靠整页向下滚动才露出底边距。
+  合法：壳列锁在视口（父级 `h-dvh` / `overflow-hidden` + 子级 `min-h-0`）；圆角内容面（灰底/白底）与视口底边之间始终能看到与右侧同等的固定间距；页头、工具带留在面内，超高的表/正文在面内滚动（`min-h-0 flex-1 overflow-auto`）。
+  违规：内容面贴死浏览器底边；窗口滚动条是主滚动、底 gutter 被顶出视口；页面根或壳用 `min-h-screen` 随内容长高，把 `md:p-2` 推到折页下方。
+  口径：未登录 auth 页不适用。短页不溢出时底 gutter 仍必须在首屏可见，不要把内容面拉满贴底。L2 禁止页面再垫一层 `p-6`，本条管的是**壳已有的间距不能滚没**。Kit 若仍写 `min-h-screen`，宿主 `AppShell` / 页面 stack 必须把列高锁回视口，不要在每个业务页手搓第二套 padding。
+  截图核（首屏、侧栏展开、**不必先滚**）：指着内容面底边问「和右侧是不是同一圈灰边」；没有、或要往下滚才出现 → 本条违规。
 
 ## C — 组件用法
 
@@ -228,6 +233,7 @@ Starter 业务页默认 `hideHeader: true`，正文页头走 **A 或 B**。不�
 - 2026-09-02：Kit `@forge-ui-official/core@0.1.11` 已默认 soft。业务页状态列改回 `StatusBadge`；`StatusText` 弃用。权限/角色等类目仍用纯文本。
 - 2026-09-12：轻详情对照 `/ref/detail-modal` + `Modal` + `?id=`（**暂无第二业务样板**，不要指向已删的 approvals）。
 - 2026-09-12：新菜单必须写**菜单三处**（`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`）；默认应用勾齐新 id；`rbac_menus` 只是目录。加完清 `forge-starter:app-registry`。侧栏再按登录角色 `:read` 过滤。
+- 2026-09-20：新增 **L10**：右侧内容壳顶/右/底 gutter 必须锁在首屏，溢出在内容面内滚动。由「列表一长，底边距要往下滚才看见」反哺。L2 只管页面不要再垫 padding，不覆盖本条。
 - 2026-09-18：新增 **V7**：字色按 Forge `--text-primary/secondary/muted/disabled` 分层。由「新页面正文也写成浅灰、V1 只验 token 家族漏检」反哺。V5 不再把辅助色写成 `text-fg-grey-500`（那是 `--text-disabled`）。
 - 2026-09-12：审批中心再次从公共 starter 删除，勿当轻样板对照。
 - 2026-09-09：审计必须先定角色再选对照页（skill 第 0 步）。`accounts` 不是全站基线；卡片列表对照 `/ref/list-cards`，看板对照 dashboard / ecommerce-2。L4/C2 按所选角色适用，不因「不像 accounts」打红线。

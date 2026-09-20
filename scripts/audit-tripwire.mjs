@@ -147,9 +147,9 @@ const RULES = [
   {
     id: "V7-grey-heading",
     level: "error",
-    doc: "标题必须是主文字 text-fg-black，禁止 h1/h2/h3 用 text-fg-grey-400/500/600（audit-checklist V7）",
-    // 零误报：现有业务页/画廊标题都是 text-fg-black。正文发灰仍靠 LLM 审 V7。
-    pattern: /<h[1-3]\b[^>]*\btext-fg-grey-[345]00\b/g,
+    doc: "页标题必须是主文字 text-fg-black，禁止 h1 用 text-fg-grey-400/500/600（audit-checklist V7）",
+    // 零误报：只拦 h1。h3 分类/caption 允许 grey-500。正文发灰仍靠 LLM 审 V7。
+    pattern: /<h1\b[^>]*\btext-fg-grey-[345]00\b/g,
     files: () => true,
   },
 ];
