@@ -21,6 +21,7 @@ import {
   type ColumnDef,
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
+import { PageTitleActions } from "@/components/ask-ai-entry";
 import { usePermissionsStore } from "@/components/permissions-store";
 import { PermissionFormDialog } from "@/components/permission-form-dialog";
 import { PermissionDetailDialog } from "@/components/permission-detail-dialog";
@@ -267,13 +268,15 @@ function PermissionsPageContent() {
             ]}
           />
         </div>
-        <Button
-          color={siteConfig.accent}
-          iconLeft={<PlusIcon size={16} />}
-          onClick={openCreate}
-        >
-          新建权限
-        </Button>
+        <PageTitleActions>
+          <Button
+            color={siteConfig.accent}
+            iconLeft={<PlusIcon size={16} />}
+            onClick={openCreate}
+          >
+            新建权限
+          </Button>
+        </PageTitleActions>
       </div>
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">

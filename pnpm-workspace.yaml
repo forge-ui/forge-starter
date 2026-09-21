@@ -1,4 +1,5 @@
 allowBuilds:
+  esbuild: true
   sharp: true
 minimumReleaseAgeExclude:
   - '@forge-ui-official/core@0.1.3'
@@ -7,3 +8,5 @@ minimumReleaseAgeExclude:
   - '@forge-ui-official/core@0.1.10'
   - '@forge-ui-official/core@0.1.11'
   - '@forge-ui-official/core@0.1.13'
+  - '@forge-ui-official/core@0.1.16'
+  - '@forge-ui-official/core@0.1.17'

@@ -38,6 +38,7 @@ components/<resource>-form-dialog.tsx
 config/apps.ts                    # 1 APP_MODULE_IDS  2 APP_MODULE_META
 config/menu.tsx                   # 3 MODULE_MENU
 config/site.ts                    # hideHeader: true（页头，不是侧栏）
+# 页头右侧 Ask AI：PageTitleActions / AskAiEntry（AskAiProvider 已挂 AppShell）
 ```
 
 默认应用种子勾齐新 id。`rbac_menus` 可选，只写目录不进 `APP_MODULE_IDS` 侧栏仍看不见。  

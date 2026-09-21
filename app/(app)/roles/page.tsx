@@ -22,6 +22,7 @@ import {
   type ColumnDef,
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
+import { PageTitleActions } from "@/components/ask-ai-entry";
 import { useRolesStore } from "@/components/roles-store";
 import { RoleFormDialog } from "@/components/role-form-dialog";
 import { RoleDetailDialog } from "@/components/role-detail-dialog";
@@ -255,13 +256,15 @@ function RolesPageContent() {
             ]}
           />
         </div>
-        <Button
-          color={siteConfig.accent}
-          iconLeft={<PlusIcon size={16} />}
-          onClick={openCreate}
-        >
-          新建角色
-        </Button>
+        <PageTitleActions>
+          <Button
+            color={siteConfig.accent}
+            iconLeft={<PlusIcon size={16} />}
+            onClick={openCreate}
+          >
+            新建角色
+          </Button>
+        </PageTitleActions>
       </div>
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">

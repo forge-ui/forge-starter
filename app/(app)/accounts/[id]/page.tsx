@@ -32,6 +32,7 @@ import {
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
 import { useAccountsStore } from "@/components/accounts-store";
+import { PageTitleActions } from "@/components/ask-ai-entry";
 import { AccountFormDialog } from "@/components/account-form-dialog";
 import {
   ACCOUNT_STATUS_META,
@@ -261,7 +262,7 @@ export default function AccountDetailPage({
               ]}
             />
           </div>
-          <div className="flex flex-wrap items-center gap-3">
+          <PageTitleActions>
             <Button
               color={siteConfig.accent}
               variant="tertiary"
@@ -273,7 +274,7 @@ export default function AccountDetailPage({
             <Button color="red" variant="tertiary" onClick={() => setConfirmDelete(true)}>
               删除
             </Button>
-          </div>
+          </PageTitleActions>
         </div>
 
         <Grid columns={{ base: 1, md: 3 }} gap={16}>

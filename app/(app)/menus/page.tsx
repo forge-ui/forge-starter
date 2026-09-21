@@ -22,6 +22,7 @@ import {
   type ColumnDef,
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
+import { PageTitleActions } from "@/components/ask-ai-entry";
 import { useMenusStore } from "@/components/menus-store";
 import { MenuFormDialog } from "@/components/menu-form-dialog";
 import { MenuDetailDialog } from "@/components/menu-detail-dialog";
@@ -266,13 +267,15 @@ function MenusPageContent() {
             ]}
           />
         </div>
-        <Button
-          color={siteConfig.accent}
-          iconLeft={<PlusIcon size={16} />}
-          onClick={openCreate}
-        >
-          新建菜单
-        </Button>
+        <PageTitleActions>
+          <Button
+            color={siteConfig.accent}
+            iconLeft={<PlusIcon size={16} />}
+            onClick={openCreate}
+          >
+            新建菜单
+          </Button>
+        </PageTitleActions>
       </div>
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">

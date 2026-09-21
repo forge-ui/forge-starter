@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Breadcrumbs, StatusBadge } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
+import { AskAiEntry } from "@/components/ask-ai-entry";
 import { REF_PAGES, refPath } from "@/lib/reference/catalog";
 import { RefChrome } from "@/components/reference/ref-chrome";
 
@@ -13,18 +14,21 @@ import { RefChrome } from "@/components/reference/ref-chrome";
 export default function RefIndexPage() {
   return (
     <RefChrome>
-      <div className="flex flex-col gap-1">
-        <h1 className="text-display-l font-semibold leading-9 tracking-fg text-fg-black">
-          页面范式参考库
-        </h1>
-        <Breadcrumbs
-          color={siteConfig.accent}
-          items={[{ label: "参考索引" }]}
-        />
-        <p className="mt-2 max-w-2xl text-sm text-fg-grey-600">
-          真实可渲染页面，专供 Agent / 开发对照。业务模块请抄这里的结构 + 可运行样板
-          （accounts），不要当成产品功能。
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-display-l font-semibold leading-9 tracking-fg text-fg-black">
+            页面范式参考库
+          </h1>
+          <Breadcrumbs
+            color={siteConfig.accent}
+            items={[{ label: "参考索引" }]}
+          />
+          <p className="mt-2 max-w-2xl text-sm text-fg-grey-600">
+            真实可渲染页面，专供 Agent / 开发对照。业务模块请抄这里的结构 + 可运行样板
+            （accounts），不要当成产品功能。
+          </p>
+        </div>
+        <AskAiEntry />
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">

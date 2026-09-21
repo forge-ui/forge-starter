@@ -101,7 +101,7 @@ description: >
 ### 列表
 
 - `app/(app)/<res>/page.tsx`  
-- Header + **一条**筛选/搜索工具带 + DataTable + 空态。页头任选：Starter `h1`+`Breadcrumbs`+`Button`，或 Kit `PageTitleToolbar`（查 `/cases/toolbar`）。工具带任选：`ButtonGroup`+`TextField`，或 `Toolbar`+`ToolbarSearchInput`。禁止手搓页头/搜索。卡片列表的列用 `Grid`/`GridItem`（core `≥0.1.13`，查 `/cases/grid`），不要 Tailwind `grid-cols-*`。名称列用 `CellText`/`text-fg-black`，不要把主文字写成 `text-fg-grey-500`。
+- Header + **一条**筛选/搜索工具带 + DataTable + 空态。页头任选：Starter `h1`+`Breadcrumbs`+`PageTitleActions`（Ask AI + 主操作 `Button`），或 Kit `PageTitleToolbarWithAsk`（查 `/cases/toolbar`）。工具带任选：`ButtonGroup`+`TextField`，或 `Toolbar`+`ToolbarSearchInput`。禁止手搓页头/搜索。卡片列表的列用 `Grid`/`GridItem`（core `≥0.1.13`，查 `/cases/grid`），不要 Tailwind `grid-cols-*`。名称列用 `CellText`/`text-fg-black`，不要把主文字写成 `text-fg-grey-500`。Ask AI 用本仓槽位，不要传 `AppLayout.askAi`（`hideHeader` 下不渲染），不要浮钮或自研抽屉/全屏层（core `≥0.1.17` 已带）。
 - 新建按钮 → form dialog  
 - 详情入口 → 名称/标题列的数据可点击，按已选详情形态打开全页或 `?id=` 弹窗；保留筛选上下文，支持键盘操作和可见焦点。对齐 accounts 的名称单元格，保持普通文字样式，不附加箭头。不要用带箭头的 `CellLink` 作为默认详情入口。
 - 操作列只放编辑、删除等真实业务动作；不要另放箭头/眼睛“查看详情”按钮。无其他动作时不生成操作列。

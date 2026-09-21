@@ -28,6 +28,7 @@ import {
   PROFILE_UPDATED_EVENT,
   type ProfileUpdatedDetail,
 } from "@/lib/auth/profile-events";
+import { AskAiProvider } from "@/components/ask-ai-entry";
 import { ToastProvider } from "@/components/ui/toast-provider";
 import {
   SettingsAccountDialog,
@@ -235,35 +236,37 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [logout, selectApp, apps]);
 
   return (
-    <AppLayout
-      mode="light"
-      logo={<img src={asset("/images/forge-logo.svg")} alt="Forge" className="size-8" />}
-      profilePosition="sidebar"
-      accent={siteConfig.accent}
-      teamName={activeApp.name}
-      teamSubtitle={activeApp.subtitle || "当前应用"}
-      teams={teams}
-      menuItems={shellMenuItems}
-      profile={profile}
-      hideSidebarWidgets
-      pageTitle={shell.title}
-      pageHeaderVariant={shell.headerVariant ?? "home"}
-      onBack={shell.backHref ? () => router.push(shell.backHref!) : undefined}
-      primaryAction={
-        shell.primaryAction
-          ? {
-              label: shell.primaryAction.label,
-              onClick: () => router.push(shell.primaryAction!.href),
-            }
-          : undefined
-      }
-      hideHeader={shell.hideHeader === true}
-      showDatePicker={false}
-      showKebab={false}
-    >
-      {forbiddenModule ? null : children}
-      <SettingsAccountDialog kind={accountDialog} onClose={() => setAccountDialog(null)} />
-      <ToastProvider />
-    </AppLayout>
+    <AskAiProvider>
+      <AppLayout
+        mode="light"
+        logo={<img src={asset("/images/forge-logo.svg")} alt="Forge" className="size-8" />}
+        profilePosition="sidebar"
+        accent={siteConfig.accent}
+        teamName={activeApp.name}
+        teamSubtitle={activeApp.subtitle || "当前应用"}
+        teams={teams}
+        menuItems={shellMenuItems}
+        profile={profile}
+        hideSidebarWidgets
+        pageTitle={shell.title}
+        pageHeaderVariant={shell.headerVariant ?? "home"}
+        onBack={shell.backHref ? () => router.push(shell.backHref!) : undefined}
+        primaryAction={
+          shell.primaryAction
+            ? {
+                label: shell.primaryAction.label,
+                onClick: () => router.push(shell.primaryAction!.href),
+              }
+            : undefined
+        }
+        hideHeader={shell.hideHeader === true}
+        showDatePicker={false}
+        showKebab={false}
+      >
+        {forbiddenModule ? null : children}
+        <SettingsAccountDialog kind={accountDialog} onClose={() => setAccountDialog(null)} />
+        <ToastProvider />
+      </AppLayout>
+    </AskAiProvider>
   );
 }

@@ -24,6 +24,7 @@ import {
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
 import { useAccountsStore } from "@/components/accounts-store";
+import { PageTitleActions } from "@/components/ask-ai-entry";
 import { AccountFormDialog } from "@/components/account-form-dialog";
 import {
   ACCOUNT_STATUS_META,
@@ -268,13 +269,15 @@ function AccountsPageContent() {
             ]}
           />
         </div>
-        <Button
-          color={siteConfig.accent}
-          iconLeft={<PlusIcon size={16} />}
-          onClick={openCreate}
-        >
-          新建账号
-        </Button>
+        <PageTitleActions>
+          <Button
+            color={siteConfig.accent}
+            iconLeft={<PlusIcon size={16} />}
+            onClick={openCreate}
+          >
+            新建账号
+          </Button>
+        </PageTitleActions>
       </div>
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">

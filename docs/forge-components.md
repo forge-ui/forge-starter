@@ -47,7 +47,7 @@
 | 页面/业务意图 | 先用这些组件 | Starter 抄谁 | monorepo case（查 props） |
 |---------------|--------------|--------------|---------------------------|
 | 列表、管理 | `DataTable` `StatusBadge` `Button`；页头见下行 | `accounts/page` 或官方 wallets/customers | `table` `toolbar` `button-link` |
-| 列表页头 + 工具带 | **任选一套**：Starter `h1`+`Breadcrumbs`+`Button` 再单行 `ButtonGroup`+`TextField`；**或** Kit `PageTitleToolbar` + `Toolbar`/`ToolbarSearchInput`/`ToolbarPillTabs` | 同上 | `toolbar` |
+| 列表页头 + 工具带 | **任选一套**：Starter `h1`+`Breadcrumbs`+`PageTitleActions` 再单行 `ButtonGroup`+`TextField`；**或** Kit `PageTitleToolbarWithAsk` + `Toolbar`/`ToolbarSearchInput`/`ToolbarPillTabs` | 同上 | `toolbar` |
 | 筛选条 | 一条工具带，禁止两行 pills。Starter：`ButtonGroup`+`TextField`。官方：`Toolbar`+`ToolbarSearchInput` | 同上 | `tab` `input-field` `toolbar` |
 | 新建/编辑弹窗 | `TextField` `TextArea` `SelectOption` + 本仓 `Modal` | `account-form-dialog` | `input-field` `modal` |
 | 轻详情（看完回列表） | `StatusBadge` `DescriptionItem` + `Modal` 底栏按钮 | `/ref/detail-modal` + `Modal` + `?id=`（暂无第二业务样板） | `list` `modal` |
@@ -56,6 +56,7 @@
 | 工作台、指标 | `StatCard` `ChartCard` 图表家族 `DataTable`；分栏 `Grid`/`GridItem`（core `≥0.1.13`，默认 12 列 / 16px） | `dashboard` | `card` `chart` `table` `grid` |
 | **资源工作台** | `WorkspaceSplit` `FolderNav` `ResourceCard` + `Grid` 卡组 + toast | `/ref/resource-workspace` | `grid` |
 | 设置单卡 | 头像菜单三项（资料/改密/系统偏好）用 `Modal` 表单，不要整页；应用管理仍是 collection | `settings-account-dialog`、`settings/apps` | `input-field` `modal` |
+| Ask AI | Kit `AskAi`（core `≥0.1.17`：抽屉 + 独立全屏层 + `sessions`）。`hideHeader` 时不要传 `AppLayout.askAi`。壳 `AskAiProvider` + 页头 `PageTitleActions` / `AskAiEntry`；B 页头用 `PageTitleToolbarWithAsk` | `ask-ai-entry`、accounts 页头右侧 | `page-header` |
 | 空态 | 文案 + `Button`；可选 solar 图标 | 各列表 empty | `button-link` |
 
 > **状态呈现纪律**：语义状态用 Kit `StatusBadge`（默认 `variant="soft"`，浅底+细边+同色字）。禁止 `variant="solid"`、`Label`、手搓 pill、本仓 `StatusText`。分类/角色/标签用 `CellText`/`CellMuted`，不要彩虹胶囊。一张表最多一列状态胶囊。
@@ -72,7 +73,9 @@
 | 把工具带改成 `Grid` | 一维排列继续 Flex / `Toolbar`；`Grid` 只管页面分栏 |
 | `gap={4}` 当 `gap-4` | Grid 的 gap 是像素；页面级用 16 或 24 |
 | 自拼 sidebar、topbar | 用本仓 `AppShell`、Kit `AppLayout` |
-| Drawer | Kit 可能未导出；先 FORGE-GAP |
+| Drawer | Kit 可能未导出；先 FORGE-GAP。Ask AI 用 Kit `AskAi`，不要自研抽屉或全屏层 |
+| `AppLayout.askAi` + `hideHeader: true` | 顶栏被藏，按钮不会出现；走页头槽 |
+| 右下角 Ask 浮钮 | 入口只挂带标题的那条栏右侧 |
 | 页面内嵌成功绿条 / 红条 | **禁止**；用全站 `toast`（见下） |
 | 两行 `ButtonGroup` | Starter 禁止 |
 
@@ -91,6 +94,23 @@ toast.info("请填写名称");
 - 宿主：`ToastProvider` 已挂在 `components/app-shell.tsx`（登录后页面可用）
 - 实现：`lib/toast.ts`（总线）+ `components/ui/toast-provider.tsx`（浮层 UI）
 - 底部居中，约 2.6s 自动消失，可点关闭
+
+### 全站 Ask AI（Kit，core ≥0.1.17）
+
+Starter 业务页默认 `hideHeader: true`，所以 **不要** 写 `<AppLayout askAi={…} />` 指望顶栏出现按钮。
+
+```tsx
+import { PageTitleActions } from "@/components/ask-ai-entry";
+
+<PageTitleActions>
+  <Button color={siteConfig.accent}>新建</Button>
+</PageTitleActions>
+```
+
+- 宿主：`AskAiProvider` 已挂 `AppShell`，换页不卸、对话保住
+- 入口：A 紧凑页头用 `PageTitleActions`；无主操作时单独 `<AskAiEntry />`；B 用 `PageTitleToolbarWithAsk`
+- 全屏 / 会话：走 Kit 抽屉顶栏全屏钮 + `sessions` / `currentSessionId` / `landingTitle`。core 不读 localStorage，不要另挂全视口层
+- 发送：`lib/ask-ai.ts` 的 `sendAskAiDemo`。接真模型只换 `onSend`，不要另做一套抽屉
 
 ## 后台常用 import 清单
 
@@ -120,6 +140,7 @@ import { Modal } from "@/components/ui/modal";
 import { ResourceCard } from "@/components/resource-card";
 import { FolderNav, WorkspaceSplit } from "@/components/workspace-split";
 import { toast } from "@/lib/toast";
+import { PageTitleActions } from "@/components/ask-ai-entry";
 import { formatDateOnly, formatTime } from "@/lib/format/datetime";
 import { siteConfig } from "@/config/site";
 // color={siteConfig.accent}

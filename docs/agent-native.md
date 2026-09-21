@@ -58,7 +58,7 @@ Coding Agent 是第一开发界面，专注 **Forge 管理后台**：skills 拆�
 
 | 路径 | 形态 |
 |------|------|
-| `/accounts` · `/accounts/[id]` | 列表 + 弹窗表单 + **全页详情**（重样板） |
+| `/accounts` · `/accounts/[id]` | 列表 + 弹窗表单 + **全页详情**（重样板）；页头右侧 Kit Ask AI |
 | `/dashboard` | 工作台 |
 | `/settings/apps` | 应用管理（collection）；资料/改密/系统偏好在头像菜单弹窗 |
 | `/ref/` | 布局参考画廊（真路由，开发默认开、默认不进侧栏） |

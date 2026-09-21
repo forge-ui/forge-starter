@@ -34,6 +34,7 @@ import {
 import { getDefaultAppRegistry } from "@/lib/apps/defaults";
 import { loadAppRegistry, saveAppRegistry } from "@/lib/apps/registry";
 import { AppFormDialog } from "@/components/app-form-dialog";
+import { PageTitleActions } from "@/components/ask-ai-entry";
 
 const filterTabs = [
   { label: "全部" },
@@ -240,16 +241,18 @@ export default function SettingsAppsPage() {
             ]}
           />
         </div>
-        <Button
-          color={siteConfig.accent}
-          iconLeft={<PlusIcon size={16} />}
-          onClick={() => {
-            setEditId(null);
-            setFormOpen(true);
-          }}
-        >
-          新建应用
-        </Button>
+        <PageTitleActions>
+          <Button
+            color={siteConfig.accent}
+            iconLeft={<PlusIcon size={16} />}
+            onClick={() => {
+              setEditId(null);
+              setFormOpen(true);
+            }}
+          >
+            新建应用
+          </Button>
+        </PageTitleActions>
       </div>
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">

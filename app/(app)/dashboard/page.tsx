@@ -39,6 +39,7 @@ import {
   type MapRegion,
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
+import { AskAiEntry } from "@/components/ask-ai-entry";
 import { useAccountsStore } from "@/components/accounts-store";
 import {
   ACCOUNT_STATUS_META,
@@ -140,6 +141,9 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-end">
+        <AskAiEntry />
+      </div>
       <Grid columns={{ base: 1, lg: 3 }} gap={24}>
         <ProgressStatCard
           title="账号总数"

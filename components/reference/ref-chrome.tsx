@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Breadcrumbs } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
+import { AskAiEntry } from "@/components/ask-ai-entry";
 import type { RefPageMeta } from "@/lib/reference/catalog";
 
 /** Banner + breadcrumbs for AI reference pages (not product UX). */
@@ -34,18 +35,21 @@ export function RefChrome({
         ) : null}
       </div>
       {meta ? (
-        <div className="flex flex-col gap-1">
-          <h1 className="text-display-l font-semibold leading-9 tracking-fg text-fg-black">
-            {meta.title}
-          </h1>
-          <Breadcrumbs
-            color={siteConfig.accent}
-            items={[
-              { label: "参考索引", href: "/ref/" },
-              { label: meta.title },
-            ]}
-          />
-          <p className="mt-1 text-sm text-fg-grey-500">{meta.summary}</p>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-display-l font-semibold leading-9 tracking-fg text-fg-black">
+              {meta.title}
+            </h1>
+            <Breadcrumbs
+              color={siteConfig.accent}
+              items={[
+                { label: "参考索引", href: "/ref/" },
+                { label: meta.title },
+              ]}
+            />
+            <p className="mt-1 text-sm text-fg-grey-500">{meta.summary}</p>
+          </div>
+          <AskAiEntry />
         </div>
       ) : null}
       {children}

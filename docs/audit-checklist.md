@@ -78,9 +78,9 @@
 Starter 业务页默认 `hideHeader: true`，正文页头走 **A 或 B**。不要把 `PageHeader` 当业务标题栏。
 
 - **H1** 🔴 业务页必须有 Forge 页头，用 Kit 组件实现。同一页只选一套，禁止叠两套（含壳 `pageTitle` 与页内页头叠加）。合法形态：
-  - **A. Starter 紧凑**：`h1.text-display-l.font-semibold` + `Breadcrumbs` + 右侧主操作 `Button`（`color={siteConfig.accent}`）。
+  - **A. Starter 紧凑**：`h1.text-display-l.font-semibold` + `Breadcrumbs` + 右侧 `PageTitleActions`（Kit `AskAi` 槽 + 主操作 `Button`，`color={siteConfig.accent}`）。无主操作时可只挂 `AskAiEntry`。
   - **B. Kit 正文页头**：`PageTitleToolbar`（列表/详情/看板都可用）。**面包屑写进这个组件**，不要写在它外面再挂一行。
-    - core `≥ 0.1.12`：`variant` 对上角色（`collection` / `overview` / `detail` / `action`）+ `breadcrumbItems` + 结构化 action，对照 `/cases/toolbar`。
+    - core `≥ 0.1.12`：`variant` 对上角色（`collection` / `overview` / `detail` / `action`）+ `breadcrumbItems` + 结构化 action，对照 `/cases/toolbar`。Ask AI 用 `PageTitleToolbarWithAsk`，与标题同一条。
     - core `≤ 0.1.11`：只有 `title` + `breadcrumbs={<Breadcrumbs … />}` + `actions`。视觉与模板相同，**不得因没写 `variant` 判违规**。
   - **C. 壳顶栏**：`AppLayout` / `AppShell` 的 `PageHeader variant="title"`（`hideHeader` 未开）。只用于「顶栏返回+标题」。面包屑若需要，走 AppLayout 的 `breadcrumbs` 槽，**页内不得再画 h1 / `PageTitleToolbar`**。
   **不要**用 `PageHeader variant="search"` 当列表/详情页头。
@@ -233,6 +233,8 @@ Starter 业务页默认 `hideHeader: true`，正文页头走 **A 或 B**。不�
 - 2026-09-02：Kit `@forge-ui-official/core@0.1.11` 已默认 soft。业务页状态列改回 `StatusBadge`；`StatusText` 弃用。权限/角色等类目仍用纯文本。
 - 2026-09-12：轻详情对照 `/ref/detail-modal` + `Modal` + `?id=`（**暂无第二业务样板**，不要指向已删的 approvals）。
 - 2026-09-12：新菜单必须写**菜单三处**（`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`）；默认应用勾齐新 id；`rbac_menus` 只是目录。加完清 `forge-starter:app-registry`。侧栏再按登录角色 `:read` 过滤。
+- 2026-09-21：Ask AI 跟到 core `0.1.17`：Kit 自带全屏层与 `sessions` 栏。禁止再自研全视口层。
+- 2026-09-20：Ask AI 用 Kit `AskAi`。Starter `hideHeader` 下入口挂页头右侧槽，不走 `AppLayout.askAi`，禁止浮钮/自研抽屉。
 - 2026-09-20：新增 **L10**：右侧内容壳顶/右/底 gutter 必须锁在首屏，溢出在内容面内滚动。由「列表一长，底边距要往下滚才看见」反哺。L2 只管页面不要再垫 padding，不覆盖本条。
 - 2026-09-18：新增 **V7**：字色按 Forge `--text-primary/secondary/muted/disabled` 分层。由「新页面正文也写成浅灰、V1 只验 token 家族漏检」反哺。V5 不再把辅助色写成 `text-fg-grey-500`（那是 `--text-disabled`）。
 - 2026-09-12：审批中心再次从公共 starter 删除，勿当轻样板对照。

@@ -58,7 +58,7 @@
 
 | 模块 | 状态 |
 |------|------|
-| App Shell | `AppLayout`；应用切换器；隐藏未实现的通知/消息 widget |
+| App Shell | `AppLayout`；应用切换器；隐藏未实现的通知/消息 widget；Kit **Ask AI**（页头右侧，抽屉 + 全屏会话，演示 onSend） |
 | 认证 | 登录、注册、找回、重置、profile 改资料改密 |
 | 工作台 | ecommerce-2 布局，指标接业务账号 |
 | 账号管理 | **重样板**：DataTable 列表 + Modal 新建编辑 + **全页详情** + `/api/accounts` |
