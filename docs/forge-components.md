@@ -56,7 +56,10 @@
 | 工作台、指标 | `StatCard` `ChartCard` 图表家族 `DataTable`；分栏 `Grid`/`GridItem`（core `≥0.1.13`，默认 12 列 / 16px） | `dashboard` | `card` `chart` `table` `grid` |
 | **资源工作台** | `WorkspaceSplit` `FolderNav` `ResourceCard` + `Grid` 卡组 + toast | `/ref/resource-workspace` | `grid` |
 | 设置单卡 | 头像菜单三项（资料/改密/系统偏好）用 `Modal` 表单，不要整页；应用管理仍是 collection | `settings-account-dialog`、`settings/apps` | `input-field` `modal` |
-| Ask AI | Kit `AskAi`（core `≥0.1.17`：抽屉 + 独立全屏层 + `sessions`）。`hideHeader` 时不要传 `AppLayout.askAi`。壳 `AskAiProvider` + 页头 `PageTitleActions` / `AskAiEntry`；B 页头用 `PageTitleToolbarWithAsk` | `ask-ai-entry`、accounts 页头右侧 | `page-header` |
+| Ask AI | Kit `AskAi`（抽屉 + 全屏 + `sessions`）。composer 用 `PromptBar`；回复用几组示范问答，按题选用 Agent 组件，不要整页丢 `/cases/agent` 英文 demo。`hideHeader` 时不要传 `AppLayout.askAi` | `ask-ai-entry`、`/ref/agent` | `page-header` `agent` |
+| Agent 痕迹 / 任务 / 审批 | `ThinkingTrace` `StreamingAnswer` `ToolChips` `AgentTaskRows` `ApprovalCard` | `/ref/agent` | `agent` |
+| Agent 检索 / 建议 / 命令 | `ContextCards` `RecommendationCard` `InsightCards` `CommandSearch` | `/ref/agent` | `agent` |
+| Agent 产物 | `AgentDiffTable` `AgentCodeBlock` `AgentFlowchart` `PromptBar` | `/ref/agent` | `agent` |
 | 空态 | 文案 + `Button`；可选 solar 图标 | 各列表 empty | `button-link` |
 
 > **状态呈现纪律**：语义状态用 Kit `StatusBadge`（默认 `variant="soft"`，浅底+细边+同色字）。禁止 `variant="solid"`、`Label`、手搓 pill、本仓 `StatusText`。分类/角色/标签用 `CellText`/`CellMuted`，不要彩虹胶囊。一张表最多一列状态胶囊。
@@ -110,6 +113,8 @@ import { PageTitleActions } from "@/components/ask-ai-entry";
 - 宿主：`AskAiProvider` 已挂 `AppShell`，换页不卸、对话保住
 - 入口：A 紧凑页头用 `PageTitleActions`；无主操作时单独 `<AskAiEntry />`；B 用 `PageTitleToolbarWithAsk`
 - 全屏 / 会话：走 Kit 抽屉顶栏全屏钮 + `sessions` / `currentSessionId` / `landingTitle`。core 不读 localStorage，不要另挂全视口层
+- 输入：Kit `PromptBar`（Sources / Commands / 模型），不要手搓底栏
+- 回复：演示走 `AskAiTranscript` 四条中文问答（页面 / 下一步 / 状态 / 权限）。对照页 `/ref/agent` 只看组件，不要把英文 case 原文塞进抽屉
 - 发送：`lib/ask-ai.ts` 的 `sendAskAiDemo`。接真模型只换 `onSend`，不要另做一套抽屉
 
 ## 后台常用 import 清单

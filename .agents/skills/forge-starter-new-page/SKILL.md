@@ -65,6 +65,7 @@ description: >
 | product 多 Tab | `/ref/product` | — |
 | calendar | `/ref/calendar` | — |
 | chat | `/ref/chat` | — |
+| agent | `/ref/agent` | Ask AI 示范问答（按问题选用 Agent 组件，不整页丢英文 case） |
 | files | `/ref/files` | — |
 | split 主从 | `/ref/split` | — |
 | queue | `/ref/queue` | — |

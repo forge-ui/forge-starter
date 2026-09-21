@@ -48,7 +48,7 @@ docs/forge-components.md
 
 - 通用 Modal：core 无导出 → `components/ui/modal.tsx`  
 - 操作 Toast：core 无导出 → `lib/toast.ts` + `components/ui/toast-provider.tsx`（已挂 AppShell）  
-- **Ask AI**：Kit `AskAi`（core `≥0.1.17`）。业务页默认 `hideHeader: true`，`AppLayout.askAi` 不会出现。壳层 `AskAiProvider` 保活唯一实例，页头右侧用 `PageTitleActions` / `AskAiEntry`（`components/ask-ai-entry.tsx`）。全屏、会话栏走 Kit props（`sessions` / `landingTitle` / 抽屉顶栏全屏钮），禁止自研抽屉或全视口层。演示 `onSend` 在 `lib/ask-ai.ts`，接真模型只换这个函数。  
+- **Ask AI**：Kit `AskAi`（core `≥0.1.17`）。业务页默认 `hideHeader: true`，`AppLayout.askAi` 不会出现。壳层 `AskAiProvider` 保活唯一实例，页头右侧用 `PageTitleActions` / `AskAiEntry`。composer 用 `PromptBar`；回复是几组中文示范问答（`AskAiTranscript`），按问题选用 Agent 组件，不要整页铺 `/cases/agent` 英文死 demo。组件对照仍看 `/ref/agent`。全屏、会话栏走 Kit props，禁止自研抽屉或全视口层。接真模型只换 `lib/ask-ai.ts` 的 `onSend`。  
 - 资源工作台：`WorkspaceSplit` + `FolderNav` + `ResourceCard`（见 `/ref/resource-workspace`）  
 - 时间格式：`lib/format/datetime.ts`（客户端安全，勿塞 next/headers）  
 - 缺组件 → `FORGE-GAP`，禁止手搓  
@@ -95,7 +95,9 @@ app/api/auth|accounts|roles|menus|permissions
 components/app-shell.tsx
 components/*-form-dialog.tsx | *-store.tsx
 components/ask-ai-entry.tsx
+components/ask-ai-transcript.tsx
 lib/ask-ai.ts
+lib/reference/agent-demo.ts
 components/ui/modal.tsx
 config/site.ts menu.tsx apps.ts
 lib/auth lib/db lib/accounts lib/roles lib/menus lib/permissions lib/rbac lib/reference

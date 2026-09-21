@@ -18,7 +18,9 @@ import {
   ASK_AI_FS_LAYER_ATTR,
   AskAi,
   PageTitleToolbar,
+  PromptBar,
   type AskAiProps,
+  type AskAiRequest,
   type AskAiSessionItem,
 } from "@forge-ui-official/core";
 import { shellForPath, siteConfig } from "@/config/site";
@@ -26,12 +28,16 @@ import {
   ASK_AI_DEMO_SESSIONS,
   ASK_AI_LANDING_TITLE,
   ASK_AI_PLACEHOLDER,
+  ASK_AI_PROMPT_COMMANDS,
+  ASK_AI_PROMPT_MODELS,
+  ASK_AI_PROMPT_SOURCES,
   ASK_AI_SUGGESTIONS,
   createAskAiSession,
   filterAskAiSessions,
   sendAskAiDemo,
   titleAskAiSession,
 } from "@/lib/ask-ai";
+import { AskAiTranscript } from "@/components/ask-ai-transcript";
 
 const AskAiPlaceContext = createContext<(slot: HTMLElement | null, releasing?: HTMLElement | null) => void>(
   () => {},
@@ -65,6 +71,10 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
   const [sessions, setSessions] = useState<AskAiSessionItem[]>(ASK_AI_DEMO_SESSIONS);
   const [currentSessionId, setCurrentSessionId] = useState(ASK_AI_DEMO_SESSIONS[0]?.id ?? "demo-1");
   const [searchQuery, setSearchQuery] = useState("");
+  const [draft, setDraft] = useState("");
+  const [lastQuestion, setLastQuestion] = useState(ASK_AI_SUGGESTIONS[0] ?? "这个页面可以做什么？");
+  const [hasChat, setHasChat] = useState(false);
+  const [model, setModel] = useState("fast");
   const currentSessionIdRef = useRef(currentSessionId);
   currentSessionIdRef.current = currentSessionId;
 
@@ -74,6 +84,9 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
   );
 
   const onSend = useCallback<AskAiProps["onSend"]>(async (message, request) => {
+    setDraft("");
+    setLastQuestion(message);
+    setHasChat(true);
     setSessions((prev) =>
       prev.map((item) =>
         item.id === currentSessionIdRef.current && item.title === "新对话"
@@ -83,6 +96,18 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     );
     return sendAskAiDemo(message, request);
   }, []);
+
+  const askFromHost = useCallback(
+    (message: string) => {
+      const request: AskAiRequest = {
+        context: `${shell.title} / ${pathname}`,
+        messages: [],
+        signal: new AbortController().signal,
+      };
+      void onSend(message, request);
+    },
+    [onSend, pathname, shell.title],
+  );
 
   const value = useMemo<AskAiProps>(
     () => ({
@@ -95,19 +120,68 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
       currentSessionId,
       searchQuery,
       onSearchQueryChange: setSearchQuery,
+      hasConversation: hasChat,
+      messages: hasChat ? (
+        <AskAiTranscript
+          question={lastQuestion}
+          pageLabel={`${shell.title} / ${pathname}`}
+          onAsk={askFromHost}
+        />
+      ) : undefined,
+      composer: (
+        <PromptBar
+          value={draft}
+          onChange={setDraft}
+          onSend={askFromHost}
+          placeholder={ASK_AI_PLACEHOLDER}
+          sources={ASK_AI_PROMPT_SOURCES}
+          commands={ASK_AI_PROMPT_COMMANDS}
+          models={ASK_AI_PROMPT_MODELS}
+          model={model}
+          onModelChange={setModel}
+        />
+      ),
       onNewSession: () => {
         const next = createAskAiSession();
         setSessions((prev) => [next, ...prev].slice(0, 20));
         setCurrentSessionId(next.id);
         setSearchQuery("");
+        setHasChat(false);
+        setDraft("");
       },
       onSelectSession: (id) => {
         setCurrentSessionId(id);
         setSearchQuery("");
+        const session = sessions.find((item) => item.id === id);
+        const demo = ASK_AI_DEMO_SESSIONS.find((item) => item.id === id);
+        if (demo) {
+          setLastQuestion(demo.title);
+          setHasChat(true);
+          return;
+        }
+        if (session?.title && session.title !== "新对话") {
+          setLastQuestion(session.title);
+          setHasChat(true);
+          return;
+        }
+        setHasChat(false);
       },
       onSend,
     }),
-    [currentSessionId, onSend, pathname, shell.title, visibleSessions, searchQuery],
+    [
+      askFromHost,
+      currentSessionId,
+      draft,
+      hasChat,
+      lastQuestion,
+      model,
+      onSend,
+      pathname,
+      searchQuery,
+      sessions,
+      shell.title,
+      visibleSessions,
+    ],
   );
 
   useLayoutEffect(() => {

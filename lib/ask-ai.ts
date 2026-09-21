@@ -1,19 +1,19 @@
 import type { AskAiRequest, AskAiResponse, AskAiSessionItem } from "@forge-ui-official/core";
+import { ASK_AI_FALLBACK_SUMMARY, matchAskAiDemo } from "@/lib/ask-ai-demos";
 
-export const ASK_AI_SUGGESTIONS = [
-  "这个页面可以做什么？",
-  "下一步该做什么？",
-  "帮我总结当前内容",
-];
+export {
+  ASK_AI_DEMOS,
+  ASK_AI_DEMO_SESSIONS,
+  ASK_AI_PROMPT_COMMANDS,
+  ASK_AI_PROMPT_MODELS,
+  ASK_AI_PROMPT_SOURCES,
+  ASK_AI_SUGGESTIONS,
+  matchAskAiDemo,
+} from "@/lib/ask-ai-demos";
 
-export const ASK_AI_PLACEHOLDER = "输入问题…";
+export const ASK_AI_PLACEHOLDER = "问当前页，或点一条示范问题";
 
-export const ASK_AI_LANDING_TITLE = "今天想做什么？";
-
-export const ASK_AI_DEMO_SESSIONS: AskAiSessionItem[] = [
-  { id: "demo-1", title: "这个页面可以做什么？" },
-  { id: "demo-2", title: "帮我总结当前内容" },
-];
+export const ASK_AI_LANDING_TITLE = "先问这几件？";
 
 export function createAskAiSession(title = "新对话"): AskAiSessionItem {
   const id =
@@ -39,16 +39,10 @@ export async function sendAskAiDemo(
   question: string,
   request: AskAiRequest,
 ): Promise<AskAiResponse> {
-  await wait(400, request.signal);
-  const contextLine = request.context
-    ? `本次携带当前页：${request.context}。`
-    : "本次未携带当前页。";
+  await wait(280, request.signal);
+  const demo = matchAskAiDemo(question);
   return {
-    text: `演示回复：已收到「${question}」。\n\n${contextLine}\n\n业务系统把 \`lib/ask-ai.ts\` 的 onSend 换成你们的模型接口即可，Kit \`AskAi\` 会把回复显示在这里。`,
-    links: [
-      { label: "打开工作台", href: "/dashboard/" },
-      { label: "打开账号管理", href: "/accounts/" },
-    ],
+    text: demo?.summary ?? ASK_AI_FALLBACK_SUMMARY,
   };
 }
 
