@@ -5,13 +5,12 @@
  * Left meta/members/files + right progress/checklist/activity.
  */
 
-import { useState } from "react";
 import { AddCircleLinear, Pen2Linear, UserPlusLinear } from "solar-icon-set";
 import {
   Avatar,
   AvatarGroup,
   Button,
-  Checkbox,
+  Checklist,
   FileCard,
   ProgressBar,
   StatusBadge,
@@ -37,10 +36,10 @@ const task = {
 };
 
 const checklist = [
-  { label: "Wireframe", done: true },
-  { label: "Moodboard", done: true },
-  { label: "Prototype", done: false },
-  { label: "Stakeholder review", done: false },
+  { id: "wireframe", label: "Wireframe", done: true },
+  { id: "moodboard", label: "Moodboard", done: true },
+  { id: "prototype", label: "Prototype", done: false },
+  { id: "review", label: "Stakeholder review", done: false },
 ];
 
 const activities = [
@@ -72,15 +71,13 @@ function Panel({
 function Info({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-sm text-fg-grey-500">{label}</div>
+      <div className="text-sm text-fg-grey-700">{label}</div>
       <div className="mt-1 text-base text-fg-black">{value}</div>
     </div>
   );
 }
 
 export default function RefTaskPage() {
-  const [checks, setChecks] = useState(checklist);
-
   return (
     <RefChrome meta={meta}>
       <div className="flex flex-wrap items-center justify-end gap-2">
@@ -101,7 +98,7 @@ export default function RefTaskPage() {
               </div>
               <div>
                 <h2 className="text-xl font-semibold text-fg-black">{task.name}</h2>
-                <p className="text-sm text-fg-grey-500">{task.client}</p>
+                <p className="text-sm text-fg-grey-700">{task.client}</p>
               </div>
             </div>
             <Info label="Status" value={task.status} />
@@ -154,31 +151,8 @@ export default function RefTaskPage() {
             </p>
           </Panel>
 
-          <Panel
-            title="Checklist"
-            action={
-              <Button color="grey" variant="tertiary" size="sm">
-                <AddCircleLinear size={18} />
-              </Button>
-            }
-          >
-            {checks.map((item, index) => (
-              <div
-                key={item.label}
-                className="flex items-center justify-between rounded-2xl border border-fg-grey-200 px-4 py-3"
-              >
-                <span className="text-sm text-fg-black">{item.label}</span>
-                <Checkbox
-                  color="purple"
-                  checked={item.done}
-                  onChange={(checked) => {
-                    setChecks((prev) =>
-                      prev.map((c, i) => (i === index ? { ...c, done: checked } : c)),
-                    );
-                  }}
-                />
-              </div>
-            ))}
+          <Panel title="Checklist">
+            <Checklist color={siteConfig.accent} defaultTasks={checklist} />
           </Panel>
 
           <Panel title="Activity">
@@ -188,7 +162,7 @@ export default function RefTaskPage() {
                   <h4 className="text-sm font-semibold text-fg-black">{item.title}</h4>
                   <span className="shrink-0 text-xs text-fg-grey-500">{item.time}</span>
                 </div>
-                <p className="mt-1 text-sm text-fg-grey-600">{item.body}</p>
+                <p className="mt-1 text-sm text-fg-grey-700">{item.body}</p>
               </div>
             ))}
           </Panel>

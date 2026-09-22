@@ -1,4 +1,5 @@
 import {
+  boolean,
   integer,
   pgTable,
   text,
@@ -127,6 +128,28 @@ export const rbacMenus = pgTable(
   (table) => [uniqueIndex("rbac_menus_code_uidx").on(table.code)],
 );
 
+/** Platform model catalog — OpenAI-compatible credentials for Ask AI. */
+export const aiModels = pgTable(
+  "ai_models",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: text("name").notNull(),
+    provider: text("provider").notNull(),
+    modelName: text("model_name").notNull(),
+    apiBase: text("api_base").notNull().default(""),
+    apiKey: text("api_key").notNull().default(""),
+    status: text("status").notNull().default("active"),
+    isDefault: boolean("is_default").notNull().default(false),
+    notes: text("notes").notNull().default(""),
+    lastProbeAt: timestamp("last_probe_at", { withTimezone: true }),
+    lastProbeOk: boolean("last_probe_ok"),
+    lastProbeMessage: text("last_probe_message").notNull().default(""),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [uniqueIndex("ai_models_name_uidx").on(table.name)],
+);
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type AdminAccountRow = typeof adminAccounts.$inferSelect;
@@ -134,3 +157,4 @@ export type NewAdminAccountRow = typeof adminAccounts.$inferInsert;
 export type RbacRoleRow = typeof rbacRoles.$inferSelect;
 export type RbacPermissionRow = typeof rbacPermissions.$inferSelect;
 export type RbacMenuRow = typeof rbacMenus.$inferSelect;
+export type AiModelRow = typeof aiModels.$inferSelect;

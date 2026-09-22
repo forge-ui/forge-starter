@@ -19,6 +19,7 @@ export const routeShells: Record<string, RouteShell> = {
   "/roles": { title: "角色", hideHeader: true },
   "/menus": { title: "菜单", hideHeader: true },
   "/permissions": { title: "权限", hideHeader: true },
+  "/models": { title: "模型服务", hideHeader: true },
   "/settings": { title: "设置", hideHeader: true },
   "/settings/apps": { title: "应用管理", hideHeader: true },
   "/ref": { title: "页面参考库", hideHeader: true },

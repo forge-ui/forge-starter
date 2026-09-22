@@ -25,6 +25,7 @@
 | `/ref/calendar` | **日历** | micellaneous/calendar |
 | `/ref/chat` | **对话** | micellaneous/chat |
 | `/ref/agent` | **Agent 组件** | [cases/agent](https://www.forgeui.org/cases/agent) |
+| `/ref/checklist` | **Checklist** | [cases/checklist](https://www.forgeui.org/cases/checklist) |
 | `/ref/files` | **文件清单** | micellaneous/files |
 | `/ref/dashboard-board` | Dashboard · 通用条 | ecommerce-2 骨架 |
 | `/ref/dashboard-kpi` | Dashboard · 精简 KPI | ecommerce-2 |

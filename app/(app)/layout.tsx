@@ -5,6 +5,7 @@ import { AccountsStoreProvider } from "@/components/accounts-store";
 import { RolesStoreProvider } from "@/components/roles-store";
 import { PermissionsStoreProvider } from "@/components/permissions-store";
 import { MenusStoreProvider } from "@/components/menus-store";
+import { ModelsStoreProvider } from "@/components/models-store";
 
 export default function AppSectionLayout({ children }: { children: ReactNode }) {
   return (
@@ -13,7 +14,9 @@ export default function AppSectionLayout({ children }: { children: ReactNode }) 
         <RolesStoreProvider>
           <PermissionsStoreProvider>
             <MenusStoreProvider>
-              <AppShell>{children}</AppShell>
+              <ModelsStoreProvider>
+                <AppShell>{children}</AppShell>
+              </ModelsStoreProvider>
             </MenusStoreProvider>
           </PermissionsStoreProvider>
         </RolesStoreProvider>

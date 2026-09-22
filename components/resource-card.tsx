@@ -40,11 +40,11 @@ export function ResourceCard({
 }) {
   const compact = density === "compact";
   const interactive = Boolean(onClick || href);
-  const iconSize = compact ? "h-8 w-8" : "h-10 w-10";
+  const iconSize = compact ? "h-8 w-8" : "h-9 w-9";
   const chipClass =
     iconVariant === "plain"
       ? `flex ${iconSize} shrink-0 items-center justify-center overflow-hidden`
-      : `flex ${iconSize} shrink-0 items-center justify-center overflow-hidden rounded-xl ${
+      : `flex ${iconSize} shrink-0 items-center justify-center overflow-hidden rounded-lg ${
           iconClassName ?? "bg-fg-blue-50 text-fg-blue-700"
         }`;
 
@@ -76,61 +76,74 @@ export function ResourceCard({
           </div>
           {subtitle ? (
             <div
-              className={`text-xs text-fg-grey-600 ${compact ? "mt-0.5" : "mt-1"}`}
+              className={`truncate text-xs text-fg-grey-700 ${compact ? "mt-0.5" : "mt-1"}`}
             >
               {subtitle}
             </div>
           ) : null}
         </div>
+        {actions ? (
+          <div
+            className="relative z-10 -mr-1 -mt-1 shrink-0"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {actions}
+          </div>
+        ) : null}
       </div>
 
-      <p
-        className={`line-clamp-2 flex-1 text-fg-grey-700 ${
-          compact ? "mt-2 text-xs leading-5" : "mt-3 text-sm leading-6"
-        }`}
-      >
-        {description || "暂无描述"}
-      </p>
+      {description ? (
+        <p
+          className={`line-clamp-2 text-fg-grey-700 ${
+            compact ? "mt-2 text-xs leading-5" : "mt-3 text-sm leading-6"
+          }`}
+        >
+          {description}
+        </p>
+      ) : null}
     </>
   );
 
   return (
     <article
       className={`flex h-full flex-col border border-fg-grey-200 bg-white ${
-        compact ? "min-h-0 rounded-xl p-3" : "min-h-[168px] rounded-2xl p-4"
+        compact ? "rounded-xl p-3" : "rounded-2xl p-4"
       } ${
         interactive
-          ? "cursor-pointer transition-colors hover:border-fg-grey-300"
+          ? "cursor-pointer transition-colors hover:border-fg-grey-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg-blue-500"
           : ""
       }`}
+      role={onClick && !href ? "button" : undefined}
+      tabIndex={onClick && !href ? 0 : undefined}
       onClick={href ? undefined : onClick}
+      onKeyDown={
+        onClick && !href
+          ? (event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
     >
       {href ? (
-        <a
-          href={href}
-          className="flex min-h-0 flex-1 flex-col text-inherit no-underline"
-        >
+        <a href={href} className="min-w-0 text-inherit no-underline">
           {body}
         </a>
       ) : (
-        <div className="flex min-h-0 flex-1 flex-col">{body}</div>
+        <div className="min-w-0">{body}</div>
       )}
 
-      <div
-        className={`flex items-center justify-between gap-2 border-t border-fg-grey-100 ${
-          compact ? "mt-2.5 pt-2" : "mt-4 pt-3"
-        }`}
-      >
-        <div className="min-w-0 flex-1 text-xs text-fg-grey-600">{footer}</div>
-        {actions ? (
-          <div
-            className="relative z-10 flex shrink-0 items-center gap-1"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {actions}
-          </div>
-        ) : null}
-      </div>
+      {footer ? (
+        <div
+          className={`mt-auto flex flex-wrap items-center gap-2 border-t border-fg-grey-100 ${
+            compact ? "mt-2.5 pt-2" : "mt-3 pt-3"
+          }`}
+        >
+          {footer}
+        </div>
+      ) : null}
     </article>
   );
 }

@@ -9,6 +9,8 @@ export type WorkspaceFolder = {
   id: string;
   name: string;
   locked?: boolean;
+  count?: number;
+  icon?: ReactNode;
 };
 
 /**
@@ -20,14 +22,16 @@ export function WorkspaceSplit({
   left,
   children,
   leftWidthClassName = "w-[240px]",
+  className = "",
 }: {
   leftTitle: string;
   left: ReactNode;
   children: ReactNode;
   leftWidthClassName?: string;
+  className?: string;
 }) {
   return (
-    <div className="flex min-h-[calc(100vh-48px)] gap-0 overflow-hidden rounded-2xl border border-fg-grey-200 bg-white">
+    <div className={`flex min-h-[32rem] flex-1 gap-0 overflow-hidden rounded-2xl border border-fg-grey-200 bg-white ${className}`.trim()}>
       <aside
         className={`flex shrink-0 flex-col border-r border-fg-grey-200 bg-fg-grey-50/60 ${leftWidthClassName}`}
       >
@@ -77,12 +81,23 @@ export function FolderNav({
                   : "text-fg-grey-800"
               }`}
             >
-              <span
-                className={`inline-block h-2 w-2 rounded-full ${
-                  active ? "bg-fg-blue-600" : "bg-fg-grey-300"
-                }`}
-              />
+              {folder.icon ? (
+                <span className="flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-md bg-white">
+                  {folder.icon}
+                </span>
+              ) : (
+                <span
+                  className={`inline-block h-2 w-2 rounded-full ${
+                    active ? "bg-fg-blue-600" : "bg-fg-grey-300"
+                  }`}
+                />
+              )}
               <span className="truncate">{folder.name}</span>
+              {typeof folder.count === "number" ? (
+                <span className="ml-auto tabular-nums text-xs text-fg-grey-500">
+                  {folder.count}
+                </span>
+              ) : null}
             </button>
             {!folder.locked && (onEdit || onDelete) ? (
               <KebabMenu

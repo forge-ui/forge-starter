@@ -34,7 +34,7 @@ Compose 默认库与 `.env.example` 一致：`postgresql://forge:forge@127.0.0.1
 | 侧栏角色 | 见下方种子角色表。用户名 `admin` / `operator` / `auditor` / `readonly`（及中文别名）映射种子角色；**其余用户名默认超级管理员（全开）**。无库时回退种子授权 | `users.role_code`（**默认 `super_admin`**）；注册时若用户名是种子角色码则写入该码。改角色需改库字段，不是业务账号 `admin_accounts.role` |
 | `AUTH_SECRET` | 未设时用内置演示密钥 | **必填**，至少 16 位（`.env.example` 建议更长） |
 | 业务 CRUD | **仍要** `DATABASE_URL` + `pnpm db:push` | 同左 |
-| 登录守卫 | 默认不强制（可用 `AUTH_GUARD=true` 打开） | 默认强制登录 |
+| 登录守卫 | 默认强制。未登录打开后台会进登录页，不出现访客壳（`AUTH_GUARD=false` 可关） | 默认强制登录 |
 
 ### 种子角色与侧栏（管理员 / 合理默认）
 
@@ -70,15 +70,19 @@ API 一律先 `requireSession`（未登录 401）。账号 / 角色 / 菜单 / �
 | `AUTH_SECRET` | 会话签名。`local` 至少 16 位 |
 | `APP_URL` | 对外地址，用于重置密码链接，默认 `http://localhost:3000` |
 | `DATABASE_URL` | PostgreSQL 连接串。`local` 登录和任何业务 CRUD 都需要 |
-| `AUTH_GUARD` | `true` 时即使 `demo` 也强制登录；`false` 关闭 |
+| `AUTH_GUARD` | 默认开启。设 `false` 才允许未登录进入后台 |
 | `SHOW_REF_PAGES` | `/ref/*` 参考页。开发默认开、生产默认关；生产要开则设 `true` |
 | `SMTP_HOST` | 有值才发信；留空则重置信打日志 |
 | `SMTP_PORT` | 默认 `587` |
 | `SMTP_SECURE` | 默认 `false` |
 | `SMTP_USER` / `SMTP_PASS` | 可选 |
 | `SMTP_FROM` | 发件人显示名 |
+| `ASK_AI_LLM_API_KEY` | 模型表为空时的 Ask AI 回退密钥；优先用模型管理里启用的条目。密钥不要放进前端 |
+| `ASK_AI_LLM_PROVIDER` | 默认 `dashscope`（OpenAI 兼容） |
+| `ASK_AI_LLM_MODEL` | 回退模型 ID，默认 `qwen-plus` |
+| `ASK_AI_LLM_BASE_URL` | 可选，覆盖供应商默认地址 |
 
-只支持标准 SMTP，没有云邮件 SaaS SDK。
+只支持标准 SMTP，没有云邮件 SaaS SDK。Ask AI 优先走模型管理，其次服务端 `ASK_AI_LLM_*`，请求体带 `apiKey` 会被拒绝。
 
 ## 常用命令
 

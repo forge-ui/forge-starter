@@ -35,6 +35,10 @@ const SPECS: Omit<SeedPermissionSpec, "code">[] = [
   { resource: "permissions", action: "create", name: "新建权限", description: "登记权限点" },
   { resource: "permissions", action: "update", name: "编辑权限", description: "修改权限点" },
   { resource: "permissions", action: "delete", name: "删除权限", description: "删除权限点" },
+  { resource: "models", action: "read", name: "查看模型", description: "浏览大模型目录与测连结果" },
+  { resource: "models", action: "create", name: "新建模型", description: "接入供应商与模型" },
+  { resource: "models", action: "update", name: "编辑模型", description: "修改模型配置与测连" },
+  { resource: "models", action: "delete", name: "删除模型", description: "删除模型配置" },
 ];
 
 export const SEED_PERMISSIONS: SeedPermissionSpec[] = SPECS.map((item) => ({
@@ -56,6 +60,7 @@ export const SEED_ROLES: SeedRoleSpec[] = [
     grant: (code) =>
       code === "dashboard:read"
       || code.startsWith("accounts:")
+      || code.startsWith("models:")
       || code === "settings:read"
       || code === "settings:update",
   },

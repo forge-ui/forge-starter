@@ -15,6 +15,7 @@ export const RBAC_RESOURCES = [
   "roles",
   "menus",
   "permissions",
+  "models",
 ] as const;
 
 export type RbacResource = (typeof RBAC_RESOURCES)[number];
@@ -26,6 +27,7 @@ export const RBAC_RESOURCE_META: Record<RbacResource, { label: string }> = {
   roles: { label: "角色" },
   menus: { label: "菜单" },
   permissions: { label: "权限" },
+  models: { label: "模型" },
 };
 
 export const RBAC_ACTIONS = ["read", "create", "update", "delete"] as const;
@@ -75,6 +77,9 @@ export function formatRbacDate(date: Date) {
 
 export function uniqueConstraintMessage(error: unknown, fallback: string) {
   const message = error instanceof Error ? error.message : String(error);
+  if (message.includes("ai_models_name")) {
+    return "模型名称已被占用";
+  }
   if (message.includes("rbac_roles_code") || message.includes("rbac_permissions_code") || message.includes("rbac_menus_code")) {
     return "编码已被占用";
   }

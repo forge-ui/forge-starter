@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import "@fontsource-variable/manrope";
 import "@fontsource-variable/plus-jakarta-sans";
+import { siteConfig } from "@/config/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,7 +17,7 @@ const fontVariables = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="zh-CN" className="h-full antialiased" style={fontVariables}>
+    <html lang="zh-CN" data-accent={siteConfig.accent} className="h-full antialiased" style={fontVariables}>
       <body className="min-h-full font-sans">{children}</body>
     </html>
   );

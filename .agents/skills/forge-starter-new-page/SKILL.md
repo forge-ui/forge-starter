@@ -66,6 +66,7 @@ description: >
 | calendar | `/ref/calendar` | — |
 | chat | `/ref/chat` | — |
 | agent | `/ref/agent` | Ask AI 示范问答（按问题选用 Agent 组件，不整页丢英文 case） |
+| checklist | `/ref/checklist` | `/ref/task` 清单（Kit `Checklist`，禁止手搓 Checkbox 行） |
 | files | `/ref/files` | — |
 | split 主从 | `/ref/split` | — |
 | queue | `/ref/queue` | — |
@@ -77,6 +78,7 @@ description: >
 | dashboard Project | `/ref/dashboard-project` | monorepo `dashboards/project-1` |
 | invoice 单据 | `/ref/invoice` | finance invoices/[id] |
 | task 任务 | `/ref/task` | project tasks/[id] |
+| resource-workspace | `/ref/resource-workspace` | `/models` 模型卡片台 |
 | project 项目 | `/ref/project` | project projects/[id] |
 | kanban 泳道 | `/ref/kanban` | 嵌在 project Task tab，独立抽出 |
 | tickets 工单 | `/ref/tickets` | 工单线程语义 |

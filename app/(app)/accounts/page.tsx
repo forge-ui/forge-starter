@@ -26,6 +26,8 @@ import { siteConfig } from "@/config/site";
 import { useAccountsStore } from "@/components/accounts-store";
 import { PageTitleActions } from "@/components/ask-ai-entry";
 import { AccountFormDialog } from "@/components/account-form-dialog";
+import { AGENT_FILL_EVENT, consumeAgentFormFill, peekAgentFormFill } from "@/lib/agent/fill";
+import type { AgentFormFill } from "@/lib/agent/types";
 import {
   ACCOUNT_STATUS_META,
   type AccountStatus,
@@ -54,13 +56,16 @@ function AccountsPageContent() {
   const [deleting, setDeleting] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [formDraft, setFormDraft] = useState<Record<string, string> | null>(null);
 
   function openCreate() {
+    setFormDraft(null);
     setEditId(null);
     setFormOpen(true);
   }
 
   function openEdit(id: string) {
+    setFormDraft(null);
     setEditId(id);
     setFormOpen(true);
   }
@@ -68,7 +73,34 @@ function AccountsPageContent() {
   function closeForm() {
     setFormOpen(false);
     setEditId(null);
+    setFormDraft(null);
   }
+
+  useEffect(() => {
+    function applyFill(fill: AgentFormFill) {
+      if (fill.mode === "delete") {
+        const row = accounts.find((item) => item.id === fill.recordId);
+        if (!row) return false;
+        setDeleteTarget(row);
+        setFormOpen(false);
+        return true;
+      }
+      setEditId(fill.mode === "edit" ? fill.recordId ?? null : null);
+      setFormDraft(fill.fields);
+      setFormOpen(true);
+      return true;
+    }
+
+    function takeFill() {
+      const fill = peekAgentFormFill("accounts");
+      if (!fill) return;
+      if (applyFill(fill)) consumeAgentFormFill("accounts");
+    }
+
+    takeFill();
+    window.addEventListener(AGENT_FILL_EVENT, takeFill);
+    return () => window.removeEventListener(AGENT_FILL_EVENT, takeFill);
+  }, [accounts]);
 
   useEffect(() => {
     const create = searchParams.get("create") === "1";
@@ -218,6 +250,7 @@ function AccountsPageContent() {
         open={formOpen}
         onClose={closeForm}
         accountId={editId}
+        draft={formDraft}
       />
 
       {deleteTarget ? (

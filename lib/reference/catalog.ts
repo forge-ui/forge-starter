@@ -54,6 +54,15 @@ export const REF_PAGES: RefPageMeta[] = [
     ],
   },
   {
+    slug: "checklist",
+    title: "Checklist 画廊",
+    role: "checklist",
+    summary:
+      "对照 /cases/checklist：Checklist、ChecklistItem；完成沉底、md/sm、勾选色与 Checkbox 对齐。",
+    forgeTemplate: "https://www.forgeui.org/cases/checklist",
+    components: ["Checklist", "ChecklistItem"],
+  },
+  {
     slug: "resource-workspace",
     title: "资源工作台 · 文件夹 + 卡片",
     role: "resource-workspace",
@@ -232,9 +241,9 @@ export const REF_PAGES: RefPageMeta[] = [
     slug: "task",
     title: "详情 · 任务",
     role: "task",
-    summary: "左 meta/成员/附件 + 右进度/清单 Checkbox/活动。",
+    summary: "左 meta/成员/附件 + 右进度/Kit Checklist/活动。",
     forgeTemplate: "templates/project-template/tasks/[id]",
-    components: ["ProgressBar", "Checkbox", "FileCard", "AvatarGroup", "StatusBadge"],
+    components: ["ProgressBar", "Checklist", "FileCard", "AvatarGroup", "StatusBadge"],
   },
   {
     slug: "project",

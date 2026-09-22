@@ -2,6 +2,15 @@ import type { AskAiSessionItem } from "@forge-ui-official/core";
 
 export type AskAiDemoId = "page" | "next" | "status" | "rbac";
 
+export type AskAiAccountSnapshot = {
+  ready: boolean;
+  note?: string;
+  total: number;
+  byStatus: Record<"active" | "disabled" | "pending" | "locked", number>;
+  byRole: Record<string, number>;
+  recent: Array<{ name: string; role: string; status: string }>;
+};
+
 export type AskAiDemo = {
   id: AskAiDemoId;
   title: string;
@@ -44,7 +53,7 @@ export const ASK_AI_DEMO_SESSIONS: AskAiSessionItem[] = ASK_AI_DEMOS.map((demo) 
 }));
 
 export const ASK_AI_FALLBACK_SUMMARY =
-  "演示只预设了四条问答。点下面的问题看对应回复；接真模型时换 lib/ask-ai.ts 的 onSend。";
+  "先点下面四条。模型管理里启用的默认模型会用来问答；没有可用模型时再看 ASK_AI_LLM_API_KEY，都没有就走本地规则。";
 
 export function matchAskAiDemo(question: string): AskAiDemo | null {
   const text = question.trim().replace(/\s+/g, " ");
@@ -65,20 +74,3 @@ export function matchAskAiDemo(question: string): AskAiDemo | null {
   }
   return score >= 2 ? best : null;
 }
-
-export const ASK_AI_PROMPT_SOURCES = [
-  { id: "page", label: "当前页", description: "页面标题和路由", connected: true },
-  { id: "accounts", label: "账号表", description: "admin_accounts 样板数据", connected: true },
-  { id: "rbac", label: "角色权限", description: "角色、菜单、权限勾选" },
-];
-
-export const ASK_AI_PROMPT_COMMANDS = ASK_AI_DEMOS.map((demo) => ({
-  id: demo.id,
-  label: demo.id,
-  description: demo.title,
-}));
-
-export const ASK_AI_PROMPT_MODELS = [
-  { id: "fast", label: "Forge Fast" },
-  { id: "think", label: "Forge Think" },
-];

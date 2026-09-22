@@ -7,9 +7,8 @@ export function getAuthMode(): AuthMode {
 
 export function isAuthGuardEnabled() {
   const explicit = process.env.AUTH_GUARD?.trim().toLowerCase();
-  if (explicit === "true") return true;
   if (explicit === "false") return false;
-  return getAuthMode() === "local";
+  return true;
 }
 
 export function getAuthSecret() {

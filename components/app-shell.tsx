@@ -175,6 +175,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [ready, allowedModules, pathname, canRead]);
 
   useEffect(() => {
+    if (!ready || user) return;
+    router.replace("/login/");
+  }, [ready, user, router]);
+
+  useEffect(() => {
     if (!forbiddenModule) return;
     router.replace("/dashboard/");
   }, [forbiddenModule, router]);
@@ -234,6 +239,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     document.addEventListener("click", onDocumentClick, true);
     return () => document.removeEventListener("click", onDocumentClick, true);
   }, [logout, selectApp, apps]);
+
+  if (!ready || !user) return null;
 
   return (
     <AskAiProvider>

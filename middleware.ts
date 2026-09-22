@@ -9,9 +9,8 @@ function authMode() {
 
 function guardEnabled() {
   const explicit = process.env.AUTH_GUARD?.trim().toLowerCase();
-  if (explicit === "true") return true;
   if (explicit === "false") return false;
-  return authMode() === "local";
+  return true;
 }
 
 function authSecret() {

@@ -73,7 +73,23 @@ app/api/<res>/[id]/route.ts     # GET one, PATCH/DELETE/POST actions
 Client store（`components/<res>-store.tsx` + layout Provider）归 **new-page、UI 层**。  
 本步只保证 REST API 可被 `fetch` 调用。
 
-### 5. Verify
+### 5. Ask AI 工具（可选）
+
+模块要被对话里问数、填数或导出时才做。不登记 = Ask AI 不知道这个模块。
+
+```text
+lib/<res>/agent.ts     # 工具：权限、Zod、说明、run
+lib/agent/registry.ts  # 把工具数组拼进 AGENT_TOOLS
+```
+
+参考：`lib/accounts/agent.ts`。
+
+- 入参用 API 同一份 Zod，`run` 只调已有 service，不写 SQL  
+- `mode: "read"` 立即执行；`mode: "write"` 提供 `describe` 和 `fill`，确认后把字段填进页面表单，不在工具里写库  
+- 不把密钥、密码哈希放进 `summary`  
+- 不在这里生成页面或改菜单三处
+
+### 6. Verify
 
 ```bash
 pnpm typecheck
@@ -88,6 +104,7 @@ pnpm db:push   # 业务表必须 Postgres；demo 登录模式不能代替 DATABA
 告诉用户：
 
 - 表名、API 路径与方法  
+- 若登记了 Ask AI 工具：工具 id，以及哪些是写入（需确认）  
 - **API 齐 ≠ 侧栏有。** 本步没有挂应用模块。  
 - **下一步**：`forge-starter-new-page`（store + 列表/表单/详情 UI，并挂应用模块）  
   - 菜单三处：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用种子勾齐新 id  

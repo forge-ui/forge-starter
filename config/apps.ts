@@ -30,6 +30,7 @@ export const APP_MODULE_IDS = [
   "roles",
   "menus",
   "permissions",
+  "models",
   "settings",
 ] as const;
 
@@ -112,6 +113,7 @@ export const APP_MODULE_META: Record<
   roles: { label: "角色", href: "/roles/" },
   menus: { label: "菜单", href: "/menus/" },
   permissions: { label: "权限", href: "/permissions/" },
+  models: { label: "模型服务", href: "/models/" },
   settings: { label: "应用管理", href: "/settings/apps/" },
 };
 

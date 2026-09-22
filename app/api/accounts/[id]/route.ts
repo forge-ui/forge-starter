@@ -1,23 +1,11 @@
-import { z } from "zod";
 import {
   deleteAdminAccount,
   getAdminAccountById,
   updateAdminAccount,
 } from "@/lib/accounts/service";
-import { ACCOUNT_ROLES } from "@/lib/accounts/types";
+import { accountPatchSchema, toAccountInput } from "@/lib/accounts/input";
 import { jsonError, jsonOk } from "@/lib/auth/http";
 import { requirePermission } from "@/lib/rbac/access";
-
-const bodySchema = z.object({
-  name: z.string().min(1),
-  username: z.string().min(3).optional(),
-  email: z.string().email(),
-  phone: z.string().min(1),
-  role: z.enum(ACCOUNT_ROLES as [string, ...string[]]),
-  department: z.string().min(1),
-  status: z.enum(["active", "disabled", "pending", "locked"]),
-  notes: z.string().optional().default(""),
-});
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -41,21 +29,15 @@ export async function PATCH(request: Request, ctx: Ctx) {
     if (!auth.ok) return auth.response;
     const { id } = await ctx.params;
     const json = await request.json();
-    const parsed = bodySchema.safeParse(json);
+    const parsed = accountPatchSchema.safeParse(json);
     if (!parsed.success) {
       return jsonError(parsed.error.issues[0]?.message ?? "参数无效");
     }
 
-    const account = await updateAdminAccount(id, {
-      name: parsed.data.name,
-      username: parsed.data.username ?? "",
-      email: parsed.data.email,
-      phone: parsed.data.phone,
-      role: parsed.data.role as (typeof ACCOUNT_ROLES)[number],
-      department: parsed.data.department,
-      status: parsed.data.status,
-      notes: parsed.data.notes ?? "",
-    });
+    const account = await updateAdminAccount(
+      id,
+      toAccountInput(parsed.data, parsed.data.username ?? ""),
+    );
     return jsonOk({ account });
   } catch (error) {
     const message = error instanceof Error ? error.message : "更新失败";

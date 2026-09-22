@@ -26,6 +26,7 @@
 | **detail-modal** | 轻详情、短处理 | 列表上叠 Modal |
 | **detail** | 重详情、档案 | 主栏 + 侧栏 + Tab/时间线；主次栏用 `Grid`/`GridItem`（core `≥0.1.13`） |
 | **form-page** | 字段极多 | 页内长表单（少用） |
+| **resource-workspace** | 供应商/文件夹 + 资源卡 | 左 `FolderNav` + 右一条工具带 + `Grid`/`ResourceCard` |
 | **settings** | 资料、偏好 | 应用管理走 collection；资料/改密/系统偏好走头像菜单 form-modal |
 | **auth** | 登录注册 | `app/(auth)` |
 
@@ -60,6 +61,8 @@
 | split | `/ref/split` | — |
 | calendar | `/ref/calendar` | — |
 | chat | `/ref/chat` | — |
+| agent | `/ref/agent` | Ask AI 示范问答 |
+| checklist | `/ref/checklist` | `/ref/task` 清单 |
 | files | `/ref/files` | — |
 | settings | `/ref/settings` | `settings/apps` + 头像菜单弹窗 |
 | activity | `/ref/activity` | — |
@@ -68,6 +71,7 @@
 | dashboard | `/ref/dashboard-board` · `/ref/dashboard-kpi` · `/ref/dashboard-crm` · `/ref/dashboard-analytics` · `/ref/dashboard-project` | `/dashboard` |
 | invoice 单据 | `/ref/invoice` | — |
 | task 任务 | `/ref/task` | — |
+| resource-workspace | `/ref/resource-workspace` | `/models` 模型卡片台 |
 | project 项目 | `/ref/project` | — |
 | kanban 泳道 | `/ref/kanban`（官方嵌在 project Task tab） | — |
 | tickets 工单线程 | `/ref/tickets` | — |
@@ -81,6 +85,7 @@
 |------|----------|--------------|
 | dashboard | ecommerce-2、crm、analytics | `/dashboard` + `/ref/dashboard-*` |
 | collection | ecommerce/customers | `accounts` 列表 + `/ref/list-table`、`list-cards` |
+| resource-workspace | — | `/models` + `/ref/resource-workspace` |
 | form-modal | customers Add Modal | `account-form-dialog` |
 | detail-modal | 官网列表 view dialog | `/ref/detail-modal` + `Modal` + `?id=`（暂无第二业务样板） |
 | detail | customers/[id] | `accounts/[id]` |

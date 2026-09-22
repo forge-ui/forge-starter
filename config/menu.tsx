@@ -3,6 +3,7 @@
 import {
   HamburgerMenuBoldDuotone,
   HomeSmileBoldDuotone,
+  ProgrammingBoldDuotone,
   ShieldKeyholeBoldDuotone,
   ShieldUserBoldDuotone,
   UsersGroupTwoRoundedBoldDuotone,
@@ -42,6 +43,11 @@ const MODULE_MENU: Record<AppModuleId, AppLayoutMenuItem> = {
     icon: <ShieldKeyholeBoldDuotone size={20} />,
     label: "权限",
     href: "/permissions/",
+  },
+  models: {
+    icon: <ProgrammingBoldDuotone size={20} />,
+    label: "模型服务",
+    href: "/models/",
   },
   settings: {
     icon: <WidgetBoldDuotone size={20} />,

@@ -10,6 +10,7 @@ import {
   ACCOUNT_DEPARTMENTS,
   ACCOUNT_ROLES,
   ACCOUNT_STATUS_META,
+  isAccountStatus,
   type AccountRole,
   type AccountStatus,
 } from "@/lib/accounts/types";
@@ -48,13 +49,30 @@ type Props = {
   onClose: () => void;
   accountId?: string | null;
   goToDetailOnCreate?: boolean;
+  draft?: Record<string, string> | null;
 };
+
+function formFromDraft(base: FormState, draft?: Record<string, string> | null): FormState {
+  if (!draft) return base;
+  const status = draft.status && isAccountStatus(draft.status) ? draft.status : base.status;
+  return {
+    name: draft.name ?? base.name,
+    username: draft.username ?? base.username,
+    email: draft.email ?? base.email,
+    phone: draft.phone ?? base.phone,
+    role: draft.role || base.role,
+    department: draft.department || base.department,
+    status,
+    notes: draft.notes ?? base.notes,
+  };
+}
 
 export function AccountFormDialog({
   open,
   onClose,
   accountId = null,
   goToDetailOnCreate = true,
+  draft = null,
 }: Props) {
   const router = useRouter();
   const { getById, createAccount, updateAccount } = useAccountsStore();
@@ -70,7 +88,7 @@ export function AccountFormDialog({
     setError(null);
     setSaving(false);
     if (mode === "edit" && existing) {
-      setForm({
+      setForm(formFromDraft({
         name: existing.name,
         username: existing.username,
         email: existing.email,
@@ -79,11 +97,11 @@ export function AccountFormDialog({
         department: existing.department,
         status: existing.status,
         notes: existing.notes,
-      });
+      }, draft));
     } else if (mode === "create") {
-      setForm(emptyForm());
+      setForm(formFromDraft(emptyForm(), draft));
     }
-  }, [open, mode, existing]);
+  }, [open, mode, existing, draft]);
 
   function setField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));

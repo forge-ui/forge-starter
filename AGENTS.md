@@ -48,7 +48,8 @@ docs/forge-components.md
 
 - 通用 Modal：core 无导出 → `components/ui/modal.tsx`  
 - 操作 Toast：core 无导出 → `lib/toast.ts` + `components/ui/toast-provider.tsx`（已挂 AppShell）  
-- **Ask AI**：Kit `AskAi`（core `≥0.1.17`）。业务页默认 `hideHeader: true`，`AppLayout.askAi` 不会出现。壳层 `AskAiProvider` 保活唯一实例，页头右侧用 `PageTitleActions` / `AskAiEntry`。composer 用 `PromptBar`；回复是几组中文示范问答（`AskAiTranscript`），按问题选用 Agent 组件，不要整页铺 `/cases/agent` 英文死 demo。组件对照仍看 `/ref/agent`。全屏、会话栏走 Kit props，禁止自研抽屉或全视口层。接真模型只换 `lib/ask-ai.ts` 的 `onSend`。  
+- **Ask AI**：Kit `AskAi`（core `≥0.1.17`）。业务页默认 `hideHeader: true`，`AppLayout.askAi` 不会出现。壳层 `AskAiProvider` 保活唯一实例，页头右侧用 `PageTitleActions` / `AskAiEntry`。composer 用 `PromptBar`（宽栏，抽屉里必须垫 gutter + `min-w-0`，核心自定义 composer 不带默认 `p-4`）；回复是几组中文示范问答（`AskAiTranscript`），按问题选用 Agent 组件，不要整页铺 `/cases/agent` 英文死 demo。`onSend` 打 `POST /api/ask-ai`：`modelId` 对应模型管理里启用的条目；没有可用模型再看 `ASK_AI_LLM_*`，都没有用本地规则。已接模型时只调用已登记工具（`lib/<resource>/agent.ts` 登记进 `lib/agent/registry.ts`），按当前用户权限过滤。读立即执行；写入和删除先出确认单，确认后把字段填进页面表单或打开页面上的删除确认，由页面自己的保存逻辑处理，不直接写库。不读仓库源码，不生成页面。未登记的模块助手不知道。密钥只放服务端，禁止请求体传 `apiKey`。组件对照仍看 `/ref/agent`。全屏、会话栏走 Kit props，禁止自研抽屉或全视口层。
+- **Checklist**：Kit `Checklist` / `ChecklistItem`（对照 `/ref/checklist`，任务页禁止手搓 Checkbox 行）。core `0.1.18` 起随包导出。  
 - 资源工作台：`WorkspaceSplit` + `FolderNav` + `ResourceCard`（见 `/ref/resource-workspace`）  
 - 时间格式：`lib/format/datetime.ts`（客户端安全，勿塞 next/headers）  
 - 缺组件 → `FORGE-GAP`，禁止手搓  
@@ -89,14 +90,17 @@ app/(auth)/              登录注册找回
 app/(app)/dashboard      工作台
 app/(app)/accounts       ★ 重样板：列表 + 表单弹窗 + 全页详情
 app/(app)/roles · menus · permissions  RBAC 目录：列表 + 表单/详情弹窗
+app/(app)/models         大模型接入：供应商 FolderNav + ResourceCard + 表单/详情弹窗
 app/(app)/ref/**         ★ AI 参考页（真实路由，不进菜单；生产默认关）
 app/(app)/settings       apps；资料/改密/系统设置走头像菜单弹窗
-app/api/auth|accounts|roles|menus|permissions
+app/api/auth|accounts|roles|menus|permissions|models
 components/app-shell.tsx
 components/*-form-dialog.tsx | *-store.tsx
 components/ask-ai-entry.tsx
 components/ask-ai-transcript.tsx
 lib/ask-ai.ts
+lib/ask-ai-llm.ts
+app/api/ask-ai
 lib/reference/agent-demo.ts
 components/ui/modal.tsx
 config/site.ts menu.tsx apps.ts

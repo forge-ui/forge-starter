@@ -25,19 +25,44 @@ import {
 } from "@forge-ui-official/core";
 import { shellForPath, siteConfig } from "@/config/site";
 import {
-  ASK_AI_DEMO_SESSIONS,
   ASK_AI_LANDING_TITLE,
   ASK_AI_PLACEHOLDER,
-  ASK_AI_PROMPT_COMMANDS,
-  ASK_AI_PROMPT_MODELS,
-  ASK_AI_PROMPT_SOURCES,
+  ASK_AI_RUNTIME_EVENT,
   ASK_AI_SUGGESTIONS,
+  askAiPromptModels,
+  confirmAskAi,
   createAskAiSession,
+  fetchAskAiRuntime,
   filterAskAiSessions,
-  sendAskAiDemo,
+  pickAskAiModelId,
+  sendAskAi,
   titleAskAiSession,
+  writeStoredAskAiModelId,
+  type AskAiClientResult,
+  type AskAiRuntimeStatus,
+  type AskAiTurn,
 } from "@/lib/ask-ai";
 import { AskAiTranscript } from "@/components/ask-ai-transcript";
+import { queueAgentFormFill } from "@/lib/agent/fill";
+import { toast } from "@/lib/toast";
+
+function historyFromTurns(turns: AskAiTurn[]) {
+  const messages: Array<{ role: "user" | "assistant"; content: string }> = [];
+  for (const turn of turns) {
+    if (turn.pending || !turn.result || turn.result.failed) continue;
+    const question = turn.question.trim();
+    const text = turn.result.text.trim();
+    if (!question || !text) continue;
+    messages.push({ role: "user", content: question }, { role: "assistant", content: text });
+  }
+  return messages.slice(-8);
+}
+
+function turnId() {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `turn-${Date.now()}`;
+}
 
 const AskAiPlaceContext = createContext<(slot: HTMLElement | null, releasing?: HTMLElement | null) => void>(
   () => {},
@@ -68,39 +93,109 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const slotRef = useRef<HTMLElement | null>(null);
   const [mountNode, setMountNode] = useState<HTMLElement | null>(null);
-  const [sessions, setSessions] = useState<AskAiSessionItem[]>(ASK_AI_DEMO_SESSIONS);
-  const [currentSessionId, setCurrentSessionId] = useState(ASK_AI_DEMO_SESSIONS[0]?.id ?? "demo-1");
+  const [sessions, setSessions] = useState<AskAiSessionItem[]>([{ id: "new", title: "新对话" }]);
+  const [currentSessionId, setCurrentSessionId] = useState("new");
   const [searchQuery, setSearchQuery] = useState("");
   const [draft, setDraft] = useState("");
-  const [lastQuestion, setLastQuestion] = useState(ASK_AI_SUGGESTIONS[0] ?? "这个页面可以做什么？");
-  const [hasChat, setHasChat] = useState(false);
-  const [model, setModel] = useState("fast");
+  const [turnsBySession, setTurnsBySession] = useState<Record<string, AskAiTurn[]>>({});
+  const [spentIntents, setSpentIntents] = useState<string[]>([]);
+  const [confirmingIntent, setConfirmingIntent] = useState<string | null>(null);
+  const [runtime, setRuntime] = useState<AskAiRuntimeStatus | null>(null);
+  const [modelId, setModelId] = useState("");
   const currentSessionIdRef = useRef(currentSessionId);
+  const modelIdRef = useRef(modelId);
+  const turnsRef = useRef(turnsBySession);
+  const sessionsRef = useRef(sessions);
+  const busyRef = useRef(false);
   currentSessionIdRef.current = currentSessionId;
+  modelIdRef.current = modelId;
+  turnsRef.current = turnsBySession;
+  sessionsRef.current = sessions;
+
+  const applyRuntime = useCallback((next: AskAiRuntimeStatus) => {
+    setRuntime(next);
+    setModelId((current) => pickAskAiModelId(current, next));
+  }, []);
 
   const visibleSessions = useMemo(
     () => filterAskAiSessions(sessions, searchQuery),
     [sessions, searchQuery],
   );
 
+  useEffect(() => {
+    let cancelled = false;
+    function load() {
+      void fetchAskAiRuntime().then((next) => {
+        if (!cancelled) applyRuntime(next);
+      });
+    }
+    load();
+    window.addEventListener(ASK_AI_RUNTIME_EVENT, load);
+    return () => {
+      cancelled = true;
+      window.removeEventListener(ASK_AI_RUNTIME_EVENT, load);
+    };
+  }, [applyRuntime, pathname]);
+
   const onSend = useCallback<AskAiProps["onSend"]>(async (message, request) => {
+    if (busyRef.current) {
+      return { text: "上一条还在处理" };
+    }
+    busyRef.current = true;
+    const sessionId = currentSessionIdRef.current;
+    const history = historyFromTurns(turnsRef.current[sessionId] ?? []);
+    const id = turnId();
     setDraft("");
-    setLastQuestion(message);
-    setHasChat(true);
+    setTurnsBySession((prev) => ({
+      ...prev,
+      [sessionId]: [...(prev[sessionId] ?? []), { id, question: message, pending: true, result: null }],
+    }));
     setSessions((prev) =>
       prev.map((item) =>
-        item.id === currentSessionIdRef.current && item.title === "新对话"
+        item.id === sessionId && item.title === "新对话"
           ? { ...item, title: titleAskAiSession(message) }
           : item,
       ),
     );
-    return sendAskAiDemo(message, request);
-  }, []);
+    void fetchAskAiRuntime().then(applyRuntime);
+    const finish = (result: AskAiClientResult) => {
+      setTurnsBySession((prev) => ({
+        ...prev,
+        [sessionId]: (prev[sessionId] ?? []).map((turn) =>
+          turn.id === id ? { ...turn, pending: false, result } : turn,
+        ),
+      }));
+      return result;
+    };
+    try {
+      const result = await sendAskAi(
+        message,
+        request,
+        modelIdRef.current,
+        history,
+        `${shell.title} / ${pathname}`,
+      );
+      if (result.live && result.model) {
+        setRuntime((prev) => (prev ? { ...prev, configured: true, model: result.model } : prev));
+      }
+      return finish(result);
+    } catch (error) {
+      const text = error instanceof Error ? error.message : "提问失败";
+      const failed: AskAiClientResult = {
+        text,
+        live: false,
+        failed: true,
+        model: runtime?.model,
+      };
+      return finish(failed);
+    } finally {
+      busyRef.current = false;
+    }
+  }, [applyRuntime, pathname, runtime?.model, shell.title]);
 
   const askFromHost = useCallback(
     (message: string) => {
       const request: AskAiRequest = {
-        context: `${shell.title} / ${pathname}`,
         messages: [],
         signal: new AbortController().signal,
       };
@@ -109,10 +204,98 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     [onSend, pathname, shell.title],
   );
 
+  const confirmIntent = useCallback((intent: string) => {
+    if (busyRef.current || spentIntents.includes(intent)) return;
+    busyRef.current = true;
+    setConfirmingIntent(intent);
+    const sessionId = currentSessionIdRef.current;
+    const id = turnId();
+    setTurnsBySession((prev) => ({
+      ...prev,
+      [sessionId]: [
+        ...(prev[sessionId] ?? []),
+        { id, question: "填入页面", pending: true, result: null },
+      ],
+    }));
+    void confirmAskAi(intent)
+      .then((result) => {
+        setSpentIntents((prev) => (prev.includes(intent) ? prev : [...prev, intent]));
+        setTurnsBySession((prev) => ({
+          ...prev,
+          [sessionId]: (prev[sessionId] ?? []).map((turn) =>
+            turn.id === id ? { ...turn, pending: false, result } : turn,
+          ),
+        }));
+        if (result.fill) {
+          queueAgentFormFill(result.fill);
+          const target = result.fill.href.endsWith("/") ? result.fill.href : `${result.fill.href}/`;
+          const here = pathname.endsWith("/") ? pathname : `${pathname}/`;
+          if (here !== target) router.push(target);
+          toast.success(
+            result.fill.mode === "delete"
+              ? "已打开页面上的删除确认"
+              : "已填入页面表单，请检查后保存",
+          );
+        } else {
+          toast.success("已处理");
+        }
+      })
+      .catch((error: unknown) => {
+        const text = error instanceof Error ? error.message : "写入失败";
+        if (text.includes("已使用")) {
+          setSpentIntents((prev) => (prev.includes(intent) ? prev : [...prev, intent]));
+        }
+        const failed: AskAiClientResult = { text, live: false, failed: true };
+        setTurnsBySession((prev) => ({
+          ...prev,
+          [sessionId]: (prev[sessionId] ?? []).map((turn) =>
+            turn.id === id ? { ...turn, pending: false, result: failed } : turn,
+          ),
+        }));
+        toast.error(text);
+      })
+      .finally(() => {
+        busyRef.current = false;
+        setConfirmingIntent(null);
+      });
+  }, [pathname, router, spentIntents]);
+
+  const startNewSession = useCallback(() => {
+    const hasInput = (id: string) =>
+      (turnsRef.current[id] ?? []).some((turn) => turn.question.trim().length > 0);
+    if (!hasInput(currentSessionIdRef.current)) {
+      setSearchQuery("");
+      return;
+    }
+    const existingEmpty = sessionsRef.current.find((item) => !hasInput(item.id));
+    if (existingEmpty) {
+      currentSessionIdRef.current = existingEmpty.id;
+      setCurrentSessionId(existingEmpty.id);
+      setSearchQuery("");
+      setDraft("");
+      return;
+    }
+    const next = createAskAiSession();
+    currentSessionIdRef.current = next.id;
+    setSessions((prev) => [next, ...prev].slice(0, 20));
+    setCurrentSessionId(next.id);
+    setSearchQuery("");
+    setDraft("");
+    void fetchAskAiRuntime().then(applyRuntime);
+  }, [applyRuntime]);
+
+  const selectSession = useCallback((id: string) => {
+    currentSessionIdRef.current = id;
+    setCurrentSessionId(id);
+    setSearchQuery("");
+  }, []);
+
+  const turns = turnsBySession[currentSessionId] ?? [];
+  const hasChat = turns.length > 0;
+
   const value = useMemo<AskAiProps>(
     () => ({
       color: siteConfig.accent,
-      context: `${shell.title} / ${pathname}`,
       suggestions: ASK_AI_SUGGESTIONS,
       placeholder: ASK_AI_PLACEHOLDER,
       landingTitle: ASK_AI_LANDING_TITLE,
@@ -122,64 +305,58 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
       onSearchQueryChange: setSearchQuery,
       hasConversation: hasChat,
       messages: hasChat ? (
-        <AskAiTranscript
-          question={lastQuestion}
-          pageLabel={`${shell.title} / ${pathname}`}
-          onAsk={askFromHost}
-        />
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto">
+          <AskAiTranscript
+            turns={turns}
+            runtime={runtime}
+            spentIntents={spentIntents}
+            confirmingIntent={confirmingIntent}
+            onAsk={askFromHost}
+            onConfirm={confirmIntent}
+          />
+        </div>
       ) : undefined,
       composer: (
-        <PromptBar
-          value={draft}
-          onChange={setDraft}
-          onSend={askFromHost}
-          placeholder={ASK_AI_PLACEHOLDER}
-          sources={ASK_AI_PROMPT_SOURCES}
-          commands={ASK_AI_PROMPT_COMMANDS}
-          models={ASK_AI_PROMPT_MODELS}
-          model={model}
-          onModelChange={setModel}
-        />
+        <div
+          data-accent={siteConfig.accent}
+          className="@container w-full min-w-0 max-w-full shrink-0 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3"
+        >
+          <PromptBar
+            className="w-full min-w-0 max-w-full overflow-hidden [&_button[aria-label=Attach]]:hidden [&_button[aria-label=Dictate]]:hidden @max-[440px]:[&_textarea]:h-[4.5rem] @max-[440px]:[&_textarea]:pt-3"
+            value={draft}
+            onChange={setDraft}
+            onSend={askFromHost}
+            placeholder={ASK_AI_PLACEHOLDER}
+            models={askAiPromptModels(runtime)}
+            model={modelId}
+            onModelChange={(id) => {
+              setModelId(id);
+              writeStoredAskAiModelId(id);
+            }}
+          />
+        </div>
       ),
-      onNewSession: () => {
-        const next = createAskAiSession();
-        setSessions((prev) => [next, ...prev].slice(0, 20));
-        setCurrentSessionId(next.id);
-        setSearchQuery("");
-        setHasChat(false);
-        setDraft("");
-      },
-      onSelectSession: (id) => {
-        setCurrentSessionId(id);
-        setSearchQuery("");
-        const session = sessions.find((item) => item.id === id);
-        const demo = ASK_AI_DEMO_SESSIONS.find((item) => item.id === id);
-        if (demo) {
-          setLastQuestion(demo.title);
-          setHasChat(true);
-          return;
-        }
-        if (session?.title && session.title !== "新对话") {
-          setLastQuestion(session.title);
-          setHasChat(true);
-          return;
-        }
-        setHasChat(false);
-      },
+      onNewSession: startNewSession,
+      onSelectSession: selectSession,
       onSend,
     }),
     [
       askFromHost,
+      confirmingIntent,
+      confirmIntent,
       currentSessionId,
       draft,
       hasChat,
-      lastQuestion,
-      model,
+      modelId,
       onSend,
       pathname,
+      runtime,
       searchQuery,
-      sessions,
+      selectSession,
       shell.title,
+      spentIntents,
+      startNewSession,
+      turns,
       visibleSessions,
     ],
   );

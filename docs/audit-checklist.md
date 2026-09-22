@@ -233,6 +233,7 @@ Starter 业务页默认 `hideHeader: true`，正文页头走 **A 或 B**。不�
 - 2026-09-02：Kit `@forge-ui-official/core@0.1.11` 已默认 soft。业务页状态列改回 `StatusBadge`；`StatusText` 弃用。权限/角色等类目仍用纯文本。
 - 2026-09-12：轻详情对照 `/ref/detail-modal` + `Modal` + `?id=`（**暂无第二业务样板**，不要指向已删的 approvals）。
 - 2026-09-12：新菜单必须写**菜单三处**（`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`）；默认应用勾齐新 id；`rbac_menus` 只是目录。加完清 `forge-starter:app-registry`。侧栏再按登录角色 `:read` 过滤。
+- 2026-09-21：Ask AI 四条示范问题走 `POST /api/ask-ai`：有 `ASK_AI_LLM_API_KEY` 问模型，并带账号表快照；没密钥用本地规则。禁止请求体传 key。
 - 2026-09-21：Ask AI 演示改成四条中文问答，按问题选用 Agent 组件；禁止把 `/cases/agent` 英文原文整页塞进抽屉。
 - 2026-09-21：Ask AI 跟到 core `0.1.17`：Kit 自带全屏层与 `sessions` 栏。禁止再自研全视口层。
 - 2026-09-20：Ask AI 用 Kit `AskAi`。Starter `hideHeader` 下入口挂页头右侧槽，不走 `AppLayout.askAi`，禁止浮钮/自研抽屉。
