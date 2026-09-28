@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "forge-starter",
+  "main": "worker.ts",
+  "compatibility_date": "2026-09-28",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    { "binding": "WORKER_SELF_REFERENCE", "service": "forge-starter" }
+  ],
+  "vars": {
+    "AUTH_MODE": "local",
+    "APP_URL": "https://starter.forgeui.org"
+  },
+  "observability": { "enabled": true }
+}

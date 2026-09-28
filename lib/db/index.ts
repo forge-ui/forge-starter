@@ -1,6 +1,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
+import { databaseRequestScope } from "./request-scope";
 
 let client: ReturnType<typeof postgres> | null = null;
 let db: ReturnType<typeof drizzle<typeof schema>> | null = null;
@@ -14,6 +15,15 @@ export function getDatabaseUrl() {
 }
 
 export function getDb() {
+  const scope = databaseRequestScope.getStore();
+  if (scope) {
+    if (scope.database) return scope.database as ReturnType<typeof drizzle<typeof schema>>;
+    const requestClient = postgres(getDatabaseUrl(), { max: 1, connect_timeout: 10 });
+    const requestDb = drizzle(requestClient, { schema });
+    scope.database = requestDb;
+    scope.close = () => requestClient.end({ timeout: 5 });
+    return requestDb;
+  }
   if (db) return db;
   const url = getDatabaseUrl();
   client = postgres(url, { max: 10 });

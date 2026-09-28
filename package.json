@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:cloudflare": "opennextjs-cloudflare build && node scripts/prepare-cloudflare.mjs",
+    "preview:cloudflare": "opennextjs-cloudflare preview",
+    "deploy:cloudflare": "pnpm build:cloudflare && opennextjs-cloudflare deploy",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "audit:tripwire": "node scripts/audit-tripwire.mjs",
@@ -18,10 +21,11 @@
     "@fontsource-variable/manrope": "^5.2.8",
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
     "@forge-ui-official/core": "0.1.18",
+    "@opennextjs/cloudflare": "1.20.6",
     "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.2",
     "jose": "^6.2.8",
-    "next": "^16.0.0",
+    "next": "^16.3.6",
     "nodemailer": "^9.0.3",
     "postgres": "^3.4.9",
     "react": "^19.0.0",
@@ -40,6 +44,7 @@
     "drizzle-kit": "^0.31.10",
     "tailwindcss": "^4.0.0",
     "tsx": "^4.23.5",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "wrangler": "4.142.0"
   }
 }

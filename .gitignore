@@ -18,3 +18,9 @@ drizzle/meta
 .DS_Store
 *.tsbuildinfo
 .gstack/
+
+# Cloudflare
+.open-next/
+.wrangler/
+.dev.vars
+.dev.vars.*
