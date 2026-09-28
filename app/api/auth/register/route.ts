@@ -14,6 +14,9 @@ const bodySchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    if (process.env.REGISTRATION_ENABLED === "false") {
+      return jsonError("当前站点未开放注册，请联系管理员", 403);
+    }
     if (getAuthMode() === "demo") {
       return jsonError("演示模式无需注册，请直接登录", 400);
     }

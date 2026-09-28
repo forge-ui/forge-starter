@@ -1,6 +1,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 
 export type DatabaseScope = {
+  connectionString?: string;
   database?: unknown;
   close?: () => Promise<void>;
 };

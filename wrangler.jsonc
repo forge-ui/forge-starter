@@ -4,6 +4,9 @@
   "main": "worker.ts",
   "compatibility_date": "2026-09-28",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "hyperdrive": [
+    { "binding": "HYPERDRIVE", "id": "5654fd54fb03415c91241937174fad05" }
+  ],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
@@ -13,6 +16,7 @@
   ],
   "vars": {
     "AUTH_MODE": "local",
+    "REGISTRATION_ENABLED": "false",
     "APP_URL": "https://starter.forgeui.org"
   },
   "observability": { "enabled": true }

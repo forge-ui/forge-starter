@@ -21,6 +21,10 @@ export async function POST(request: Request) {
     }
     return jsonOk({ mode: result.mode, redirectTo: result.redirectTo });
   } catch (error) {
+    const cause = error instanceof Error ? error.cause : undefined;
+    if (cause instanceof Error) {
+      console.error("Login backend failure", { name: cause.name, message: cause.message });
+    }
     const message = error instanceof Error ? error.message : "登录失败";
     return jsonError(message, 500);
   }

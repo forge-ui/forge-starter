@@ -7,7 +7,7 @@ let client: ReturnType<typeof postgres> | null = null;
 let db: ReturnType<typeof drizzle<typeof schema>> | null = null;
 
 export function getDatabaseUrl() {
-  const url = process.env.DATABASE_URL?.trim();
+  const url = databaseRequestScope.getStore()?.connectionString ?? process.env.DATABASE_URL?.trim();
   if (!url) {
     throw new Error("DATABASE_URL is required when AUTH_MODE=local");
   }
@@ -18,7 +18,7 @@ export function getDb() {
   const scope = databaseRequestScope.getStore();
   if (scope) {
     if (scope.database) return scope.database as ReturnType<typeof drizzle<typeof schema>>;
-    const requestClient = postgres(getDatabaseUrl(), { max: 1, connect_timeout: 10 });
+    const requestClient = postgres(getDatabaseUrl(), { max: 1, connect_timeout: 10, fetch_types: false });
     const requestDb = drizzle(requestClient, { schema });
     scope.database = requestDb;
     scope.close = () => requestClient.end({ timeout: 5 });
