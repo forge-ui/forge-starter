@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   MagniferLinear,
@@ -22,11 +22,18 @@ import {
   TextField,
   type ColumnDef,
 } from "@forge-ui-official/core";
+import { toast } from "@/lib/toast";
 import { siteConfig } from "@/config/site";
 import { useAccountsStore } from "@/components/accounts-store";
 import { PageTitleActions } from "@/components/ask-ai-entry";
 import { AccountFormDialog } from "@/components/account-form-dialog";
-import { AGENT_FILL_EVENT, consumeAgentFormFill, peekAgentFormFill } from "@/lib/agent/fill";
+import {
+  AGENT_FILL_EVENT,
+  abandonAgentContinuation,
+  consumeAgentFormFill,
+  notifyAgentPageDone,
+  peekAgentFormFill,
+} from "@/lib/agent/fill";
 import type { AgentFormFill } from "@/lib/agent/types";
 import {
   ACCOUNT_STATUS_META,
@@ -47,30 +54,51 @@ function AccountsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { accounts, loading, error, deleteAccount, countsByStatus, refresh } = useAccountsStore();
-  const [activeFilterIndex, setActiveFilterIndex] = useState(0);
-  const [search, setSearch] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const activeFilterIndex = Math.max(0, filterValues.findIndex((value) => value === searchParams.get("status")));
+  const search = searchParams.get("q") ?? "";
+  const requestedPage = Number(searchParams.get("page") ?? "1");
+  const currentPage = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const updateFilters = useCallback((changes: Record<string, string>) => {
+    const next = new URLSearchParams(searchParams.toString());
+    for (const [key, value] of Object.entries(changes)) {
+      if (value) next.set(key, value);
+      else next.delete(key);
+    }
+    router.replace(`/accounts/${next.size ? `?${next}` : ""}`, { scroll: false });
+  }, [router, searchParams]);
+  const setSearch = (value: string) => updateFilters({ q: value, page: "" });
+  const setActiveFilterIndex = (index: number) => updateFilters({ status: index ? filterValues[index] : "", page: "" });
+  const listHref = `/accounts/${searchParams.size ? `?${searchParams}` : ""}`;
   const pageSize = 8;
   const [deleteTarget, setDeleteTarget] = useState<AdminAccount | null>(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [formDraft, setFormDraft] = useState<Record<string, string> | null>(null);
+  const [agentMode, setAgentMode] = useState<AgentFormFill["mode"] | null>(null);
+
+  const dropAgentChain = useCallback(() => {
+    setAgentMode(null);
+    abandonAgentContinuation();
+  }, []);
 
   function openCreate() {
+    dropAgentChain();
     setFormDraft(null);
     setEditId(null);
     setFormOpen(true);
   }
 
-  function openEdit(id: string) {
+  const openEdit = useCallback((id: string) => {
+    dropAgentChain();
     setFormDraft(null);
     setEditId(id);
     setFormOpen(true);
-  }
+  }, [dropAgentChain]);
 
   function closeForm() {
+    if (agentMode === "create" || agentMode === "edit") abandonAgentContinuation();
+    setAgentMode(null);
     setFormOpen(false);
     setEditId(null);
     setFormDraft(null);
@@ -81,10 +109,12 @@ function AccountsPageContent() {
       if (fill.mode === "delete") {
         const row = accounts.find((item) => item.id === fill.recordId);
         if (!row) return false;
+        setAgentMode("delete");
         setDeleteTarget(row);
         setFormOpen(false);
         return true;
       }
+      setAgentMode(fill.mode);
       setEditId(fill.mode === "edit" ? fill.recordId ?? null : null);
       setFormDraft(fill.fields);
       setFormOpen(true);
@@ -106,17 +136,19 @@ function AccountsPageContent() {
     const create = searchParams.get("create") === "1";
     const edit = searchParams.get("edit");
     if (create) {
+      dropAgentChain();
       setEditId(null);
       setFormOpen(true);
       router.replace("/accounts/", { scroll: false });
       return;
     }
     if (edit) {
+      dropAgentChain();
       setEditId(edit);
       setFormOpen(true);
       router.replace("/accounts/", { scroll: false });
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, dropAgentChain]);
 
   const filtered = useMemo(() => {
     const statusKey = filterValues[activeFilterIndex];
@@ -138,12 +170,8 @@ function AccountsPageContent() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [search, activeFilterIndex]);
-
-  useEffect(() => {
-    if (currentPage > totalPages) setCurrentPage(totalPages);
-  }, [currentPage, totalPages]);
+    if (!loading && !error && currentPage > totalPages) updateFilters({ page: String(totalPages) });
+  }, [currentPage, totalPages, loading, error, updateFilters]);
 
   const pageRows = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
@@ -160,7 +188,7 @@ function AccountsPageContent() {
           <button
             type="button"
             className="text-left"
-            onClick={() => router.push(`/accounts/${row.id}/`)}
+            onClick={() => router.push(`/accounts/${row.id}/?returnTo=${encodeURIComponent(listHref)}`)}
           >
             <CellImageText
               src={row.avatarUrl}
@@ -221,10 +249,7 @@ function AccountsPageContent() {
               shape="square"
               size="sm"
               aria-label="编辑"
-              onClick={() => {
-                setEditId(row.id);
-                setFormOpen(true);
-              }}
+              onClick={() => openEdit(row.id)}
             >
               <PenLinear size={16} />
             </IconButton>
@@ -233,7 +258,10 @@ function AccountsPageContent() {
               shape="square"
               size="sm"
               aria-label="删除"
-              onClick={() => setDeleteTarget(row)}
+              onClick={() => {
+                dropAgentChain();
+                setDeleteTarget(row);
+              }}
             >
               <TrashBinMinimalisticLinear size={16} />
             </IconButton>
@@ -241,7 +269,7 @@ function AccountsPageContent() {
         ),
       },
     ],
-    [router],
+    [router, openEdit, dropAgentChain, listHref],
   );
 
   return (
@@ -251,6 +279,9 @@ function AccountsPageContent() {
         onClose={closeForm}
         accountId={editId}
         draft={formDraft}
+        onSaved={() => {
+          if (agentMode === "create" || agentMode === "edit") notifyAgentPageDone(agentMode);
+        }}
       />
 
       {deleteTarget ? (
@@ -264,28 +295,28 @@ function AccountsPageContent() {
             cancelLabel="取消"
             onCancel={() => {
               if (deleting) return;
+              if (agentMode === "delete") abandonAgentContinuation();
+              setAgentMode(null);
               setDeleteTarget(null);
-              setDeleteError(null);
             }}
             onConfirm={() => {
               if (deleting) return;
               setDeleting(true);
-              setDeleteError(null);
+              const fromAgent = agentMode === "delete";
               void deleteAccount(deleteTarget.id)
                 .then(() => {
+                  toast.success("账号已删除");
+                  if (fromAgent) notifyAgentPageDone("delete");
+                  setAgentMode(null);
                   setDeleteTarget(null);
                 })
                 .catch((err: unknown) => {
-                  setDeleteError(err instanceof Error ? err.message : "删除失败");
+                  toast.error(err instanceof Error ? err.message : "删除失败");
                 })
                 .finally(() => setDeleting(false));
             }}
           />
-          {deleteError ? (
-            <p className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 rounded-lg bg-white px-3 py-2 text-sm text-fg-red shadow">
-              {deleteError}
-            </p>
-          ) : null}
+
         </div>
       ) : null}
 
@@ -370,8 +401,7 @@ function AccountsPageContent() {
               color={siteConfig.accent}
               variant="tertiary"
               onClick={() => {
-                setSearch("");
-                setActiveFilterIndex(0);
+                updateFilters({ q: "", status: "", page: "" });
               }}
             >
               清除筛选
@@ -387,7 +417,7 @@ function AccountsPageContent() {
           showPagination
           currentPage={currentPage}
           totalPages={totalPages}
-          onPageChange={setCurrentPage}
+          onPageChange={(page) => updateFilters({ page: page > 1 ? String(page) : "" })}
           paginationLabel={`显示 ${pageRows.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filtered.length)} / 共 ${filtered.length} 条`}
         />
       )}

@@ -85,7 +85,7 @@ lib/agent/registry.ts  # 把工具数组拼进 AGENT_TOOLS
 参考：`lib/accounts/agent.ts`。
 
 - 入参用 API 同一份 Zod，`run` 只调已有 service，不写 SQL  
-- `mode: "read"` 立即执行；`mode: "write"` 提供 `describe` 和 `fill`，确认后把字段填进页面表单，不在工具里写库  
+- `mode: "read"` 立即执行；`mode: "write"` 提供 `describe` 和 `fill`，确认后把字段填进页面表单，不在工具里写库。页面保存成功后同一会话继续剩下的查询或导出
 - 不把密钥、密码哈希放进 `summary`  
 - 不在这里生成页面或改菜单三处
 

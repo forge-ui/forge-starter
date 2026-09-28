@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, SelectOption, TextArea, TextField } from "@forge-ui-official/core";
+import { toast } from "@/lib/toast";
 import { Modal } from "@/components/ui/modal";
 import { siteConfig } from "@/config/site";
 import { useAccountsStore } from "@/components/accounts-store";
@@ -50,6 +51,7 @@ type Props = {
   accountId?: string | null;
   goToDetailOnCreate?: boolean;
   draft?: Record<string, string> | null;
+  onSaved?: () => void;
 };
 
 function formFromDraft(base: FormState, draft?: Record<string, string> | null): FormState {
@@ -73,6 +75,7 @@ export function AccountFormDialog({
   accountId = null,
   goToDetailOnCreate = true,
   draft = null,
+  onSaved,
 }: Props) {
   const router = useRouter();
   const { getById, createAccount, updateAccount } = useAccountsStore();
@@ -80,12 +83,12 @@ export function AccountFormDialog({
   const existing = accountId ? getById(accountId) : undefined;
 
   const [form, setForm] = useState<FormState>(emptyForm);
-  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!open) return;
-    setError(null);
+    setFieldErrors({});
     setSaving(false);
     if (mode === "edit" && existing) {
       setForm(formFromDraft({
@@ -105,38 +108,36 @@ export function AccountFormDialog({
 
   function setField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
+    setFieldErrors((prev) => ({ ...prev, [key]: undefined }));
   }
 
   function validate() {
-    if (!form.name.trim()) return "请填写姓名";
-    if (mode === "create") {
-      if (!/^[a-z0-9_]{3,32}$/.test(form.username.trim().toLowerCase())) {
-        return "用户名需 3–32 位小写字母、数字或下划线";
-      }
+    const errors: Partial<Record<keyof FormState, string>> = {};
+    if (!form.name.trim()) errors.name = "请填写姓名";
+    if (mode === "create" && !/^[a-z0-9_]{3,32}$/.test(form.username.trim().toLowerCase())) {
+      errors.username = "用户名需 3–32 位小写字母、数字或下划线";
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) return "邮箱格式不正确";
-    if (!form.phone.trim()) return "请填写手机号";
-    return null;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) errors.email = "邮箱格式不正确";
+    if (!form.phone.trim()) errors.phone = "请填写手机号";
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   }
 
   function handleClose() {
     if (saving) return;
-    setError(null);
+    setFieldErrors({});
     onClose();
   }
 
   async function submit() {
+    if (saving) return;
     if (mode === "edit" && accountId && !existing) {
-      setError("账号不存在或已删除");
+      toast.error("账号不存在或已删除");
       return;
     }
-    const msg = validate();
-    if (msg) {
-      setError(msg);
-      return;
-    }
+    if (!validate()) return;
     setSaving(true);
-    setError(null);
+    setFieldErrors({});
     const payload = {
       name: form.name,
       username: mode === "edit" && existing ? existing.username : form.username,
@@ -152,19 +153,23 @@ export function AccountFormDialog({
       if (mode === "edit" && existing) {
         await updateAccount(existing.id, payload);
         setSaving(false);
-        setError(null);
+        setFieldErrors({});
+        toast.success("账号已保存");
+        onSaved?.();
         onClose();
         return;
       }
       const created = await createAccount(payload);
       setSaving(false);
-      setError(null);
+      setFieldErrors({});
+      toast.success("账号已创建");
+      onSaved?.();
       onClose();
       if (goToDetailOnCreate) {
         router.push(`/accounts/${created.id}/`);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "保存失败");
+      toast.error(err instanceof Error ? err.message : "保存失败");
       setSaving(false);
     }
   }
@@ -196,6 +201,8 @@ export function AccountFormDialog({
           <TextField
             color={siteConfig.accent}
             label="姓名"
+            state={fieldErrors.name ? "error" : undefined}
+            errorMessage={fieldErrors.name}
             value={form.name}
             onChange={(v) => setField("name", v)}
             placeholder="真实姓名"
@@ -203,6 +210,8 @@ export function AccountFormDialog({
           <TextField
             color={siteConfig.accent}
             label="用户名"
+            state={fieldErrors.username ? "error" : undefined}
+            errorMessage={fieldErrors.username}
             value={form.username}
             onChange={(v) => setField("username", v)}
             placeholder="登录名"
@@ -212,6 +221,8 @@ export function AccountFormDialog({
             color={siteConfig.accent}
             label="邮箱"
             type="email"
+            state={fieldErrors.email ? "error" : undefined}
+            errorMessage={fieldErrors.email}
             value={form.email}
             onChange={(v) => setField("email", v)}
             placeholder="name@example.com"
@@ -219,6 +230,8 @@ export function AccountFormDialog({
           <TextField
             color={siteConfig.accent}
             label="手机"
+            state={fieldErrors.phone ? "error" : undefined}
+            errorMessage={fieldErrors.phone}
             value={form.phone}
             onChange={(v) => setField("phone", v)}
             placeholder="联系手机号"
@@ -257,7 +270,6 @@ export function AccountFormDialog({
             onChange={(v) => setField("notes", v)}
             placeholder="可选"
           />
-          {error ? <p className="text-sm text-fg-red">{error}</p> : null}
         </div>
       </div>
       <div className="flex items-center justify-between border-t border-fg-grey-100 px-6 py-4">

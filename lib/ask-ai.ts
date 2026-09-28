@@ -73,10 +73,14 @@ export function askAiStatusLabel(input: {
   model?: string;
   snapshotReady?: boolean;
   runtime?: AskAiRuntimeStatus | null;
+  error?: string;
 }) {
   const model = input.model || input.runtime?.model;
   if (input.pending) return model ? `${model} · 正在提问` : "正在提问";
-  if (input.failed) return model ? `模型报错 · ${model}` : "模型报错";
+  if (input.failed) {
+    if (input.error?.includes("未登录")) return "未登录";
+    return model ? `模型报错 · ${model}` : "模型报错";
+  }
   if (input.live || (input.landing && input.runtime?.configured)) {
     const name = model || input.runtime?.name || "模型";
     if (input.snapshotReady) return `${name} · 已读账号表`;

@@ -27,7 +27,7 @@ components/<resource>-store.tsx   # 可选；列表页若 client fetch 需要
 - session 守卫、`jsonOk`/`jsonError`、Zod、中文错误  
 - **不**在此 skill 里规定详情全页或弹窗  
 - **API 齐 ≠ 侧栏有**；挂应用模块是 new-page 的菜单三处
-- Ask AI 只调用已登记工具，不读源码。不登记 `agent.ts`，助手就不知道这个模块。工具入参用 API 同一份 Zod；读工具直接执行，写工具确认后把字段填进页面表单，不在工具里写库。
+- Ask AI 只调用已登记工具，不读源码。不登记 `agent.ts`，助手就不知道这个模块。工具入参用 API 同一份 Zod；读工具直接执行，写工具确认后把字段填进页面表单，不在工具里写库。页面保存成功后，同一会话继续原请求里还没做的查询或导出。
 
 ## B. 页面切片（new-page）
 

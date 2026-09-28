@@ -23,3 +23,17 @@ body {
   width: max-content;
   max-width: 100%;
 }
+
+/* Keep the Kit content gutter visible; long pages scroll inside the surface. */
+[data-starter-shell],
+[data-starter-shell] > div {
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+[data-starter-shell] [data-forge-app-content],
+[data-starter-shell] [data-forge-app-content] > div,
+[data-starter-shell] [data-forge-app-content] > div > .overflow-auto {
+  min-height: 0;
+}

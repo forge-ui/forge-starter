@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import { usePathname, useRouter } from "next/navigation";
 import {
   AppLayout,
+  Button,
   type AppLayoutProfile,
   type Team,
 } from "@forge-ui-official/core";
@@ -77,7 +78,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const shell = useMemo(() => shellForPath(pathname), [pathname]);
-  const { user, roleName, allowedModules, ready, canRead, refresh: refreshAccess } = useAccess();
+  const { user, roleName, allowedModules, ready, canRead, signedOut, error: accessError, refresh: refreshAccess } = useAccess();
   const [profile, setProfile] = useState<AppLayoutProfile>(defaultProfile);
   const [apps, setApps] = useState<AppEntry[]>(() => getDefaultAppRegistry());
   const [activeAppId, setActiveAppId] = useState(DEFAULT_APP_ID);
@@ -168,16 +169,16 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [refreshAccess]);
 
   const forbiddenModule = useMemo(() => {
-    if (!ready || allowedModules == null) return null;
+    if (!ready || !user || signedOut || allowedModules == null) return null;
     const moduleId = moduleIdForPath(pathname);
     if (!moduleId || moduleId === "dashboard") return null;
     return canRead(moduleId) ? null : moduleId;
-  }, [ready, allowedModules, pathname, canRead]);
+  }, [ready, user, signedOut, allowedModules, pathname, canRead]);
 
   useEffect(() => {
-    if (!ready || user) return;
+    if (!signedOut) return;
     router.replace("/login/");
-  }, [ready, user, router]);
+  }, [signedOut, router]);
 
   useEffect(() => {
     if (!forbiddenModule) return;
@@ -240,40 +241,51 @@ export function AppShell({ children }: { children: ReactNode }) {
     return () => document.removeEventListener("click", onDocumentClick, true);
   }, [logout, selectApp, apps]);
 
-  if (!ready || !user) return null;
+  if (!ready) return <div className="py-20 text-center text-sm text-fg-grey-500">正在确认登录状态…</div>;
+  if (!user) {
+    if (signedOut || !accessError) return null;
+    return (
+      <div className="flex min-h-dvh flex-col items-center justify-center gap-4">
+        <p className="text-sm text-fg-grey-700">{accessError}</p>
+        <Button color={siteConfig.accent} onClick={() => void refreshAccess()}>重试连接</Button>
+      </div>
+    );
+  }
 
   return (
     <AskAiProvider>
-      <AppLayout
-        mode="light"
-        logo={<img src={asset("/images/forge-logo.svg")} alt="Forge" className="size-8" />}
-        profilePosition="sidebar"
-        accent={siteConfig.accent}
-        teamName={activeApp.name}
-        teamSubtitle={activeApp.subtitle || "当前应用"}
-        teams={teams}
-        menuItems={shellMenuItems}
-        profile={profile}
-        hideSidebarWidgets
-        pageTitle={shell.title}
-        pageHeaderVariant={shell.headerVariant ?? "home"}
-        onBack={shell.backHref ? () => router.push(shell.backHref!) : undefined}
-        primaryAction={
-          shell.primaryAction
-            ? {
-                label: shell.primaryAction.label,
-                onClick: () => router.push(shell.primaryAction!.href),
-              }
-            : undefined
-        }
-        hideHeader={shell.hideHeader === true}
-        showDatePicker={false}
-        showKebab={false}
-      >
-        {forbiddenModule ? null : children}
-        <SettingsAccountDialog kind={accountDialog} onClose={() => setAccountDialog(null)} />
-        <ToastProvider />
-      </AppLayout>
+      <div data-starter-shell>
+        <AppLayout
+          mode="light"
+          logo={<img src={asset("/images/forge-logo.svg")} alt="Forge" className="size-8" />}
+          profilePosition="sidebar"
+          accent={siteConfig.accent}
+          teamName={activeApp.name}
+          teamSubtitle={activeApp.subtitle || "当前应用"}
+          teams={teams}
+          menuItems={shellMenuItems}
+          profile={profile}
+          hideSidebarWidgets
+          pageTitle={shell.title}
+          pageHeaderVariant={shell.headerVariant ?? "home"}
+          onBack={shell.backHref ? () => router.push(shell.backHref!) : undefined}
+          primaryAction={
+            shell.primaryAction
+              ? {
+                  label: shell.primaryAction.label,
+                  onClick: () => router.push(shell.primaryAction!.href),
+                }
+              : undefined
+          }
+          hideHeader={shell.hideHeader === true}
+          showDatePicker={false}
+          showKebab={false}
+        >
+          {forbiddenModule ? null : children}
+          <SettingsAccountDialog kind={accountDialog} onClose={() => setAccountDialog(null)} />
+          <ToastProvider />
+        </AppLayout>
+      </div>
     </AskAiProvider>
   );
 }

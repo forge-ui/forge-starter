@@ -109,6 +109,7 @@ function AskAiTurnView({
     model: result?.model,
     snapshotReady: result?.snapshot?.ready,
     runtime,
+    error: result?.failed ? result.text : undefined,
   });
   const body = turn.pending
     ? "正在处理…"

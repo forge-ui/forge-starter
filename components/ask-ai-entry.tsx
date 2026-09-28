@@ -43,7 +43,12 @@ import {
   type AskAiTurn,
 } from "@/lib/ask-ai";
 import { AskAiTranscript } from "@/components/ask-ai-transcript";
-import { queueAgentFormFill } from "@/lib/agent/fill";
+import {
+  AGENT_PAGE_DONE_EVENT,
+  queueAgentContinuation,
+  queueAgentFormFill,
+  type AgentContinuation,
+} from "@/lib/agent/fill";
 import { toast } from "@/lib/toast";
 
 function historyFromTurns(turns: AskAiTurn[]) {
@@ -63,6 +68,7 @@ function turnId() {
     ? crypto.randomUUID()
     : `turn-${Date.now()}`;
 }
+
 
 const AskAiPlaceContext = createContext<(slot: HTMLElement | null, releasing?: HTMLElement | null) => void>(
   () => {},
@@ -107,6 +113,8 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
   const turnsRef = useRef(turnsBySession);
   const sessionsRef = useRef(sessions);
   const busyRef = useRef(false);
+  const [busy, setBusy] = useState(false);
+  const [continuations, setContinuations] = useState<AgentContinuation[]>([]);
   currentSessionIdRef.current = currentSessionId;
   modelIdRef.current = modelId;
   turnsRef.current = turnsBySession;
@@ -137,15 +145,16 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     };
   }, [applyRuntime, pathname]);
 
-  const onSend = useCallback<AskAiProps["onSend"]>(async (message, request) => {
+  const onSend = useCallback(async (message: string, request: AskAiRequest, continuation?: AgentContinuation) => {
     if (busyRef.current) {
       return { text: "上一条还在处理" };
     }
     busyRef.current = true;
-    const sessionId = currentSessionIdRef.current;
+    setBusy(true);
+    const sessionId = continuation?.sessionId ?? currentSessionIdRef.current;
     const history = historyFromTurns(turnsRef.current[sessionId] ?? []);
     const id = turnId();
-    setDraft("");
+    if (!continuation) setDraft("");
     setTurnsBySession((prev) => ({
       ...prev,
       [sessionId]: [...(prev[sessionId] ?? []), { id, question: message, pending: true, result: null }],
@@ -171,7 +180,7 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
       const result = await sendAskAi(
         message,
         request,
-        modelIdRef.current,
+        continuation?.modelId ?? modelIdRef.current,
         history,
         `${shell.title} / ${pathname}`,
       );
@@ -190,6 +199,7 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
       return finish(failed);
     } finally {
       busyRef.current = false;
+      setBusy(false);
     }
   }, [applyRuntime, pathname, runtime?.model, shell.title]);
 
@@ -204,9 +214,35 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     [onSend, pathname, shell.title],
   );
 
+  useEffect(() => {
+    function onPageDone(event: Event) {
+      const detail = (event as CustomEvent<AgentContinuation>).detail;
+      if (!detail?.sessionId || !detail.question) return;
+      setContinuations((pending) => [...pending, detail]);
+    }
+    window.addEventListener(AGENT_PAGE_DONE_EVENT, onPageDone);
+    return () => window.removeEventListener(AGENT_PAGE_DONE_EVENT, onPageDone);
+  }, []);
+
+  // Keep completed page actions queued while another question/confirmation is running.
+  useEffect(() => {
+    if (busy || busyRef.current || continuations.length === 0) return;
+    const [next] = continuations;
+    setContinuations((pending) => pending.slice(1));
+    currentSessionIdRef.current = next.sessionId;
+    setCurrentSessionId(next.sessionId);
+    const verb = next.mode === "delete" ? "已在页面删除" : "已在页面保存";
+    void onSend(
+      `${verb}。原请求：${next.question}\n请继续原请求中还没做的步骤：要核对就查询，要文件就导出。不要再提出同一条写入。如果没有后续步骤，一句话确认即可。`,
+      { messages: [], signal: new AbortController().signal },
+      next,
+    );
+  }, [busy, continuations, onSend]);
+
   const confirmIntent = useCallback((intent: string) => {
     if (busyRef.current || spentIntents.includes(intent)) return;
     busyRef.current = true;
+    setBusy(true);
     setConfirmingIntent(intent);
     const sessionId = currentSessionIdRef.current;
     const id = turnId();
@@ -227,6 +263,20 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
           ),
         }));
         if (result.fill) {
+          // Older confirmation cards must resume the request that produced them,
+          // even if the user has since asked another question in this session.
+          const sourceTurn = (turnsRef.current[sessionId] ?? []).find((turn) =>
+            turn.result?.blocks?.some((block) => block.type === "confirm" && block.intent === intent),
+          );
+          const question = sourceTurn?.question.trim() ?? "";
+          if (question) {
+            queueAgentContinuation({
+              sessionId,
+              question,
+              mode: result.fill.mode,
+              modelId: modelIdRef.current,
+            });
+          }
           queueAgentFormFill(result.fill);
           const target = result.fill.href.endsWith("/") ? result.fill.href : `${result.fill.href}/`;
           const here = pathname.endsWith("/") ? pathname : `${pathname}/`;
@@ -256,6 +306,7 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
       })
       .finally(() => {
         busyRef.current = false;
+        setBusy(false);
         setConfirmingIntent(null);
       });
   }, [pathname, router, spentIntents]);

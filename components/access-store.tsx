@@ -28,6 +28,9 @@ type AccessValue = {
   allowedModules: AppModuleId[] | null;
   canRead: (moduleId: AppModuleId) => boolean;
   can: (resource: RbacResource, action: RbacAction) => boolean;
+  /** True only after the server says the session is missing. Network errors do not count. */
+  signedOut: boolean;
+  error: string | null;
   refresh: () => Promise<void>;
 };
 
@@ -47,28 +50,37 @@ export function AccessStoreProvider({ children }: { children: ReactNode }) {
   const [roleCode, setRoleCode] = useState<string | null>(null);
   const [allowedModules, setAllowedModules] = useState<AppModuleId[] | null>(null);
   const [permissions, setPermissions] = useState<string[]>([]);
+  const [signedOut, setSignedOut] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
       const res = await apiFetch("/api/auth/me/");
       const data = await parseApiJson<MeResponse>(res);
       if (res.ok && data.ok && data.user) {
+        setError(null);
+        setSignedOut(false);
         setUser(data.user);
         setRoleName(data.role?.name ?? null);
         setRoleCode(data.role?.code ?? null);
         setAllowedModules(data.allowedModules ?? []);
         setPermissions(data.permissions ?? []);
-      } else {
+        return;
+      }
+      if (res.status === 401) {
+        setError(null);
+        setSignedOut(true);
         setUser(null);
         setRoleName(null);
         setRoleCode(null);
         setAllowedModules([]);
         setPermissions([]);
+      } else {
+        setError("暂时无法获取登录状态，请重试");
       }
     } catch {
-      setUser(null);
-      setAllowedModules([]);
-      setPermissions([]);
+      // Preserve an established session across transient network failures.
+      setError("网络连接失败，请重试");
     } finally {
       setReady(true);
     }
@@ -90,8 +102,8 @@ export function AccessStoreProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ ready, user, roleName, roleCode, allowedModules, canRead, can, refresh }),
-    [ready, user, roleName, roleCode, allowedModules, canRead, can, refresh],
+    () => ({ ready, user, roleName, roleCode, allowedModules, canRead, can, signedOut, error, refresh }),
+    [ready, user, roleName, roleCode, allowedModules, canRead, can, signedOut, error, refresh],
   );
 
   return <AccessContext.Provider value={value}>{children}</AccessContext.Provider>;
