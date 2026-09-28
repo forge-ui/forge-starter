@@ -27,7 +27,7 @@ pnpm preview:cloudflare
 
 ## 域名切换顺序
 
-目标域名为 `starter.forgeui.org`。Wrangler 暂未声明域名，避免第一次部署就覆盖 GitHub Pages 旧站。
+正式域名为 `starter.forgeui.org`，已在 `wrangler.jsonc` 声明 Workers Custom Domain。根域名 `forgeui.org` 保留原网站。以下切换步骤已完成。
 
 1. 在 Workers 临时域名验证登录、CRUD、刷新持久化、权限和 Ask AI。
 2. 保存 GitHub Pages 设置及原 DNS 记录，给 Worker 添加该自定义域名，并替换原 GitHub CNAME。
@@ -46,11 +46,13 @@ pnpm preview:cloudflare
 
 - 新建 Neon 免费项目 `forge-starter`（`steep-dawn-93987117`），新加坡区域，PostgreSQL 18，production 分支。已初始化 schema、基础权限和独立管理员，未迁移历史项目的数据或模型密钥。
 - 云端通过 Hyperdrive `forge-starter-db` 连接 Neon，关闭 SQL 查询缓存。直接 Node.js TLS 连接在 Workers 中有兼容性错误，生产配置使用 Hyperdrive 处理源站 TLS 和连接池。
-- 临时地址：`https://forge-starter.hesongworkmail.workers.dev`。Workers 版本：`654b6245-41df-4ba5-8f4d-09ade5dad67b`。
+- 临时地址：`https://forge-starter.hesongworkmail.workers.dev`。Workers 版本：`00e9180b-1127-4af5-9a24-932dfb52e28a`。
 - 真实密码登录 200、匿名账号请求 401、关闭注册 403；连续两轮并发读取权限、账号、角色、Ask AI 运行配置均为 200。
 - 业务账号新建 201、详情 200、修改和再次读取持久化通过、删除 200、删除后 404；测试记录已清理。
 - 浏览器真实登录和侧栏到账号列表通过。当前是新数据库，业务账号和模型目录为空。
 - 连接串与随机生成的初始管理员密码仅保存在本地已忽略的 `.env.production.local`，密码字段为 `BOOTSTRAP_ADMIN_PASSWORD`；云端凭据使用 Worker secrets / Hyperdrive 配置。
-- `forgeui.org` 已有 Forge 网站；最终根域名或子域名待用户确认，因此未修改 DNS、未下线 GitHub Pages。历史 Neon 项目删除也待不可逆操作确认。
+- 正式地址：`https://starter.forgeui.org`。原 GitHub CNAME 已替换为 Workers Custom Domain；HTTPS、真实登录、侧栏账号列表及深链刷新通过，正式域名 API 并发查询和完整 CRUD 持久化复测通过，测试记录已清理。
+- GitHub Pages 已禁用（删除配置返回 204，复查返回 404）；正式域名继续返回 200。原 Pages 设置与 DNS 记录保存在本地忽略目录 `.gstack/qa-2026-09-28/`。
+- 用户明确确认后，已永久删除 Neon 旧项目 am team、justlogo、ccshop、scria、supa、mcpchat 及其数据。刷新组织列表确认只剩新建的 `forge-starter`。
 
 参考：[Cloudflare Next.js](https://developers.cloudflare.com/workers/framework-guides/web-apps/nextjs/)、[OpenNext 配置](https://opennext.js.org/cloudflare/get-started)。

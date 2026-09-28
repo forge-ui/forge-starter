@@ -1,6 +1,11 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "forge-starter",
+  "workers_dev": true,
+  "preview_urls": false,
+  "routes": [
+    { "pattern": "starter.forgeui.org", "custom_domain": true }
+  ],
   "main": "worker.ts",
   "compatibility_date": "2026-09-28",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
