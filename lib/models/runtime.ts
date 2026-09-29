@@ -67,6 +67,7 @@ export async function runModelChatTurn(
     signal?: AbortSignal;
     timeoutMs?: number;
     tools?: ModelToolDef[];
+    toolChoice?: "auto" | "required";
   } = {},
 ): Promise<ModelTurn> {
   if (!model.apiBase) throw new Error("模型没有 Chat Completions 地址");
@@ -97,7 +98,7 @@ export async function runModelChatTurn(
                   parameters: tool.parameters,
                 },
               })),
-              tool_choice: "auto",
+              tool_choice: options.toolChoice ?? "auto",
             }
           : {}),
       }),

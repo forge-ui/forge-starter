@@ -1,4 +1,6 @@
-import { desc, eq } from "drizzle-orm";
+import { accountCreateSchema, toAccountInput } from "./input";
+import { OperationError, type Transaction } from "@/lib/semantic/operations";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { adminAccounts, type AdminAccountRow } from "@/lib/db/schema";
 import {
@@ -15,6 +17,7 @@ function toAdminAccount(row: AdminAccountRow): AdminAccount {
   const status = isAccountStatus(row.status) ? row.status : "pending";
   return {
     id: row.id,
+    revision: row.revision,
     name: row.name,
     username: row.username,
     email: row.email,
@@ -31,30 +34,8 @@ function toAdminAccount(row: AdminAccountRow): AdminAccount {
 }
 
 function normalizeInput(input: AccountInput) {
-  const name = input.name.trim();
-  const username = input.username.trim().toLowerCase();
-  const email = input.email.trim().toLowerCase();
-  const phone = input.phone.trim();
-  if (!name) throw new Error("请填写姓名");
-  if (!/^[a-z0-9_]{3,32}$/.test(username)) {
-    throw new Error("用户名需 3–32 位小写字母、数字或下划线");
-  }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    throw new Error("邮箱格式不正确");
-  }
-  if (!phone) throw new Error("请填写手机号");
-  if (!isAccountRole(input.role)) throw new Error("角色无效");
-  if (!isAccountStatus(input.status)) throw new Error("状态无效");
-  return {
-    name,
-    username,
-    email,
-    phone,
-    role: input.role,
-    department: input.department.trim() || "平台",
-    status: input.status,
-    notes: input.notes.trim(),
-  };
+  const data = accountCreateSchema.parse({ ...input, department: input.department.trim() || "平台", notes: input.notes.trim() });
+  return toAccountInput(data, data.username);
 }
 
 export async function listAdminAccounts(): Promise<AdminAccount[]> {
@@ -66,8 +47,8 @@ export async function listAdminAccounts(): Promise<AdminAccount[]> {
   return rows.map(toAdminAccount);
 }
 
-export async function getAdminAccountById(id: string): Promise<AdminAccount | null> {
-  const db = getDb();
+export async function getAdminAccountById(id: string, transaction?: Transaction): Promise<AdminAccount | null> {
+  const db = transaction ?? getDb();
   const [row] = await db
     .select()
     .from(adminAccounts)
@@ -76,8 +57,8 @@ export async function getAdminAccountById(id: string): Promise<AdminAccount | nu
   return row ? toAdminAccount(row) : null;
 }
 
-export async function createAdminAccount(input: AccountInput): Promise<AdminAccount> {
-  const db = getDb();
+export async function createAdminAccount(input: AccountInput, transaction?: Transaction): Promise<AdminAccount> {
+  const db = transaction ?? getDb();
   const data = normalizeInput(input);
   try {
     const [row] = await db
@@ -105,9 +86,11 @@ export async function createAdminAccount(input: AccountInput): Promise<AdminAcco
 export async function updateAdminAccount(
   id: string,
   input: AccountInput,
+  expectedRevision?: number,
+  transaction?: Transaction,
 ): Promise<AdminAccount> {
-  const db = getDb();
-  const existing = await getAdminAccountById(id);
+  const db = transaction ?? getDb();
+  const existing = await getAdminAccountById(id, transaction);
   if (!existing) throw new Error("账号不存在");
 
   const data = normalizeInput({
@@ -128,10 +111,11 @@ export async function updateAdminAccount(
         status: data.status,
         notes: data.notes,
         updatedAt: new Date(),
+        revision: sql`${adminAccounts.revision} + 1`,
       })
-      .where(eq(adminAccounts.id, id))
+      .where(and(eq(adminAccounts.id, id), expectedRevision === undefined ? undefined : eq(adminAccounts.revision, expectedRevision)))
       .returning();
-    if (!row) throw new Error("账号不存在");
+    if (!row) throw new OperationError("账号已被修改或删除，请刷新后重试");
     return toAdminAccount(row);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -142,11 +126,11 @@ export async function updateAdminAccount(
   }
 }
 
-export async function deleteAdminAccount(id: string): Promise<void> {
-  const db = getDb();
+export async function deleteAdminAccount(id: string, expectedRevision?: number, transaction?: Transaction): Promise<void> {
+  const db = transaction ?? getDb();
   const result = await db
     .delete(adminAccounts)
-    .where(eq(adminAccounts.id, id))
+    .where(and(eq(adminAccounts.id, id), expectedRevision === undefined ? undefined : eq(adminAccounts.revision, expectedRevision)))
     .returning({ id: adminAccounts.id });
-  if (result.length === 0) throw new Error("账号不存在");
+  if (result.length === 0) throw new OperationError("账号已被修改或删除，请刷新后重试");
 }

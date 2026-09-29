@@ -1,3 +1,6 @@
+import { accountDraftSchema } from "@/lib/agent/forms";
+import { matchesAccount } from "./filter";
+import { toolParameters } from "@/lib/semantic/schema";
 import { getAdminAccountById, listAdminAccounts } from "@/lib/accounts/service";
 import { ACCOUNT_STATUS_META, type AdminAccount } from "@/lib/accounts/types";
 import { signExportToken } from "@/lib/agent/intent";
@@ -25,39 +28,13 @@ const TABLE_COLUMNS = [
   { key: "department", label: "部门" },
 ];
 
-const FILTER_PARAMETERS = {
-  type: "object",
-  additionalProperties: false,
-  properties: {
-    query: { type: "string", description: "匹配姓名、用户名、邮箱或手机" },
-    status: {
-      type: "string",
-      enum: ["active", "disabled", "pending", "locked"],
-      description: "active 启用，disabled 停用，pending 待激活，locked 锁定",
-    },
-    role: {
-      type: "string",
-      enum: ["超级管理员", "运营", "审计", "只读"],
-    },
-  },
-} as const;
-
 function statusLabel(account: AdminAccount) {
   return ACCOUNT_STATUS_META[account.status].label;
 }
 
-function matches(account: AdminAccount, filter: AccountFilter) {
-  if (filter.status && account.status !== filter.status) return false;
-  if (filter.role && account.role !== filter.role) return false;
-  const query = filter.query?.trim().toLowerCase();
-  if (!query) return true;
-  const hay = `${account.name} ${account.username} ${account.email} ${account.phone}`.toLowerCase();
-  return hay.includes(query);
-}
-
 export async function selectAccounts(filter: AccountFilter) {
   const rows = await listAdminAccounts();
-  return rows.filter((account) => matches(account, filter));
+  return rows.filter((account) => matchesAccount(account, filter));
 }
 
 function tableRow(account: AdminAccount): Record<string, string> {
@@ -171,7 +148,7 @@ const accountTools: AgentTool[] = [
     mode: "read",
     permission: { resource: "accounts", action: "read" },
     description: "按姓名、用户名、邮箱、手机、状态或角色筛选业务账号。问人数、状态、名单时先调用，不要编造。",
-    parameters: FILTER_PARAMETERS,
+    parameters: toolParameters(accountFilterSchema),
     schema: accountFilterSchema,
     async run(input) {
       const filter = parseArgs(accountFilterSchema, input);
@@ -184,12 +161,7 @@ const accountTools: AgentTool[] = [
     mode: "read",
     permission: { resource: "accounts", action: "read" },
     description: "按列表返回的 id 读取一条业务账号。",
-    parameters: {
-      type: "object",
-      additionalProperties: false,
-      required: ["id"],
-      properties: { id: { type: "string", description: "账号 id" } },
-    },
+    parameters: toolParameters(accountIdSchema),
     schema: accountIdSchema,
     async run(input) {
       const { id } = parseArgs(accountIdSchema, input);
@@ -202,27 +174,27 @@ const accountTools: AgentTool[] = [
     },
   },
   {
+    id: "accounts.open",
+    mode: "read",
+    permission: { resource: "accounts", action: "read" },
+    description: "打开指定业务账号的详情页面。用户要求打开/进入详情时调用；仅在对话中读取信息使用 accounts_get。id 必须来自真实查询和用户明确选择。",
+    parameters: toolParameters(accountIdSchema),
+    schema: accountIdSchema,
+    async run(input) {
+      const { id } = parseArgs(accountIdSchema, input);
+      const account = await getAdminAccountById(id);
+      if (!account) throw new Error("账号不存在");
+      return { summary: `正在打开「${account.name}」详情，等待客户端确认。`, navigation: { href: `/accounts/${encodeURIComponent(id)}/`, label: `${account.name}详情` } };
+    },
+  },
+  {
     id: "accounts.create",
     mode: "write",
     permission: { resource: "accounts", action: "create" },
     description:
-      "把新建账号的字段填进账号管理页面的表单，不直接写库。用户要在弹窗里检查并点创建，页面上的校验才会执行。不会修改侧栏。部门常用：平台、安全、运营、财务、客服。",
-    parameters: {
-      type: "object",
-      additionalProperties: false,
-      required: ["name", "username", "email", "phone", "role", "department", "status"],
-      properties: {
-        name: { type: "string" },
-        username: { type: "string", description: "3–32 位小写字母、数字或下划线" },
-        email: { type: "string" },
-        phone: { type: "string" },
-        role: { type: "string", enum: ["超级管理员", "运营", "审计", "只读"] },
-        department: { type: "string" },
-        status: { type: "string", enum: ["active", "disabled", "pending", "locked"] },
-        notes: { type: "string" },
-      },
-    },
-    schema: accountCreateSchema,
+      "展示对话内的新建账号表单。即使只有用户名或缺少其他字段，也立即调用，只传用户已提供的信息；未提供的字段省略，让用户在表单补齐。不要用长文字索要字段，不要编造姓名邮箱手机。用户确认后带入页面保存，不直接写库。",
+    parameters: toolParameters(accountDraftSchema),
+    schema: accountDraftSchema,
     async describe(input) {
       const data = parseArgs(accountCreateSchema, input);
       return {
@@ -254,22 +226,8 @@ const accountTools: AgentTool[] = [
     id: "accounts.update",
     mode: "write",
     permission: { resource: "accounts", action: "update" },
-    description: "把修改后的字段填进账号管理页面的编辑表单，不直接写库。用户名不可改。id 用列表返回的 id。",
-    parameters: {
-      type: "object",
-      additionalProperties: false,
-      required: ["id", "name", "email", "phone", "role", "department", "status"],
-      properties: {
-        id: { type: "string" },
-        name: { type: "string" },
-        email: { type: "string" },
-        phone: { type: "string" },
-        role: { type: "string", enum: ["超级管理员", "运营", "审计", "只读"] },
-        department: { type: "string" },
-        status: { type: "string", enum: ["active", "disabled", "pending", "locked"] },
-        notes: { type: "string" },
-      },
-    },
+    description: "把修改后的字段填进账号管理页面的编辑表单，不直接写库。只需提供要修改的字段，未提供的字段保留原值。用户名不可改。id 用当前记录或列表返回的 id。",
+    parameters: toolParameters(accountUpdateToolSchema),
     schema: accountUpdateToolSchema,
     async describe(input) {
       const data = parseArgs(accountUpdateToolSchema, input);
@@ -278,9 +236,10 @@ const accountTools: AgentTool[] = [
       return {
         title: `修改账号「${current.name}」`,
         body: `用户名保持 ${current.username}。\n${accountLines({
+          ...current,
           ...data,
           username: current.username,
-          notes: data.notes ?? "",
+          notes: data.notes ?? current.notes,
         })}`,
         actionLabel: "填入页面表单",
       };
@@ -289,20 +248,22 @@ const accountTools: AgentTool[] = [
       const data = parseArgs(accountUpdateToolSchema, input);
       const current = await getAdminAccountById(data.id);
       if (!current) throw new Error("账号不存在");
+      const merged = { ...current, ...data };
       return {
         formId: "accounts" as const,
         mode: "edit" as const,
         href: "/accounts/",
         recordId: current.id,
+        expectedRevision: current.revision,
         fields: {
-          name: data.name,
+          name: merged.name,
           username: current.username,
-          email: data.email,
-          phone: data.phone,
-          role: data.role,
-          department: data.department,
-          status: data.status,
-          notes: data.notes ?? "",
+          email: merged.email,
+          phone: merged.phone,
+          role: merged.role,
+          department: merged.department,
+          status: merged.status,
+          notes: merged.notes ?? "",
         },
       };
     },
@@ -312,12 +273,7 @@ const accountTools: AgentTool[] = [
     mode: "write",
     permission: { resource: "accounts", action: "delete" },
     description: "打开账号管理页面上的删除确认，不直接删库。用户还要点页面里的删除。",
-    parameters: {
-      type: "object",
-      additionalProperties: false,
-      required: ["id"],
-      properties: { id: { type: "string" } },
-    },
+    parameters: toolParameters(accountIdSchema),
     schema: accountIdSchema,
     async describe(input) {
       const { id } = parseArgs(accountIdSchema, input);
@@ -338,6 +294,7 @@ const accountTools: AgentTool[] = [
         mode: "delete" as const,
         href: "/accounts/",
         recordId: account.id,
+        expectedRevision: account.revision,
         fields: { name: account.name, username: account.username },
       };
     },
@@ -347,7 +304,7 @@ const accountTools: AgentTool[] = [
     mode: "read",
     permission: { resource: "accounts", action: "read" },
     description: "按与列表相同的筛选生成业务账号 CSV 下载。不要在回复里粘贴表格全文。",
-    parameters: FILTER_PARAMETERS,
+    parameters: toolParameters(accountFilterSchema),
     schema: accountFilterSchema,
     async run(input, ctx) {
       const filter = parseArgs(accountFilterSchema, input);

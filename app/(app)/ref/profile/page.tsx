@@ -15,6 +15,7 @@ import {
   LineChartStatCard,
   StatusBadge,
   TabBar,
+  TabsContent,
   type ColumnDef,
 } from "@forge-ui-official/core";
 import { RefChrome } from "@/components/reference/ref-chrome";
@@ -183,6 +184,7 @@ export default function RefProfilePage() {
             />
           </div>
 
+          <TabsContent activeKey={tab}>
           {tab === 0 || tab === 1 ? (
             <DataTable<Row>
               color={siteConfig.accent}
@@ -203,6 +205,7 @@ export default function RefProfilePage() {
               />
             </div>
           )}
+          </TabsContent>
         </div>
       </section>
     </RefChrome>

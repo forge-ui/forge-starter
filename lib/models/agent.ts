@@ -1,9 +1,12 @@
+import { isModelProviderId, resolveProviderId, MODEL_PROVIDERS } from "./providers";
+import { matchesModel } from "./filter";
+import { toolParameters } from "@/lib/semantic/schema";
 import { listAiModels } from "@/lib/models/service";
 import { MODEL_STATUS_META } from "@/lib/models/types";
 import { AGENT_TABLE_LIMIT, type AgentTool } from "@/lib/agent/types";
 import { z } from "zod";
 
-const schema = z.object({}).strict();
+const schema = z.object({ provider: z.string().max(80).optional(), query: z.string().max(80).optional(), modelType: z.enum(["LLM"]).optional(), scope: z.enum(["all", "page"]).optional() }).strict();
 
 export const modelAgentTools: AgentTool[] = [
   {
@@ -11,11 +14,14 @@ export const modelAgentTools: AgentTool[] = [
     mode: "read",
     permission: { resource: "models", action: "read" },
     description: "列出模型的名称、供应商、模型名、是否启用、是否默认。没有密钥，也不能改配置。",
-    parameters: { type: "object", additionalProperties: false, properties: {} },
+    parameters: toolParameters(schema),
     schema,
-    async run() {
-      const rows = await listAiModels();
+    async run(args) {
+      const filter = schema.parse(args);
+      if (filter.provider && !isModelProviderId(resolveProviderId(filter.provider))) throw new Error("未知供应商，请使用实际名称：" + MODEL_PROVIDERS.map((p) => p.name).join("、"));
+      const rows = (await listAiModels()).filter((row) => matchesModel(row, filter));
       const safe = rows.map((row) => ({
+        id: row.id,
         name: row.name,
         provider: row.providerLabel,
         modelName: row.modelName,
@@ -35,10 +41,7 @@ export const modelAgentTools: AgentTool[] = [
               { key: "status", label: "状态" },
               { key: "isDefault", label: "默认" },
             ],
-            rows: safe.slice(0, AGENT_TABLE_LIMIT).map((row, index) => ({
-              id: String(index),
-              ...row,
-            })),
+            rows: safe.slice(0, AGENT_TABLE_LIMIT),
           },
         ],
       };

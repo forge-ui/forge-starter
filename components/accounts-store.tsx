@@ -1,5 +1,12 @@
 "use client";
 
+import type { Receipt } from "@/lib/semantic/operations";
+export type SaveOptions = { operationId?: string; key?: string; revision?: number };
+type SavedAccount = AdminAccount & { receipt?: Receipt };
+function writeHeaders(options?: SaveOptions): Record<string, string> {
+  return { "Content-Type": "application/json", "idempotency-key": options?.key ?? crypto.randomUUID(), ...(options?.operationId ? { "x-operation-id": options.operationId } : {}), ...(options?.revision ? { "if-match": String(options.revision) } : {}) };
+}
+
 import {
   createContext,
   useCallback,
@@ -18,9 +25,9 @@ type AccountsStoreValue = {
   error: string | null;
   refresh: () => Promise<void>;
   getById: (id: string) => AdminAccount | undefined;
-  createAccount: (input: AccountInput) => Promise<AdminAccount>;
-  updateAccount: (id: string, input: AccountInput) => Promise<AdminAccount>;
-  deleteAccount: (id: string) => Promise<void>;
+  createAccount: (input: AccountInput, options?: SaveOptions) => Promise<SavedAccount>;
+  updateAccount: (id: string, input: AccountInput, options?: SaveOptions) => Promise<SavedAccount>;
+  deleteAccount: (id: string, options?: SaveOptions) => Promise<Receipt | undefined>;
   countsByStatus: Record<string, number>;
 };
 
@@ -32,6 +39,7 @@ async function parseJson(res: Response) {
     error?: string;
     accounts?: AdminAccount[];
     account?: AdminAccount;
+    receipt?: Receipt;
   };
 }
 
@@ -77,10 +85,10 @@ export function AccountsStoreProvider({ children }: { children: ReactNode }) {
     [accounts],
   );
 
-  const createAccount = useCallback(async (input: AccountInput) => {
+  const createAccount = useCallback(async (input: AccountInput, options?: SaveOptions) => {
     const res = await fetch("/api/accounts/", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: writeHeaders(options),
       body: JSON.stringify(input),
     });
     const data = await parseJson(res);
@@ -88,13 +96,13 @@ export function AccountsStoreProvider({ children }: { children: ReactNode }) {
       throw new Error(data.error ?? "创建失败");
     }
     setAccounts((prev) => [data.account!, ...prev.filter((a) => a.id !== data.account!.id)]);
-    return data.account;
+    return { ...data.account, receipt: data.receipt };
   }, []);
 
-  const updateAccount = useCallback(async (id: string, input: AccountInput) => {
+  const updateAccount = useCallback(async (id: string, input: AccountInput, options?: SaveOptions) => {
     const res = await fetch(`/api/accounts/${id}/`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: writeHeaders(options),
       body: JSON.stringify(input),
     });
     const data = await parseJson(res);
@@ -102,16 +110,17 @@ export function AccountsStoreProvider({ children }: { children: ReactNode }) {
       throw new Error(data.error ?? "更新失败");
     }
     setAccounts((prev) => prev.map((item) => (item.id === id ? data.account! : item)));
-    return data.account;
+    return { ...data.account, receipt: data.receipt };
   }, []);
 
-  const deleteAccount = useCallback(async (id: string) => {
-    const res = await fetch(`/api/accounts/${id}/`, { method: "DELETE" });
+  const deleteAccount = useCallback(async (id: string, options?: SaveOptions) => {
+    const res = await fetch(`/api/accounts/${id}/`, { method: "DELETE", headers: writeHeaders(options) });
     const data = await parseJson(res);
     if (!res.ok || !data.ok) {
       throw new Error(data.error ?? "删除失败");
     }
     setAccounts((prev) => prev.filter((item) => item.id !== id));
+    return data.receipt;
   }, []);
 
   const countsByStatus = useMemo(() => {

@@ -1,3 +1,4 @@
+import { pageContextSchema } from "@/lib/semantic/context";
 import { z } from "zod";
 import { executeConfirmedIntent } from "@/lib/agent/confirm";
 import { jsonError, jsonOk } from "@/lib/auth/http";
@@ -5,6 +6,7 @@ import { requireSession } from "@/lib/auth/session";
 import { resolveAccess } from "@/lib/rbac/access";
 
 const bodySchema = z.object({
+  page: pageContextSchema.optional(),
   intent: z.string().trim().min(20).max(8000),
 }).strict();
 
@@ -27,7 +29,7 @@ export async function POST(request: Request) {
 
   try {
     const access = await resolveAccess(auth.session);
-    const output = await executeConfirmedIntent(parsed.data.intent, auth.session.id, access);
+    const output = await executeConfirmedIntent(parsed.data.intent, auth.session.id, access, parsed.data.page);
     return jsonOk({
       text: output.summary,
       live: true,

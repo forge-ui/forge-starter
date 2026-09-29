@@ -24,3 +24,7 @@ drizzle/meta
 .wrangler/
 .dev.vars
 .dev.vars.*
+
+# Rebuildable local code index
+.semantic/
+.semantic-next/

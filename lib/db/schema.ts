@@ -1,6 +1,8 @@
 import {
   boolean,
+  jsonb,
   integer,
+  index,
   pgTable,
   text,
   timestamp,
@@ -50,6 +52,7 @@ export const adminAccounts = pgTable(
     role: text("role").notNull(),
     department: text("department").notNull(),
     status: text("status").notNull().default("pending"),
+    revision: integer("revision").notNull().default(1),
     loginCount: integer("login_count").notNull().default(0),
     lastLogin: text("last_login"),
     notes: text("notes").notNull().default(""),
@@ -158,3 +161,34 @@ export type RbacRoleRow = typeof rbacRoles.$inferSelect;
 export type RbacPermissionRow = typeof rbacPermissions.$inferSelect;
 export type RbacMenuRow = typeof rbacMenus.$inferSelect;
 export type AiModelRow = typeof aiModels.$inferSelect;
+
+/** Durable operation receipts; login subject is text to also support demo identities. */
+export const semanticOperations = pgTable("semantic_operations", {
+  id: uuid("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  actionId: text("action_id").notNull(),
+  entityId: text("entity_id"),
+  contractVersion: text("contract_version").notNull(),
+  harnessRunId: text("harness_run_id"),
+  harnessRequestId: text("harness_request_id"),
+  state: text("state").notNull(),
+  fingerprint: text("fingerprint"),
+  receipt: jsonb("receipt"),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+/** Versioned harness snapshots; ownership columns are the authoritative access boundary. */
+export const harnessRuns = pgTable("harness_runs", {
+  id: text("id").primaryKey(),
+  ownerId: text("owner_id").notNull(),
+  applicationId: text("application_id").notNull(),
+  buildId: text("build_id").notNull(),
+  revision: integer("revision").notNull(),
+  state: jsonb("state").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
+}, (table) => [
+  index("harness_runs_owner_application_updated_idx").on(table.ownerId, table.applicationId, table.updatedAt),
+]);

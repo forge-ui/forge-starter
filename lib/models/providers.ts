@@ -23,6 +23,15 @@ export const MODEL_PROVIDERS: readonly ModelProvider[] = [
     models: ["gpt-4o-mini", "gpt-4o", "o4-mini"],
   },
   {
+    id: "model_xai_provider",
+    name: "xAI / Grok",
+    kind: "commercial",
+    icon: "/provider-icons/model_xai_provider.svg",
+    defaultApiBase: "https://api.x.ai/v1",
+    defaultModel: "grok-4.7",
+    models: ["grok-4.7", "grok-4.6"],
+  },
+  {
     id: "model_anthropic_provider",
     name: "Anthropic",
     kind: "commercial",
@@ -146,6 +155,9 @@ export const MODEL_PROVIDERS: readonly ModelProvider[] = [
 ];
 
 const ENV_PROVIDER_ALIAS: Record<string, string> = {
+  xai: "model_xai_provider",
+  "x.ai": "model_xai_provider",
+  grok: "model_xai_provider",
   dashscope: "aliyun_bai_lian_model_provider",
   aliyun: "aliyun_bai_lian_model_provider",
   openai: "model_openai_provider",
@@ -161,8 +173,8 @@ export function isModelProviderId(value: string) {
 
 export function resolveProviderId(value: string) {
   const trimmed = value.trim();
-  if (isModelProviderId(trimmed)) return trimmed;
-  return ENV_PROVIDER_ALIAS[trimmed] || trimmed;
+  const matched = MODEL_PROVIDERS.find((item) => item.id.toLowerCase() === trimmed.toLowerCase() || item.name.toLowerCase() === trimmed.toLowerCase());
+  return matched?.id || ENV_PROVIDER_ALIAS[trimmed.toLowerCase()] || trimmed;
 }
 
 export function modelProviderById(id: string) {

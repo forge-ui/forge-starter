@@ -1,3 +1,6 @@
+import { presentationTools } from "./presentation-tool";
+import { pageTools } from "@/lib/semantic/page-tools";
+import { navigationTools } from "./navigation-tools";
 import { accountAgentTools } from "@/lib/accounts/agent";
 import { menuAgentTools } from "@/lib/menus/agent";
 import { modelAgentTools } from "@/lib/models/agent";
@@ -7,6 +10,9 @@ import { hasPermission, type AccessContext } from "@/lib/rbac/access";
 import { agentFunctionName, type AgentTool } from "./types";
 
 export const AGENT_TOOLS: AgentTool[] = [
+  ...presentationTools,
+  ...pageTools,
+  ...navigationTools,
   ...accountAgentTools,
   ...roleAgentTools,
   ...menuAgentTools,

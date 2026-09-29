@@ -18,4 +18,6 @@ export type AskAiRuntimePublic = {
   name?: string;
   provider?: string;
   models: AskAiModelOption[];
+  /** Permission-filtered prompts for the current page; [] means no available actions. */
+  suggestions?: string[];
 };

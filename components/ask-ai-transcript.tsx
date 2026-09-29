@@ -1,6 +1,11 @@
 "use client";
 
+import { AskAiPresentation } from "./ask-ai-presentation";
+import { isPresentationBlock } from "@/lib/agent/presentation";
+import { AskAiForm, type ConfirmFormIntent } from "./ask-ai-form";
+import { AskAiHarness, type ReplyToHarness } from "./ask-ai-harness";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   AgentDiffTable,
   AgentFlowchart,
@@ -14,7 +19,6 @@ import {
   InsightCards,
   RecommendationCard,
   StreamingAnswer,
-  SurfaceCard,
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
 import type { AgentBlock, AgentDownloadBlock } from "@/lib/agent/types";
@@ -41,6 +45,8 @@ export function AskAiTranscript({
   confirmingIntent,
   onAsk,
   onConfirm,
+  onReply,
+  busy = false,
 }: {
   turns: AskAiTurn[];
   runtime?: AskAiRuntimeStatus | null;
@@ -48,7 +54,9 @@ export function AskAiTranscript({
   spentIntents: string[];
   confirmingIntent: string | null;
   onAsk: (text: string) => void;
-  onConfirm: (intent: string) => void;
+  onConfirm: ConfirmFormIntent;
+  onReply?: ReplyToHarness;
+  busy?: boolean;
 }) {
   const suggestions = suggestionDemos();
 
@@ -59,8 +67,8 @@ export function AskAiTranscript({
       ) : null}
       {landing ? (
         <div className="flex flex-col gap-5">
-          <span className="text-xs text-fg-grey-500">
-            Ask AI · {askAiStatusLabel({ landing: true, runtime })}
+          <span className="text-xs text-fg-grey-700">
+            Ask AI
           </span>
           <StreamingAnswer text={askAiLandingCopy(runtime ?? null)} />
           <SuggestionPrompts items={suggestions} onAsk={onAsk} />
@@ -76,6 +84,8 @@ export function AskAiTranscript({
             confirmingIntent={confirmingIntent}
             onAsk={onAsk}
             onConfirm={onConfirm}
+            onReply={onReply}
+            busy={busy}
           />
         ))
       )}
@@ -91,6 +101,8 @@ function AskAiTurnView({
   confirmingIntent,
   onAsk,
   onConfirm,
+  onReply,
+  busy,
 }: {
   turn: AskAiTurn;
   latest: boolean;
@@ -98,19 +110,23 @@ function AskAiTurnView({
   spentIntents: string[];
   confirmingIntent: string | null;
   onAsk: (text: string) => void;
-  onConfirm: (intent: string) => void;
+  onConfirm: ConfirmFormIntent;
+  onReply?: ReplyToHarness;
+  busy: boolean;
 }) {
+  const router = useRouter();
   const result = turn.result;
   const demo = result && !result.live && !result.failed ? matchAskAiDemo(turn.question) : null;
-  const source = askAiStatusLabel({
+  const source = result?.failed ? askAiStatusLabel({
     live: result?.live,
     failed: result?.failed,
     pending: turn.pending,
     model: result?.model,
     snapshotReady: result?.snapshot?.ready,
     runtime,
-    error: result?.failed ? result.text : undefined,
-  });
+    error: result.text,
+  }) : null;
+  const followUpsDisabled = !latest || busy || Boolean(turn.pending) || confirmingIntent !== null;
   const body = turn.pending
     ? "正在处理…"
     : result?.text || ASK_AI_FALLBACK_SUMMARY;
@@ -118,41 +134,81 @@ function AskAiTurnView({
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col items-end gap-1.5">
-        <span className="text-xs text-fg-grey-500">你</span>
-        <p className="max-w-full rounded-2xl bg-fg-grey-100 px-4 py-3 text-sm leading-6 text-fg-black">
+        <span className="text-xs text-fg-grey-700">你</span>
+        <p className="max-w-full rounded-2xl bg-fg-grey-100 px-4 py-3 text-sm leading-6 text-fg-black [overflow-wrap:anywhere]">
           {turn.question}
         </p>
       </div>
-      <span className="text-xs text-fg-grey-500">Ask AI · {source}</span>
-      <StreamingAnswer text={body} />
-      {result?.blocks?.map((block, index) => (
+      <span className="text-xs text-fg-grey-700">Ask AI{source ? ` · ${source}` : ""}</span>
+      {body && !(latest && result?.harness?.pending?.kind === "question") ? <StreamingAnswer text={result?.blocks?.some(block => block.type === "choice" && block.title === "选择目标") ? "请选择目标，也可以输入序号、名称或 ID。未显示的记录可直接按名称或 ID 查找。" : body} /> : null}
+      {result?.links?.length ? <div className="flex flex-wrap gap-2">{result.links.map(link => <Button key={link.href} variant="secondary" color={siteConfig.accent} onClick={() => router.push(link.href)}>{link.label}</Button>)}</div> : null}
+      {result?.blocks?.filter(block => block.type !== "choice" && !(latest && result.harness?.pending?.kind === "question" && block.type === "table")).map((block, index) => (
+        !latest && (block.type === "form" || block.type === "confirm") ? <p key={`closed-${index}`} className="text-sm text-fg-grey-700">此轮操作已结束，请按最新请求继续。</p> :
         <AgentBlockView
           key={`${turn.id}-${block.type}-${index}`}
           block={block}
+          disabled={followUpsDisabled}
+          onAsk={onAsk}
+          question={turn.question}
+          draftKey={`${turn.id}-${index}`}
           spent={block.type === "confirm" && spentIntents.includes(block.intent)}
           confirming={block.type === "confirm" && confirmingIntent === block.intent}
           onConfirm={onConfirm}
+          onCancel={latest && result?.harness?.pending && onReply ? () => onReply(result.harness!, { interactionId: result.harness!.pending!.id, cancel: true }) : undefined}
         />
       ))}
+      {latest && result?.harness && onReply ? <AskAiHarness key={result.harness.pending?.id ?? `${result.harness.id}-${result.harness.revision}`} state={result.harness} disabled={busy || turn.pending || confirmingIntent !== null} onReply={onReply} /> : null}
       {latest && demo?.id === "page" ? <PageExtras onAsk={onAsk} /> : null}
       {latest && demo?.id === "next" ? <NextExtras onAsk={onAsk} snapshot={result?.snapshot} /> : null}
       {latest && demo?.id === "status" ? <StatusExtras onAsk={onAsk} snapshot={result?.snapshot} /> : null}
       {latest && demo?.id === "rbac" ? <RbacExtras /> : null}
+      {result?.blocks?.filter(block => block.type === "choice").map((block, index) => {
+        const options = [...new Map(block.options.map(option => [option.question, option])).values()];
+        if (!options.length) return null;
+        return (
+          <fieldset key={`choice-${index}`} aria-label={block.title} disabled={followUpsDisabled}
+            className="m-0 min-w-0 border-0 p-0 disabled:opacity-50">
+            <StreamingAnswer
+              text=""
+              followUpsLabel={block.title}
+              followUps={options.map(option => option.label)}
+              onFollowUp={(_, optionIndex) => {
+                const option = options[optionIndex];
+                if (!followUpsDisabled && option) onAsk(option.question);
+              }}
+              className="[&>p:empty]:hidden"
+            />
+          </fieldset>
+        );
+      })}
     </div>
   );
 }
 
 function AgentBlockView({
   block,
+  question,
+  draftKey,
+  disabled,
+  onAsk,
   spent,
   confirming,
   onConfirm,
+  onCancel,
 }: {
   block: AgentBlock;
+  disabled: boolean;
+  onAsk: (question: string) => void;
+  question: string;
+  draftKey: string;
   spent: boolean;
   confirming: boolean;
-  onConfirm: (intent: string) => void;
+  onConfirm: ConfirmFormIntent;
+  onCancel?: () => void;
 }) {
+  if (isPresentationBlock(block)) return <AskAiPresentation block={block} storageKey={draftKey} disabled={disabled} onAsk={onAsk} />;
+  if (block.type === "choice") return null;
+  if (block.type === "form") return <AskAiForm block={block} draftKey={draftKey} question={question} onConfirm={onConfirm} onCancel={onCancel} />;
   if (block.type === "table") {
     return (
       <DataTable<Record<string, string>>
@@ -241,15 +297,14 @@ function SuggestionPrompts({
     <Grid columns={2} gap={8}>
         {items.map((item) => (
           <GridItem key={item.id} span={1}>
-            <SurfaceCard padding="none" className="h-full">
-              <button
-                type="button"
-                className="flex h-full min-h-14 w-full items-center justify-center px-3 py-3 text-center hover:bg-fg-grey-50"
+              <Button
+                color={siteConfig.accent}
+                variant="secondary"
+                className="h-full min-h-14 w-full whitespace-normal px-3 py-3 text-center"
                 onClick={() => onAsk(item.title)}
               >
                 <span className="text-sm font-medium leading-5 text-fg-black">{item.title}</span>
-              </button>
-            </SurfaceCard>
+              </Button>
           </GridItem>
         ))}
     </Grid>

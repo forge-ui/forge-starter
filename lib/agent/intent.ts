@@ -1,5 +1,8 @@
+import type { PageContext } from "@/lib/semantic/context";
 import { SignJWT, jwtVerify } from "jose";
 import { getAuthSecret } from "@/lib/auth/config";
+import type { TaskBinding } from "@/lib/harness/starter-operations";
+type IntentBinding = { page?: PageContext; revision?: number; harness?: TaskBinding };
 
 const INTENT_AUDIENCE = "agent-intent";
 const EXPORT_AUDIENCE = "agent-export";
@@ -24,11 +27,11 @@ function claimJti(jti: string) {
   return true;
 }
 
-async function signToken(audience: string, userId: string, toolId: string, args: unknown) {
-  return new SignJWT({ toolId, args })
+async function signToken(audience: string, userId: string, toolId: string, args: unknown, binding?: IntentBinding) {
+  return new SignJWT({ toolId, args, binding })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(userId)
-    .setJti(crypto.randomUUID())
+    .setJti(binding?.harness?.requestId ?? crypto.randomUUID())
     .setAudience(audience)
     .setIssuedAt()
     .setExpirationTime(INTENT_TTL)
@@ -43,11 +46,11 @@ async function readToken(token: string, audience: string) {
   if (!userId || !jti || !toolId || payload.args === undefined) {
     throw new Error("确认单无效");
   }
-  return { userId, jti, toolId, args: payload.args };
+  return { userId, jti, toolId, args: payload.args, binding: payload.binding as IntentBinding | undefined };
 }
 
-export function signAgentIntent(userId: string, toolId: string, args: unknown) {
-  return signToken(INTENT_AUDIENCE, userId, toolId, args);
+export function signAgentIntent(userId: string, toolId: string, args: unknown, binding?: IntentBinding) {
+  return signToken(INTENT_AUDIENCE, userId, toolId, args, binding);
 }
 
 export function signExportToken(userId: string, toolId: string, args: unknown) {

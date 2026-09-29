@@ -4,6 +4,7 @@ export type AccountRole = "超级管理员" | "运营" | "审计" | "只读";
 
 export type AdminAccount = {
   id: string;
+  revision: number;
   name: string;
   username: string;
   email: string;

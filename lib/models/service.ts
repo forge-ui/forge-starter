@@ -103,7 +103,7 @@ async function seedFromEnvIfEmpty() {
   await db.insert(aiModels).values({
     name: "默认对话模型",
     provider,
-    modelName: process.env.ASK_AI_LLM_MODEL?.trim() || "qwen-plus",
+    modelName: process.env.ASK_AI_LLM_MODEL?.trim() || modelProviderById(provider)?.defaultModel || "qwen-plus",
     apiBase: process.env.ASK_AI_LLM_BASE_URL?.trim() || defaultApiBaseForProvider(provider),
     apiKey,
     status: "active",

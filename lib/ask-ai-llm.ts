@@ -1,3 +1,8 @@
+import { routeDialogue } from "./agent/dialogue";
+import type { PageContext } from "@/lib/semantic/context";
+import { hasPermission } from "@/lib/rbac/access";
+import { prepareContinuationReadback } from "@/lib/semantic/continuation";
+import type { AgentNavigation } from "@/lib/agent/navigation";
 import { runAgentTurn } from "@/lib/agent/loop";
 import type { AgentBlock } from "@/lib/agent/types";
 import type { AccessContext } from "@/lib/rbac/access";
@@ -9,7 +14,7 @@ import {
   type AskAiRuntimePublic,
   type AskAiRuntimeSource,
 } from "@/lib/ask-ai-types";
-import { modelProviderById } from "@/lib/models/providers";
+import { modelProviderById, resolveProviderId } from "@/lib/models/providers";
 import { listAiModels, resolveAiModel } from "@/lib/models/service";
 import type { ResolvedAiModel } from "@/lib/models/types";
 import {
@@ -35,6 +40,7 @@ type AskAiRuntime = AskAiLlmConfig & {
 };
 
 export type AskAiChatResult = {
+  navigation?: AgentNavigation;
   text: string;
   live: boolean;
   model?: string;
@@ -60,17 +66,18 @@ function isUsableKey(apiKey: string) {
 
 export function resolveAskAiLlmConfig(): AskAiLlmConfig {
   const provider = readEnv("ASK_AI_LLM_PROVIDER") || "dashscope";
-  const model = readEnv("ASK_AI_LLM_MODEL") || "qwen-plus";
+  const catalog = modelProviderById(resolveProviderId(provider));
+  const model = readEnv("ASK_AI_LLM_MODEL") || catalog?.defaultModel || "qwen-plus";
   return {
     provider,
     model,
-    baseUrl: readEnv("ASK_AI_LLM_BASE_URL") || PROVIDER_BASE[provider] || PROVIDER_BASE.dashscope,
+    baseUrl: readEnv("ASK_AI_LLM_BASE_URL") || catalog?.defaultApiBase || PROVIDER_BASE[provider] || PROVIDER_BASE.dashscope,
     apiKey: readEnv("ASK_AI_LLM_API_KEY"),
   };
 }
 
 function providerLabel(provider: string) {
-  return modelProviderById(provider)?.name ?? provider;
+  return modelProviderById(resolveProviderId(provider))?.name ?? provider;
 }
 
 function runtimeFromResolved(row: ResolvedAiModel): AskAiRuntime {
@@ -178,6 +185,13 @@ function toResolvedModel(runtime: AskAiRuntime, modelName: string): ResolvedAiMo
   };
 }
 
+/** Server-only resolver for the harness model port; never return credentials to HTTP. */
+export async function resolveHarnessModel(modelId?: string): Promise<ResolvedAiModel> {
+  const runtime = await resolveAskAiRuntime(modelId);
+  if (runtime.source === "none" || !isUsableKey(runtime.apiKey)) throw new Error("请先在模型服务启用一个支持工具调用的模型");
+  return toResolvedModel(runtime, runtime.model);
+}
+
 export async function loadAskAiSnapshot(): Promise<AskAiAccountSnapshot> {
   const empty: AskAiAccountSnapshot = {
     ready: false,
@@ -266,22 +280,31 @@ function localAnswer(question: string, pageLabel: string, snapshot: AskAiAccount
 }
 
 export async function answerAskAi(input: {
+  continuationOperationId?: string;
   question: string;
   context?: string;
+  page?: PageContext;
   modelId?: string;
   history?: Array<{ role: "user" | "assistant"; content: string }>;
   signal: AbortSignal;
   userId: string;
   access: AccessContext;
 }): Promise<AskAiChatResult> {
-  const question = input.question.trim();
+  let question = input.question.trim();
+  if (!input.continuationOperationId) {
+    const dialogue = await routeDialogue(input);
+    if (dialogue.reply) return { ...dialogue.reply, live: false };
+    if (dialogue.question) question = dialogue.question;
+  }
   const pageLabel = input.context?.trim() || "";
   const demo = matchAskAiDemo(question);
+  const readback = input.continuationOperationId ? await prepareContinuationReadback(input.continuationOperationId, input.userId, input.access) : undefined;
   const runtime = await resolveAskAiRuntime(input.modelId);
   const model = runtime.model;
 
   if (runtime.source === "none" || !isUsableKey(runtime.apiKey)) {
-    const snapshot = await loadAskAiSnapshot();
+    if (readback) return { text: "已根据保存回执重新读取记录。", live: false, blocks: readback.blocks ?? [], links: [] };
+    const snapshot = hasPermission(input.access, "accounts", "read") ? await loadAskAiSnapshot() : { ready: false, total: 0, byStatus: { active: 0, disabled: 0, pending: 0, locked: 0 }, byRole: {}, recent: [], note: "没有账号读取权限" };
     return {
       text: localAnswer(question, pageLabel, snapshot),
       live: false,
@@ -293,8 +316,10 @@ export async function answerAskAi(input: {
   }
 
   const loop = await runAgentTurn({
+    readback,
     question,
     pageLabel,
+    page: input.page,
     history: input.history ?? [],
     signal: input.signal,
     userId: input.userId,
@@ -303,6 +328,7 @@ export async function answerAskAi(input: {
   });
   return {
     text: loop.text,
+    navigation: loop.navigation,
     live: true,
     model,
     blocks: loop.blocks,

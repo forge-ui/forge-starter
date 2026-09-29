@@ -110,3 +110,7 @@ pnpm db:push   # 业务表必须 Postgres；demo 登录模式不能代替 DATABA
   - 菜单三处：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用种子勾齐新 id  
   - 重详情 → 对照 `accounts`  
   - 轻详情 → 对照 `/ref/detail-modal` + `components/ui/modal.tsx`（暂无第二业务样板）  
+
+## 可选语义底座接入
+
+需要 Ask AI / Coding Agent 理解新模块时，按 `docs/agent-semantic-foundation.md` 登记业务契约，工具 JSON Schema 从共享 Zod 派生；写入回执必须与业务事务原子提交。后端完成不代表页面适配已完成。

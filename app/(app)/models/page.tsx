@@ -1,6 +1,11 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Modal } from "@/components/ui/modal";
+
+import { matchesModel } from "@/lib/models/filter";
+import { useSemanticPage } from "@/components/semantic-page";
+
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   PenLinear,
@@ -19,6 +24,7 @@ import {
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
 import { PageTitleActions } from "@/components/ask-ai-entry";
+import { WorkspaceSplit, FolderNav } from "@/components/workspace-split";
 import { ModelCard } from "@/components/model-card";
 import { useModelsStore } from "@/components/models-store";
 import { ModelFormDialog } from "@/components/model-form-dialog";
@@ -86,7 +92,21 @@ function ModelsPageContent() {
   const [editId, setEditId] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [probeMap, setProbeMap] = useState<Record<string, ProbeEntry>>({});
-  const probedKey = useRef("");
+
+
+  useSemanticPage({ pageId: "models.workspace", entityId: detailId ?? undefined, query: { provider: providerFilter || undefined, query: searchText || undefined, modelType: modelTypeFilter || undefined } }, "models", (fill) => {
+    if (loading) return false;
+    if (error) throw new Error(error);
+    if (formOpen) throw new Error("请先关闭模型编辑表单");
+    if (fill.mode === "filter") {
+      setProviderFilter(fill.fields.provider ?? ""); setSearchText(fill.fields.query ?? ""); setModelTypeFilter(fill.fields.modelType ?? ""); setSearchType(fill.fields.modelType ? "model_type" : "name"); return true;
+    }
+    if (fill.mode === "open") {
+      if (!models.some((row) => row.id === fill.recordId)) throw new Error("模型不存在");
+      openDetail(fill.recordId!); return true;
+    }
+    throw new Error("不支持的模型页面操作");
+  });
 
   function openCreate() {
     setEditId(null);
@@ -160,21 +180,7 @@ function ModelsPageContent() {
   );
 
   const filtered = useMemo(() => {
-    const q = searchText.trim().toLowerCase();
-    return models.filter((item) => {
-      if (providerFilter && item.provider !== providerFilter) return false;
-      if (searchType === "name" && q) {
-        return (
-          item.name.toLowerCase().includes(q)
-          || item.modelName.toLowerCase().includes(q)
-          || item.providerLabel.toLowerCase().includes(q)
-        );
-      }
-      if (searchType === "model_type" && modelTypeFilter) {
-        return modelTypeFilter === "LLM";
-      }
-      return true;
-    });
+    return models.filter((item) => matchesModel(item, { provider: providerFilter, query: searchType === "name" ? searchText : undefined, modelType: searchType === "model_type" ? modelTypeFilter : undefined }));
   }, [modelTypeFilter, models, providerFilter, searchText, searchType]);
 
   const hasSearchFilters = Boolean(
@@ -194,13 +200,13 @@ function ModelsPageContent() {
     setModelTypeFilter("");
   }
 
+  // Probe results replace model records. Depend on membership, not those records,
+  // so one completed request cannot cancel the other workers' state updates.
+  const probeTargetIds = JSON.stringify(models.filter((item) => item.status !== "disabled").map((item) => item.id).sort());
   useEffect(() => {
-    if (loading || models.length === 0) return;
-    const key = models.map((item) => item.id).sort().join(",");
-    if (probedKey.current === key) return;
-    probedKey.current = key;
+    if (loading) return;
     let cancelled = false;
-    const targets = models.filter((item) => item.status !== "disabled");
+    const targets = JSON.parse(probeTargetIds) as string[];
     const concurrency = 3;
     let index = 0;
 
@@ -209,16 +215,16 @@ function ModelsPageContent() {
         if (cancelled) return;
         const current = targets[index++];
         if (!current) return;
-        setProbeMap((prev) => ({ ...prev, [current.id]: { state: "testing" } }));
+        setProbeMap((prev) => ({ ...prev, [current]: { state: "testing" } }));
         try {
-          await probeModel(current.id);
+          await probeModel(current);
           if (cancelled) return;
-          setProbeMap((prev) => ({ ...prev, [current.id]: { state: "ok" } }));
+          setProbeMap((prev) => ({ ...prev, [current]: { state: "ok" } }));
         } catch (err) {
           if (cancelled) return;
           setProbeMap((prev) => ({
             ...prev,
-            [current.id]: {
+            [current]: {
               state: "error",
               error: err instanceof Error ? err.message : "连接测试失败",
             },
@@ -231,7 +237,7 @@ function ModelsPageContent() {
     return () => {
       cancelled = true;
     };
-  }, [loading, models, probeModel]);
+  }, [loading, probeTargetIds, probeModel]);
 
   async function retestOne(id: string) {
     setProbeMap((prev) => ({ ...prev, [id]: { state: "testing" } }));
@@ -261,8 +267,11 @@ function ModelsPageContent() {
         onEdit={openEdit}
       />
 
-      {deleteTarget ? (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/30">
+      <Modal open={deleteTarget != null} onClose={() => {
+              if (deleting) return;
+              setDeleteTarget(null);
+            }} overlayClassName="z-[70]">
+        {deleteTarget ? (
           <ConfirmationDialog
             title={`删除模型「${deleteTarget.name}」？`}
             description="删除后不可恢复。Ask AI 将不再使用这条配置。"
@@ -289,8 +298,8 @@ function ModelsPageContent() {
                 .finally(() => setDeleting(false));
             }}
           />
-        </div>
-      ) : null}
+        ) : null}
+      </Modal>
 
       <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-hidden">
         <div className="flex shrink-0 flex-wrap items-start justify-between gap-4">
@@ -303,7 +312,6 @@ function ModelsPageContent() {
               className="mt-1"
               items={[
                 { label: "工作台", href: "/dashboard/" },
-                { label: "模型", href: "/models/" },
                 { label: "模型服务" },
               ]}
             />
@@ -319,79 +327,10 @@ function ModelsPageContent() {
           </PageTitleActions>
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden lg:flex-row lg:items-stretch">
-          <aside className="flex max-h-[24vh] w-full shrink-0 flex-col overflow-hidden lg:max-h-none lg:h-full lg:w-[240px]">
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-fg-grey-200 bg-white p-2">
-              <p className="shrink-0 px-2.5 pb-2 pt-1.5 text-xs font-medium uppercase tracking-wide text-fg-grey-700">
-                供应商
-              </p>
-              <nav
-                className="min-h-0 flex-1 space-y-0.5 overflow-y-auto overscroll-contain"
-                aria-label="模型供应商"
-              >
-                <Button
-                  color={siteConfig.accent}
-                  variant="tertiary"
-                  type="button"
-                  aria-pressed={!providerFilter}
-                  onClick={() => setProviderFilter("")}
-                  className={`!justify-start !outline-none !rounded-xl !font-normal [&>span]:contents flex w-full items-center gap-2.5 !px-2.5 !py-2 text-left text-sm transition ${
-                    !providerFilter
-                      ? "bg-fg-grey-100 font-semibold text-fg-black"
-                      : "text-fg-grey-800 hover:bg-fg-grey-50"
-                  }`}
-                >
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-fg-grey-50 text-fg-grey-600">
-                    <span className="text-xs font-bold">全</span>
-                  </span>
-                  <span className="min-w-0 flex-1 truncate">全部</span>
-                  <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-xs tabular-nums ${
-                      !providerFilter
-                        ? "bg-white text-fg-grey-700"
-                        : "bg-fg-grey-100 text-fg-grey-700"
-                    }`}
-                  >
-                    {models.length}
-                  </span>
-                </Button>
-                {sidebarProviders.map((provider) => {
-                  const count = providerCounts.get(provider.id) || 0;
-                  const selected = providerFilter === provider.id;
-                  return (
-                    <Button
-                      color={siteConfig.accent}
-                      variant="tertiary"
-                      key={provider.id}
-                      type="button"
-                      aria-pressed={selected}
-                      onClick={() => setProviderFilter(provider.id)}
-                      className={`!justify-start !outline-none !rounded-xl !font-normal [&>span]:contents flex w-full items-center gap-2.5 !px-2.5 !py-2 text-left text-sm transition ${
-                        selected
-                          ? "bg-fg-grey-100 font-semibold text-fg-black"
-                          : "text-fg-grey-800 hover:bg-fg-grey-50"
-                      }`}
-                    >
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-fg-grey-50">
-                        <ProviderIcon providerId={provider.id} size="sm" />
-                      </span>
-                      <span className="min-w-0 flex-1 truncate">{provider.name}</span>
-                      <span
-                        className={`shrink-0 rounded-full px-2 py-0.5 text-xs tabular-nums ${
-                          selected
-                            ? "bg-white text-fg-grey-700"
-                            : "bg-fg-grey-100 text-fg-grey-700"
-                        }`}
-                      >
-                        {count}
-                      </span>
-                    </Button>
-                  );
-                })}
-              </nav>
-            </div>
-          </aside>
-
+        <WorkspaceSplit leftTitle="供应商" className="!min-h-0"
+          left={<FolderNav activeId={providerFilter} onSelect={setProviderFilter}
+            folders={[{ id: "", name: "全部", count: models.length, locked: true }, ...sidebarProviders.map((provider) => ({ id: provider.id, name: provider.name, count: providerCounts.get(provider.id) ?? 0, locked: true, icon: <ProviderIcon providerId={provider.id} size="sm" /> }))]} />}
+        >
           <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-hidden">
             <div className="flex shrink-0 flex-wrap items-end gap-3">
               <SelectOption
@@ -531,7 +470,7 @@ function ModelsPageContent() {
               )}
             </div>
           </div>
-        </div>
+        </WorkspaceSplit>
       </div>
     </>
   );

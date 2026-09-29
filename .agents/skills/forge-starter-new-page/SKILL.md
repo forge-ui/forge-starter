@@ -170,3 +170,7 @@ pnpm check   # typecheck + 规范绊线
 - 对照样板：accounts（重）或 `/ref/detail-modal`（轻，暂无第二业务样板）  
 - 菜单三处：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用是否勾齐新 id；是否已清 `forge-starter:app-registry`  
 - 无权限直链是否 `replace` 回工作台（不要只藏侧栏）  
+
+## 可选语义底座接入
+
+已登记语义契约的模块按 `docs/agent-semantic-foundation.md` 使用 `useSemanticPage` 暴露白名单状态并实现页面动作适配器。加载、未保存表单和过期记录必须明确处理；页面接收 ACK 不等于数据保存成功。仍执行完整页面审计。

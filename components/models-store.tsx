@@ -123,7 +123,12 @@ export function ModelsStoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const probeModel = useCallback(async (id: string) => {
-    const res = await apiFetch(`/api/models/${id}/probe/`, { method: "POST" });
+    const res = await apiFetch(`/api/models/${id}/probe/`, { method: "POST" }, 30_000).catch((error: unknown) => {
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new Error("连接检测超时（30 秒），请检查中转站地址或稍后重试");
+      }
+      throw error;
+    });
     const data = await parseApiJson<ModelsResponse>(res);
     if (data.model) {
       setModels((prev) => prev.map((item) => (item.id === id ? data.model! : item)));

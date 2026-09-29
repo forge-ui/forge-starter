@@ -4,6 +4,8 @@ Coding Agent 是第一开发界面，专注 **Forge 管理后台**：skills 拆�
 
 人怎么把项目跑起来：[`docs/setup.md`](setup.md)。产品范围：[`docs/product.md`](product.md)。合约：[`AGENTS.md`](../AGENTS.md)。
 
+Ask AI 的运行时、业务适配器、知识来源、数据库迁移与测试协议见 [`docs/ask-ai-harness.md`](ask-ai-harness.md)。跨平台能力先在 Starter 验证，再接入业务适配器；不要把资源规则写进通用 `lib/harness/engine.ts`。
+
 ## 核心做法
 
 | 做法 | 价值 |

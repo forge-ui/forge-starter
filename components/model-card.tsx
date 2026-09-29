@@ -56,7 +56,7 @@ export function ModelCard({
             <h3 className="break-words text-base font-semibold text-fg-black">{name}</h3>
           )}
           {modelName ? (
-            <p className="mt-1 truncate text-xs text-fg-grey-500" title={`基础模型 ${modelName}`}>
+            <p className="mt-1 truncate text-xs text-fg-grey-700" title={`基础模型 ${modelName}`}>
               基础模型 {modelName}
             </p>
           ) : null}

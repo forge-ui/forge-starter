@@ -18,6 +18,7 @@ import {
   HistoryGrouped,
   StatusBadge,
   TabBar,
+  TabsContent,
   type ColumnDef,
 } from "@forge-ui-official/core";
 import { RefChrome } from "@/components/reference/ref-chrome";
@@ -139,6 +140,7 @@ export default function RefPersonPage() {
               onChange={setProfileTab}
             />
           </div>
+          <TabsContent activeKey={profileTab} ariaLabel="客户资料">
           {profileTab === 0 ? (
             <dl className="space-y-3 text-sm">
               {[
@@ -171,6 +173,7 @@ export default function RefPersonPage() {
               ))}
             </dl>
           )}
+          </TabsContent>
         </aside>
 
         {/* Right multi-tabs */}
@@ -185,7 +188,8 @@ export default function RefPersonPage() {
           </div>
 
           <div className="mt-4">
-            {tab === 0 ? (
+            <TabsContent activeKey={tab}>
+          {tab === 0 ? (
               <div className="rounded-xl bg-white p-5 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
                 <HistoryGrouped
                   title="客户动态"
@@ -251,6 +255,7 @@ export default function RefPersonPage() {
                 <p className="mt-3 text-xs text-fg-grey-500">Linda Blair · 2 天前</p>
               </div>
             ) : null}
+          </TabsContent>
           </div>
         </div>
       </div>

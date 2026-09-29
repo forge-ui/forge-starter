@@ -33,11 +33,15 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    ".semantic-next/types/**/*.ts",
+    ".semantic-next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
     ".open-next",
-    "tmp"
+    "tmp",
+    ".semantic",
+    ".semantic-next"
   ]
 }

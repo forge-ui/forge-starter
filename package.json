@@ -1,6 +1,6 @@
 {
   "name": "forge-starter",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "private": true,
   "description": "用 Forge UI 快速搭建管理后台。开箱样板 + AI skills + 布局画廊，给人和编程助手一起用。",
   "scripts": {
@@ -15,12 +15,15 @@
     "check": "pnpm typecheck && pnpm audit:tripwire",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "semantic": "tsx tooling/semantic/cli.ts",
+    "test:semantic": "tsx --test tests/semantic/*.test.ts",
+    "test:harness": "tsx --test --test-concurrency=1 tests/harness/*.test.ts"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.8",
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
-    "@forge-ui-official/core": "0.1.18",
+    "@forge-ui-official/core": "0.3.1",
     "@opennextjs/cloudflare": "1.20.6",
     "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.2",
@@ -43,6 +46,7 @@
     "dotenv": "^17.4.2",
     "drizzle-kit": "^0.31.10",
     "tailwindcss": "^4.0.0",
+    "ts-morph": "27.0.2",
     "tsx": "^4.23.5",
     "typescript": "^5.0.0",
     "wrangler": "4.142.0"

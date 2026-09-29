@@ -21,6 +21,7 @@
   ],
   "vars": {
     "AUTH_MODE": "local",
+    "SEMANTIC_ENABLED": "true",
     "REGISTRATION_ENABLED": "false",
     "APP_URL": "https://starter.forgeui.org"
   },

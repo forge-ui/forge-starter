@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { accountCreateSchema, accountPatchSchema } from "@/lib/accounts/input";
+import type { Receipt } from "@/lib/semantic/operations";
+
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, SelectOption, TextArea, TextField } from "@forge-ui-official/core";
 import { toast } from "@/lib/toast";
@@ -51,7 +54,9 @@ type Props = {
   accountId?: string | null;
   goToDetailOnCreate?: boolean;
   draft?: Record<string, string> | null;
-  onSaved?: () => void;
+  onSaved?: (receipt?: Receipt) => void;
+  operationId?: string;
+  expectedRevision?: number;
 };
 
 function formFromDraft(base: FormState, draft?: Record<string, string> | null): FormState {
@@ -76,18 +81,29 @@ export function AccountFormDialog({
   goToDetailOnCreate = true,
   draft = null,
   onSaved,
+  operationId,
+  expectedRevision,
 }: Props) {
   const router = useRouter();
   const { getById, createAccount, updateAccount } = useAccountsStore();
   const mode = accountId ? "edit" : "create";
   const existing = accountId ? getById(accountId) : undefined;
 
+  const saveKey = useRef("");
+  const revision = useRef<number | undefined>(undefined);
+  const initialized = useRef("");
   const [form, setForm] = useState<FormState>(emptyForm);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) { initialized.current = ""; return; }
+    const identity = `${accountId ?? "new"}:${operationId ?? "manual"}`;
+    if (initialized.current === identity) return;
+    if (mode === "edit" && !existing) return;
+    initialized.current = identity;
+    saveKey.current = crypto.randomUUID();
+    revision.current = expectedRevision ?? existing?.revision;
     setFieldErrors({});
     setSaving(false);
     if (mode === "edit" && existing) {
@@ -104,7 +120,7 @@ export function AccountFormDialog({
     } else if (mode === "create") {
       setForm(formFromDraft(emptyForm(), draft));
     }
-  }, [open, mode, existing, draft]);
+  }, [open, mode, existing, draft, accountId, operationId, expectedRevision]);
 
   function setField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -113,12 +129,11 @@ export function AccountFormDialog({
 
   function validate() {
     const errors: Partial<Record<keyof FormState, string>> = {};
-    if (!form.name.trim()) errors.name = "请填写姓名";
-    if (mode === "create" && !/^[a-z0-9_]{3,32}$/.test(form.username.trim().toLowerCase())) {
-      errors.username = "用户名需 3–32 位小写字母、数字或下划线";
+    const parsed = (mode === "create" ? accountCreateSchema : accountPatchSchema).safeParse(form);
+    if (!parsed.success) for (const issue of parsed.error.issues) {
+      const key = issue.path[0] as keyof FormState;
+      if (key in form && !errors[key]) errors[key] = issue.message;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) errors.email = "邮箱格式不正确";
-    if (!form.phone.trim()) errors.phone = "请填写手机号";
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   }
@@ -151,19 +166,19 @@ export function AccountFormDialog({
 
     try {
       if (mode === "edit" && existing) {
-        await updateAccount(existing.id, payload);
+        const saved = await updateAccount(existing.id, payload, { operationId, key: saveKey.current, revision: revision.current });
         setSaving(false);
         setFieldErrors({});
         toast.success("账号已保存");
-        onSaved?.();
+        onSaved?.(saved.receipt);
         onClose();
         return;
       }
-      const created = await createAccount(payload);
+      const created = await createAccount(payload, { operationId, key: saveKey.current });
       setSaving(false);
       setFieldErrors({});
       toast.success("账号已创建");
-      onSaved?.();
+      onSaved?.(created.receipt);
       onClose();
       if (goToDetailOnCreate) {
         router.push(`/accounts/${created.id}/`);
@@ -240,6 +255,8 @@ export function AccountFormDialog({
             <SelectOption
               color={siteConfig.accent}
               label="角色"
+              state={fieldErrors.role ? "error" : undefined}
+              errorMessage={fieldErrors.role}
               width="100%"
               options={roleOptions}
               value={form.role}
@@ -248,6 +265,8 @@ export function AccountFormDialog({
             <SelectOption
               color={siteConfig.accent}
               label="部门"
+              state={fieldErrors.department ? "error" : undefined}
+              errorMessage={fieldErrors.department}
               width="100%"
               options={deptOptions}
               value={form.department}
@@ -257,6 +276,8 @@ export function AccountFormDialog({
           <SelectOption
             color={siteConfig.accent}
             label="状态"
+              state={fieldErrors.status ? "error" : undefined}
+              errorMessage={fieldErrors.status}
             width="100%"
             options={statusOptions}
             value={form.status}

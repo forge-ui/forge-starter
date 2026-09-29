@@ -1,3 +1,5 @@
+import { writeWithReceipt } from "@/lib/semantic/write-api";
+import { OperationError } from "@/lib/semantic/operations";
 import { createAdminAccount, listAdminAccounts } from "@/lib/accounts/service";
 import { accountCreateSchema, toAccountInput } from "@/lib/accounts/input";
 import { jsonError, jsonOk } from "@/lib/auth/http";
@@ -29,13 +31,16 @@ export async function POST(request: Request) {
       return jsonError(parsed.error.issues[0]?.message ?? "参数无效");
     }
 
-    const account = await createAdminAccount(toAccountInput(parsed.data, parsed.data.username));
-    return jsonOk({ account }, { status: 201 });
+    const output = await writeWithReceipt(request, auth.session.id, "accounts.create", undefined, parsed.data, async (tx) => {
+      const account = await createAdminAccount(toAccountInput(parsed.data, parsed.data.username), tx);
+      return { entityId: account.id, revision: account.revision, result: { account } };
+    });
+    return jsonOk(output, { status: 201 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "创建失败";
     if (message.includes("DATABASE_URL")) {
       return jsonError("未配置 DATABASE_URL，无法读写账号数据", 503);
     }
-    return jsonError(message, 400);
+    return jsonError(message, error instanceof OperationError ? error.status : 400);
   }
 }

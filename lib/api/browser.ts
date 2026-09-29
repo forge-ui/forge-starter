@@ -8,9 +8,9 @@ function nativeFetch(): typeof fetch {
 }
 
 /** Client fetch that cannot spin forever (timeout + no Next cache). */
-export async function apiFetch(input: string, init: RequestInit = {}): Promise<Response> {
+export async function apiFetch(input: string, init: RequestInit = {}, timeoutMs = FETCH_TIMEOUT_MS): Promise<Response> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   const onAbort = () => controller.abort();
   init.signal?.addEventListener("abort", onAbort);
   try {

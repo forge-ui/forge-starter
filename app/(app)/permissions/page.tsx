@@ -1,5 +1,7 @@
 "use client";
 
+import { Modal } from "@/components/ui/modal";
+
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -224,8 +226,11 @@ function PermissionsPageContent() {
         onEdit={openEdit}
       />
 
-      {deleteTarget ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+      <Modal open={deleteTarget != null} onClose={() => {
+              if (deleting) return;
+              setDeleteTarget(null);
+            }}>
+        {deleteTarget ? (
           <ConfirmationDialog
             title="删除权限？"
             description={`确定删除「${deleteTarget.name}」？角色上的对应授权会一并移除。`}
@@ -252,8 +257,8 @@ function PermissionsPageContent() {
                 .finally(() => setDeleting(false));
             }}
           />
-        </div>
-      ) : null}
+        ) : null}
+      </Modal>
 
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">

@@ -1,3 +1,5 @@
+import type { AgentFormBlock } from "./forms";
+import type { AgentNavigation } from "./navigation";
 import type { RbacAction, RbacResource } from "@/lib/rbac/constants";
 import type { z } from "zod";
 
@@ -9,8 +11,11 @@ export type AgentTableBlock = {
 };
 
 export type AgentFormFill = {
-  formId: "accounts";
-  mode: "create" | "edit" | "delete";
+  formId: string;
+  commandId?: string;
+  operationId?: string;
+  expectedRevision?: number;
+  mode: "create" | "edit" | "delete" | "open" | "filter";
   href: string;
   recordId?: string;
   fields: Record<string, string>;
@@ -31,11 +36,12 @@ export type AgentDownloadBlock = {
   filename: string;
 };
 
-export type AgentBlock = AgentTableBlock | AgentConfirmBlock | AgentDownloadBlock;
+export type AgentBlock = import("./presentation").AgentPresentationBlock | import("./intent-policy").ChoiceBlock | AgentTableBlock | AgentConfirmBlock | AgentDownloadBlock | AgentFormBlock;
 
 export type AgentToolOutput = {
   /** 回给模型的短事实，不要塞密钥或整文件。 */
   summary: string;
+  navigation?: AgentNavigation;
   blocks?: AgentBlock[];
   /** 写入不落库，交给页面表单或页面上的删除确认。 */
   fill?: AgentFormFill;

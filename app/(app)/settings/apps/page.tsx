@@ -1,5 +1,7 @@
 "use client";
 
+import { Modal } from "@/components/ui/modal";
+
 /**
  * 应用管理 — collection CRUD (list + header action + modal form)
  * Same IA as accounts list / ecommerce customers.
@@ -213,8 +215,8 @@ export default function SettingsAppsPage() {
         onSaved={refresh}
       />
 
-      {deleteTarget ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+      <Modal open={deleteTarget != null} onClose={() => setDeleteTarget(null)}>
+        {deleteTarget ? (
           <ConfirmationDialog
             title="删除应用？"
             description={`确定删除「${deleteTarget.name}」？将从侧栏应用切换器中移除。`}
@@ -225,8 +227,8 @@ export default function SettingsAppsPage() {
             onCancel={() => setDeleteTarget(null)}
             onConfirm={confirmDelete}
           />
-        </div>
-      ) : null}
+        ) : null}
+      </Modal>
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-1">

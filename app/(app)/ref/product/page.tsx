@@ -13,6 +13,7 @@ import {
   DataTable,
   StatusBadge,
   TabBar,
+  TabsContent,
   type ColumnDef,
 } from "@forge-ui-official/core";
 import { RefChrome } from "@/components/reference/ref-chrome";
@@ -158,6 +159,7 @@ export default function RefProductPage() {
             />
           </div>
 
+          <TabsContent activeKey={tab}>
           {tab === 0 ? (
             <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
               <h3 className="text-base font-semibold text-fg-black">商品说明</h3>
@@ -224,6 +226,7 @@ export default function RefProductPage() {
               ))}
             </div>
           ) : null}
+          </TabsContent>
         </div>
       </div>
     </RefChrome>

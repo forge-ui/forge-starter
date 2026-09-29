@@ -1,5 +1,10 @@
 "use client";
 
+import { Modal } from "@/components/ui/modal";
+
+import { useSemanticPage } from "@/components/semantic-page";
+import { matchesAccount } from "@/lib/accounts/filter";
+
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -28,11 +33,12 @@ import { useAccountsStore } from "@/components/accounts-store";
 import { PageTitleActions } from "@/components/ask-ai-entry";
 import { AccountFormDialog } from "@/components/account-form-dialog";
 import {
-  AGENT_FILL_EVENT,
   abandonAgentContinuation,
-  consumeAgentFormFill,
+  AGENT_PAGE_CANCEL_EVENT,
   notifyAgentPageDone,
-  peekAgentFormFill,
+  readContinuation,
+  requestAgentOperationCancellation,
+  type AgentPageCancellation,
 } from "@/lib/agent/fill";
 import type { AgentFormFill } from "@/lib/agent/types";
 import {
@@ -75,12 +81,32 @@ function AccountsPageContent() {
   const [formOpen, setFormOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [formDraft, setFormDraft] = useState<Record<string, string> | null>(null);
+  const [agentFill, setAgentFill] = useState<AgentFormFill | null>(null);
   const [agentMode, setAgentMode] = useState<AgentFormFill["mode"] | null>(null);
 
   const dropAgentChain = useCallback(() => {
+    if (agentFill?.operationId) {
+      if (readContinuation()?.operationId === agentFill.operationId) abandonAgentContinuation(agentFill.operationId);
+      else void requestAgentOperationCancellation(agentFill.operationId);
+    }
+    setAgentFill(null);
     setAgentMode(null);
-    abandonAgentContinuation();
-  }, []);
+  }, [agentFill]);
+
+  useEffect(() => {
+    function onAgentCancelled(event: Event) {
+      const target = (event as CustomEvent<AgentPageCancellation>).detail;
+      if (!target?.sessionId || !target.operationId || target.operationId !== agentFill?.operationId) return;
+      setAgentFill(null);
+      setAgentMode(null);
+      setFormOpen(false);
+      setEditId(null);
+      setFormDraft(null);
+      setDeleteTarget(null);
+    }
+    window.addEventListener(AGENT_PAGE_CANCEL_EVENT, onAgentCancelled);
+    return () => window.removeEventListener(AGENT_PAGE_CANCEL_EVENT, onAgentCancelled);
+  }, [agentFill?.operationId]);
 
   function openCreate() {
     dropAgentChain();
@@ -97,40 +123,31 @@ function AccountsPageContent() {
   }, [dropAgentChain]);
 
   function closeForm() {
-    if (agentMode === "create" || agentMode === "edit") abandonAgentContinuation();
+    if ((agentMode === "create" || agentMode === "edit") && agentFill?.operationId) abandonAgentContinuation(agentFill.operationId);
     setAgentMode(null);
+    setAgentFill(null);
     setFormOpen(false);
     setEditId(null);
     setFormDraft(null);
   }
 
-  useEffect(() => {
-    function applyFill(fill: AgentFormFill) {
-      if (fill.mode === "delete") {
-        const row = accounts.find((item) => item.id === fill.recordId);
-        if (!row) return false;
-        setAgentMode("delete");
-        setDeleteTarget(row);
-        setFormOpen(false);
-        return true;
-      }
-      setAgentMode(fill.mode);
-      setEditId(fill.mode === "edit" ? fill.recordId ?? null : null);
-      setFormDraft(fill.fields);
-      setFormOpen(true);
-      return true;
-    }
-
-    function takeFill() {
-      const fill = peekAgentFormFill("accounts");
-      if (!fill) return;
-      if (applyFill(fill)) consumeAgentFormFill("accounts");
-    }
-
-    takeFill();
-    window.addEventListener(AGENT_FILL_EVENT, takeFill);
-    return () => window.removeEventListener(AGENT_FILL_EVENT, takeFill);
-  }, [accounts]);
+  useSemanticPage({ pageId: "accounts.list", query: { query: search || undefined, status: filterValues[activeFilterIndex] === "all" ? undefined : filterValues[activeFilterIndex] as AccountStatus, role: (searchParams.get("role") || undefined) as "运营" | undefined },
+    ...(formOpen || deleteTarget ? { form: { mode: deleteTarget ? "delete" as const : editId ? "edit" as const : "create" as const, entityId: deleteTarget?.id ?? editId ?? undefined, dirty: true } } : {}),
+  }, "accounts", (fill) => {
+    if (loading) return false;
+    if (error) throw new Error(error);
+    if (fill.mode === "filter") { updateFilters({ q: fill.fields.query ?? "", status: fill.fields.status ?? "", role: fill.fields.role ?? "", page: "" }); return true; }
+    if (formOpen || deleteTarget) throw new Error("请先保存或关闭当前表单");
+    if (!["create", "edit", "delete"].includes(fill.mode)) throw new Error("不支持的账号页面操作");
+    const row = accounts.find((item) => item.id === fill.recordId);
+    if (fill.mode !== "create" && !row) throw new Error("账号不存在或已删除");
+    if (row && fill.expectedRevision !== undefined && row.revision !== fill.expectedRevision) throw new Error("账号已变化，请刷新后重新操作");
+    setAgentFill(fill);
+    setAgentMode(fill.mode);
+    if (fill.mode === "delete") { setDeleteTarget(row!); setFormOpen(false); }
+    else { setEditId(fill.mode === "edit" ? fill.recordId! : null); setFormDraft(fill.fields); setFormOpen(true); }
+    return true;
+  });
 
   useEffect(() => {
     const create = searchParams.get("create") === "1";
@@ -152,20 +169,8 @@ function AccountsPageContent() {
 
   const filtered = useMemo(() => {
     const statusKey = filterValues[activeFilterIndex];
-    const q = search.trim().toLowerCase();
-    return accounts.filter((a) => {
-      if (statusKey !== "all" && a.status !== statusKey) return false;
-      if (!q) return true;
-      return (
-        a.name.toLowerCase().includes(q)
-        || a.username.toLowerCase().includes(q)
-        || a.email.toLowerCase().includes(q)
-        || a.phone.replace(/\s/g, "").includes(q.replace(/\s/g, ""))
-        || a.department.toLowerCase().includes(q)
-        || a.role.toLowerCase().includes(q)
-      );
-    });
-  }, [accounts, activeFilterIndex, search]);
+    return accounts.filter((a) => matchesAccount(a, { query: search, status: statusKey === "all" ? undefined : statusKey, role: (searchParams.get("role") || undefined) as "运营" | undefined }));
+  }, [accounts, activeFilterIndex, search, searchParams]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
 
@@ -279,13 +284,21 @@ function AccountsPageContent() {
         onClose={closeForm}
         accountId={editId}
         draft={formDraft}
-        onSaved={() => {
-          if (agentMode === "create" || agentMode === "edit") notifyAgentPageDone(agentMode);
+        operationId={agentFill?.operationId}
+        expectedRevision={agentFill?.expectedRevision}
+        onSaved={(receipt) => {
+          if (agentMode === "create" || agentMode === "edit") notifyAgentPageDone(agentMode, receipt);
         }}
       />
 
-      {deleteTarget ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+      <Modal open={deleteTarget != null} onClose={() => {
+              if (deleting) return;
+              if (agentMode === "delete" && agentFill?.operationId) abandonAgentContinuation(agentFill.operationId);
+              setAgentMode(null);
+              setAgentFill(null);
+              setDeleteTarget(null);
+            }}>
+        {deleteTarget ? (
           <ConfirmationDialog
             title="删除账号？"
             description={`确定删除「${deleteTarget.name}」？此操作将从数据库移除，不可撤销。`}
@@ -295,19 +308,21 @@ function AccountsPageContent() {
             cancelLabel="取消"
             onCancel={() => {
               if (deleting) return;
-              if (agentMode === "delete") abandonAgentContinuation();
+              if (agentMode === "delete" && agentFill?.operationId) abandonAgentContinuation(agentFill.operationId);
               setAgentMode(null);
+              setAgentFill(null);
               setDeleteTarget(null);
             }}
             onConfirm={() => {
               if (deleting) return;
               setDeleting(true);
               const fromAgent = agentMode === "delete";
-              void deleteAccount(deleteTarget.id)
-                .then(() => {
+              void deleteAccount(deleteTarget.id, { revision: deleteTarget.revision, operationId: agentFill?.operationId, key: agentFill?.operationId ?? deleteTarget.id })
+                .then((receipt) => {
                   toast.success("账号已删除");
-                  if (fromAgent) notifyAgentPageDone("delete");
+                  if (fromAgent) notifyAgentPageDone("delete", receipt);
                   setAgentMode(null);
+                  setAgentFill(null);
                   setDeleteTarget(null);
                 })
                 .catch((err: unknown) => {
@@ -316,9 +331,8 @@ function AccountsPageContent() {
                 .finally(() => setDeleting(false));
             }}
           />
-
-        </div>
-      ) : null}
+        ) : null}
+      </Modal>
 
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
@@ -373,7 +387,7 @@ function AccountsPageContent() {
       {error ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-[28px] border border-dashed border-fg-grey-200 bg-white py-16">
           <p className="text-lg font-semibold text-fg-black">无法加载账号</p>
-          <p className="max-w-md text-center text-sm text-fg-grey-500">{error}</p>
+          <p className="max-w-md text-center text-sm text-fg-grey-700">{error}</p>
           <Button color={siteConfig.accent} onClick={() => void refresh()}>
             重试
           </Button>
