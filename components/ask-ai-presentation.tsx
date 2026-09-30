@@ -23,7 +23,9 @@ export function AskAiPresentation({ block, disabled, onAsk, storageKey }: {
       confidence="review" confidenceLabel="建议，待核对" acceptLabel="按此建议继续"
       alternatives={data.alternatives.map(item => ({ id: item.id, label: item.label }))}
       onAccept={() => ask(data.question)} onSelectAlternative={id => { const item = data.alternatives.find(item => item.id === id); if (item) ask(item.question); }} />);
-    case "insights": return interactive(<InsightCards cards={data.cards} onAsk={prompt => ask(prompt)} />);
+    case "insights": return <InsightCards
+      cards={data.cards.map(card => ({ ...card, prompt: disabled ? undefined : card.prompt }))}
+      onAsk={prompt => ask(prompt)} />;
     case "commands": return interactive(<CommandSearch items={data.items} placeholder={data.title} emptyLabel="没有匹配的建议"
       onSelect={item => { const selected = data.items.find(option => option.id === item.id); if (selected) ask(selected.question); }} />);
     case "context": return <ContextCards chunks={data.chunks} total={data.chunks.length} />;
@@ -33,7 +35,7 @@ export function AskAiPresentation({ block, disabled, onAsk, storageKey }: {
       <ToolChips items={[]} diffs={[{ file: data.title, add: data.rows.filter(row => row.change === "add").length, del: data.rows.filter(row => row.change === "remove").length }]} summary="待核对差异，尚未应用" />
       {interactive(<AgentDiffTable title={data.title} columns={data.columns} rows={data.rows}
         applyLabel="提交所选差异供核对" appliedLabel="已提交核对"
-        onApply={ids => ask(`请核对以下差异建议，若涉及修改请先生成确认单，不要直接保存：${JSON.stringify({ title: data.title, rows: data.rows.filter(row => ids.includes(row.id)) })}`)} />)}
+        onApply={ids => ask(`请核对以下差异建议，若涉及修改请先生成确认单，不要直接保存：${JSON.stringify({ title: data.title, columns: data.columns, rows: data.rows.filter(row => ids.includes(row.id)) })}`)} />)}
     </div>;
   }
 }

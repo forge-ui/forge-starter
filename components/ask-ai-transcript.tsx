@@ -3,7 +3,7 @@
 import { AskAiPresentation } from "./ask-ai-presentation";
 import { isPresentationBlock } from "@/lib/agent/presentation";
 import { AskAiForm, type ConfirmFormIntent } from "./ask-ai-form";
-import { AskAiHarness, type ReplyToHarness } from "./ask-ai-harness";
+import { AskAiHarness, AskAiTaskProgress, type ReplyToHarness } from "./ask-ai-harness";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -30,7 +30,16 @@ import {
   type AskAiDemoId,
 } from "@/lib/ask-ai-demos";
 import type { AskAiAccountSnapshot } from "@/lib/ask-ai-demos";
-import { askAiLandingCopy, askAiStatusLabel, type AskAiRuntimeStatus, type AskAiTurn } from "@/lib/ask-ai";
+import {
+  askAiDeliveryPlaying,
+  askAiDeliverySettled,
+  askAiLandingCopy,
+  askAiStatusLabel,
+  bindAskAiAnswer,
+  type AskAiRuntimeStatus,
+  type AskAiTextDelivery,
+  type AskAiTurn,
+} from "@/lib/ask-ai";
 import { toast } from "@/lib/toast";
 
 function suggestionDemos(id?: AskAiDemoId): AskAiDemo[] {
@@ -46,6 +55,7 @@ export function AskAiTranscript({
   onAsk,
   onConfirm,
   onReply,
+  onPresented,
   busy = false,
 }: {
   turns: AskAiTurn[];
@@ -56,6 +66,7 @@ export function AskAiTranscript({
   onAsk: (text: string) => void;
   onConfirm: ConfirmFormIntent;
   onReply?: ReplyToHarness;
+  onPresented?: (turnId: string) => void;
   busy?: boolean;
 }) {
   const suggestions = suggestionDemos();
@@ -70,7 +81,7 @@ export function AskAiTranscript({
           <span className="text-xs text-fg-grey-700">
             Ask AI
           </span>
-          <StreamingAnswer text={askAiLandingCopy(runtime ?? null)} />
+          <StreamingAnswer {...bindAskAiAnswer(askAiLandingCopy(runtime ?? null))} />
           <SuggestionPrompts items={suggestions} onAsk={onAsk} />
         </div>
       ) : (
@@ -85,6 +96,7 @@ export function AskAiTranscript({
             onAsk={onAsk}
             onConfirm={onConfirm}
             onReply={onReply}
+            onPresented={onPresented}
             busy={busy}
           />
         ))
@@ -102,6 +114,7 @@ function AskAiTurnView({
   onAsk,
   onConfirm,
   onReply,
+  onPresented,
   busy,
 }: {
   turn: AskAiTurn;
@@ -112,6 +125,7 @@ function AskAiTurnView({
   onAsk: (text: string) => void;
   onConfirm: ConfirmFormIntent;
   onReply?: ReplyToHarness;
+  onPresented?: (turnId: string) => void;
   busy: boolean;
 }) {
   const router = useRouter();
@@ -126,13 +140,17 @@ function AskAiTurnView({
     runtime,
     error: result.text,
   }) : null;
-  const followUpsDisabled = !latest || busy || Boolean(turn.pending) || confirmingIntent !== null;
-  const body = turn.pending
-    ? "正在处理…"
-    : result?.text || ASK_AI_FALLBACK_SUMMARY;
+  const delivery = turn.delivery ?? { mode: "static" as const };
+  const playing = askAiDeliveryPlaying(turn.delivery);
+  const chromeReady = askAiDeliverySettled(turn.delivery);
+  const followUpsDisabled = !latest || busy || Boolean(turn.pending) || playing || confirmingIntent !== null;
+  const choicePrompt = result?.blocks?.some((block) => block.type === "choice" && block.title === "选择目标")
+    ? "请选择目标，也可以输入序号、名称或 ID。未显示的记录可直接按名称或 ID 查找。"
+    : null;
+  const answer = assistantAnswer(turn, choicePrompt);
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5" data-ask-ai-turn={turn.id} data-ask-ai-delivery={answer.kind === "answer" ? answer.delivery.mode : "prompt"} data-ask-ai-chrome={chromeReady ? "ready" : "waiting"}>
       <div className="flex flex-col items-end gap-1.5">
         <span className="text-xs text-fg-grey-700">你</span>
         <p className="max-w-full rounded-2xl bg-fg-grey-100 px-4 py-3 text-sm leading-6 text-fg-black [overflow-wrap:anywhere]">
@@ -140,7 +158,16 @@ function AskAiTurnView({
         </p>
       </div>
       <span className="text-xs text-fg-grey-700">Ask AI{source ? ` · ${source}` : ""}</span>
-      {body && !(latest && result?.harness?.pending?.kind === "question") ? <StreamingAnswer text={result?.blocks?.some(block => block.type === "choice" && block.title === "选择目标") ? "请选择目标，也可以输入序号、名称或 ID。未显示的记录可直接按名称或 ID 查找。" : body} /> : null}
+      {answer.text && !(latest && result?.harness?.pending?.kind === "question") ? (
+        answer.kind === "prompt" ? (
+          <p className="text-[15px] leading-7 text-fg-black">{answer.text}</p>
+        ) : (
+          <AskAiAnswerText turnId={turn.id} text={answer.text} delivery={answer.delivery} onPresented={onPresented} />
+        )
+      ) : null}
+      {latest && delivery.mode === "stopped" && answer.kind === "answer" ? (
+        <p className="text-xs text-fg-grey-700">已停止</p>
+      ) : null}
       {result?.links?.length ? <div className="flex flex-wrap gap-2">{result.links.map(link => <Button key={link.href} variant="secondary" color={siteConfig.accent} onClick={() => router.push(link.href)}>{link.label}</Button>)}</div> : null}
       {result?.blocks?.filter(block => block.type !== "choice" && !(latest && result.harness?.pending?.kind === "question" && block.type === "table")).map((block, index) => (
         !latest && (block.type === "form" || block.type === "confirm") ? <p key={`closed-${index}`} className="text-sm text-fg-grey-700">此轮操作已结束，请按最新请求继续。</p> :
@@ -157,12 +184,14 @@ function AskAiTurnView({
           onCancel={latest && result?.harness?.pending && onReply ? () => onReply(result.harness!, { interactionId: result.harness!.pending!.id, cancel: true }) : undefined}
         />
       ))}
-      {latest && result?.harness && onReply ? <AskAiHarness key={result.harness.pending?.id ?? `${result.harness.id}-${result.harness.revision}`} state={result.harness} disabled={busy || turn.pending || confirmingIntent !== null} onReply={onReply} /> : null}
+      {chromeReady && latest && result?.harness ? <AskAiTaskProgress key={result.harness.id} state={result.harness} /> : null}
+      {latest && result?.harness && onReply && (chromeReady || result.harness.pending) ? <AskAiHarness key={result.harness.pending?.id ?? `${result.harness.id}-${result.harness.revision}`} state={result.harness} disabled={busy || turn.pending || playing || confirmingIntent !== null} onReply={onReply} /> : null}
       {latest && demo?.id === "page" ? <PageExtras onAsk={onAsk} /> : null}
       {latest && demo?.id === "next" ? <NextExtras onAsk={onAsk} snapshot={result?.snapshot} /> : null}
       {latest && demo?.id === "status" ? <StatusExtras onAsk={onAsk} snapshot={result?.snapshot} /> : null}
       {latest && demo?.id === "rbac" ? <RbacExtras /> : null}
-      {result?.blocks?.filter(block => block.type === "choice").map((block, index) => {
+      {chromeReady ? result?.blocks?.filter(block => block.type === "choice" && (latest || block.title !== "接下来可以")).map((block, index) => {
+        if (block.type !== "choice") return null;
         const options = [...new Map(block.options.map(option => [option.question, option])).values()];
         if (!options.length) return null;
         return (
@@ -180,8 +209,47 @@ function AskAiTurnView({
             />
           </fieldset>
         );
-      })}
+      }) : null}
     </div>
+  );
+}
+
+function assistantAnswer(turn: AskAiTurn, choicePrompt: string | null): {
+  text: string;
+  delivery: AskAiTextDelivery;
+  kind: "prompt" | "answer";
+} {
+  if (turn.pending) return { text: "正在处理…", delivery: { mode: "static" }, kind: "prompt" };
+  if (choicePrompt) return { text: choicePrompt, delivery: { mode: "static" }, kind: "prompt" };
+  const received = turn.result?.text ?? "";
+  if (turn.delivery?.mode === "stopped" && !received.trim()) {
+    return { text: "已停止", delivery: { mode: "static" }, kind: "prompt" };
+  }
+  return {
+    text: received || ASK_AI_FALLBACK_SUMMARY,
+    delivery: turn.delivery ?? { mode: "static" },
+    kind: "answer",
+  };
+}
+
+function AskAiAnswerText({
+  turnId,
+  text,
+  delivery,
+  onPresented,
+}: {
+  turnId: string;
+  text: string;
+  delivery: AskAiTextDelivery;
+  onPresented?: (turnId: string) => void;
+}) {
+  const notify = delivery.mode === "replay" || (delivery.mode === "incremental" && delivery.status === "complete");
+  return (
+    <StreamingAnswer
+      key={turnId}
+      {...bindAskAiAnswer(text, delivery)}
+      onDone={notify && onPresented ? () => onPresented(turnId) : undefined}
+    />
   );
 }
 
@@ -208,7 +276,7 @@ function AgentBlockView({
 }) {
   if (isPresentationBlock(block)) return <AskAiPresentation block={block} storageKey={draftKey} disabled={disabled} onAsk={onAsk} />;
   if (block.type === "choice") return null;
-  if (block.type === "form") return <AskAiForm block={block} draftKey={draftKey} question={question} onConfirm={onConfirm} onCancel={onCancel} />;
+  if (block.type === "form") return <AskAiForm block={block} draftKey={draftKey} question={question} disabled={disabled} onConfirm={onConfirm} onCancel={onCancel} />;
   if (block.type === "table") {
     return (
       <DataTable<Record<string, string>>
@@ -235,8 +303,8 @@ function AgentBlockView({
         <div>
           <Button
             color={siteConfig.accent}
-            disabled={spent || confirming}
-            onClick={() => onConfirm(block.intent)}
+            disabled={disabled || spent || confirming}
+            onClick={() => { if (!disabled && !spent && !confirming) void onConfirm(block.intent); }}
           >
             {spent ? "已填入" : confirming ? "正在打开页面…" : block.actionLabel || "填入页面表单"}
           </Button>

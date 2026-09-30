@@ -41,12 +41,15 @@ import {
   fetchAskAiRuns,
   filterAskAiSessions,
   pickAskAiModelId,
+  askAiReplayDelivery,
+  isCurrentAskAiRequest,
   sendAskAi,
   titleAskAiSession,
   writeStoredAskAiModelId,
   AskAiRequestError,
   type AskAiClientResult,
   type AskAiRuntimeStatus,
+  type AskAiTextDelivery,
   type AskAiTurn,
   type AskAiHarnessRef,
   type AskAiHarnessReply,
@@ -65,6 +68,8 @@ import {
   type AgentContinuation,
 } from "@/lib/agent/fill";
 import { toast } from "@/lib/toast";
+import { watchAskAiProgress } from "@/lib/ask-ai-progress-client";
+import { askAiDeliveryPlaying } from "@/lib/ask-ai-playback";
 
 function historyFromTurns(turns: AskAiTurn[]) {
   const messages: Array<{ role: "user" | "assistant"; content: string }> = [];
@@ -133,6 +138,9 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
   const [busy, setBusy] = useState(false);
   const [continuations, setContinuations] = useState<AgentContinuation[]>([]);
   const runRefs = useRef<Record<string, AskAiHarnessState>>({});
+  const activeRequest = useRef<{ turnId: string; sessionId: string; controller: AbortController } | null>(null);
+  const presentedTurnIds = useRef(new Set<string>());
+  const markTurnStoppedRef = useRef<(sessionId: string, turnId: string) => void>(() => {});
   const [restoring, setRestoring] = useState(true);
   const [restoreError, setRestoreError] = useState("");
   const restoreReady = useRef(false);
@@ -141,6 +149,11 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
   modelIdRef.current = modelId;
   turnsRef.current = turnsBySession;
   sessionsRef.current = sessions;
+
+  useEffect(() => () => {
+    activeRequest.current?.controller.abort();
+    activeRequest.current = null;
+  }, []);
 
   const applyRuntime = useCallback((next: AskAiRuntimeStatus) => {
     setRuntime(next);
@@ -258,12 +271,23 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     const history = historyFromTurns(turnsRef.current[sessionId] ?? []);
     const id = turnId();
     if (!continuation && !interaction) setDraft("");
+    const controller = new AbortController();
+    const abortRequest = () => controller.abort();
+    if (request.signal.aborted) controller.abort();
+    else request.signal.addEventListener("abort", abortRequest, { once: true });
+    const ticket = { turnId: id, sessionId, controller };
+    activeRequest.current = ticket;
     const displayQuestion = interaction
       ? interaction.reply.cancel ? "取消本次任务" : interaction.reply.text || (interaction.reply.optionIds ? run?.pending?.options.filter(option => interaction.reply.optionIds!.includes(option.id)).map(option => option.label).join("、") : "") || run?.pending?.options.find(option => option.id === interaction.reply.optionId)?.label || "已选择目标"
       : continuation ? "已保存，请继续原请求中的核对或导出" : message;
     setTurnsBySession((prev) => ({
       ...prev,
-      [sessionId]: [...(prev[sessionId] ?? []), { id, question: displayQuestion, pending: true, result: null }],
+      [sessionId]: [...(prev[sessionId] ?? []), {
+        id,
+        question: displayQuestion,
+        pending: true,
+        result: null,
+      }],
     }));
     setSessions((prev) =>
       prev.map((item) =>
@@ -273,12 +297,40 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
       ),
     );
     void fetchAskAiRuntime(pathname).then(next => { if (committedPath.current === pathname) applyRuntime(next); });
+    const stillCurrent = () => isCurrentAskAiRequest(activeRequest.current, ticket);
+    const stopProgress = watchAskAiProgress({
+      runId: run?.id ?? id,
+      requestId: id,
+      signal: controller.signal,
+      isCurrent: stillCurrent,
+      onProgress: (progress) => {
+        if (!stillCurrent()) return;
+        setTurnsBySession((prev) => {
+          if (!stillCurrent()) return prev;
+          const turns = prev[ticket.sessionId];
+          const turn = turns?.find(item => item.id === id);
+          if (!turn?.pending || turn.result || (turn.progress?.revision ?? -1) >= progress.revision) return prev;
+          return { ...prev, [ticket.sessionId]: turns.map(item => item.id === id ? { ...item, progress } : item) };
+        });
+      },
+    });
+    const abandon = (): AskAiClientResult => {
+      if (controller.signal.aborted && activeRequest.current?.controller === controller) {
+        markTurnStoppedRef.current(ticket.sessionId, ticket.turnId);
+      }
+      return { text: "已停止", live: false };
+    };
     const finish = (result: AskAiClientResult) => {
+      stopProgress();
+      if (!stillCurrent()) return result;
       sessionId = rememberRun(sessionId, result.harness);
+      ticket.sessionId = sessionId;
+      if (!stillCurrent()) return result;
+      const delivery = askAiReplayDelivery(result);
       setTurnsBySession((prev) => ({
         ...prev,
         [sessionId]: (prev[sessionId] ?? []).map((turn) =>
-          turn.id === id ? { ...turn, pending: false, result } : turn,
+          turn.id === id ? { ...turn, pending: false, result, delivery, progress: undefined } : turn,
         ),
       }));
       return result;
@@ -286,7 +338,7 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     try {
       const result = await sendAskAi(
         message,
-        request,
+        { ...request, signal: controller.signal },
         continuation?.modelId ?? modelIdRef.current,
         history,
         `${shell.title} / ${pathname}`,
@@ -294,6 +346,8 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
         continuation?.operationId,
         { requestId: id, runId: run?.id, expectedRevision: run?.revision, reply: interaction?.reply },
       );
+      stopProgress();
+      if (!stillCurrent()) return abandon();
       if (pageToRetire && result.harness?.id === run?.id && result.harness.revision > run.revision
         && result.harness.pending?.id !== run.pending?.id) {
         cancelAgentPageOperation(pageToRetire);
@@ -301,17 +355,21 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
         toast.info(interaction?.reply.cancel ? "已取消本次页面操作" : "上一项页面操作已取消");
       }
       sessionId = rememberRun(sessionId, result.harness);
+      ticket.sessionId = sessionId;
       if (result.live && result.model) {
         setRuntime((prev) => (prev ? { ...prev, configured: true, model: result.model } : prev));
       }
+      if (!stillCurrent()) return abandon();
       if (result.navigation) {
         result.text = await executeAgentNavigation(result.navigation, {
           push: (href) => router.push(href, { scroll: false }),
           getPath: () => committedPath.current,
-          signal: request.signal,
+          signal: controller.signal,
         });
+        if (!stillCurrent()) return abandon();
         toast.success(result.text);
       }
+      if (!stillCurrent()) return abandon();
       if (result.fill) {
         if (["create", "edit", "delete"].includes(result.fill.mode)) {
           queueAgentContinuation({ sessionId, question: message, mode: result.fill.mode, operationId: result.fill.operationId, modelId: modelIdRef.current });
@@ -322,11 +380,14 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
         const here = committedPath.current.endsWith("/") ? committedPath.current : `${committedPath.current}/`;
         if (here !== target) router.push(target, { scroll: false });
         await accepted;
+        if (!stillCurrent()) return abandon();
         result.text = ["open", "filter"].includes(result.fill.mode) ? "页面已更新" : "已带入页面，请核对后确认";
         toast.success(result.text);
       }
       return finish(result);
     } catch (error) {
+      stopProgress();
+      if (!stillCurrent()) return abandon();
       const text = error instanceof Error ? error.message : "提问失败";
       const failed: AskAiClientResult = {
         text,
@@ -342,10 +403,84 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
       }
       return failed;
     } finally {
-      busyRef.current = false;
-      setBusy(false);
+      stopProgress();
+      request.signal.removeEventListener("abort", abortRequest);
+      if (activeRequest.current?.controller === controller) {
+        activeRequest.current = null;
+        busyRef.current = false;
+        setBusy(false);
+      }
     }
   }, [applyRuntime, pathname, rememberRun, restoreSessions, router, runtime?.model, shell.title]);
+
+  const markTurnStopped = useCallback((sessionId: string, turnId: string) => {
+    setTurnsBySession((prev) => {
+      const turns = prev[sessionId];
+      if (!turns?.some((turn) => turn.id === turnId)) return prev;
+      return {
+        ...prev,
+        [sessionId]: turns.map((turn) => {
+          if (turn.id !== turnId || turn.delivery?.mode === "stopped" || turn.delivery?.mode === "static") return turn;
+          const delivery: AskAiTextDelivery = { mode: "stopped" };
+          return { ...turn, pending: false, delivery, progress: undefined };
+        }),
+      };
+    });
+  }, []);
+  markTurnStoppedRef.current = markTurnStopped;
+
+  const stopResponse = useCallback(() => {
+    const request = activeRequest.current;
+    if (request) {
+      request.controller.abort();
+      markTurnStopped(request.sessionId, request.turnId);
+      activeRequest.current = null;
+      busyRef.current = false;
+      setBusy(false);
+      setConfirmingIntent(null);
+    }
+    for (const turn of turnsRef.current[currentSessionIdRef.current] ?? []) {
+      if (askAiDeliveryPlaying(turn.delivery)) {
+        markTurnStopped(currentSessionIdRef.current, turn.id);
+      }
+    }
+  }, [markTurnStopped]);
+
+  const onPresented = useCallback((turnId: string) => {
+    if (presentedTurnIds.current.has(turnId)) return;
+    setTurnsBySession((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const [sessionId, turns] of Object.entries(prev)) {
+        if (!turns.some((turn) => turn.id === turnId)) continue;
+        next[sessionId] = turns.map((turn) => {
+          if (turn.id !== turnId) return turn;
+          const playing = turn.delivery?.mode === "replay"
+            || (turn.delivery?.mode === "incremental" && turn.delivery.status === "complete");
+          if (!playing) return turn;
+          changed = true;
+          presentedTurnIds.current.add(turnId);
+          return { ...turn, delivery: { mode: "static" } };
+        });
+      }
+      return changed ? next : prev;
+    });
+  }, []);
+
+  const settleSessionPlayback = useCallback((sessionId: string) => {
+    setTurnsBySession((prev) => {
+      const turns = prev[sessionId];
+      if (!turns?.some((turn) => turn.delivery?.mode === "replay" || turn.delivery?.mode === "incremental")) return prev;
+      return {
+        ...prev,
+        [sessionId]: turns.map((turn) =>
+          turn.delivery?.mode === "replay" || turn.delivery?.mode === "incremental"
+            ? { ...turn, delivery: { mode: "static" } }
+            : turn,
+        ),
+      };
+    });
+  }, []);
 
   const replyToHarness = useCallback((run: AskAiHarnessRef, reply: AskAiHarnessReply) => {
     void onSend("", { messages: [], signal: new AbortController().signal }, undefined, { run, reply });
@@ -378,6 +513,7 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     if (restoring || busy || busyRef.current || continuations.length === 0) return;
     const [next] = continuations;
     setContinuations((pending) => pending.slice(1));
+    if (currentSessionIdRef.current !== next.sessionId) settleSessionPlayback(currentSessionIdRef.current);
     currentSessionIdRef.current = next.sessionId;
     setCurrentSessionId(next.sessionId);
     setSessions((sessions) => sessions.some((s) => s.id === next.sessionId) ? sessions : [{ id: next.sessionId, title: "恢复的操作" }, ...sessions]);
@@ -387,7 +523,7 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
       { messages: [], signal: new AbortController().signal },
       next,
     );
-  }, [busy, continuations, onSend, restoring]);
+  }, [busy, continuations, onSend, restoring, settleSessionPlayback]);
 
   const confirmIntent = useCallback(async (intent: string, sourceQuestion?: string): Promise<boolean> => {
     if (busyRef.current || spentIntents.includes(intent)) { toast.info("请等待当前操作完成"); return false; }
@@ -396,6 +532,9 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     setConfirmingIntent(intent);
     const sessionId = currentSessionIdRef.current;
     const id = turnId();
+    const controller = new AbortController();
+    const ticket = { turnId: id, sessionId, controller };
+    activeRequest.current = ticket;
     setTurnsBySession((prev) => ({
       ...prev,
       [sessionId]: [
@@ -403,8 +542,9 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
         { id, question: "填入页面", pending: true, result: null },
       ],
     }));
-    return confirmAskAi(intent, currentPageContext())
+    return confirmAskAi(intent, currentPageContext(), controller.signal)
       .then(async (result) => {
+        if (!isCurrentAskAiRequest(activeRequest.current, ticket)) return false;
         result.harness ??= runRefs.current[sessionId];
         rememberRun(sessionId, result.harness);
         setSpentIntents((prev) => (prev.includes(intent) ? prev : [...prev, intent]));
@@ -430,6 +570,7 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
           const here = pathname.endsWith("/") ? pathname : `${pathname}/`;
           if (here !== target) router.push(target);
           await accepted;
+          if (!isCurrentAskAiRequest(activeRequest.current, ticket)) return false;
           result.text = result.fill.mode === "delete"
               ? "已打开页面上的删除确认"
               : ["open", "filter"].includes(result.fill.mode) ? "页面已更新" : "已填入页面表单，请检查后保存";
@@ -446,6 +587,7 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
         return true;
       })
       .catch((error: unknown) => {
+        if (!isCurrentAskAiRequest(activeRequest.current, ticket)) return false;
         const text = error instanceof Error ? error.message : "写入失败";
         if (text.includes("已使用")) {
           setSpentIntents((prev) => (prev.includes(intent) ? prev : [...prev, intent]));
@@ -461,6 +603,8 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
         return false;
       })
       .finally(() => {
+        if (activeRequest.current?.controller !== controller) return;
+        activeRequest.current = null;
         busyRef.current = false;
         setBusy(false);
         setConfirmingIntent(null);
@@ -474,6 +618,7 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
       setSearchQuery("");
       return;
     }
+    settleSessionPlayback(currentSessionIdRef.current);
     const existingEmpty = sessionsRef.current.find((item) => !hasInput(item.id));
     if (existingEmpty) {
       currentSessionIdRef.current = existingEmpty.id;
@@ -489,16 +634,18 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     setSearchQuery("");
     setDraft("");
     void fetchAskAiRuntime(pathname).then(next => { if (committedPath.current === pathname) applyRuntime(next); });
-  }, [applyRuntime, pathname]);
+  }, [applyRuntime, pathname, settleSessionPlayback]);
 
   const selectSession = useCallback((id: string) => {
+    if (id !== currentSessionIdRef.current) settleSessionPlayback(currentSessionIdRef.current);
     currentSessionIdRef.current = id;
     setCurrentSessionId(id);
     setSearchQuery("");
-  }, []);
+  }, [settleSessionPlayback]);
 
   const turns = turnsBySession[currentSessionId] ?? [];
   const hasChat = turns.length > 0;
+  const responseRunning = busy || turns.some(turn => askAiDeliveryPlaying(turn.delivery));
 
   const value = useMemo<AskAiProps>(
     () => ({
@@ -521,6 +668,7 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
             onAsk={askFromHost}
             onConfirm={confirmIntent}
             onReply={replyToHarness}
+            onPresented={onPresented}
             busy={busy}
           />
         </AskAiScrollArea>
@@ -540,6 +688,11 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
             value={draft}
             onChange={setDraft}
             onSend={askFromHost}
+            status={responseRunning ? "running" : "idle"}
+            onStop={stopResponse}
+            sendLabel="发送"
+            stopLabel="停止生成"
+            stoppingLabel="正在停止"
             disabled={busy || restoring}
             color={siteConfig.accent}
             placeholder={restoring ? "正在恢复会话…" : ASK_AI_PLACEHOLDER}
@@ -566,11 +719,14 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
       draft,
       hasChat,
       modelId,
+      onPresented,
       onSend,
       replyToHarness,
       restoreError,
       restoreSessions,
       restoring,
+      responseRunning,
+      stopResponse,
       pathname,
       runtime,
       searchQuery,

@@ -17,8 +17,8 @@ export function AskAiFormStateProvider({ children }: { children: ReactNode }) {
   const drafts = useRef(new Map<string, SavedDraft>());
   return <DraftContext.Provider value={drafts.current}>{children}</DraftContext.Provider>;
 }
-export function AskAiForm({ block, question, draftKey, onConfirm, onCancel }: {
-  block: AgentFormBlock; question: string; draftKey: string; onConfirm: ConfirmFormIntent; onCancel?: () => void;
+export function AskAiForm({ block, question, draftKey, disabled = false, onConfirm, onCancel }: {
+  block: AgentFormBlock; question: string; draftKey: string; disabled?: boolean; onConfirm: ConfirmFormIntent; onCancel?: () => void;
 }) {
   const drafts = useContext(DraftContext);
   const saved = drafts?.get(draftKey);
@@ -35,11 +35,12 @@ export function AskAiForm({ block, question, draftKey, onConfirm, onCancel }: {
   const request = useRef<AbortController | null>(null);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; request.current?.abort(); }; }, []);
   function change(key: string, value: string) {
+    if (disabled) return;
     setValues(prev => ({ ...prev, [key]: value }));
     setErrors(prev => ({ ...prev, [key]: "" }));
   }
   async function submit() {
-    if (locked.current || state !== "editing") return;
+    if (disabled || locked.current || state !== "editing") return;
     const parsed = accountCreateSchema.safeParse(values);
     if (!parsed.success) {
       setErrors(Object.fromEntries(parsed.error.issues.map(issue => {
@@ -73,7 +74,7 @@ export function AskAiForm({ block, question, draftKey, onConfirm, onCancel }: {
     <div className="flex flex-col gap-2">
       <p className="text-sm font-semibold text-fg-black">新建账号 · {values.username || "未填写用户名"}</p>
       <p role="status" className="text-sm text-fg-grey-700">{state === "done" ? "这份草稿已带入页面，后续结果见下方消息。" : "已取消这份草稿。"}</p>
-      {state === "cancelled" && !block.harness ? <div><Button color={siteConfig.accent} variant="tertiary" onClick={() => setState("editing")}>继续填写</Button></div> : null}
+      {state === "cancelled" && !block.harness ? <div><Button color={siteConfig.accent} variant="tertiary" disabled={disabled} onClick={() => { if (!disabled) setState("editing"); }}>继续填写</Button></div> : null}
     </div>
   );
 
@@ -85,15 +86,15 @@ export function AskAiForm({ block, question, draftKey, onConfirm, onCancel }: {
       </div>
       <Grid columns={2} gap={12}>
       {accountFormFields.map(field => <GridItem key={field.key} span={field.key === "status" ? "full" : 1}>{"options" in field ? (
-        <SelectOption className="w-full" key={field.key} color={siteConfig.accent} label={field.label} width="100%" options={[...field.options]} placeholder={`请选择${field.label}`} value={values[field.key]} state={errors[field.key] ? "error" : state === "submitting" ? "disabled" : undefined} errorMessage={errors[field.key]} onChange={value => change(field.key, value)} />
+        <SelectOption className="w-full" key={field.key} color={siteConfig.accent} label={field.label} width="100%" options={[...field.options]} placeholder={`请选择${field.label}`} value={values[field.key]} state={disabled || state === "submitting" ? "disabled" : errors[field.key] ? "error" : undefined} errorMessage={errors[field.key]} onChange={value => change(field.key, value)} />
       ) : (
-        <TextField key={field.key} color={siteConfig.accent} label={field.label} type={"type" in field ? field.type : "text"} placeholder={field.placeholder} value={values[field.key]} disabled={state === "submitting"} state={errors[field.key] ? "error" : undefined} errorMessage={errors[field.key]} onChange={value => change(field.key, value)} />
+        <TextField key={field.key} color={siteConfig.accent} label={field.label} type={"type" in field ? field.type : "text"} placeholder={field.placeholder} value={values[field.key]} disabled={disabled || state === "submitting"} state={errors[field.key] ? "error" : undefined} errorMessage={errors[field.key]} onChange={value => change(field.key, value)} />
       )}</GridItem>)}
       </Grid>
-      {notesOpen ? <TextArea color={siteConfig.accent} label="备注（选填）" rows={2} value={values.notes} onChange={value => change("notes", value)} disabled={state === "submitting"} /> : <div><Button color={siteConfig.accent} variant="tertiary" disabled={state === "submitting"} onClick={() => setNotesOpen(true)}>添加备注</Button></div>}
+      {notesOpen ? <TextArea color={siteConfig.accent} label="备注（选填）" rows={2} value={values.notes} onChange={value => change("notes", value)} disabled={disabled || state === "submitting"} /> : <div><Button color={siteConfig.accent} variant="tertiary" disabled={disabled || state === "submitting"} onClick={() => setNotesOpen(true)}>添加备注</Button></div>}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <Button color={siteConfig.accent} variant="tertiary" disabled={state === "submitting"} onClick={() => { if (onCancel) onCancel(); else setState("cancelled"); }}>取消</Button>
-        <Button color={siteConfig.accent} disabled={state === "submitting"} onClick={() => void submit()}>{state === "submitting" ? "正在带入…" : "确认并带入页面"}</Button>
+        <Button color={siteConfig.accent} variant="tertiary" disabled={disabled || state === "submitting"} onClick={() => { if (onCancel) onCancel(); else setState("cancelled"); }}>取消</Button>
+        <Button color={siteConfig.accent} disabled={disabled || state === "submitting"} onClick={() => void submit()}>{state === "submitting" ? "正在带入…" : "确认并带入页面"}</Button>
       </div>
     </form>
   );

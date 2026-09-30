@@ -116,6 +116,7 @@ import { PageTitleActions } from "@/components/ask-ai-entry";
 - 全屏 / 会话：走 Kit 抽屉顶栏全屏钮 + `sessions` / `currentSessionId` / `landingTitle`。core 不读 localStorage，不要另挂全视口层
 - 输入：Kit `PromptBar`（模型选择 + 发送）。模型列表来自模型管理里启用且有密钥的条目，发送带 `modelId`；没有可用模型时不画选择器，退本地规则。不要手搓底栏，也不要挂未实现的附件 / Sources / Commands / 语音。抽屉 460px，自定义 `composer` 核心不带 `p-4`，宿主必须自己垫 gutter + `min-w-0`，别把宽栏直接贴边
 - 回复：演示走 `AskAiTranscript` 四条中文问答（页面 / 下一步 / 状态 / 权限）。对照页 `/ref/agent` 只看组件，不要把英文 case 原文塞进抽屉
+- 终止（core ≥0.3.5）：`PromptBar status="running"` + `onStop`，覆盖等待响应和文字播放阶段；停止时取消当前请求及进度读取，并将回复 delivery 设为 stopped。
 - 发送：`lib/ask-ai.ts` 的 `sendAskAi` → `POST /api/ask-ai`。优先用所选/默认的库内模型，没有再用 `ASK_AI_LLM_*`，都没有走本地规则。不要另做一套抽屉，也不要把 key 放进前端
 
 ## 后台常用 import 清单

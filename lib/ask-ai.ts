@@ -7,7 +7,27 @@ import type { AskAiRequest, AskAiResponse, AskAiSessionItem } from "@forge-ui-of
 import type { AgentBlock, AgentFormFill } from "@/lib/agent/types";
 import { ASK_AI_FALLBACK_SUMMARY, type AskAiAccountSnapshot } from "@/lib/ask-ai-demos";
 import type { AskAiModelOption, AskAiRuntimePublic, AskAiRuntimeSource } from "@/lib/ask-ai-types";
+import type { AskAiTextDelivery } from "@/lib/ask-ai-playback";
+import { parseAskAiTasks, type AskAiTask } from "@/lib/ask-ai-progress";
 import type { Input, Interaction, RunStatus } from "@/lib/harness/types";
+
+export {
+  ASK_AI_ANSWER_MOTION,
+  askAiDeliveryPlaying,
+  askAiDeliverySettled,
+  askAiReplayDelivery,
+  bindAskAiAnswer,
+  completeAskAiText,
+  createAskAiTextBuffer,
+  isCurrentAskAiRequest,
+  receiveAskAiText,
+  settleAskAiDelivery,
+  stopAskAiText,
+  type AskAiAnswerBinding,
+  type AskAiAnswerStatus,
+  type AskAiTextBuffer,
+  type AskAiTextDelivery,
+} from "@/lib/ask-ai-playback";
 
 export {
   ASK_AI_DEMOS,
@@ -25,6 +45,7 @@ export type AskAiHarnessState = AskAiHarnessRef & {
   status: RunStatus;
   pending?: Interaction;
   events: Array<{ kind: string; label: string; at: string }>;
+  tasks?: AskAiTask[];
 };
 export type AskAiHarnessRequest = {
   requestId: string;
@@ -56,6 +77,10 @@ export type AskAiTurn = {
   question: string;
   pending: boolean;
   result: AskAiClientResult | null;
+  /** Absent on restored history, which must render statically. */
+  delivery?: AskAiTextDelivery;
+  /** In-flight checkpoint. The finished answer still comes from the POST result. */
+  progress?: AskAiHarnessState;
 };
 
 export const ASK_AI_PLACEHOLDER = "说出目标，例如：查找账号、分析权限或导出数据";
@@ -224,7 +249,7 @@ function historyPayload(history?: Array<{ role: "user" | "assistant"; content: s
     .filter((item) => item.content.length > 0);
 }
 
-function parseHarness(value: unknown): AskAiHarnessState | undefined {
+export function parseAskAiHarness(value: unknown): AskAiHarnessState | undefined {
   if (!value || typeof value !== "object") return;
   const state = value as Record<string, unknown>;
   if (typeof state.id !== "string" || !Number.isInteger(state.revision)
@@ -239,6 +264,7 @@ function parseHarness(value: unknown): AskAiHarnessState | undefined {
     revision: state.revision as number,
     status: state.status as RunStatus,
     pending: validPending ? pending : undefined,
+    tasks: parseAskAiTasks(state.tasks),
     events: Array.isArray(state.events) ? state.events.filter((event): event is AskAiHarnessState["events"][number] =>
       Boolean(event && typeof event === "object" && typeof event.kind === "string" && typeof event.label === "string" && typeof event.at === "string")) : [],
   };
@@ -256,7 +282,7 @@ function parseResult(payload: Record<string, unknown>): AskAiClientResult {
     snapshot: payload.snapshot as AskAiAccountSnapshot | undefined,
     blocks: Array.isArray(payload.blocks) ? payload.blocks.filter(isAgentBlock) : [],
     fill: isAgentFormFill(payload.fill) ? payload.fill : undefined,
-    harness: parseHarness(payload.harness),
+    harness: parseAskAiHarness(payload.harness),
   };
 }
 
@@ -270,7 +296,7 @@ export async function fetchAskAiRuns(): Promise<AskAiSavedRun[]> {
   return payload.runs.flatMap(value => {
     if (!value || typeof value !== "object") return [];
     const run = value as Record<string, unknown>;
-    const harness = parseHarness(run);
+    const harness = parseAskAiHarness(run);
     if (!harness || !Array.isArray(run.exchanges)) return [];
     const exchanges = run.exchanges as Array<{ id?: string; question?: string; output?: { text?: string; data?: Record<string, unknown> } }>;
     const turns = exchanges.filter(exchange => typeof exchange.id === "string" && typeof exchange.question === "string" && exchange.output).map((exchange, index, list): AskAiTurn => ({
@@ -281,7 +307,10 @@ export async function fetchAskAiRuns(): Promise<AskAiSavedRun[]> {
   });
 }
 
-/** 走 /api/ask-ai。`modelId` 对应模型管理里启用的条目；没传则用默认模型，再退 ASK_AI_LLM_*。 */
+/**
+ * 走 /api/ask-ai。`modelId` 对应模型管理里启用的条目；没传则用默认模型，再退 ASK_AI_LLM_*。
+ * 当前协议一次返回完整 JSON。新回答由页面用 `streaming` 渐显；增量通道应追加累计文本并传 `status`。
+ */
 export async function sendAskAi(
   question: string,
   request: AskAiRequest,
@@ -313,11 +342,12 @@ export async function sendAskAi(
   return parseResult(payload);
 }
 
-export async function confirmAskAi(intent: string, page?: PageContext): Promise<AskAiClientResult> {
+export async function confirmAskAi(intent: string, page?: PageContext, signal?: AbortSignal): Promise<AskAiClientResult> {
   const response = await fetch("/api/ask-ai/confirm/", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ intent, page }),
+    signal,
   });
   const payload = (await response.json().catch(() => null)) as
     | {
@@ -338,7 +368,7 @@ export async function confirmAskAi(intent: string, page?: PageContext): Promise<
     live: Boolean(payload.live),
     blocks: Array.isArray(payload.blocks) ? payload.blocks.filter(isAgentBlock) : [],
     fill: isAgentFormFill(payload.fill) ? payload.fill : undefined,
-    harness: parseHarness(payload.harness),
+    harness: parseAskAiHarness(payload.harness),
   };
 }
 

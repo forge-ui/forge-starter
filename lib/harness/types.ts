@@ -21,6 +21,15 @@ export type Interaction = {
 };
 export type Output = { text: string; data: JsonObject };
 export type RunStatus = "running" | "waiting-user" | "waiting-external" | "completed" | "cancelled" | "failed";
+/** Observed execution steps only. Waiting is not a successful business commit. */
+export type RunTask = {
+  id: string;
+  title: string;
+  status: RunStatus;
+  meta?: string;
+  /** Internal binding used when a choice or verified page receipt resumes a step. */
+  interactionId?: string;
+};
 export type Run = {
   version: typeof HARNESS_VERSION;
   id: string;
@@ -36,6 +45,8 @@ export type Run = {
   output: Output;
   exchanges: Array<{ id: string; question: string; output: Output }>;
   events: Array<{ kind: string; label: string; at: string }>;
+  /** Optional for tasks persisted before progress tracking was introduced. */
+  tasks?: RunTask[];
   lastRequestId: string;
   leaseUntil?: string;
   updatedAt: string;

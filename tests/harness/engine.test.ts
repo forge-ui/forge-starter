@@ -82,9 +82,16 @@ test("independent tickets adapter completes query, structured choice, proposal a
   assert.equal(waiting.status, "waiting-user");
   assert.deepEqual(waiting.pending?.options.map(option => option.id), tickets.map(row => row.id));
   assert.deepEqual(f.invoked.map(row => row.name), ["tickets.list"]);
+  assert.equal(waiting.tasks?.find(task => task.id === "request-1:tool:0:0")?.status, "completed");
+  const choiceTask = waiting.tasks?.find(task => task.interactionId === waiting.pending!.id);
+  assert.equal(choiceTask?.status, "waiting-user");
   const proposed = await advanceRun(follow(waiting, { reply: { interactionId: waiting.pending!.id, optionId: "ticket-b" } }), f.ports);
   assert.equal(proposed.status, "waiting-external");
   assert.equal(proposed.pending?.payload?.ticketId, "ticket-b");
+  assert.equal(proposed.tasks?.find(task => task.id === choiceTask!.id)?.status, "completed");
+  assert.equal(proposed.tasks?.find(task => task.id === "request-2:tool:0:0")?.status, "completed", "preparing the proposal is complete");
+  const saveTask = proposed.tasks?.find(task => task.interactionId === proposed.pending!.id);
+  assert.equal(saveTask?.status, "waiting-external", "business save remains pending until a verified receipt");
   const choiceResult = f.seen[2].find(message => message.role === "tool" && message.toolCallId === "choose-ticket");
   assert.deepEqual(JSON.parse(choiceResult!.content).choice, { id: "ticket-b", label: "导出超时" });
   const completed = await advanceRun(follow(proposed, { requestId: "request-3", receipt: { interactionId: proposed.pending!.id, summary: "数据库确认工单 ticket-b 已分派给成员甲", data: { receipt: { operationId: "operation-1", verified: true } } } }), f.ports);
@@ -92,6 +99,8 @@ test("independent tickets adapter completes query, structured choice, proposal a
   assert.equal(completed.pending, undefined);
   assert.equal(completed.exchanges.length, 3);
   assert.deepEqual(completed.output.data.receipt, { operationId: "operation-1", verified: true });
+  assert.equal(completed.tasks?.find(task => task.id === saveTask!.id)?.status, "completed");
+  assert.equal(completed.tasks?.find(task => task.id === saveTask!.id)?.meta, "已核实页面保存回执");
   assert.deepEqual(await f.store.load(completed.id, scope.ownerId, scope.applicationId), jsonValue(completed));
 });
 
@@ -101,6 +110,7 @@ test("a pending interaction prevents all later tool calls in that model response
   assert.equal(waiting.status, "waiting-user");
   assert.deepEqual(f.invoked, []);
   assert.ok(waiting.messages.some(message => message.role === "tool" && message.toolCallId === "must-not-run" && message.content.includes("尚未执行")));
+  assert.equal(waiting.tasks?.some(task => task.id === "request-1:tool:0:1"), false, "skipped calls must not appear as attempted execution");
 });
 
 test("existing runs reject another owner, app, build or changed capability permissions", async () => {
@@ -157,6 +167,8 @@ test("cancel retires outstanding proposals and removes pending state", async () 
   assert.deepEqual(cancelled.messages, []);
   assert.deepEqual(f.retired, [proposed]);
   assert.equal(f.seen.length, 1);
+  assert.equal(cancelled.tasks?.find(task => task.interactionId === proposed.pending!.id)?.status, "cancelled");
+  assert.equal(cancelled.tasks?.find(task => task.id === "request-1:tool:0:0")?.status, "completed", "cancelling a save does not undo the completed preparation");
 });
 
 test("a new goal retires pending interaction before continuing", async () => {
@@ -167,6 +179,7 @@ test("a new goal retires pending interaction before continuing", async () => {
   assert.equal(next.pending, undefined);
   assert.deepEqual(f.retired, [waiting]);
   assert.equal(f.seen[1].some(message => message.role === "assistant" && message.toolCalls?.length), false);
+  assert.ok(next.tasks?.every(task => task.id.startsWith("request-2:")), "a new goal must not reuse old execution steps");
 });
 
 test("unregistered tools and invalid JSON/schema return errors and permit correction", async () => {
@@ -182,6 +195,8 @@ test("unregistered tools and invalid JSON/schema return errors and permit correc
   assert.equal(failures.length, 3);
   assert.ok(failures.every(message => JSON.parse(message.content).error));
   assert.equal(completed.events.filter(event => event.kind === "tool-error").length, 3);
+  assert.equal(completed.tasks?.filter(task => task.status === "failed").length, 3, "correcting a tool error must preserve the failed attempt");
+  assert.equal(completed.tasks?.find(task => task.id === "request-1:tool:1:0")?.status, "completed");
 });
 
 test("model failure persists a safe message without provider credentials", async () => {
@@ -190,6 +205,7 @@ test("model failure persists a safe message without provider credentials", async
   const failed = await advanceRun(start(), f.ports);
   assert.equal(failed.status, "failed");
   assert.equal(failed.pending, undefined);
+  assert.equal(failed.tasks?.find(task => task.id === "request-1:model:0")?.status, "failed");
   assert.equal(JSON.stringify(failed).includes("sk-do-not-persist"), false);
   assert.equal(JSON.stringify(await f.store.load(failed.id, scope.ownerId, scope.applicationId)).includes("sk-do-not-persist"), false);
 });
@@ -205,6 +221,29 @@ test("deadline finishes even when a model adapter does not honor AbortSignal", a
   assert.notEqual(deadline, null, "harness must enforce its own execution deadline");
   assert.equal(deadline!.status, "failed");
   assert.equal(deadline!.leaseUntil, undefined);
+  assert.equal(deadline!.tasks?.find(task => task.id === "request-1:model:0")?.status, "failed");
+});
+
+test("in-flight progress is checkpointed and uses the same ID when execution finishes", async () => {
+  const f = fixture();
+  let release!: () => void;
+  let entered!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const started = new Promise<void>(resolve => { entered = resolve; });
+  f.ports.model.next = async () => {
+    entered();
+    await gate;
+    return { content: "已完成分析", toolCalls: [] };
+  };
+  const work = advanceRun(start(), f.ports);
+  await started;
+  const running = await f.store.load("request-1", scope.ownerId, scope.applicationId);
+  const active = running?.tasks?.find(task => task.id === "request-1:model:0");
+  assert.equal(running?.status, "running");
+  assert.equal(active?.status, "running");
+  release();
+  const done = await work;
+  assert.equal(done.tasks?.find(task => task.id === active!.id)?.status, "completed");
 });
 
 test("respond question persists a resumable interaction and consumes structured choice or text", async () => {

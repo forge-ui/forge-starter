@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createStarterPorts, answerWithHarness } from "../../lib/harness/starter";
+import { createStarterPorts, answerWithHarness, publicHarness, readStarterRunProgress } from "../../lib/harness/starter";
+import { postgresTaskStore } from "../../lib/harness/postgres-store";
 import { advanceRun } from "../../lib/harness/engine";
 import { HARNESS_VERSION, HarnessError, ToolInputError, jsonValue, type Run, type TaskStore, type Message } from "../../lib/harness/types";
 import { agentToolById } from "../../lib/agent/registry";
@@ -54,6 +55,54 @@ test("cancellation does not require a configured or reachable model", async () =
   const cancelled = await advanceRun({ ownerId, applicationId, buildId, runId: pending.id, expectedRevision: pending.revision, requestId: crypto.randomUUID(), question: "", reply: { interactionId: pending.pending!.id, cancel: true } }, ports);
   assert.equal(cancelled.status, "cancelled");
   assert.equal(resolved, false);
+});
+
+test("progress reads are scoped to owner, application, build and capabilities without exposing page effects", async () => {
+  const grant = access(["accounts"], ["accounts:read"]);
+  const ports = createStarterPorts({ userId: ownerId, access: grant, model: async () => { assert.fail("progress reads must not resolve a model"); } });
+  const stored = run({
+    capabilityNames: (await ports.capabilities.list()).map(capability => capability.name).sort(),
+    tasks: [{ id: "task-current", title: "查询账号", status: "running" }],
+    output: { text: "internal answer", data: { navigation: { href: "/must-not-replay" }, fill: { commandId: "must-not-apply" } } },
+  });
+  const originalLoad = postgresTaskStore.load;
+  postgresTaskStore.load = async (id, owner, app) => {
+    assert.equal(app, applicationId);
+    return id === stored.id && owner === stored.ownerId ? jsonValue(stored) : null;
+  };
+  try {
+    const value = await readStarterRunProgress(stored.id, ownerId, grant);
+    assert.equal(value.requestId, stored.lastRequestId);
+    assert.equal(value.harness.tasks[0].status, "running");
+    assert.equal(JSON.stringify(value).includes("must-not-"), false);
+    assert.deepEqual(Object.keys(value).sort(), ["harness", "requestId"]);
+    await assert.rejects(readStarterRunProgress(stored.id, "another-owner", grant), (error: unknown) => error instanceof HarnessError && error.status === 404);
+    await assert.rejects(readStarterRunProgress(stored.id, ownerId, access(["roles"], ["roles:read"])), (error: unknown) => error instanceof HarnessError && error.status === 403);
+    stored.buildId = "old-build";
+    await assert.rejects(readStarterRunProgress(stored.id, ownerId, grant), (error: unknown) => error instanceof HarnessError && error.status === 409);
+  } finally { postgresTaskStore.load = originalLoad; }
+});
+
+test("public progress retains recent tool calls through later errors while bounding events without mutation", () => {
+  const at = "2026-09-30T00:00:00.000Z";
+  const obsolete = Array.from({ length: 5 }, (_, index) => ({ kind: "message", label: `旧记录 ${index}`, at }));
+  const recent = [
+    { kind: "tool", label: "查询模型", at },
+    { kind: "tool", label: "查询角色", at },
+    { kind: "tool", label: "整理交互内容", at },
+    ...Array.from({ length: 25 }, (_, index) => ({ kind: index % 2 ? "message" : "tool-error", label: `后续处理 ${index}`, at })),
+    { kind: "verified", label: "已核实页面保存回执", at },
+    { kind: "completed", label: "本轮处理完成", at },
+  ];
+  const state = run({ status: "completed", events: [...obsolete, ...recent] });
+  const before = jsonValue(state);
+  const exposed = publicHarness(state);
+  assert.equal(exposed.events.length, 30);
+  assert.deepEqual(exposed.events, recent);
+  assert.deepEqual(exposed.events.filter(event => event.kind === "tool").map(event => event.label), ["查询模型", "查询角色", "整理交互内容"]);
+  assert.deepEqual(state, before, "reading public progress must not truncate or rewrite persisted events");
+  exposed.events.pop();
+  assert.deepEqual(state, before, "the returned event array must not alias the stored array");
 });
 
 test("Starter adapter grants tools and knowledge from current permissions across modules", async () => {

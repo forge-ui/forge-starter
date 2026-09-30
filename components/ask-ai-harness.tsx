@@ -1,17 +1,44 @@
 "use client";
 
-import { useId, useState } from "react";
-import { AgentTaskRows, ApprovalCard, Button, StatusBadge, TextField, ThinkingTrace, ToolChips } from "@forge-ui-official/core";
-import { AltArrowDownLinear } from "solar-icon-set";
+import { useState } from "react";
+import { AgentTaskRows, ApprovalCard, Button, DescriptionItem, StatusBadge, TextField, ToolChips } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
 import type { AskAiHarnessRef, AskAiHarnessReply, AskAiHarnessState } from "@/lib/ask-ai";
+import { askAiTaskStatus, isAgentTaskRow } from "@/lib/ask-ai-progress";
 
 export type ReplyToHarness = (run: AskAiHarnessRef, reply: AskAiHarnessReply) => void;
 
-const statusLabel = {
-  running: "处理中", "waiting-user": "等你选择", "waiting-external": "待页面确认",
-  completed: "已完成", cancelled: "已取消", failed: "处理失败",
-} as const;
+const TOOL_KINDS = new Set(["tool", "tool-error", "verified"]);
+/** Older runs stored a plain answer as a tool event with this label. */
+const PLAIN_ANSWER_LABEL = "整理回答或请求选择";
+
+/** Engine bookkeeping for every turn. Real queries and edits stay on ToolChips. */
+const PIPELINE_TASKS = new Set([
+  "检查可用能力与业务上下文",
+  "分析当前请求",
+  "分析工具结果与后续步骤",
+  "校验工具调用",
+  "整理回答",
+]);
+
+/** Every row comes from a server checkpoint, never from a model-written progress claim. */
+export function AskAiTaskProgress({ state }: { state: AskAiHarnessState }) {
+  const [expanded, setExpanded] = useState(false);
+  const tasks = (state.tasks ?? []).filter(task => !PIPELINE_TASKS.has(task.title));
+  if (!tasks.length) return null;
+  const visible = expanded ? tasks : tasks.slice(-6);
+  return (
+    <section className="flex min-w-0 flex-col gap-3" aria-label="任务进度">
+      {visible.filter(isAgentTaskRow).length ? <AgentTaskRows tasks={visible.filter(isAgentTaskRow)}
+        className="[&_p.truncate]:whitespace-normal [&_p.truncate]:break-words [&_p.text-fg-grey-500]:text-fg-grey-700" /> : null}
+      {visible.filter(task => !isAgentTaskRow(task)).map(task => (
+        <DescriptionItem key={task.id} label={task.title} content={<StatusBadge {...askAiTaskStatus(task.status)} />} />
+      ))}
+      {tasks.length > 6 ? <div><Button size="sm" variant="tertiary" color={siteConfig.accent}
+        onClick={() => setExpanded(value => !value)}>{expanded ? "收起早期步骤" : `查看全部 ${tasks.length} 个步骤`}</Button></div> : null}
+    </section>
+  );
+}
 
 /** Renders the shared protocol only; resource IDs and business forms stay in adapters. */
 export function AskAiHarness({ state, disabled, onReply }: {
@@ -21,47 +48,44 @@ export function AskAiHarness({ state, disabled, onReply }: {
 }) {
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
-  const [traceOpen, setTraceOpen] = useState(false);
-  const traceId = useId();
   const [approvalAttempt, setApprovalAttempt] = useState(0);
   const pending = state.pending;
   const waiting = state.status === "waiting-user" || state.status === "waiting-external";
+  const tools: Array<{ id: string; kind: "run" | "read"; label: string; chip: string }> = [];
+  let messageCount = 0;
+  let toolCallCount = 0;
+  let turnStart = 0;
+  state.events.forEach((event, index) => {
+    if (event.kind === "understanding") turnStart = index;
+  });
+  state.events.slice(turnStart).forEach((event, index) => {
+    const plainAnswer = event.kind === "message" || (event.kind === "tool" && event.label === PLAIN_ANSWER_LABEL);
+    if (plainAnswer) {
+      messageCount += 1;
+      return;
+    }
+    if (!TOOL_KINDS.has(event.kind)) return;
+    if (event.kind === "tool") toolCallCount += 1;
+    tools.push({
+      id: `${state.id}-tool-${index}`,
+      kind: event.kind === "verified" ? "read" : "run",
+      label: event.label,
+      chip: event.kind === "tool-error" ? "未完成" : event.kind === "verified" ? "已核实" : "已调用",
+    });
+  });
+  const chipSummary = messageCount > 0
+    ? `${toolCallCount} 个工具调用，${messageCount} 条消息`
+    : `${toolCallCount} 个工具调用`;
   function submitText() {
     if (!pending || disabled) return;
     if (!value.trim()) { setError("请输入名称、ID 或补充说明"); return; }
     if (value.trim().length > 2000) { setError("请控制在 2000 字以内"); return; }
     onReply(state, { interactionId: pending.id, text: value.trim() });
   }
+  if (!tools.length && !waiting) return null;
   return (
     <section className="flex min-w-0 flex-col gap-3" aria-label="任务进度与下一步">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs text-fg-grey-700">本次任务</span>
-        <StatusBadge label={statusLabel[state.status]} color={state.status === "failed" ? "red" : state.status === "completed" ? "green" : state.status === "cancelled" ? "grey" : state.status === "running" ? "blue" : "yellow"} />
-        {state.events.length > 0 ? (
-          <Button variant="tertiary" size="sm" color={siteConfig.accent}
-            aria-expanded={traceOpen} aria-controls={traceId}
-            className="!h-auto !min-h-7 !rounded-lg !px-1.5 !py-1 !font-medium !text-fg-grey-700 !outline-transparent hover:!bg-fg-grey-100 focus-visible:!outline-accent"
-            onClick={() => setTraceOpen(open => !open)}>
-            <span className="flex items-center gap-1">
-              处理记录
-              <span aria-hidden="true" className={traceOpen ? "rotate-180" : ""}>
-                <AltArrowDownLinear size={12} color="var(--fg-grey-700)" />
-              </span>
-            </span>
-          </Button>
-        ) : null}
-      </div>
-      <div id={traceId} hidden={!traceOpen}>
-        {traceOpen && state.events.length > 0 ? (
-          <div className="flex min-w-0 flex-col gap-3">
-            <ThinkingTrace variant="steps"
-              rows={state.events.slice(-3).map(event => ({ primary: event.label }))}
-              settled play={false} className="[&>button]:hidden" />
-            <AgentTaskRows variant="list" tasks={[{ id: state.id, title: "本次任务", status: state.status === "completed" ? "completed" : state.status === "failed" || state.status === "cancelled" ? "failed" : "running", meta: statusLabel[state.status] }]} />
-            <ToolChips items={state.events.filter(event => event.kind === "tool" || event.kind === "tool-error" || event.kind === "verified").map((event, index) => ({ id: `${state.id}-${index}`, kind: event.kind === "tool" ? "run" : "read", label: event.label, chip: event.kind === "tool-error" ? "未完成" : event.kind === "verified" ? "已核实" : "调用记录", detail: [{ text: event.label }] }))} summary="实际任务记录；调用记录不代表写入成功" />
-          </div>
-        ) : null}
-      </div>
+      {tools.length ? <ToolChips className="[&>button_svg]:transition-transform [&>button:last-child_svg]:-rotate-90" items={tools} summary={chipSummary} /> : null}
       {waiting && pending?.kind === "question" ? (
         <form className="flex min-w-0 flex-col gap-3" onSubmit={event => { event.preventDefault(); submitText(); }}>
           {!pending.multiple ? <h3 className="text-sm font-semibold text-fg-black">{pending.title}</h3> : null}

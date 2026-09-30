@@ -23,6 +23,7 @@ import {
   ToolChips,
 } from "@forge-ui-official/core";
 import { RefChrome } from "@/components/reference/ref-chrome";
+import { StreamingAnswerDemo } from "@/components/reference/streaming-answer-demo";
 import { REF_PAGES } from "@/lib/reference/catalog";
 import {
   AGENT_APPROVAL_QUESTIONS,
@@ -94,14 +95,22 @@ export default function RefAgentPage() {
           </Grid>
         </AgentSection>
 
-        <AgentSection title="StreamingAnswer" description="来源可展开，follow-up 可点。">
-          <StreamingAnswer
-            text={AGENT_STREAM_TEXT}
-            sources={AGENT_STREAM_SOURCES}
-            followUps={AGENT_FOLLOW_UPS}
-            onFollowUp={(text) => setFollowUp(text)}
-          />
-          {followUp ? <p className="text-sm text-fg-grey-700">Selected: {followUp}</p> : null}
+        <AgentSection title="StreamingAnswer" description="演示数据：播放、停止、重新播放，以及中英文 Markdown。下方来源示例保持静态。">
+          <StreamingAnswerDemo />
+          <div className="flex flex-col gap-2 border-t border-fg-grey-200 pt-5">
+            <p className="text-xs text-fg-grey-700">静态来源与追问，不播放</p>
+            <StreamingAnswer
+              text={AGENT_STREAM_TEXT}
+              sources={AGENT_STREAM_SOURCES}
+              followUps={AGENT_FOLLOW_UPS}
+              onFollowUp={(text) => setFollowUp(text)}
+              format="markdown"
+              animation="fade"
+              duration={500}
+              motion="auto"
+            />
+            {followUp ? <p className="text-sm text-fg-grey-700">Selected: {followUp}</p> : null}
+          </div>
         </AgentSection>
 
         <AgentSection title="ApprovalCard" description="单选自动前进，多选等 Continue。">
