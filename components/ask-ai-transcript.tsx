@@ -3,7 +3,7 @@
 import { AskAiPresentation } from "./ask-ai-presentation";
 import { isPresentationBlock } from "@/lib/agent/presentation";
 import { AskAiForm, type ConfirmFormIntent } from "./ask-ai-form";
-import { AskAiHarness, AskAiTaskProgress, type ReplyToHarness } from "./ask-ai-harness";
+import { AskAiHarness, askAiToolReceipt, askAiTraceRows, type ReplyToHarness } from "./ask-ai-harness";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -12,6 +12,7 @@ import {
   AgentTaskRows,
   Button,
   CellText,
+  ChatBubble,
   CommandSearch,
   DataTable,
   Grid,
@@ -19,6 +20,8 @@ import {
   InsightCards,
   RecommendationCard,
   StreamingAnswer,
+  ThinkingTrace,
+  ToolChips,
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
 import type { AgentBlock, AgentDownloadBlock } from "@/lib/agent/types";
@@ -34,7 +37,6 @@ import {
   askAiDeliveryPlaying,
   askAiDeliverySettled,
   askAiLandingCopy,
-  askAiStatusLabel,
   bindAskAiAnswer,
   type AskAiRuntimeStatus,
   type AskAiTextDelivery,
@@ -78,9 +80,6 @@ export function AskAiTranscript({
       ) : null}
       {landing ? (
         <div className="flex flex-col gap-5">
-          <span className="text-xs text-fg-grey-700">
-            Ask AI
-          </span>
           <StreamingAnswer {...bindAskAiAnswer(askAiLandingCopy(runtime ?? null))} />
           <SuggestionPrompts items={suggestions} onAsk={onAsk} />
         </div>
@@ -90,7 +89,6 @@ export function AskAiTranscript({
             key={turn.id}
             turn={turn}
             latest={index === turns.length - 1}
-            runtime={runtime}
             spentIntents={spentIntents}
             confirmingIntent={confirmingIntent}
             onAsk={onAsk}
@@ -108,7 +106,6 @@ export function AskAiTranscript({
 function AskAiTurnView({
   turn,
   latest,
-  runtime,
   spentIntents,
   confirmingIntent,
   onAsk,
@@ -119,7 +116,6 @@ function AskAiTurnView({
 }: {
   turn: AskAiTurn;
   latest: boolean;
-  runtime?: AskAiRuntimeStatus | null;
   spentIntents: string[];
   confirmingIntent: string | null;
   onAsk: (text: string) => void;
@@ -131,15 +127,6 @@ function AskAiTurnView({
   const router = useRouter();
   const result = turn.result;
   const demo = result && !result.live && !result.failed ? matchAskAiDemo(turn.question) : null;
-  const source = result?.failed ? askAiStatusLabel({
-    live: result?.live,
-    failed: result?.failed,
-    pending: turn.pending,
-    model: result?.model,
-    snapshotReady: result?.snapshot?.ready,
-    runtime,
-    error: result.text,
-  }) : null;
   const delivery = turn.delivery ?? { mode: "static" as const };
   const playing = askAiDeliveryPlaying(turn.delivery);
   const chromeReady = askAiDeliverySettled(turn.delivery);
@@ -148,16 +135,20 @@ function AskAiTurnView({
     ? "请选择目标，也可以输入序号、名称或 ID。未显示的记录可直接按名称或 ID 查找。"
     : null;
   const answer = assistantAnswer(turn, choicePrompt);
+  const waitingOnTrace = Boolean(turn.pending) && !result?.text;
+  const receipt = askAiToolReceipt(result?.harness);
+  const showAnswer = Boolean(answer.text) && !waitingOnTrace && !(latest && result?.harness?.pending?.kind === "question");
 
   return (
     <div className="flex flex-col gap-5" data-ask-ai-turn={turn.id} data-ask-ai-delivery={answer.kind === "answer" ? answer.delivery.mode : "prompt"} data-ask-ai-chrome={chromeReady ? "ready" : "waiting"}>
-      <div className="flex flex-col items-end">
-        <p className="max-w-full rounded-2xl bg-fg-grey-100 px-4 py-3 text-sm leading-6 text-fg-black [overflow-wrap:anywhere]">
-          {turn.question}
-        </p>
-      </div>
-      <span className="text-xs text-fg-grey-700">Ask AI{source ? ` · ${source}` : ""}</span>
-      {answer.text && !(latest && result?.harness?.pending?.kind === "question") ? (
+      <ChatBubble type="sent" color={siteConfig.accent} className="w-full" content={turn.question} />
+      {waitingOnTrace ? (
+        <ThinkingTrace variant="reasoning" play activeLabel="正在思考" rows={[{ primary: "正在处理当前请求" }]} />
+      ) : (
+        <ThinkingTrace variant="steps" settled play={false} activeLabel="正在思考" doneLabel="已思考" rows={askAiTraceRows(result?.harness)} />
+      )}
+      {receipt ? <ToolChips className="[&>button_svg]:transition-transform [&>button:last-child_svg]:-rotate-90" items={receipt.items} summary={receipt.summary} /> : null}
+      {showAnswer ? (
         answer.kind === "prompt" ? (
           <p className="text-[15px] leading-7 text-fg-black">{answer.text}</p>
         ) : (
@@ -183,7 +174,6 @@ function AskAiTurnView({
           onCancel={latest && result?.harness?.pending && onReply ? () => onReply(result.harness!, { interactionId: result.harness!.pending!.id, cancel: true }) : undefined}
         />
       ))}
-      {chromeReady && latest && result?.harness ? <AskAiTaskProgress key={result.harness.id} state={result.harness} /> : null}
       {latest && result?.harness && onReply && (chromeReady || result.harness.pending) ? <AskAiHarness key={result.harness.pending?.id ?? `${result.harness.id}-${result.harness.revision}`} state={result.harness} disabled={busy || turn.pending || playing || confirmingIntent !== null} onReply={onReply} /> : null}
       {latest && demo?.id === "page" ? <PageExtras onAsk={onAsk} /> : null}
       {latest && demo?.id === "next" ? <NextExtras onAsk={onAsk} snapshot={result?.snapshot} /> : null}
