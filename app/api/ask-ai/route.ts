@@ -8,6 +8,7 @@ import { answerWithHarness, harnessEnabled, harnessRequestSchema, starterSuggest
 import { apiError, jsonError, jsonOk } from "@/lib/auth/http";
 import { requireSession } from "@/lib/auth/session";
 import { resolveAccess } from "@/lib/rbac/access";
+import { databaseRequestScope } from "@/lib/db/request-scope";
 
 export async function GET(request: Request) {
   const auth = await requireSession();
@@ -68,12 +69,18 @@ export async function POST(request: Request) {
     const harness = parsed.data.harness;
     if (harness) {
       const encoder = new TextEncoder();
+      const scope = databaseRequestScope.getStore();
+      let settle!: () => void;
+      const finished = new Promise<void>(resolve => { settle = resolve; });
+      if (scope) (scope.pending ??= []).push(finished);
+      const abort = new AbortController();
+      const signal = AbortSignal.any([request.signal, abort.signal]);
       const stream = new ReadableStream({
         async start(controller) {
           let closed = false;
           let sent = "";
           const send = (value: unknown) => {
-            if (closed || request.signal.aborted) return;
+            if (closed || signal.aborted) return;
             controller.enqueue(encoder.encode(`${JSON.stringify(value)}\n`));
           };
           try {
@@ -84,7 +91,7 @@ export async function POST(request: Request) {
               userId: auth.session.id,
               access,
               model: () => resolveHarnessModel(parsed.data.modelId),
-              signal: request.signal,
+              signal,
               onText: (text) => {
                 if (!text || text === sent) return;
                 sent = text;
@@ -93,13 +100,16 @@ export async function POST(request: Request) {
             });
             send({ type: "done", ok: true, ...result });
           } catch (error) {
-            const message = error instanceof Error ? error.message : "提问失败";
-            if (!request.signal.aborted) send({ type: "error", error: message, status: failureStatus(error) });
+            const status = failureStatus(error);
+            const message = status < 500 && error instanceof Error ? error.message : "回复未能完成，请稍后重试";
+            if (!signal.aborted) send({ type: "error", error: message, status });
           } finally {
             closed = true;
             try { controller.close(); } catch { /* already closed */ }
+            settle();
           }
         },
+        cancel() { abort.abort(); },
       });
       return new Response(stream, {
         headers: {

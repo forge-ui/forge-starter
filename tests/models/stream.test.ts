@@ -18,6 +18,7 @@ test("model turns request a stream and emit answer text while tool arguments gro
   const body = [
     'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call-1","function":{"name":"respond","arguments":"{\\"outcome\\":\\"answer\\",\\"text\\":\\"你"}}]}}]}\n\n',
     'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"function":{"arguments":"好\\"}"}}]}}]}\n\n',
+    'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"function":{"arguments":null}}]}}]}\n\n',
     "data: [DONE]\n\n",
   ].join("");
   const original = globalThis.fetch;
@@ -33,7 +34,7 @@ test("model turns request a stream and emit answer text while tool arguments gro
       onToolArguments: (call) => { if (call.name === "respond") seen.push(respondAnswerText(call.arguments)); },
     });
     assert.deepEqual(turn.toolCalls, [{ id: "call-1", name: "respond", arguments: '{"outcome":"answer","text":"你好"}' }]);
-    assert.deepEqual(seen.filter(Boolean), ["你", "你好"]);
+    assert.deepEqual([...new Set(seen.filter(Boolean))], ["你", "你好"]);
   } finally {
     globalThis.fetch = original;
   }

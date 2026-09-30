@@ -97,7 +97,7 @@ function applyToolCall(
   const current = calls.get(index) ?? { arguments: "" };
   if (call.id) current.id = call.id;
   if (call.function?.name) current.name = `${current.name ?? ""}${call.function.name}`;
-  if (call.function?.arguments !== undefined && call.function.arguments !== "") {
+  if (call.function?.arguments != null && call.function.arguments !== "") {
     current.arguments += toolArgumentsText(call.function.arguments);
   }
   calls.set(index, current);
