@@ -309,7 +309,7 @@ export async function fetchAskAiRuns(): Promise<AskAiSavedRun[]> {
 
 /**
  * 走 /api/ask-ai。`modelId` 对应模型管理里启用的条目；没传则用默认模型，再退 ASK_AI_LLM_*。
- * 当前协议一次返回完整 JSON。新回答由页面用 `streaming` 渐显；增量通道应追加累计文本并传 `status`。
+ * 任务接口默认返回 NDJSON：正文累计文本先到，结束后再给完整结果。
  */
 export async function sendAskAi(
   question: string,
@@ -320,10 +320,11 @@ export async function sendAskAi(
   page?: PageContext,
   continuationOperationId?: string,
   harness?: AskAiHarnessRequest,
+  onText?: (text: string) => void,
 ): Promise<AskAiClientResult> {
   const response = await fetch("/api/ask-ai/", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", Accept: "application/x-ndjson, application/json" },
     body: JSON.stringify({
       question,
       context,
@@ -335,11 +336,45 @@ export async function sendAskAi(
     }),
     signal: request.signal,
   });
+  const type = response.headers.get("content-type") ?? "";
+  if (type.includes("ndjson") || type.includes("event-stream")) return readAskAiStream(response, onText);
   const payload = (await response.json().catch(() => null)) as Record<string, unknown> | null;
   if (!response.ok || !payload?.ok || typeof payload.text !== "string") {
     throw new AskAiRequestError(typeof payload?.error === "string" ? payload.error : ASK_AI_FALLBACK_SUMMARY, response.status);
   }
   return parseResult(payload);
+}
+
+async function readAskAiStream(response: Response, onText?: (text: string) => void): Promise<AskAiClientResult> {
+  if (!response.ok || !response.body) {
+    const payload = await response.json().catch(() => null) as { error?: string } | null;
+    throw new AskAiRequestError(payload?.error || ASK_AI_FALLBACK_SUMMARY, response.status);
+  }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let result: AskAiClientResult | null = null;
+  const consume = (line: string) => {
+    if (!line.trim()) return;
+    const event = JSON.parse(line) as { type?: string; text?: string; error?: string; status?: number; ok?: boolean };
+    if (event.type === "text" && typeof event.text === "string") onText?.(event.text);
+    else if (event.type === "error") throw new AskAiRequestError(event.error || ASK_AI_FALLBACK_SUMMARY, event.status || 502);
+    else if (event.type === "done") {
+      if (event.ok !== true || typeof event.text !== "string") throw new AskAiRequestError(ASK_AI_FALLBACK_SUMMARY, 502);
+      result = parseResult(event as Record<string, unknown>);
+    }
+  };
+  while (true) {
+    const { done, value } = await reader.read();
+    buffer += decoder.decode(value ?? new Uint8Array(), { stream: !done });
+    const lines = buffer.split("\n");
+    buffer = done ? "" : lines.pop() ?? "";
+    for (const line of lines) consume(line);
+    if (done) break;
+  }
+  if (buffer) consume(buffer);
+  if (!result) throw new AskAiRequestError(ASK_AI_FALLBACK_SUMMARY, 502);
+  return result;
 }
 
 export async function confirmAskAi(intent: string, page?: PageContext, signal?: AbortSignal): Promise<AskAiClientResult> {

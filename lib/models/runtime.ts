@@ -41,6 +41,140 @@ export type ModelTurn = {
   toolCalls: ModelToolCall[];
 };
 
+export type ModelToolArgumentUpdate = {
+  index: number;
+  id: string;
+  name: string;
+  arguments: string;
+};
+
+type ChatPayload = {
+  choices?: Array<{
+    message?: {
+      content?: string | null;
+      tool_calls?: Array<{
+        index?: number;
+        id?: string;
+        function?: { name?: string; arguments?: unknown };
+      }>;
+    };
+    delta?: {
+      content?: string | null;
+      tool_calls?: Array<{
+        index?: number;
+        id?: string;
+        function?: { name?: string; arguments?: string };
+      }>;
+    };
+  }>;
+  error?: { message?: string };
+};
+
+function toolArgumentsText(value: unknown) {
+  return typeof value === "string" ? value : JSON.stringify(value ?? {});
+}
+
+function turnFromCalls(
+  content: string,
+  calls: Map<number, { id?: string; name?: string; arguments: string }>,
+): ModelTurn {
+  const toolCalls = [...calls.entries()]
+    .sort(([left], [right]) => left - right)
+    .flatMap(([index, call]) => {
+      const name = call.name?.trim();
+      if (!name) return [];
+      return [{ id: call.id?.trim() || `call-${index}`, name, arguments: call.arguments }];
+    });
+  return { content: content.trim(), toolCalls };
+}
+
+function applyToolCall(
+  calls: Map<number, { id?: string; name?: string; arguments: string }>,
+  call: { index?: number; id?: string; function?: { name?: string; arguments?: unknown } },
+  onToolArguments?: (call: ModelToolArgumentUpdate) => void,
+) {
+  const index = call.index ?? 0;
+  const current = calls.get(index) ?? { arguments: "" };
+  if (call.id) current.id = call.id;
+  if (call.function?.name) current.name = `${current.name ?? ""}${call.function.name}`;
+  if (call.function?.arguments !== undefined && call.function.arguments !== "") {
+    current.arguments += toolArgumentsText(call.function.arguments);
+  }
+  calls.set(index, current);
+  const name = current.name?.trim();
+  if (name && onToolArguments) {
+    onToolArguments({ index, id: current.id?.trim() || `call-${index}`, name, arguments: current.arguments });
+  }
+}
+
+function parseChatJson(raw: string, onToolArguments?: (call: ModelToolArgumentUpdate) => void): ModelTurn {
+  const result = JSON.parse(raw) as ChatPayload;
+  if (result.error?.message) throw new Error(result.error.message);
+  const message = result.choices?.[0]?.message;
+  const calls = new Map<number, { id?: string; name?: string; arguments: string }>();
+  for (const [index, call] of (message?.tool_calls ?? []).entries()) {
+    applyToolCall(calls, { ...call, index: call.index ?? index }, onToolArguments);
+  }
+  return turnFromCalls(message?.content ?? "", calls);
+}
+
+async function readModelTurn(
+  response: Response,
+  onToolArguments?: (call: ModelToolArgumentUpdate) => void,
+): Promise<ModelTurn> {
+  const type = response.headers.get("content-type") ?? "";
+  if (type.includes("application/json")) return parseChatJson(await response.text(), onToolArguments);
+  const reader = response.body?.getReader();
+  if (!reader) return parseChatJson(await response.text(), onToolArguments);
+  const decoder = new TextDecoder();
+  const first = await reader.read();
+  if (first.done) throw new Error("模型没有返回正文");
+  let pending = decoder.decode(first.value, { stream: true });
+  if (pending.trimStart().startsWith("{")) {
+    let raw = pending;
+    while (true) {
+      const next = await reader.read();
+      if (next.done) break;
+      raw += decoder.decode(next.value, { stream: true });
+    }
+    raw += decoder.decode();
+    return parseChatJson(raw, onToolArguments);
+  }
+  const calls = new Map<number, { id?: string; name?: string; arguments: string }>();
+  let content = "";
+  const consume = (block: string) => {
+    for (const line of block.split(/\r?\n/)) {
+      if (!line.startsWith("data:")) continue;
+      const data = line.slice(5).trim();
+      if (!data || data === "[DONE]") continue;
+      const payload = JSON.parse(data) as ChatPayload;
+      if (payload.error?.message) throw new Error(payload.error.message);
+      const choice = payload.choices?.[0];
+      if (typeof choice?.delta?.content === "string") content += choice.delta.content;
+      for (const call of choice?.delta?.tool_calls ?? []) applyToolCall(calls, call, onToolArguments);
+      if (!choice?.delta && choice?.message) {
+        if (typeof choice.message.content === "string") content = choice.message.content;
+        for (const [index, call] of (choice.message.tool_calls ?? []).entries()) {
+          applyToolCall(calls, { ...call, index: call.index ?? index }, onToolArguments);
+        }
+      }
+    }
+  };
+  while (true) {
+    const splitAt = pending.lastIndexOf("\n");
+    if (splitAt >= 0) {
+      consume(pending.slice(0, splitAt + 1));
+      pending = pending.slice(splitAt + 1);
+    }
+    const next = await reader.read();
+    if (next.done) break;
+    pending += decoder.decode(next.value, { stream: true });
+  }
+  pending += decoder.decode();
+  if (pending) consume(pending);
+  return turnFromCalls(content, calls);
+}
+
 function wireMessage(message: ModelMessage) {
   if (message.role === "tool") {
     return { role: "tool", tool_call_id: message.toolCallId, content: message.content };
@@ -68,6 +202,8 @@ export async function runModelChatTurn(
     timeoutMs?: number;
     tools?: ModelToolDef[];
     toolChoice?: "auto" | "required";
+    /** Called as tool arguments grow. `arguments` is the cumulative JSON text. */
+    onToolArguments?: (call: ModelToolArgumentUpdate) => void;
   } = {},
 ): Promise<ModelTurn> {
   if (!model.apiBase) throw new Error("模型没有 Chat Completions 地址");
@@ -87,7 +223,7 @@ export async function runModelChatTurn(
         model: model.modelName,
         temperature: options.temperature ?? 0.2,
         messages: messages.map(wireMessage),
-        stream: false,
+        stream: true,
         ...(options.tools?.length
           ? {
               tools: options.tools.map((tool) => ({
@@ -106,34 +242,13 @@ export async function runModelChatTurn(
       redirect: "manual",
       cache: "no-store",
     });
-    const raw = await response.text();
-    const safe = raw.replaceAll(model.apiKey, "***");
     if (!response.ok) {
-      throw new Error(`模型接口 ${response.status}：${safe.slice(0, 200)}`);
+      const raw = await response.text();
+      throw new Error(`模型接口 ${response.status}：${raw.replaceAll(model.apiKey, "***").slice(0, 200)}`);
     }
-    const result = JSON.parse(raw) as {
-      choices?: Array<{
-        message?: {
-          content?: string | null;
-          tool_calls?: Array<{
-            id?: string;
-            function?: { name?: string; arguments?: unknown };
-          }>;
-        };
-      }>;
-    };
-    const message = result.choices?.[0]?.message;
-    const content = message?.content?.trim() || "";
-    const toolCalls = (message?.tool_calls ?? []).flatMap((call, index) => {
-      const name = call.function?.name?.trim();
-      if (!name) return [];
-      const rawArgs = call.function?.arguments;
-      const argumentsText =
-        typeof rawArgs === "string" ? rawArgs : JSON.stringify(rawArgs ?? {});
-      return [{ id: call.id?.trim() || `call-${index}`, name, arguments: argumentsText }];
-    });
-    if (!content && toolCalls.length === 0) throw new Error("模型没有返回正文");
-    return { content, toolCalls };
+    const turn = await readModelTurn(response, options.onToolArguments);
+    if (!turn.content && turn.toolCalls.length === 0) throw new Error("模型没有返回正文");
+    return turn;
   } finally {
     clearTimeout(timer);
   }

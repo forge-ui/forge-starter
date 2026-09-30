@@ -151,8 +151,7 @@ function AskAiTurnView({
 
   return (
     <div className="flex flex-col gap-5" data-ask-ai-turn={turn.id} data-ask-ai-delivery={answer.kind === "answer" ? answer.delivery.mode : "prompt"} data-ask-ai-chrome={chromeReady ? "ready" : "waiting"}>
-      <div className="flex flex-col items-end gap-1.5">
-        <span className="text-xs text-fg-grey-700">你</span>
+      <div className="flex flex-col items-end">
         <p className="max-w-full rounded-2xl bg-fg-grey-100 px-4 py-3 text-sm leading-6 text-fg-black [overflow-wrap:anywhere]">
           {turn.question}
         </p>

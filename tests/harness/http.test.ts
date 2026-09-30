@@ -48,6 +48,17 @@ function account() {
 }
 async function req(path: string, method = "GET", body?: unknown, session = cookie, extra: Record<string, string> = {}) {
   const response = await fetch(`${base}${path}`, { method, headers: { Cookie: session, "Content-Type": "application/json", ...extra }, body: body === undefined ? undefined : JSON.stringify(body) });
+  const type = response.headers.get("content-type") ?? "";
+  if (type.includes("ndjson")) {
+    const events = (await response.text()).split("\n").filter(line => line.trim()).map(line => JSON.parse(line) as ApiData & { type?: string; status?: number });
+    const done = [...events].reverse().find(event => event.type === "done");
+    const failure = [...events].reverse().find(event => event.type === "error");
+    if (!done && failure) return { status: failure.status ?? response.status, data: { ok: false, error: failure.error } as ApiData };
+    const data = { ...(done ?? { ok: false, error: "empty stream" }) };
+    delete data.type;
+    delete data.status;
+    return { status: response.status, data: data as ApiData };
+  }
   return { status: response.status, data: await response.json() as ApiData };
 }
 function ask(body: Record<string, unknown>, session = cookie) {

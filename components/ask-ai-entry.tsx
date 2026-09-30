@@ -320,13 +320,16 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
       }
       return { text: "已停止", live: false };
     };
+    let streamed = "";
     const finish = (result: AskAiClientResult) => {
       stopProgress();
       if (!stillCurrent()) return result;
       sessionId = rememberRun(sessionId, result.harness);
       ticket.sessionId = sessionId;
       if (!stillCurrent()) return result;
-      const delivery = askAiReplayDelivery(result);
+      const delivery: AskAiTextDelivery = !result.failed && streamed && result.text.startsWith(streamed)
+        ? { mode: "incremental", status: "complete" }
+        : askAiReplayDelivery(result);
       setTurnsBySession((prev) => ({
         ...prev,
         [sessionId]: (prev[sessionId] ?? []).map((turn) =>
@@ -345,6 +348,26 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
         continuation?.receipt && currentPageContext() ? { ...currentPageContext()!, entityId: continuation.receipt.entityId } : currentPageContext(),
         continuation?.operationId,
         { requestId: id, runId: run?.id, expectedRevision: run?.revision, reply: interaction?.reply },
+        (text) => {
+          if (!stillCurrent() || !text || text === streamed) return;
+          streamed = text;
+          const session = ticket.sessionId;
+          setTurnsBySession((prev) => {
+            if (!stillCurrent()) return prev;
+            const turns = prev[session];
+            if (!turns) return prev;
+            return {
+              ...prev,
+              [session]: turns.map((turn) => turn.id === id ? {
+                ...turn,
+                pending: false,
+                progress: undefined,
+                result: { text, live: true },
+                delivery: { mode: "incremental", status: "streaming" },
+              } : turn),
+            };
+          });
+        },
       );
       stopProgress();
       if (!stillCurrent()) return abandon();

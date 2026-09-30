@@ -8,7 +8,7 @@ export type AskAiAnswerStatus = StreamingAnswerStatus;
  * Core owns the fade, the display buffer, and Markdown.
  *
  * - static: history, welcome copy, and ordinary prompts. Omit streaming and status.
- * - replay: the current JSON transport already returned the full text. Play it with streaming.
+ * - replay: a finished payload arrived with no live text. Play it with streaming.
  * - incremental: a live channel. `text` is the cumulative answer and `status` is the transport.
  * - stopped: freeze the mounted answer. Do not promote it to complete afterwards.
  */
@@ -42,7 +42,7 @@ export function bindAskAiAnswer(
   return base;
 }
 
-/** Cumulative text for an incremental channel. The current Ask AI route does not use this yet. */
+/** Cumulative text for the live NDJSON channel. */
 export type AskAiTextBuffer = {
   text: string;
   status: AskAiAnswerStatus;
@@ -77,7 +77,7 @@ type ReplayInput = {
 };
 
 /**
- * Current transport is one JSON payload.
+ * Replay is the fallback when no text arrived on the live channel.
  * Replay only prose that will stay on screen. Failures, target pickers, and harness
  * questions are ordinary prompts and stay static so a later mount cannot play them.
  */

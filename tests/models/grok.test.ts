@@ -36,6 +36,7 @@ test("Grok probe and tool turns use authenticated Chat Completions", async (t) =
     const body = JSON.parse(init.body as string);
     requests.push(body);
     assert.equal(body.model, "grok-4.7");
+    assert.equal(body.stream, true);
     return Response.json({ choices: [{ message: body.tools ? { content: null, tool_calls: [{ id: "call-1", type: "function", function: { name: "models_list", arguments: "{}" } }] } : { content: "ok" } }] });
   });
   assert.equal(await probeModel(model), "ok");

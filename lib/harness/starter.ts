@@ -11,6 +11,7 @@ import type { PageContext } from "@/lib/semantic/context";
 import { prepareContinuationReadback } from "@/lib/semantic/continuation";
 import { readOperation, semanticEnabled } from "@/lib/semantic/operations";
 import { runModelChatTurn } from "@/lib/models/runtime";
+import { respondAnswerText } from "@/lib/models/stream";
 import type { ResolvedAiModel } from "@/lib/models/types";
 import type { AccessContext } from "@/lib/rbac/access";
 import { advanceRun } from "./engine";
@@ -91,7 +92,7 @@ function chooseTarget(tool: AgentTool, args: JsonObject, run: Run, page?: PageCo
   };
 }
 
-export function createStarterPorts(input: { userId: string; access: AccessContext; model: ModelProvider; page?: PageContext; context?: string }): HarnessPorts {
+export function createStarterPorts(input: { userId: string; access: AccessContext; model: ModelProvider; page?: PageContext; context?: string; onText?: (text: string) => void }): HarnessPorts {
   let activeModel = typeof input.model === "function" ? undefined : input.model;
   const tools = toolsForAccess(input.access).filter(tool => tool.permission.action === "read" || input.access.allowedModules.includes(tool.permission.resource));
   const knowledge = (question: string) => retrieveStarterKnowledge({ query: question, allowedCapabilityIds: tools.map(t => t.id), currentCapabilityIds: tools.filter(t => input.page?.pageId.startsWith(t.id.split(".")[0])).map(t => t.id), maxChars: 6500, maxEntries: 6 });
@@ -99,7 +100,10 @@ export function createStarterPorts(input: { userId: string; access: AccessContex
     store: postgresTaskStore, id: () => crypto.randomUUID(), now: () => new Date(),
     model: { async next(messages, capabilities, signal) {
       activeModel ??= await (input.model as () => Promise<ResolvedAiModel>)();
-      const options = { signal, tools: capabilities, timeoutMs: 45_000, temperature: 0.2, toolChoice: "required" as const };
+      const options = { signal, tools: capabilities, timeoutMs: 45_000, temperature: 0.2, toolChoice: "required" as const, onToolArguments: (call: { name: string; arguments: string }) => {
+        const text = call.name === "respond" ? respondAnswerText(call.arguments) : "";
+        if (text) input.onText?.(text);
+      } };
       let turn = await runModelChatTurn(activeModel, messages, options);
       // Repair one protocol violation; never parse prose into an action.
       if (!turn.toolCalls.length) {
@@ -174,7 +178,7 @@ export function publicHarness(run: Run) {
   return { id: run.id, revision: run.revision, status: run.status, pending: run.pending, events: run.events.slice(-30), tasks: publicRunTasks(run) };
 }
 
-export async function answerWithHarness(input: { harness: HarnessRequest; question: string; continuationOperationId?: string; model: ModelProvider; userId: string; access: AccessContext; page?: PageContext; context?: string; signal: AbortSignal }) {
+export async function answerWithHarness(input: { harness: HarnessRequest; question: string; continuationOperationId?: string; model: ModelProvider; userId: string; access: AccessContext; page?: PageContext; context?: string; signal: AbortSignal; onText?: (text: string) => void }) {
   if (!harnessEnabled()) throw new HarnessError("任务助手尚未启用", 503);
   const ports = createStarterPorts(input);
   const request: Input = { ...input.harness, question: input.question, ownerId: input.userId, applicationId: STARTER_APPLICATION, buildId: APPLICATION_BUILD_ID, signal: input.signal };

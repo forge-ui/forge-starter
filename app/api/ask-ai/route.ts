@@ -37,6 +37,12 @@ const bodySchema = z.object({
   history: z.array(historySchema).max(8).optional(),
 }).strict().refine(data => Boolean(data.question || data.harness?.reply), "请输入问题");
 
+export const dynamic = "force-dynamic";
+
+function failureStatus(error: unknown) {
+  return error instanceof Error && "status" in error && typeof error.status === "number" ? error.status : 502;
+}
+
 export async function POST(request: Request) {
   const auth = await requireSession();
   if (!auth.ok) return auth.response;
@@ -59,9 +65,49 @@ export async function POST(request: Request) {
 
   try {
     const access = await resolveAccess(auth.session);
-    if (parsed.data.harness) {
-      const result = await answerWithHarness({ ...parsed.data, harness: parsed.data.harness, page: contextForPermissions(parsed.data.page, access.allowedModules), userId: auth.session.id, access, model: () => resolveHarnessModel(parsed.data.modelId), signal: request.signal });
-      return jsonOk(result);
+    const harness = parsed.data.harness;
+    if (harness) {
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        async start(controller) {
+          let closed = false;
+          let sent = "";
+          const send = (value: unknown) => {
+            if (closed || request.signal.aborted) return;
+            controller.enqueue(encoder.encode(`${JSON.stringify(value)}\n`));
+          };
+          try {
+            const result = await answerWithHarness({
+              ...parsed.data,
+              harness,
+              page: contextForPermissions(parsed.data.page, access.allowedModules),
+              userId: auth.session.id,
+              access,
+              model: () => resolveHarnessModel(parsed.data.modelId),
+              signal: request.signal,
+              onText: (text) => {
+                if (!text || text === sent) return;
+                sent = text;
+                send({ type: "text", text });
+              },
+            });
+            send({ type: "done", ok: true, ...result });
+          } catch (error) {
+            const message = error instanceof Error ? error.message : "提问失败";
+            if (!request.signal.aborted) send({ type: "error", error: message, status: failureStatus(error) });
+          } finally {
+            closed = true;
+            try { controller.close(); } catch { /* already closed */ }
+          }
+        },
+      });
+      return new Response(stream, {
+        headers: {
+          "Content-Type": "application/x-ndjson; charset=utf-8",
+          "Cache-Control": "no-store",
+          "X-Accel-Buffering": "no",
+        },
+      });
     }
     const result = await answerAskAi({
       question: parsed.data.question,
