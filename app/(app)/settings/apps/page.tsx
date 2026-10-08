@@ -1,5 +1,9 @@
 "use client";
 
+import { useRouter, useSearchParams } from "next/navigation";
+import { AppDetailDialog } from "@/components/app-detail-dialog";
+import { useAccess } from "@/components/access-store";
+import { toast } from "@/lib/toast";
 import { Modal } from "@/components/ui/modal";
 
 /**
@@ -7,7 +11,7 @@ import { Modal } from "@/components/ui/modal";
  * Same IA as accounts list / ecommerce customers.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import {
   MagniferLinear,
   PenLinear,
@@ -51,14 +55,44 @@ function kindLabel(kind: AppKind) {
 }
 
 export default function SettingsAppsPage() {
+  return <Suspense><SettingsAppsContent /></Suspense>;
+}
+
+function SettingsAppsContent() {
+  const { can } = useAccess();
+  const canCreate = can("settings", "update");
+  const canUpdate = can("settings", "update");
+  const canDelete = can("settings", "update");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const detailId = searchParams.get("id");
   const [apps, setApps] = useState<AppEntry[]>(() => getDefaultAppRegistry());
-  const [search, setSearch] = useState("");
-  const [filterIndex, setFilterIndex] = useState(0);
+  const [search, setSearch] = useState(() => searchParams.get("q") ?? "");
+  const [filterIndex, setFilterIndex] = useState(() => Math.max(0, filterValues.findIndex((value) => value === searchParams.get("type"))));
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 8;
   const [formOpen, setFormOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AppEntry | null>(null);
+
+  const openDetail = useCallback((id: string | null) => {
+    const query = new URLSearchParams(searchParams.toString());
+    if (search) query.set("q", search); else query.delete("q");
+    if (filterIndex) query.set("type", filterValues[filterIndex]!); else query.delete("type");
+    if (id) query.set("id", id); else query.delete("id");
+    router.replace(`/settings/apps/${query.size ? `?${query}` : ""}`, { scroll: false });
+  }, [router, searchParams, search, filterIndex]);
+
+  useEffect(() => {
+    const edit = searchParams.get("edit");
+    const create = searchParams.get("create") === "1";
+    if ((!edit || !canUpdate) && (!create || !canCreate)) return;
+    setEditId(edit);
+    setFormOpen(true);
+    const query = new URLSearchParams(searchParams.toString());
+    query.delete("edit"); query.delete("create");
+    router.replace(`/settings/apps/${query.size ? `?${query}` : ""}`, { scroll: false });
+  }, [searchParams, router, canUpdate, canCreate]);
 
   const refresh = useCallback(() => {
     // Include host product (基础后台) as default row; other apps from registry.
@@ -104,23 +138,23 @@ export default function SettingsAppsPage() {
       {
         key: "name",
         header: "应用",
-        flex: true,
+        width: "w-[28%]",
         // Avoid CellText (flex-1) beside badges — it shoves badges to the cell edge.
         render: (row) => (
-          <div className="flex h-10 min-w-0 flex-col justify-center gap-0.5">
+          <button type="button" onClick={() => openDetail(row.id)} className="flex h-10 min-w-0 max-w-full flex-col justify-center gap-0.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2">
             <span className="truncate text-sm font-semibold leading-5 tracking-fg text-fg-black">
               {row.name}
             </span>
-            <span className="truncate text-xs leading-4 text-fg-grey-500">
+            <span className="truncate text-xs leading-4 text-fg-grey-700">
               {row.subtitle || "—"}
             </span>
-          </div>
+          </button>
         ),
       },
       {
         key: "kind",
         header: "类型",
-        width: "w-32",
+        width: "w-[12%]",
         render: (row) => (
           <CellText>
             {row.isCurrentProduct ? "宿主应用" : kindLabel(row.kind)}
@@ -130,7 +164,7 @@ export default function SettingsAppsPage() {
       {
         key: "entry",
         header: "入口 / 菜单",
-        width: "w-56",
+        width: "w-[35%]",
         render: (row) => (
           <div className="flex h-10 items-center">
             <span className="truncate text-sm font-medium text-fg-grey-700">
@@ -142,7 +176,7 @@ export default function SettingsAppsPage() {
       {
         key: "auth",
         header: "认证",
-        width: "w-36",
+        width: "w-[15%]",
         render: (row) => (
           <div className="flex h-10 items-center">
             <span className="truncate text-sm font-medium text-fg-grey-700">
@@ -155,17 +189,14 @@ export default function SettingsAppsPage() {
           </div>
         ),
       },
-      {
+      ...(canUpdate || canDelete ? [{
         key: "actions",
         header: "操作",
-        width: "w-24",
+        width: "w-[10%]",
         render: (row) => (
           <div className="flex h-10 items-center justify-end gap-2">
-            {row.isCurrentProduct ? (
-              <span className="text-sm text-fg-grey-500">—</span>
-            ) : (
-              <>
-                <IconButton
+            <>
+                {canUpdate ? <IconButton
                   variant="ghost"
                   shape="square"
                   size="sm"
@@ -176,8 +207,8 @@ export default function SettingsAppsPage() {
                   }}
                 >
                   <PenLinear size={16} />
-                </IconButton>
-                <IconButton
+                </IconButton> : null}
+                {canDelete && !row.isCurrentProduct ? <IconButton
                   variant="ghost"
                   shape="square"
                   size="sm"
@@ -185,34 +216,35 @@ export default function SettingsAppsPage() {
                   onClick={() => setDeleteTarget(row)}
                 >
                   <TrashBinMinimalisticLinear size={16} />
-                </IconButton>
-              </>
-            )}
+                </IconButton> : null}
+            </>
           </div>
         ),
-      },
+      } as ColumnDef<AppEntry>] : []),
     ],
-    [],
+    [openDetail, canUpdate, canDelete],
   );
 
   function confirmDelete() {
-    if (!deleteTarget || deleteTarget.isCurrentProduct) return;
+    if (!canDelete || !deleteTarget || deleteTarget.isCurrentProduct) return;
     const all = loadAppRegistry().filter((a) => a.id !== deleteTarget.id);
-    saveAppRegistry(all);
+    try { saveAppRegistry(all); } catch { toast.error("删除失败，请检查浏览器存储是否可用"); return; }
+    toast.success("应用已删除");
     setDeleteTarget(null);
     refresh();
   }
 
   return (
     <div className="flex flex-col gap-6">
+      <AppDetailDialog app={apps.find((app) => app.id === detailId)} open={detailId != null} onClose={() => openDetail(null)} onEdit={canUpdate ? (id) => { setEditId(id); setFormOpen(true); } : undefined} />
       <AppFormDialog
-        open={formOpen}
+        open={formOpen && (editId ? canUpdate : canCreate)}
         onClose={() => {
           setFormOpen(false);
           setEditId(null);
         }}
         appId={editId}
-        onSaved={refresh}
+        onSaved={(id) => { refresh(); openDetail(id); }}
       />
 
       <Modal open={deleteTarget != null} onClose={() => setDeleteTarget(null)}>
@@ -244,7 +276,7 @@ export default function SettingsAppsPage() {
           />
         </div>
         <PageTitleActions>
-          <Button
+          {canCreate ? <Button
             color={siteConfig.accent}
             iconLeft={<PlusIcon size={16} />}
             onClick={() => {
@@ -253,7 +285,7 @@ export default function SettingsAppsPage() {
             }}
           >
             新建应用
-          </Button>
+          </Button> : null}
         </PageTitleActions>
       </div>
 
@@ -293,7 +325,7 @@ export default function SettingsAppsPage() {
               ? "默认应包含本超管后台；若列表为空请刷新页面。也可新建其它应用。"
               : "试试清空搜索或切换类型筛选。"}
           </p>
-          {apps.length === 0 ? (
+          {apps.length === 0 && canCreate ? (
             <Button
               color={siteConfig.accent}
               onClick={() => {

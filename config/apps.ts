@@ -72,6 +72,8 @@ export type AppEntry = {
   /** internal: selected sidebar menus */
   modules: AppModuleId[];
   isCurrentProduct?: boolean;
+  /** Preserve explicitly saved host settings when refreshing built-in seeds. */
+  hostConfigured?: boolean;
 };
 
 export const APP_KIND_META: Record<
@@ -186,6 +188,8 @@ export function homePathForApp(
 ): string {
   if (app.kind === "internal") {
     const mods = modulesForApp(app);
+    const home = mods.find((id) => APP_MODULE_META[id].href === app.href);
+    if (home && (!allowedModules || allowedModules.includes(home))) return APP_MODULE_META[home].href;
     const first =
       (allowedModules?.length
         ? mods.find((id) => allowedModules.includes(id)) ?? allowedModules[0]

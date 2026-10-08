@@ -1,5 +1,6 @@
 import {
   ACTIVE_APP_STORAGE_KEY,
+  APP_MODULE_META,
   APPS_STORAGE_KEY,
   APPS_UPDATED_EVENT,
   DEFAULT_APP_ENTRIES,
@@ -56,15 +57,21 @@ function asModules(v: unknown): AppModuleId[] {
 export function normalizeAppEntry(raw: Partial<AppEntry> & { id?: string; name?: string }): AppEntry {
   const id = typeof raw.id === "string" ? raw.id : createAppId();
   const name = (raw.name ?? "未命名应用").trim() || "未命名应用";
-  const isCurrent = id === DEFAULT_APP_ID || Boolean(raw.isCurrentProduct);
+  const isCurrent = id === DEFAULT_APP_ID;
 
   if (isCurrent) {
-    // Always pin host product naming from defaults (ignore stale localStorage name)
     const builtin = DEFAULT_APP_ENTRIES[0]!;
+    if (!raw.hostConfigured) return { ...builtin };
+    const modules = Array.from(new Set([...asModules(raw.modules), "settings" as const]));
+    const href = modules.some((id) => APP_MODULE_META[id].href === raw.href)
+      ? raw.href! : APP_MODULE_META[modules[0]!].href;
     return {
       ...builtin,
-      name: builtin.name,
-      subtitle: builtin.subtitle,
+      name,
+      subtitle: (raw.subtitle ?? builtin.subtitle).trim(),
+      modules,
+      href,
+      hostConfigured: true,
     };
   }
 
@@ -113,7 +120,7 @@ function safeParse(raw: string | null): unknown[] | null {
 /**
  * Always pin built-in catalog apps from DEFAULT_APP_ENTRIES.
  * localStorage may predate new seeds — merge by id without wiping user-added apps.
- * Host product (`accounts-admin`) modules are overwritten from `[...APP_MODULE_IDS]`.
+ * Unconfigured host seeds receive new modules; explicit host configurations persist.
  * User-created internal apps keep their saved modules (will not auto-check new ones).
  */
 /** Former seed apps removed from the product — drop on load. */
@@ -127,6 +134,10 @@ function mergeBuiltinApps(list: AppEntry[]): AppEntry[] {
     const existing = byId.get(builtin.id);
     if (!existing) {
       byId.set(builtin.id, normalizeAppEntry(builtin));
+      continue;
+    }
+    if (existing.hostConfigured && builtin.id === DEFAULT_APP_ID) {
+      byId.set(builtin.id, normalizeAppEntry(existing));
       continue;
     }
     // Refresh modules/href/name from code for known seeds (keeps user openMode etc.)
