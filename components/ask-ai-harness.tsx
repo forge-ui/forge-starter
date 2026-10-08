@@ -87,7 +87,7 @@ export function AskAiHarness({ state, disabled, onReply }: {
         <form className="flex min-w-0 flex-col gap-3" onSubmit={event => { event.preventDefault(); submitText(); }}>
           {!pending.multiple ? <h3 className="text-sm font-semibold text-fg-black">{pending.title}</h3> : null}
           {pending.multiple && pending.options.length ? <fieldset disabled={disabled} className="m-0 min-w-0 border-0 p-0 disabled:opacity-50">
-            <ApprovalCard key={`${pending.id}-${approvalAttempt}`}
+            <ApprovalCard previousQuestionLabel="上一题" nextQuestionLabel="下一题" key={`${pending.id}-${approvalAttempt}`}
               questions={[{ id: pending.id, prompt: pending.title, type: "check", options: pending.options.map(option => ({ id: option.id, label: option.description ? `${option.label} · ${option.description}` : option.label })) }]}
               skipLabel="重新选择" continueLabel="继续" sendLabel="提交选择" sentLabel="已提交选择"
               onSubmitted={answers => {

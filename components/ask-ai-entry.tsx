@@ -706,7 +706,7 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
           className="@container w-full min-w-0 max-w-full shrink-0 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3"
         >
           {restoreError ? <div className="mb-2 flex flex-wrap items-center gap-2"><p className="text-xs text-fg-grey-700">{restoreError}</p><Button color={siteConfig.accent} variant="tertiary" disabled={restoring} onClick={() => { setRestoring(true); void restoreSessions().catch(error => setRestoreError(error instanceof Error ? error.message : "恢复失败")).finally(() => setRestoring(false)); }}>重试恢复</Button></div> : null}
-          <PromptBar
+          <PromptBar sourcesLabel="来源" commandsLabel="指令" connectedLabel="已连接" attachLabel="添加附件" dictateLabel="语音输入"
             className="w-full min-w-0 max-w-full [&_button[aria-label=Attach]]:hidden [&_button[aria-label=Dictate]]:hidden @max-[440px]:[&_textarea]:h-[4.5rem] @max-[440px]:[&_textarea]:pt-3"
             value={draft}
             onChange={setDraft}

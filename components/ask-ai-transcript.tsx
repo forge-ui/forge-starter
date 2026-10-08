@@ -80,7 +80,7 @@ export function AskAiTranscript({
       ) : null}
       {landing ? (
         <div className="flex flex-col gap-5">
-          <StreamingAnswer {...bindAskAiAnswer(askAiLandingCopy(runtime ?? null))} />
+          <StreamingAnswer sourcesLabel="来源" followUpsLabel="后续问题" {...bindAskAiAnswer(askAiLandingCopy(runtime ?? null))} />
           <SuggestionPrompts items={suggestions} onAsk={onAsk} />
         </div>
       ) : (
@@ -186,7 +186,7 @@ function AskAiTurnView({
         return (
           <fieldset key={`choice-${index}`} aria-label={block.title} disabled={followUpsDisabled}
             className="m-0 min-w-0 border-0 p-0 disabled:opacity-50">
-            <StreamingAnswer
+            <StreamingAnswer sourcesLabel="来源"
               text=""
               followUpsLabel={block.title}
               followUps={options.map(option => option.label)}
@@ -234,7 +234,7 @@ function AskAiAnswerText({
 }) {
   const notify = delivery.mode === "replay" || (delivery.mode === "incremental" && delivery.status === "complete");
   return (
-    <StreamingAnswer
+    <StreamingAnswer sourcesLabel="来源" followUpsLabel="后续问题"
       key={turnId}
       {...bindAskAiAnswer(text, delivery)}
       onDone={notify && onPresented ? () => onPresented(turnId) : undefined}
@@ -370,7 +370,7 @@ function SuggestionPrompts({
 
 function PageExtras({ onAsk }: { onAsk: (text: string) => void }) {
   return (
-    <CommandSearch
+    <CommandSearch groupLabel="建议指令"
       placeholder="跳到模块或示范问题"
       emptyLabel="没有匹配的入口"
       items={[
@@ -396,7 +396,7 @@ function NextExtras({
   const empty = !snapshot?.ready || snapshot.total === 0;
   return (
     <>
-      <AgentTaskRows
+      <AgentTaskRows statusLabels={{ running: "进行中", failed: "失败", completed: "已完成" }}
         tasks={[
           {
             id: "db",
@@ -418,7 +418,7 @@ function NextExtras({
           },
         ]}
       />
-      <RecommendationCard
+      <RecommendationCard alternativesLabel="其他建议"
         title={empty ? "先建一条运营账号？" : "先核对角色权限？"}
         body={
           empty
@@ -452,7 +452,7 @@ function StatusExtras({
 
   return (
     <>
-      <InsightCards
+      <InsightCards previousInsightLabel="上一条洞察" nextInsightLabel="下一条洞察"
         cards={[
           {
             id: "active",
@@ -470,7 +470,7 @@ function StatusExtras({
         onAsk={(prompt) => onAsk(prompt)}
       />
       {rows.length > 0 ? (
-        <AgentDiffTable
+        <AgentDiffTable toggleHint="点击切换是否纳入" formatApplyLabel={count => `提交 ${count} 项差异供核对`} formatAppliedLabel={count => `已提交 ${count} 项差异核对`}
           title="最近账号"
           columns={[
             { key: "name", label: "账号" },
@@ -486,7 +486,7 @@ function StatusExtras({
 
 function RbacExtras() {
   return (
-    <AgentFlowchart
+    <AgentFlowchart selectedLabel="已选择" nextLabel="下一步"
       title="账号怎么看见模块"
       nodes={[
         { id: "account", kind: "trigger", title: "新建账号", body: "登录用户 ≠ 业务账号" },
