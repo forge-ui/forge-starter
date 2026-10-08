@@ -6,7 +6,7 @@ import {
   AppLayout,
   Button,
   type AppLayoutProfile,
-  type Team,
+  type AppSwitcherItem,
 } from "@forge-ui-official/core";
 import { defaultProfile, menuItemsForApp } from "@/config/menu";
 import { useAccess } from "@/components/access-store";
@@ -51,7 +51,7 @@ function profileFromUser(
   };
 }
 
-function teamsFromApps(apps: AppEntry[], activeId: string): Team[] {
+function switcherItemsFromApps(apps: AppEntry[], activeId: string): AppSwitcherItem[] {
   return apps.map((app) => ({
     id: app.id,
     name: app.name,
@@ -118,8 +118,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     );
   }, [apps, activeAppId]);
 
-  const teams = useMemo(
-    () => teamsFromApps(apps.length ? apps : [activeApp], activeAppId),
+  const switcherItems = useMemo(
+    () => switcherItemsFromApps(apps.length ? apps : [activeApp], activeAppId),
     [apps, activeApp, activeAppId],
   );
 
@@ -219,27 +219,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         }
         return;
       }
-
-      const teamTarget = target?.closest?.(
-        '[data-popover="team"] [role="menuitemradio"]',
-      ) as HTMLElement | null;
-      if (!teamTarget) return;
-
-      event.preventDefault();
-      event.stopPropagation();
-
-      const name = (teamTarget.textContent ?? "").replace(/\s+/g, " ").trim();
-      const app = apps.find(
-        (entry) =>
-          entry.name.replace(/\s+/g, " ").trim() === name
-          || name.includes(entry.name),
-      );
-      if (app) selectApp(app);
     }
 
     document.addEventListener("click", onDocumentClick, true);
     return () => document.removeEventListener("click", onDocumentClick, true);
-  }, [logout, selectApp, apps]);
+  }, [logout]);
 
   if (!ready) return <div className="py-20 text-center text-sm text-fg-grey-500">正在确认登录状态…</div>;
   if (!user) {
@@ -260,9 +244,14 @@ export function AppShell({ children }: { children: ReactNode }) {
           logo={<img src={asset("/images/forge-logo.svg")} alt="Forge" className="size-8" />}
           profilePosition="sidebar"
           accent={siteConfig.accent}
-          teamName={activeApp.name}
-          teamSubtitle={activeApp.subtitle || "当前应用"}
-          teams={teams}
+          appName={activeApp.name}
+          appIcon={activeApp.avatar}
+          appSubtitle={activeApp.subtitle || "当前应用"}
+          apps={switcherItems}
+          onAppChange={(item) => {
+            const app = apps.find((entry) => entry.id === item.id);
+            if (app) selectApp(app);
+          }}
           menuItems={shellMenuItems}
           profile={profile}
           hideSidebarWidgets

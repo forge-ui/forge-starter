@@ -15,8 +15,8 @@ importers:
         specifier: ^5.2.8
         version: 5.2.8
       '@forge-ui-official/core':
-        specifier: 0.3.7
-        version: 0.3.7(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(supports-color@10.2.2)(tailwindcss@4.2.4)
+        specifier: 0.3.8
+        version: 0.3.8(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(supports-color@10.2.2)(tailwindcss@4.2.4)
       '@opennextjs/cloudflare':
         specifier: 1.20.6
         version: 1.20.6(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(supports-color@10.2.2)(wrangler@4.142.0(@types/node@22.19.17))
@@ -1009,8 +1009,8 @@ packages:
   '@fontsource-variable/plus-jakarta-sans@5.2.8':
     resolution: {integrity: sha512-iQecBizIdZxezODNHzOn4SvvRMrZL/S8k4MEXGDynCmUrImVW0VmX+tIAMqnADwH4haXlHSXqMgU6+kcfBQJdw==}
 
-  '@forge-ui-official/core@0.3.7':
-    resolution: {integrity: sha512-OUkPNZ54RmNJN/cXh/RW4UYFSpg/abyZMgsmOGP5lPmvtLhKHVZmy9sjrz9LFI307JTUptnN0PlX/1Nmk6W8Pg==}
+  '@forge-ui-official/core@0.3.8':
+    resolution: {integrity: sha512-ZsSivVSbtUwJ0u21CUGjRTg/v2PX7Y/9suI14p736N07qt18dUC0uj82g9JGk/3N8UYP6Nc1mLk/xThoys0oUA==}
     peerDependencies:
       '@solar-icons/react': ^2.3.2
       next: '>=15'
@@ -4018,7 +4018,7 @@ snapshots:
 
   '@fontsource-variable/plus-jakarta-sans@5.2.8': {}
 
-  '@forge-ui-official/core@0.3.7(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(supports-color@10.2.2)(tailwindcss@4.2.4)':
+  '@forge-ui-official/core@0.3.8(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(supports-color@10.2.2)(tailwindcss@4.2.4)':
     dependencies:
       '@solar-icons/react': 2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       next: 16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
