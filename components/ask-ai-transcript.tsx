@@ -418,7 +418,7 @@ function NextExtras({
           },
         ]}
       />
-      <RecommendationCard alternativesLabel="其他建议"
+      <RecommendationCard confidenceLabels={{ high: "高置信度", review: "待核对", none: "未评估" }} alternativesLabel="其他建议"
         title={empty ? "先建一条运营账号？" : "先核对角色权限？"}
         body={
           empty
@@ -486,7 +486,7 @@ function StatusExtras({
 
 function RbacExtras() {
   return (
-    <AgentFlowchart selectedLabel="已选择" nextLabel="下一步"
+    <AgentFlowchart kindLabels={{ trigger: "触发", action: "操作", condition: "条件" }} selectedLabel="已选择" nextLabel="下一步"
       title="账号怎么看见模块"
       nodes={[
         { id: "account", kind: "trigger", title: "新建账号", body: "登录用户 ≠ 业务账号" },

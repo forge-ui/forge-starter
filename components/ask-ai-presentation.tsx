@@ -19,7 +19,7 @@ export function AskAiPresentation({ block, disabled, onAsk, storageKey }: {
   const interactive = (content: React.ReactNode) => <fieldset disabled={disabled} className="m-0 min-w-0 border-0 p-0 disabled:opacity-50">{content}</fieldset>;
   switch (data.type) {
     case "checklist": return <UserChecklist key={storageKey} block={data} storageKey={storageKey} disabled={disabled} onAsk={ask} />;
-    case "recommendation": return interactive(<RecommendationCard alternativesLabel="其他建议" title={data.title} body={data.body}
+    case "recommendation": return interactive(<RecommendationCard confidenceLabels={{ high: "高置信度", review: "待核对", none: "未评估" }} alternativesLabel="其他建议" title={data.title} body={data.body}
       confidence="review" confidenceLabel="建议，待核对" acceptLabel="按此建议继续"
       alternatives={data.alternatives.map(item => ({ id: item.id, label: item.label }))}
       onAccept={() => ask(data.question)} onSelectAlternative={id => { const item = data.alternatives.find(item => item.id === id); if (item) ask(item.question); }} />);
@@ -30,7 +30,7 @@ export function AskAiPresentation({ block, disabled, onAsk, storageKey }: {
       onSelect={item => { const selected = data.items.find(option => option.id === item.id); if (selected) ask(selected.question); }} />);
     case "context": return <ContextCards allChunksLabel="全部片段" charactersLabel="字符" chunks={data.chunks} total={data.chunks.length} />;
     case "code": return <AgentCodeBlock codeLabel="代码" diffLabel="差异" copyLabel="复制代码" copiedLabel="已复制" filename={data.filename} lines={data.lines} diff={data.diff} />;
-    case "flow": return <AgentFlowchart selectedLabel="已选择" nextLabel="下一步" title={data.title} nodes={data.nodes} edges={data.edges} />;
+    case "flow": return <AgentFlowchart kindLabels={{ trigger: "触发", action: "操作", condition: "条件" }} selectedLabel="已选择" nextLabel="下一步" title={data.title} nodes={data.nodes} edges={data.edges} />;
     case "diff": return <div className="flex min-w-0 flex-col gap-3">
       <ToolChips items={[]} diffs={[{ file: data.title, add: data.rows.filter(row => row.change === "add").length, del: data.rows.filter(row => row.change === "remove").length }]} summary="待核对差异，尚未应用" />
       {interactive(<AgentDiffTable toggleHint="点击切换是否纳入" formatApplyLabel={count => `提交 ${count} 项差异供核对`} formatAppliedLabel={count => `已提交 ${count} 项差异核对`} title={data.title} columns={data.columns} rows={data.rows}
