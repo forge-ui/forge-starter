@@ -3,7 +3,6 @@ import { createHash, randomBytes } from "node:crypto";
 import { getDb } from "@/lib/db";
 import { passwordResetTokens, users, type User } from "@/lib/db/schema";
 import { hashPassword, verifyPassword } from "./password";
-import { resolveLoginRoleCode } from "@/lib/rbac/defaults";
 import type { SessionUser } from "./session";
 
 function normalizeEmail(email: string) {
@@ -20,7 +19,7 @@ export function toSessionUser(user: User): SessionUser {
     username: user.username,
     email: user.email,
     displayName: user.displayName,
-    roleCode: user.roleCode || resolveLoginRoleCode(user.username),
+    roleCode: user.roleCode || "",
   };
 }
 
@@ -60,7 +59,7 @@ export async function createUser(input: {
         email,
         passwordHash,
         displayName: input.displayName?.trim() || username,
-        roleCode: resolveLoginRoleCode(username),
+        roleCode: "readonly",
       })
       .returning();
     return row;
@@ -146,7 +145,8 @@ export async function changeUserPassword(
   const ok = await verifyPassword(currentPassword, user.passwordHash);
   if (!ok) throw new Error("当前密码不正确");
   const passwordHash = await hashPassword(newPassword);
-  await getDb().update(users).set({ passwordHash }).where(eq(users.id, userId));
+  const changed = await getDb().update(users).set({ passwordHash }).where(and(eq(users.id, userId), eq(users.passwordHash, user.passwordHash))).returning({ id: users.id });
+  if (!changed.length) throw new Error("密码已变更，请重新登录");
 }
 
 function hashToken(token: string) {
@@ -169,24 +169,13 @@ export async function createPasswordResetToken(userId: string) {
 export async function consumePasswordResetToken(token: string, newPassword: string) {
   const db = getDb();
   const tokenHash = hashToken(token);
-  const [row] = await db
-    .select()
-    .from(passwordResetTokens)
-    .where(
-      and(
-        eq(passwordResetTokens.tokenHash, tokenHash),
-        isNull(passwordResetTokens.usedAt),
-        gt(passwordResetTokens.expiresAt, new Date()),
-      ),
-    )
-    .limit(1);
-  if (!row) {
-    throw new Error("重置链接无效或已过期");
-  }
   const passwordHash = await hashPassword(newPassword);
-  await db.update(users).set({ passwordHash }).where(eq(users.id, row.userId));
-  await db
-    .update(passwordResetTokens)
-    .set({ usedAt: new Date() })
-    .where(eq(passwordResetTokens.id, row.id));
+  await db.transaction(async (tx) => {
+    const [row] = await tx.select().from(passwordResetTokens)
+      .where(and(eq(passwordResetTokens.tokenHash, tokenHash), isNull(passwordResetTokens.usedAt), gt(passwordResetTokens.expiresAt, new Date())))
+      .limit(1).for("update");
+    if (!row) throw new Error("重置链接无效或已过期");
+    await tx.update(users).set({ passwordHash }).where(eq(users.id, row.userId));
+    await tx.update(passwordResetTokens).set({ usedAt: new Date() }).where(eq(passwordResetTokens.id, row.id));
+  });
 }

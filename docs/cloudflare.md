@@ -56,3 +56,9 @@ pnpm preview:cloudflare
 - 用户明确确认后，已永久删除 Neon 旧项目 am team、justlogo、ccshop、scria、supa、mcpchat 及其数据。刷新组织列表确认只剩新建的 `forge-starter`。
 
 参考：[Cloudflare Next.js](https://developers.cloudflare.com/workers/framework-guides/web-apps/nextjs/)、[OpenNext 配置](https://opennext.js.org/cloudflare/get-started)。
+
+## 2026-10-08 安全修复升级
+
+发布此版本前，在目标 Neon 库执行 `migrations/20261008_security_sessions.sql`。该迁移仅新增 `auth_sessions` 及索引，并将未来登录用户插入的角色默认值改为 `readonly`；既有用户角色、授权和业务数据保留。旧 local JWT 需重新登录。运行时不会再补回角色授权，首次空库使用显式 `pnpm db:seed`，升级现有库无需重新初始化角色。
+
+恢复链接只经 SMTP 发到注册邮箱；未配置 SMTP 时公开接口返回统一说明。编辑模型供应商或实际调用地址须显式提供新密钥。Compose 的 loopback 绑定和数据库密码设置适用于本地 Docker；生产 Neon 连接继续使用既有 Hyperdrive 配置。

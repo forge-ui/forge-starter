@@ -28,6 +28,6 @@ export async function signInWithPassword(login: string, password: string): Promi
 
   const user = await authenticateUser(identifier, password);
   if (!user) return { ok: false, error: "用户名/邮箱或密码错误" };
-  await setSessionCookie(toSessionUser(user));
+  await setSessionCookie(toSessionUser(user), user.passwordHash);
   return { ok: true, mode: "local", redirectTo: "/dashboard/" };
 }

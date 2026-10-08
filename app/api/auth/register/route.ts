@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     if (strength) return jsonError(strength);
 
     const user = await createUser(parsed.data);
-    await setSessionCookie(toSessionUser(user));
+    await setSessionCookie(toSessionUser(user), user.passwordHash);
     return jsonOk({ redirectTo: "/dashboard/" });
   } catch (error) {
     const message = error instanceof Error ? error.message : "注册失败";

@@ -3,10 +3,10 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     environment:
       POSTGRES_USER: forge
-      POSTGRES_PASSWORD: forge
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       POSTGRES_DB: forge_starter
     volumes:
       - forge_starter_pg:/var/lib/postgresql/data

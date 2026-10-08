@@ -57,11 +57,5 @@ export async function sendPasswordResetEmail(input: { to: string; displayName: s
     "如果不是你本人操作，请忽略本邮件。",
   ].join("\n");
 
-  const config = getSmtpConfig();
-  if (!config) {
-    console.info("[forge-starter] SMTP not configured; password reset link:", resetUrl);
-    return { delivered: false as const, resetUrl };
-  }
   await sendMail({ to: input.to, subject, text });
-  return { delivered: true as const, resetUrl };
 }

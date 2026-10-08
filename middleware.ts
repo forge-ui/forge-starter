@@ -114,7 +114,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (isAuthPage(pathname) && loggedIn && normalizePath(pathname) !== "/reset-password") {
+  if (authMode() === "demo" && isAuthPage(pathname) && loggedIn && normalizePath(pathname) !== "/reset-password") {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard/";
     url.search = "";

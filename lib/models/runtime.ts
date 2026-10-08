@@ -12,11 +12,17 @@ function hasOpenAiCompatSuffix(base: string) {
 
 /** OpenAI-compatible Chat Completions URL. Bare hosts get `/v1`. */
 export function chatCompletionsUrl(apiBase: string) {
-  let base = apiBase.trim().replace(/\/+$/, "");
-  if (!base) return "";
-  if (/\/chat\/completions$/i.test(base)) return base;
-  if (!hasOpenAiCompatSuffix(base)) base = `${base}/v1`;
-  return `${base}/chat/completions`;
+  const url = new URL(apiBase.trim());
+  if (!["http:", "https:"].includes(url.protocol) || url.username || url.password || url.hash) {
+    throw new Error("模型地址必须是无凭据和片段的 HTTP(S) URL");
+  }
+  let path = url.pathname.replace(/\/+$/, "");
+  if (!/\/chat\/completions$/i.test(path)) {
+    if (!hasOpenAiCompatSuffix(path)) path = `${path}/v1`;
+    path = `${path}/chat/completions`;
+  }
+  url.pathname = path;
+  return url.href;
 }
 
 export type ModelToolCall = {

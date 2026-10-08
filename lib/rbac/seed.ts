@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { rbacMenus, rbacPermissions, rbacRolePermissions, rbacRoles } from "@/lib/db/schema";
 import { APP_MODULE_IDS, APP_MODULE_META } from "@/config/apps";
@@ -16,8 +16,7 @@ async function ensurePermissions() {
   }
 }
 
-async function ensureRoles() {
-  const db = getDb();
+async function ensureRoles(db: Parameters<Parameters<ReturnType<typeof getDb>["transaction"]>[0]>[0]) {
   const existing = await db.select().from(rbacRoles);
   if (!existing.length) {
     const perms = await db.select().from(rbacPermissions);
@@ -48,20 +47,6 @@ async function ensureRoles() {
       await db.insert(rbacRolePermissions).values(grants);
     }
     return;
-  }
-
-  const perms = await db.select().from(rbacPermissions);
-  const grants = await db.select().from(rbacRolePermissions);
-  const grantSet = new Set(grants.map((row) => `${row.roleId}:${row.permissionId}`));
-  const toInsert = existing.flatMap((role) => {
-    const spec = SEED_ROLES.find((item) => item.code === role.code);
-    if (!spec) return [];
-    return perms
-      .filter((perm) => spec.grant(perm.code) && !grantSet.has(`${role.id}:${perm.id}`))
-      .map((perm) => ({ roleId: role.id, permissionId: perm.id }));
-  });
-  if (toInsert.length) {
-    await db.insert(rbacRolePermissions).values(toInsert);
   }
 }
 
@@ -100,11 +85,10 @@ async function removeRetiredApprovals() {
 async function seedIfNeeded() {
   await removeRetiredApprovals();
   await ensurePermissions();
-  await ensureRoles();
   await ensureMenus();
 }
 
-/** Idempotent demo seed. Safe to call from every list endpoint. */
+/** Runtime catalog maintenance; never creates roles or grants. */
 export async function ensureRbacDefaults() {
   if (!seeding) {
     seeding = seedIfNeeded().finally(() => {
@@ -112,4 +96,14 @@ export async function ensureRbacDefaults() {
     });
   }
   await seeding;
+}
+
+/** Explicit operator bootstrap; existing roles and grants are preserved. */
+export async function initializeRbacDefaults() {
+  await ensureRbacDefaults();
+  await getDb().transaction(async (tx) => {
+    // Serialize explicit bootstrap across processes.
+    await tx.execute(sql`select pg_advisory_xact_lock(79310421)`);
+    await ensureRoles(tx);
+  });
 }

@@ -18,7 +18,9 @@
     "db:generate": "drizzle-kit generate",
     "semantic": "tsx tooling/semantic/cli.ts",
     "test:semantic": "tsx --test tests/semantic/*.test.ts",
-    "test:harness": "tsx --test --test-concurrency=1 tests/harness/*.test.ts"
+    "test:harness": "tsx --test --test-concurrency=1 tests/harness/*.test.ts",
+    "db:seed": "tsx scripts/seed-rbac.ts",
+    "test:security": "tsx --test tests/security/*.test.ts"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.8",

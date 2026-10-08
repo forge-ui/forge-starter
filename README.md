@@ -12,10 +12,12 @@
 ## 快速开始
 
 ```bash
-docker compose up -d
 cp .env.example .env
+# 编辑 .env：设置唯一 POSTGRES_PASSWORD，并同步 DATABASE_URL
+docker compose up -d
 pnpm install
 pnpm db:push
+pnpm db:seed
 pnpm dev
 ```
 
@@ -31,7 +33,7 @@ pnpm dev
 | 工作台、账号管理 CRUD 样板 | 审批流、支付、订阅、积分 |
 | 个人资料、改密 | 真通知中心、IM |
 | 应用管理（浏览器本地登记；外部认证占位） | 多租户、真 SSO、RBAC |
-| SMTP 发重置信（未配置则打日志） | 云邮件 SaaS、无库完整 CRUD |
+| SMTP 发重置信（令牌仅经邮件投递） | 云邮件 SaaS、无库完整 CRUD |
 
 ## 文档
 

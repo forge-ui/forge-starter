@@ -37,13 +37,13 @@
 | 能力 | 约定 |
 |------|------|
 | 主路径 | 用户名或邮箱 + 密码 |
-| 会话 | httpOnly cookie（jose JWT） |
+| 会话 | httpOnly cookie（jose JWT；local 配合持久化可撤销会话） |
 | 库 | PostgreSQL only（`DATABASE_URL`） |
 | 不做默认 | OAuth、托管 IdP |
 
 ### 3.2 邮件
 
-仅 SMTP（`SMTP_HOST` 等）；未配置时重置链打印到服务端日志，不假装已发信。
+仅 SMTP（`SMTP_HOST` 等）；密码重置令牌仅向注册邮箱投递，接口、页面和日志不展示重置链接。
 
 ### 3.3 运行模式
 
@@ -63,7 +63,7 @@
 | 工作台 | ecommerce-2 布局，指标接业务账号 |
 | 账号管理 | **重样板**：DataTable 列表 + Modal 新建编辑 + **全页详情** + `/api/accounts` |
 | 应用管理 | 应用列表 CRUD；内部应用多选菜单（`APP_MODULE_IDS`）；外链/外部系统认证占位 |
-| 角色 / 菜单 / 权限 | RBAC 目录：列表 + Modal；侧栏 = 菜单三处 ∩ 应用勾选 ∩ 角色 `:read`。种子角色见 `docs/setup.md`（demo 未识别用户名 / local 默认 = 超级管理员） |
+| 角色 / 菜单 / 权限 | RBAC 目录：列表 + Modal；侧栏 = 菜单三处 ∩ 应用勾选 ∩ 角色 `:read`。种子角色见 `docs/setup.md`（demo 未识别用户名 = 超级管理员；local 公开注册固定 readonly） |
 | 模型管理 | 左供应商 FolderNav + 右 ResourceCard（对照智能体工场 / `/ref/resource-workspace`）；表单/详情弹窗；Ask AI 优先用默认模型 |
 | Agent skills | `.agents/skills/*` |
 

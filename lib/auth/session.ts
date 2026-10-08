@@ -5,8 +5,10 @@ import {
   SESSION_COOKIE,
   SESSION_MAX_AGE_SECONDS,
   getAuthSecret,
+  getAuthMode,
 } from "./config";
 import { jsonError } from "./http";
+import { issueLocalSession, readLocalSession, revokeLocalSession } from "./session-store";
 
 export type SessionUser = {
   id: string;
@@ -21,8 +23,14 @@ function secretKey() {
   return new TextEncoder().encode(getAuthSecret());
 }
 
-export async function createSessionToken(user: SessionUser) {
+export async function createSessionToken(user: SessionUser, expectedPasswordHash?: string) {
+  let sessionId: string | undefined;
+  if (getAuthMode() === "local") {
+    if (!expectedPasswordHash) throw new Error("本地会话需要已验证的密码版本");
+    sessionId = await issueLocalSession(user.id, expectedPasswordHash);
+  }
   return new SignJWT({
+    ...(sessionId ? { jti: sessionId } : {}),
     username: user.username,
     email: user.email,
     displayName: user.displayName,
@@ -38,6 +46,10 @@ export async function createSessionToken(user: SessionUser) {
 export async function readSessionToken(token: string): Promise<SessionUser | null> {
   try {
     const { payload } = await jwtVerify(token, secretKey());
+    if (getAuthMode() === "local") {
+      if (typeof payload.jti !== "string" || typeof payload.sub !== "string") return null;
+      return await readLocalSession(payload.jti, payload.sub);
+    }
     const id = typeof payload.sub === "string" ? payload.sub : null;
     const username = typeof payload.username === "string" ? payload.username : null;
     const email = typeof payload.email === "string" ? payload.email : null;
@@ -46,7 +58,7 @@ export async function readSessionToken(token: string): Promise<SessionUser | nul
     const roleCode =
       typeof payload.roleCode === "string" && payload.roleCode.trim()
         ? payload.roleCode.trim()
-        : "super_admin";
+        : "";
     if (!id || !username || !email || !displayName) return null;
     return { id, username, email, displayName, roleCode };
   } catch {
@@ -54,8 +66,8 @@ export async function readSessionToken(token: string): Promise<SessionUser | nul
   }
 }
 
-export async function setSessionCookie(user: SessionUser) {
-  const token = await createSessionToken(user);
+export async function setSessionCookie(user: SessionUser, expectedPasswordHash?: string) {
+  const token = await createSessionToken(user, expectedPasswordHash);
   const jar = await cookies();
   jar.set(SESSION_COOKIE, token, {
     httpOnly: true,
@@ -68,6 +80,14 @@ export async function setSessionCookie(user: SessionUser) {
 
 export async function clearSessionCookie() {
   const jar = await cookies();
+  const token = jar.get(SESSION_COOKIE)?.value;
+  if (token && getAuthMode() === "local") {
+    let payload;
+    try { ({ payload } = await jwtVerify(token, secretKey())); } catch { /* Invalid tokens have no live session. */ }
+    if (typeof payload?.jti === "string" && typeof payload.sub === "string") {
+      await revokeLocalSession(payload.jti, payload.sub);
+    }
+  }
   jar.set(SESSION_COOKIE, "", {
     httpOnly: true,
     sameSite: "lax",

@@ -8,7 +8,7 @@ import {
   modelProviderById,
   resolveProviderId,
 } from "./providers";
-import { probeModel } from "./runtime";
+import { chatCompletionsUrl, probeModel } from "./runtime";
 import {
   isModelStatus,
   type AiModel,
@@ -57,7 +57,7 @@ function toResolved(row: AiModelRow): ResolvedAiModel {
   };
 }
 
-function normalizeInput(input: AiModelInput, existingKey?: string) {
+function normalizeInput(input: AiModelInput, existing?: AiModelRow) {
   const name = input.name.trim();
   if (!name) throw new Error("请填写模型名称");
   const provider = resolveProviderId(input.provider);
@@ -65,14 +65,21 @@ function normalizeInput(input: AiModelInput, existingKey?: string) {
   const modelName = input.modelName.trim();
   if (!modelName) throw new Error("请填写模型 ID");
   if (!isModelStatus(input.status)) throw new Error("状态无效");
-  const apiKey = input.apiKey?.trim() || existingKey || "";
+  const apiBase = input.apiBase?.trim() || defaultApiBaseForProvider(provider);
+  const destination = chatCompletionsUrl(apiBase);
+  const replacementKey = input.apiKey?.trim();
+  if (existing && !replacementKey && (resolveProviderId(existing.provider) !== provider ||
+      chatCompletionsUrl(existing.apiBase || defaultApiBaseForProvider(resolveProviderId(existing.provider))) !== destination)) {
+    throw new Error("变更供应商或调用地址时必须重新填写 API Key");
+  }
+  const apiKey = replacementKey || existing?.apiKey || "";
   const local = modelProviderById(provider)?.local;
   if (!apiKey && !local) throw new Error("请填写 API Key");
   return {
     name,
     provider,
     modelName,
-    apiBase: input.apiBase?.trim() || defaultApiBaseForProvider(provider),
+    apiBase,
     apiKey: apiKey || (local ? "ollama" : ""),
     status: input.status,
     isDefault: Boolean(input.isDefault),
@@ -163,7 +170,7 @@ export async function updateAiModel(id: string, input: AiModelInput): Promise<Ai
   const db = getDb();
   const [current] = await db.select().from(aiModels).where(eq(aiModels.id, id)).limit(1);
   if (!current) throw new Error("模型不存在");
-  const next = normalizeInput(input, current.apiKey);
+  const next = normalizeInput(input, current);
   try {
     if (next.isDefault) await clearOtherDefaults(id);
     const [row] = await db

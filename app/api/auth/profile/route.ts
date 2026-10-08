@@ -38,7 +38,6 @@ export async function PATCH(request: Request) {
       email: parsed.data.email,
     });
     const user = toSessionUser(row);
-    await setSessionCookie(user);
     return jsonOk({ mode, user, message: "资料已保存" });
   } catch (error) {
     const message = error instanceof Error ? error.message : "保存失败";

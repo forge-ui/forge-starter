@@ -92,7 +92,7 @@ const ROLE_ALIASES: Record<string, string> = {
   只读: "readonly",
 };
 
-/** Demo / 注册：用户名（或邮箱本地部分）映射到种子角色；未识别则超级管理员。 */
+/** Demo：用户名（或邮箱本地部分）映射到种子角色；未识别则超级管理员。 */
 export function resolveLoginRoleCode(login: string): string {
   const raw = login.trim().toLowerCase();
   const local = raw.includes("@") ? raw.split("@")[0] ?? raw : raw;
@@ -105,7 +105,7 @@ export function seedRoleName(code: string): string {
 
 export function seedPermissionCodesForRole(roleCode: string): string[] {
   const spec = SEED_ROLES.find((role) => role.code === roleCode);
-  if (!spec) return seedPermissionCodesForRole("super_admin");
+  if (!spec) return [];
   return SEED_PERMISSIONS.filter((perm) => spec.grant(perm.code)).map((perm) => perm.code);
 }
 

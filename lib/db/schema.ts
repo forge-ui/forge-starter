@@ -19,7 +19,7 @@ export const users = pgTable(
     passwordHash: text("password_hash").notNull(),
     displayName: text("display_name").notNull(),
     /** Login-side RBAC role code (`rbac_roles.code`). Not the business `admin_accounts.role`. */
-    roleCode: text("role_code").notNull().default("super_admin"),
+    roleCode: text("role_code").notNull().default("readonly"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
   },
@@ -192,3 +192,11 @@ export const harnessRuns = pgTable("harness_runs", {
 }, (table) => [
   index("harness_runs_owner_application_updated_idx").on(table.ownerId, table.applicationId, table.updatedAt),
 ]);
+
+/** Persisted local sessions. Password hash fingerprints invalidate sessions after recovery. */
+export const authSessions = pgTable("auth_sessions", {
+  id: uuid("id").primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  credentialVersion: text("credential_version").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+}, (table) => [index("auth_sessions_user_idx").on(table.userId)]);

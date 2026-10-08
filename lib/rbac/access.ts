@@ -13,7 +13,6 @@ import {
   seedPermissionCodesForRole,
   seedRoleName,
 } from "./defaults";
-import { ensureRbacDefaults } from "./seed";
 
 export type AccessContext = {
   roleCode: string;
@@ -54,7 +53,7 @@ export function roleCodeForSession(session: SessionUser): string {
   }
   const stored = session.roleCode?.trim();
   if (stored) return stored;
-  return resolveLoginRoleCode(session.username);
+  return "";
 }
 
 function fallbackAccess(roleCode: string): AccessContext {
@@ -64,13 +63,12 @@ function fallbackAccess(roleCode: string): AccessContext {
 
 async function loadAccessFromDb(roleCode: string): Promise<AccessContext | null> {
   try {
-    await ensureRbacDefaults();
     const db = getDb();
     const [role] = await db.select().from(rbacRoles).where(eq(rbacRoles.code, roleCode)).limit(1);
     if (!role) return null;
     if (role.status !== "active") {
       return {
-        roleCode: role.code,
+        roleCode: "",
         roleName: role.name,
         permissionCodes: [],
         allowedModules: [],
@@ -98,7 +96,9 @@ async function loadAccessFromDb(roleCode: string): Promise<AccessContext | null>
 export async function resolveAccess(session: SessionUser): Promise<AccessContext> {
   const roleCode = roleCodeForSession(session);
   const fromDb = await loadAccessFromDb(roleCode);
-  return fromDb ?? fallbackAccess(roleCode);
+  if (fromDb) return fromDb;
+  if (getAuthMode() === "demo") return fallbackAccess(roleCode);
+  return { roleCode: "", roleName: roleCode, permissionCodes: [], allowedModules: [], isSuperAdmin: false };
 }
 
 export function hasPermission(access: AccessContext, resource: RbacResource, action: RbacAction) {
