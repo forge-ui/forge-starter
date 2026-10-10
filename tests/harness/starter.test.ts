@@ -418,6 +418,7 @@ test("registered presentation tool assembles a sourced table through the actual 
 test("Starter repairs an unsupported live count with an actual tool call", async () => {
   const original = globalThis.fetch;
   const choices: string[] = [];
+  const streamed: string[] = [];
   globalThis.fetch = async (_url, init) => {
     const request = JSON.parse(String(init?.body));
     choices.push(request.tool_choice);
@@ -425,10 +426,11 @@ test("Starter repairs an unsupported live count with an actual tool call", async
     return Response.json({ choices: [{ message: { content: null, tool_calls: [{ id: "real-count", type: "function", function: { name: "accounts_list", arguments: "{}" } }] } }] });
   };
   try {
-    const ports = createStarterPorts({ userId: ownerId, access: access(["accounts"], ["accounts:read"]), model });
+    const ports = createStarterPorts({ userId: ownerId, access: access(["accounts"], ["accounts:read"]), model, onText: text => streamed.push(text) });
     const turn = await ports.model.next([{ role: "user", content: "账号有多少条？" }], await ports.capabilities.list(), new AbortController().signal);
     assert.deepEqual(choices, ["auto", "required"]);
     assert.equal(turn.toolCalls[0].name, "accounts_list");
     assert.equal(turn.content, "");
+    assert.equal(streamed.some(text => text.includes("12 条")), false);
   } finally { globalThis.fetch = original; }
 });

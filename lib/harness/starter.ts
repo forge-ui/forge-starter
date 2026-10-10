@@ -103,12 +103,16 @@ export function createStarterPorts(input: { userId: string; access: AccessContex
     store: postgresTaskStore, id: () => crypto.randomUUID(), now: () => new Date(),
     model: { async next(messages, capabilities, signal) {
       activeModel ??= await (input.model as () => Promise<ResolvedAiModel>)();
-      const options = { signal, tools: capabilities, timeoutMs: 120_000, temperature: 0.2, toolChoice: "auto" as const, onText: input.onText, onToolArguments: (call: { name: string; arguments: string }) => {
+      const lastUser = messages.findLastIndex(message => message.role === "user");
+      const queriedThisTurn = messages.slice(lastUser + 1).some(message => message.role === "tool");
+      const options = { signal, tools: capabilities, timeoutMs: 120_000, temperature: 0.2, toolChoice: "auto" as const, onText: (text: string) => {
+        // Do not stream a fake query receipt while no query has executed.
+        if (!queriedThisTurn && /^(?:正在查询|已查[得到]|查询结果|当前共有)/.test(text.trim())) return;
+        input.onText?.(text);
+      }, onToolArguments: (call: { name: string; arguments: string }) => {
         const text = call.name === "respond" ? respondAnswerText(call.arguments) : "";
         if (text) input.onText?.(text);
       } };
-      const lastUser = messages.findLastIndex(message => message.role === "user");
-      const queriedThisTurn = messages.slice(lastUser + 1).some(message => message.role === "tool");
       const groundedMessages = [...messages, { role: "system" as const, content: queriedThisTurn
         ? "本轮已有工具返回。实时业务数量、对象名称和状态仅按这些已返回事实回答；旧对话里的数字和示例不作为依据。"
         : "本轮尚未查询任何实时业务数据。若用户要账号、模型或其他后台资源的数量、名称、状态，必须先调用对应查询工具，不得仅输出‘正在查询’后自行给出结果，也不得沿用历史数字或示例。没有可查询的工具就明确缺少真实数据。故事、通用知识、解释和闲聊仍可直接回答，不需工具。" }];
