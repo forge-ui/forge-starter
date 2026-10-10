@@ -171,7 +171,7 @@ test("Starter navigation produces an unacknowledged page command without claimin
 
 test("Starter accepts a direct clarification without forcing a respond tool or protocol retry", async () => {
   const original = globalThis.fetch;
-  const sent: Array<{ tool_choice?: string; tools?: Array<{ function: { name: string } }> }> = [];
+  const sent: Array<{ tool_choice?: string; tools?: Array<{ function: { name: string } }>; messages: Array<{ role: string; content: string }> }> = [];
   globalThis.fetch = async (_url, init) => {
     sent.push(JSON.parse(String(init?.body)));
     return Response.json({ choices: [{ message: { content: "请告诉我想查看哪个账号。" } }] });
@@ -182,6 +182,8 @@ test("Starter accepts a direct clarification without forcing a respond tool or p
     const result = await advanceRun({ ownerId, applicationId, buildId, requestId: crypto.randomUUID(), question: "看看账号" }, ports);
     assert.equal(sent.length, 1);
     assert.equal(sent[0].tool_choice, "auto");
+    assert.match(sent[0].messages.at(-1)!.content, /本轮尚未查询任何实时业务数据/);
+    assert.match(sent[0].messages.at(-1)!.content, /不得沿用历史数字或示例/);
     assert.equal(sent[0].tools?.some(tool => tool.function.name === "respond"), false);
     assert.equal(result.status, "completed");
     assert.equal(result.output.text, "请告诉我想查看哪个账号。");
