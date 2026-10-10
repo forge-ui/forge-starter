@@ -413,3 +413,22 @@ test("registered presentation tool assembles a sourced table through the actual 
   const result = await ports.capabilities.invoke("assistant_present",{blocks:[{type:"table",title:"账号",sourceToolCallId:"query-a",columns:[],rows:[]}]},sourceRun,new AbortController().signal);
   assert.equal((result.data?.blocks as Array<{rows:Array<{name:string}>}>)[0].rows[0].name,"测试员");
 });
+
+
+test("Starter repairs an unsupported live count with an actual tool call", async () => {
+  const original = globalThis.fetch;
+  const choices: string[] = [];
+  globalThis.fetch = async (_url, init) => {
+    const request = JSON.parse(String(init?.body));
+    choices.push(request.tool_choice);
+    if (choices.length === 1) return Response.json({ choices: [{ message: { content: "正在查询账号总数……当前共有 12 条业务账号记录。" } }] });
+    return Response.json({ choices: [{ message: { content: null, tool_calls: [{ id: "real-count", type: "function", function: { name: "accounts_list", arguments: "{}" } }] } }] });
+  };
+  try {
+    const ports = createStarterPorts({ userId: ownerId, access: access(["accounts"], ["accounts:read"]), model });
+    const turn = await ports.model.next([{ role: "user", content: "账号有多少条？" }], await ports.capabilities.list(), new AbortController().signal);
+    assert.deepEqual(choices, ["auto", "required"]);
+    assert.equal(turn.toolCalls[0].name, "accounts_list");
+    assert.equal(turn.content, "");
+  } finally { globalThis.fetch = original; }
+});

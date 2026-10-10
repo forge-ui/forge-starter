@@ -113,6 +113,10 @@ export function createStarterPorts(input: { userId: string; access: AccessContex
         ? "本轮已有工具返回。实时业务数量、对象名称和状态仅按这些已返回事实回答；旧对话里的数字和示例不作为依据。"
         : "本轮尚未查询任何实时业务数据。若用户要账号、模型或其他后台资源的数量、名称、状态，必须先调用对应查询工具，不得仅输出‘正在查询’后自行给出结果，也不得沿用历史数字或示例。没有可查询的工具就明确缺少真实数据。故事、通用知识、解释和闲聊仍可直接回答，不需工具。" }];
       let turn = await runModelChatTurn(activeModel, groundedMessages, options);
+      // A textual claim of a completed live count is not an execution receipt.
+      if (!queriedThisTurn && !turn.toolCalls.length && /(?:正在查询|已查[得到]|查询结果|当前共有)[\s\S]*\d+\s*(?:条|个|名)/.test(turn.content)) {
+        turn = await runModelChatTurn(activeModel, [...groundedMessages, { role: "assistant", content: turn.content }, { role: "system", content: "你刚才声称查询了实时数量，但本轮没有任何工具执行记录，该数量无效。必须实际调用对应查询工具获取事实；不得重复刚才的数量。" }], { ...options, toolChoice: "required" });
+      }
       // Repair a bare tool name only; ordinary prose is a valid final answer.
       const bareName = turn.content.trim().replace(/^[\s()[\]`]+|[\s()[\]`]+$/g, "");
       if (!turn.toolCalls.length && (!turn.content.trim() || capabilities.some(tool => tool.name === bareName))) {
