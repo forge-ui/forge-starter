@@ -47,7 +47,7 @@
 | 页面/业务意图 | 先用这些组件 | Starter 抄谁 | monorepo case（查 props） |
 |---------------|--------------|--------------|---------------------------|
 | 列表、管理 | `DataTable` `StatusBadge` `Button`；页头见下行 | `accounts/page` 或官方 wallets/customers | `table` `toolbar` `button-link` |
-| 列表页头 + 工具带 | **任选一套**：Starter `h1`+`Breadcrumbs`+`PageTitleActions` 再单行 `ButtonGroup`+`TextField`；**或** Kit `PageTitleToolbarWithAsk` + `Toolbar`/`ToolbarSearchInput`/`ToolbarPillTabs` | 同上 | `toolbar` |
+| 列表页头 + 工具带 | Kit `PageTitleToolbar`，`actions` 内放 `ToolbarActions` + `AskAiEntry` + 业务按钮；单行工具带用 `ButtonGroup`+`TextField` 或 `Toolbar`/`ToolbarSearchInput` | 同上 | `toolbar` |
 | 筛选条 | 一条工具带，禁止两行 pills。Starter：`ButtonGroup`+`TextField`。官方：`Toolbar`+`ToolbarSearchInput` | 同上 | `tab` `input-field` `toolbar` |
 | 新建/编辑弹窗 | `TextField` `TextArea` `SelectOption` + 本仓 `Modal` | `account-form-dialog` | `input-field` `modal` |
 | 轻详情（看完回列表） | `StatusBadge` `DescriptionItem` + `Modal` 底栏按钮 | `/ref/detail-modal` + `Modal` + `?id=`（暂无第二业务样板） | `list` `modal` |
@@ -104,15 +104,18 @@ toast.info("请填写名称");
 Starter 业务页默认 `hideHeader: true`，所以 **不要** 写 `<AppLayout askAi={…} />` 指望顶栏出现按钮。
 
 ```tsx
-import { PageTitleActions } from "@/components/ask-ai-entry";
+import { PageTitleToolbar, ToolbarActions, Breadcrumbs, Button } from "@forge-ui-official/core";
+import { AskAiEntry } from "@/components/ask-ai-entry";
 
-<PageTitleActions>
-  <Button color={siteConfig.accent}>新建</Button>
-</PageTitleActions>
+<PageTitleToolbar
+  title="账号管理"
+  breadcrumbs={<Breadcrumbs color={siteConfig.accent} items={[{ label: "工作台", href: "/dashboard/" }, { label: "账号管理" }]} />}
+  actions={<ToolbarActions><AskAiEntry /><Button color={siteConfig.accent} onClick={openCreate}>新建</Button></ToolbarActions>}
+/>
 ```
 
 - 宿主：`AskAiProvider` 已挂 `AppShell`，换页不卸、对话保住
-- 入口：A 紧凑页头用 `PageTitleActions`；无主操作时单独 `<AskAiEntry />`；B 用 `PageTitleToolbarWithAsk`
+- 入口：业务页统一直接使用 core `PageTitleToolbar`，`actions` 放 `ToolbarActions` + `AskAiEntry` + 业务按钮。`breadcrumbs` 放 Kit `Breadcrumbs`；当前预设模式没有入口插槽，采用仍受支持的组合接口保留全局 Ask AI 实例。不要逐页传 `askAi` 创建新实例。工作台与参考页仍可单独挂 `AskAiEntry`。
 - 全屏 / 会话：走 Kit 抽屉顶栏全屏钮 + `sessions` / `currentSessionId` / `landingTitle`。core 不读 localStorage，不要另挂全视口层
 - 输入：Kit `PromptBar`（模型选择 + 发送）。模型列表来自模型管理里启用且有密钥的条目，发送带 `modelId`；没有可用模型时不画选择器，退本地规则。不要手搓底栏，也不要挂未实现的附件 / Sources / Commands / 语音。抽屉 460px，自定义 `composer` 核心不带 `p-4`，宿主必须自己垫 gutter + `min-w-0`，别把宽栏直接贴边
 - 回复：演示走 `AskAiTranscript` 四条中文问答（页面 / 下一步 / 状态 / 权限）。对照页 `/ref/agent` 只看组件，不要把英文 case 原文塞进抽屉
@@ -147,7 +150,7 @@ import { Modal } from "@/components/ui/modal";
 import { ResourceCard } from "@/components/resource-card";
 import { FolderNav, WorkspaceSplit } from "@/components/workspace-split";
 import { toast } from "@/lib/toast";
-import { PageTitleActions } from "@/components/ask-ai-entry";
+import { AskAiEntry } from "@/components/ask-ai-entry";
 import { formatDateOnly, formatTime } from "@/lib/format/datetime";
 import { siteConfig } from "@/config/site";
 // color={siteConfig.accent}

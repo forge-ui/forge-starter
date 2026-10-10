@@ -19,6 +19,8 @@ import {
 } from "solar-icon-set";
 import {
   Breadcrumbs,
+  PageTitleToolbar,
+  ToolbarActions,
   Button,
   ButtonGroup,
   CellText,
@@ -40,7 +42,7 @@ import {
 import { getDefaultAppRegistry } from "@/lib/apps/defaults";
 import { loadAppRegistry, saveAppRegistry } from "@/lib/apps/registry";
 import { AppFormDialog } from "@/components/app-form-dialog";
-import { PageTitleActions } from "@/components/ask-ai-entry";
+import { AskAiEntry } from "@/components/ask-ai-entry";
 
 const filterTabs = [
   { label: "全部" },
@@ -262,11 +264,9 @@ function SettingsAppsContent() {
         ) : null}
       </Modal>
 
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-display-l font-semibold leading-9 tracking-fg text-fg-black">
-            应用管理
-          </h1>
+      <PageTitleToolbar
+        title="应用管理"
+        breadcrumbs={
           <Breadcrumbs
             color={siteConfig.accent}
             items={[
@@ -274,20 +274,24 @@ function SettingsAppsContent() {
               { label: "应用管理" },
             ]}
           />
-        </div>
-        <PageTitleActions>
-          {canCreate ? <Button
-            color={siteConfig.accent}
-            iconLeft={<PlusIcon size={16} />}
-            onClick={() => {
-              setEditId(null);
-              setFormOpen(true);
-            }}
-          >
-            新建应用
-          </Button> : null}
-        </PageTitleActions>
-      </div>
+        }
+        actions={
+          <ToolbarActions className="flex-wrap">
+            <AskAiEntry />
+            {canCreate ? <Button
+              color={siteConfig.accent}
+              iconLeft={<PlusIcon size={16} />}
+              onClick={() => {
+                setEditId(null);
+                setFormOpen(true);
+              }}
+            >
+              新建应用
+            </Button> : null}
+          </ToolbarActions>
+        }
+        className="shrink-0 flex-col items-stretch gap-3 sm:flex-row sm:items-end [&>div:first-child]:min-w-0"
+      />
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <ButtonGroup

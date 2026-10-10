@@ -13,7 +13,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type ComponentProps,
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
@@ -22,7 +21,6 @@ import {
   ASK_AI_FS_LAYER_ATTR,
   AskAi,
   Button,
-  PageTitleToolbar,
   PromptBar,
   type AskAiProps,
   type AskAiRequest,
@@ -892,18 +890,6 @@ export function PageTitleActions({ children }: { children?: ReactNode }) {
     <div className="flex flex-wrap items-center gap-2">
       <AskAiEntry />
       {children}
-    </div>
-  );
-}
-
-/** B 正文页头：Kit PageTitleToolbar 与 Ask 同一条。 */
-export function PageTitleToolbarWithAsk(props: ComponentProps<typeof PageTitleToolbar>) {
-  return (
-    <div className="flex flex-wrap items-start gap-3">
-      <div className="min-w-0 flex-1">
-        <PageTitleToolbar {...props} />
-      </div>
-      <AskAiEntry />
     </div>
   );
 }

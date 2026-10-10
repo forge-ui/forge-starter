@@ -4,7 +4,7 @@
 
 ## 对照物
 
-角色：全局助手及各页标题操作区；Starter AskAiEntry / PageTitleToolbarWithAsk 与 /ref/agent 为对照。工场项目/任务列表采用 chrome B，其他既有紧凑标题采用 A；按原页面角色保留正文骨架。所有交互展示继续使用 core 组件。
+角色：全局助手及各页标题操作区；Starter AskAiEntry / 当时的页标题封装（现已删除）与 /ref/agent 为对照。工场项目/任务列表采用 chrome B，其他既有紧凑标题采用 A；按原页面角色保留正文骨架。所有交互展示继续使用 core 组件。
 
 ## S / O / N / C 分层记录
 

@@ -62,6 +62,7 @@ docs/forge-components.md
 | `forge-starter-new-module` | 新业务数据与接口 | **只** schema + service + API（+ 可选 store） |
 | `forge-starter-new-page` | 列表、详情、看板 UI | **只** 页面 + 菜单；对照样板选型 |
 | `forge-starter-audit` | 页面写完/改完后的规范审计（**必跑**） | 只审计与修复规范违规；不重构业务逻辑 |
+| `hairline-create` | 按业务含义生成自定义交互线稿 | 先独立 HTML 视觉确认，再接入；不默认添加到 Ask AI；遵循现有 Chrome 复用规则 |
 
 路径：`.agents/skills/<name>/SKILL.md`（canonical）。  
 Skills 只维护 **`.agents/skills/`**。

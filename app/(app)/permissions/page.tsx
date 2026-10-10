@@ -11,6 +11,8 @@ import {
 } from "solar-icon-set";
 import {
   Breadcrumbs,
+  PageTitleToolbar,
+  ToolbarActions,
   Button,
   ButtonGroup,
   CellMuted,
@@ -23,7 +25,7 @@ import {
   type ColumnDef,
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
-import { PageTitleActions } from "@/components/ask-ai-entry";
+import { AskAiEntry } from "@/components/ask-ai-entry";
 import { usePermissionsStore } from "@/components/permissions-store";
 import { PermissionFormDialog } from "@/components/permission-form-dialog";
 import { PermissionDetailDialog } from "@/components/permission-detail-dialog";
@@ -153,7 +155,7 @@ function PermissionsPageContent() {
             onClick={() => openDetail(row.id)}
           >
             <span className="truncate text-sm font-semibold text-fg-black">{row.name}</span>
-            <span className="text-xs text-fg-grey-500">{row.code}</span>
+            <span className="text-xs text-fg-grey-700">{row.code}</span>
           </button>
         ),
       },
@@ -260,11 +262,9 @@ function PermissionsPageContent() {
         ) : null}
       </Modal>
 
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-display-l font-semibold leading-9 tracking-fg text-fg-black">
-            权限
-          </h1>
+      <PageTitleToolbar
+        title="权限"
+        breadcrumbs={
           <Breadcrumbs
             color={siteConfig.accent}
             items={[
@@ -272,17 +272,21 @@ function PermissionsPageContent() {
               { label: "权限" },
             ]}
           />
-        </div>
-        <PageTitleActions>
-          <Button
-            color={siteConfig.accent}
-            iconLeft={<PlusIcon size={16} />}
-            onClick={openCreate}
-          >
-            新建权限
-          </Button>
-        </PageTitleActions>
-      </div>
+        }
+        actions={
+          <ToolbarActions className="flex-wrap">
+            <AskAiEntry />
+            <Button
+              color={siteConfig.accent}
+              iconLeft={<PlusIcon size={16} />}
+              onClick={openCreate}
+            >
+              新建权限
+            </Button>
+          </ToolbarActions>
+        }
+        className="shrink-0 flex-col items-stretch gap-3 sm:flex-row sm:items-end [&>div:first-child]:min-w-0"
+      />
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <ButtonGroup
@@ -311,7 +315,7 @@ function PermissionsPageContent() {
       {error ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-[28px] border border-dashed border-fg-grey-200 bg-white py-16">
           <p className="text-lg font-semibold text-fg-black">无法加载权限</p>
-          <p className="max-w-md text-center text-sm text-fg-grey-500">{error}</p>
+          <p className="max-w-md text-center text-sm text-fg-grey-700">{error}</p>
           <Button color={siteConfig.accent} onClick={() => void refresh()}>
             重试
           </Button>

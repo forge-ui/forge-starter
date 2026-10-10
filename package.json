@@ -25,7 +25,7 @@
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.8",
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
-    "@forge-ui-official/core": "0.3.9",
+    "@forge-ui-official/core": "0.3.10",
     "@opennextjs/cloudflare": "1.20.6",
     "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.2",

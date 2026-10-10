@@ -14,6 +14,8 @@ import {
 } from "solar-icon-set";
 import {
   Breadcrumbs,
+  PageTitleToolbar,
+  ToolbarActions,
   Button,
   ButtonGroup,
   CellImageText,
@@ -30,7 +32,7 @@ import {
 import { toast } from "@/lib/toast";
 import { siteConfig } from "@/config/site";
 import { useAccountsStore } from "@/components/accounts-store";
-import { PageTitleActions } from "@/components/ask-ai-entry";
+import { AskAiEntry } from "@/components/ask-ai-entry";
 import { AccountFormDialog } from "@/components/account-form-dialog";
 import {
   abandonAgentContinuation,
@@ -334,11 +336,9 @@ function AccountsPageContent() {
         ) : null}
       </Modal>
 
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-display-l font-semibold leading-9 tracking-fg text-fg-black">
-            账号管理
-          </h1>
+      <PageTitleToolbar
+        title="账号管理"
+        breadcrumbs={
           <Breadcrumbs
             color={siteConfig.accent}
             items={[
@@ -346,17 +346,21 @@ function AccountsPageContent() {
               { label: "账号管理" },
             ]}
           />
-        </div>
-        <PageTitleActions>
-          <Button
-            color={siteConfig.accent}
-            iconLeft={<PlusIcon size={16} />}
-            onClick={openCreate}
-          >
-            新建账号
-          </Button>
-        </PageTitleActions>
-      </div>
+        }
+        actions={
+          <ToolbarActions className="flex-wrap">
+            <AskAiEntry />
+            <Button
+              color={siteConfig.accent}
+              iconLeft={<PlusIcon size={16} />}
+              onClick={openCreate}
+            >
+              新建账号
+            </Button>
+          </ToolbarActions>
+        }
+        className="shrink-0 flex-col items-stretch gap-3 sm:flex-row sm:items-end [&>div:first-child]:min-w-0"
+      />
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <ButtonGroup

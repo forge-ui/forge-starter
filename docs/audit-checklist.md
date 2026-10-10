@@ -80,7 +80,7 @@ Starter 业务页默认 `hideHeader: true`，正文页头走 **A 或 B**。不�
 - **H1** 🔴 业务页必须有 Forge 页头，用 Kit 组件实现。同一页只选一套，禁止叠两套（含壳 `pageTitle` 与页内页头叠加）。合法形态：
   - **A. Starter 紧凑**：`h1.text-display-l.font-semibold` + `Breadcrumbs` + 右侧 `PageTitleActions`（Kit `AskAi` 槽 + 主操作 `Button`，`color={siteConfig.accent}`）。无主操作时可只挂 `AskAiEntry`。
   - **B. Kit 正文页头**：`PageTitleToolbar`（列表/详情/看板都可用）。**面包屑写进这个组件**，不要写在它外面再挂一行。
-    - core `≥ 0.1.12`：`variant` 对上角色（`collection` / `overview` / `detail` / `action`）+ `breadcrumbItems` + 结构化 action，对照 `/cases/toolbar`。Ask AI 用 `PageTitleToolbarWithAsk`，与标题同一条。
+    - core `≥ 0.1.12`：`variant` 对上角色（`collection` / `overview` / `detail` / `action`）+ `breadcrumbItems` + 结构化 action，对照 `/cases/toolbar`。Ask AI 与标题同一条；全局保活入口参照 `docs/forge-components.md` 的 `PageTitleToolbar` + `ToolbarActions` + `AskAiEntry` 组合。
     - core `≤ 0.1.11`：只有 `title` + `breadcrumbs={<Breadcrumbs … />}` + `actions`。视觉与模板相同，**不得因没写 `variant` 判违规**。
   - **C. 壳顶栏**：`AppLayout` / `AppShell` 的 `PageHeader variant="title"`（`hideHeader` 未开）。只用于「顶栏返回+标题」。面包屑若需要，走 AppLayout 的 `breadcrumbs` 槽，**页内不得再画 h1 / `PageTitleToolbar`**。
   **不要**用 `PageHeader variant="search"` 当列表/详情页头。

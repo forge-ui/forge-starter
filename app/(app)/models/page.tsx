@@ -14,6 +14,8 @@ import {
 } from "solar-icon-set";
 import {
   Breadcrumbs,
+  PageTitleToolbar,
+  ToolbarActions,
   Button,
   ConfirmationDialog,
   Grid,
@@ -23,7 +25,7 @@ import {
   TextField,
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
-import { PageTitleActions } from "@/components/ask-ai-entry";
+import { AskAiEntry } from "@/components/ask-ai-entry";
 import { WorkspaceSplit, FolderNav } from "@/components/workspace-split";
 import { ModelCard } from "@/components/model-card";
 import { useModelsStore } from "@/components/models-store";
@@ -302,30 +304,31 @@ function ModelsPageContent() {
       </Modal>
 
       <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-hidden">
-        <div className="flex shrink-0 flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-display-l font-semibold leading-9 tracking-fg text-fg-black">
-              模型服务
-            </h1>
+        <PageTitleToolbar
+          title="模型服务"
+          breadcrumbs={
             <Breadcrumbs
               color={siteConfig.accent}
-              className="mt-1"
               items={[
                 { label: "工作台", href: "/dashboard/" },
                 { label: "模型服务" },
               ]}
             />
-          </div>
-          <PageTitleActions>
-            <Button
-              color={siteConfig.accent}
-              iconLeft={<PlusIcon size={16} />}
-              onClick={openCreate}
-            >
-              添加模型
-            </Button>
-          </PageTitleActions>
-        </div>
+          }
+          actions={
+            <ToolbarActions className="flex-wrap">
+              <AskAiEntry />
+              <Button
+                color={siteConfig.accent}
+                iconLeft={<PlusIcon size={16} />}
+                onClick={openCreate}
+              >
+                添加模型
+              </Button>
+            </ToolbarActions>
+          }
+          className="shrink-0 flex-col items-stretch gap-3 sm:flex-row sm:items-end [&>div:first-child]:min-w-0"
+        />
 
         <WorkspaceSplit leftTitle="供应商" className="!min-h-0"
           left={<FolderNav activeId={providerFilter} onSelect={setProviderFilter}

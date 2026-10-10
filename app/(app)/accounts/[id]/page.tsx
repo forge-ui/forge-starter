@@ -8,6 +8,8 @@ import { CopyLinear, PenLinear, TrashBinMinimalisticLinear } from "solar-icon-se
 import {
   Avatar,
   Breadcrumbs,
+  PageTitleToolbar,
+  ToolbarActions,
   Button,
   CellImageText,
   CellText,
@@ -25,7 +27,7 @@ import {
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
 import { useAccountsStore } from "@/components/accounts-store";
-import { PageTitleActions } from "@/components/ask-ai-entry";
+import { AskAiEntry } from "@/components/ask-ai-entry";
 import { AccountFormDialog } from "@/components/account-form-dialog";
 import { useAccess } from "@/components/access-store";
 import { Modal } from "@/components/ui/modal";
@@ -137,14 +139,9 @@ export default function AccountDetailPage({
       </Modal>
 
       <div className="flex flex-col gap-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex min-w-0 flex-col gap-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-display-l font-semibold leading-9 tracking-fg text-fg-black">
-                {account.name}
-              </h1>
-              <StatusBadge label={meta.label} color={meta.color} />
-            </div>
+        <PageTitleToolbar
+          title={account.name}
+          breadcrumbs={
             <Breadcrumbs
               color={siteConfig.accent}
               items={[
@@ -153,21 +150,25 @@ export default function AccountDetailPage({
                 { label: account.name },
               ]}
             />
-          </div>
-          <PageTitleActions>
-            {canEdit ? <Button
-              color={siteConfig.accent}
-              variant="tertiary"
-              iconLeft={<PenLinear size={16} />}
-              onClick={() => setEditOpen(true)}
-            >
-              编辑
-            </Button> : null}
-            {canDelete ? <Button color="red" variant="tertiary" onClick={() => setConfirmDelete(true)}>
-              删除
-            </Button> : null}
-          </PageTitleActions>
-        </div>
+          }
+          actions={
+            <ToolbarActions className="flex-wrap">
+              <AskAiEntry />
+              {canEdit ? <Button
+                color={siteConfig.accent}
+                variant="tertiary"
+                iconLeft={<PenLinear size={16} />}
+                onClick={() => setEditOpen(true)}
+              >
+                编辑
+              </Button> : null}
+              {canDelete ? <Button color="red" variant="tertiary" onClick={() => setConfirmDelete(true)}>
+                删除
+              </Button> : null}
+            </ToolbarActions>
+          }
+          className="shrink-0 flex-col items-stretch gap-3 sm:flex-row sm:items-end [&>div:first-child]:min-w-0"
+        />
 
         {/* Profile structure from Forge project-template/members/[id]. */}
         <Grid gap={24} alignItems="start">
@@ -181,6 +182,7 @@ export default function AccountDetailPage({
                 <p className="mt-2 text-sm text-fg-grey-700">{account.department} · {account.role}</p>
               </div>
               <div className="flex flex-col gap-5 border-t border-fg-grey-200 p-5">
+                <DescriptionItem label="账号状态" content={<StatusBadge label={meta.label} color={meta.color} />} />
                 <h3 className="text-sm font-semibold text-fg-black">联系方式</h3>
                 <DescriptionItem label="邮箱" content={<span className="break-all">{account.email || "未填写"}</span>} actions={<IconButton variant="ghost" shape="square" size="sm" aria-label="复制邮箱" disabled={!account.email} onClick={() => copyValue("邮箱", account.email)}><CopyLinear size={14} /></IconButton>} />
                 <DescriptionItem label="手机" content={account.phone || "未填写"} actions={<IconButton variant="ghost" shape="square" size="sm" aria-label="复制手机" disabled={!account.phone} onClick={() => copyValue("手机", account.phone)}><CopyLinear size={14} /></IconButton>} />
