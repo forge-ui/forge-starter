@@ -83,7 +83,7 @@ export type AskAiTurn = {
   progress?: AskAiHarnessState;
 };
 
-export const ASK_AI_PLACEHOLDER = "说出目标，例如：查找账号、分析权限或导出数据";
+export const ASK_AI_PLACEHOLDER = "";
 
 export const ASK_AI_LANDING_TITLE = "说出要查询或操作的目标";
 

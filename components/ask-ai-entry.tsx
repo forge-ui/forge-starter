@@ -753,7 +753,7 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
             stoppingLabel="正在停止"
             disabled={busy || restoring || readingAttachment}
             color={siteConfig.accent}
-            placeholder={restoring ? "正在恢复会话…" : "说出你的目标…"}
+            placeholder=""
             models={askAiPromptModels(runtime)}
             modelMenuLabel="选择模型"
             model={modelId}
