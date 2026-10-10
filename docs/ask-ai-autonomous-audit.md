@@ -78,9 +78,9 @@
 | E3 | 通过 | components/ask-ai-presentation.tsx:12 | 所有展示类型复用同一渲染器，四仓依各自业务适配器 |
 | E4 | 通过 | components/ask-ai-presentation.tsx:1 | client 展示含真实交互，服务端引擎独立 |
 | Q1 | 通过 | package.json | 类型检查通过；工场按自身 Q1 口径保留范围外4处既有颜色绊线 |
-| Q2 | 待线上重验 | 线上 Chrome | 本地 Starter 完成正文/表格/全屏，四站部署后补齐截图与主路径 |
+| Q2 | 通过 | /Users/hesong/.codex/artifacts/ask-ai-autonomous-20261010/starter-final-table.png | 生产 Chrome 点通正文、真实查询、按需组件、全屏、新会话和停止；工场另验证取消不写入 |
 | Q3 | 通过 | ../forge/src/app/cases/agent/page.tsx | 按需组件是合理业务差异，移除固定 ThinkingTrace；不以 accounts 为聊天基线 |
-| Q4 | 待线上重验 | Chrome console | 本地 Starter 无 warn/error；四站部署后补齐 |
+| Q4 | 通过 | 2026-10-10 Chrome console | 四个生产页面最终检查 error/warn 均为空；配置问题单独记录并修正 |
 
 ## 偏差与修复
 - 移除固定上下文/模型步骤以及 ThinkingTrace，普通等待仅短状态文字。
@@ -90,3 +90,16 @@
 
 ## 重验记录
 代码检查、独立数据库、真实模型及线上 Chrome 记录将在发布后追加。
+
+## 上线验证
+- 系统：Starter；测试：162/162 全量，零跳过；新增数量修复用例后适配器17/17通过。
+- 发布版本：`f2324800-ad50-4cbb-8f44-27b9e61b6c37`。Starter 最终补丁版本以补充记录为准。
+- 正文采用供应商增量 content，经 NDJSON 持续发送；Grok 实测有数百个分块，结束前页面可读。
+- 普通问答无固定上下文/分析卡；实际业务调用有 ToolChips；展示组件不冒充业务调用。
+- 表格行列由服务端从当前请求已授权查询结果组装，模型不能替换业务记录。无有效来源拒绝展示。
+- 全屏底部 PromptBar、表格末列、历史恢复、新会话、停止操作在生产 Chrome 验证。
+- 未做生产业务数据创建或删除；真实保存回执、取消、重复请求和权限隔离在隔离测试环境验证。
+- 问题处理：Starter 千问曾无查询就生成数量，补充当前轮事实约束和未验证数量修复，最终同一自然语言请求实际查询并返回 0 条；工场 Grok 未登记供应商改为兼容 OpenAI 供应商，密钥和中转 URL 不变，私有备份保留服务端。
+- 限制：按需组件是模型决策，文字语义和意图识别仍有概率性；数量修复针对已验证的错误模式，不构成所有业务断言的形式化保证。图表核验数值来源，不保证任意标签语义准确。
+
+最终补丁复测：生产自然语言账号查询实际调用 accounts_list 返回 0 条；模型查询通过真实工具返回 1 条并显示 Kit 表格，末列可见、PromptBar 底部固定，console error/warn 为空。
