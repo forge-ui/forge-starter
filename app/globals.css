@@ -4,6 +4,33 @@
 /* Let Tailwind v4 scan the Forge dist so utility classes used inside core get generated. */
 @source "../node_modules/@forge-ui-official/core/dist";
 
+/* Shared scrollbar treatment; core's hidden and Ask AI scrollbars keep priority. */
+@layer base {
+  :where(html, body, body *):not(.fg-scrollbar-hidden) {
+    scrollbar-width: thin;
+    scrollbar-color: var(--fg-grey-300) transparent;
+  }
+
+  :where(html, body, body *):not(.fg-scrollbar-hidden)::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  :where(html, body, body *):not(.fg-scrollbar-hidden)::-webkit-scrollbar-track,
+  :where(html, body, body *):not(.fg-scrollbar-hidden)::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  :where(html, body, body *):not(.fg-scrollbar-hidden)::-webkit-scrollbar-thumb {
+    background: var(--fg-grey-300);
+    border-radius: 999px;
+  }
+
+  :where(html, body, body *):not(.fg-scrollbar-hidden)::-webkit-scrollbar-thumb:hover {
+    background: var(--fg-grey-500);
+  }
+}
+
 html,
 body {
   background: #ffffff;
