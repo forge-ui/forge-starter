@@ -125,6 +125,25 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
   const [currentSessionId, setCurrentSessionId] = useState("new");
   const [searchQuery, setSearchQuery] = useState("");
   const [draft, setDraft] = useState("");
+  const attachmentInput = useRef<HTMLInputElement>(null);
+  const [attachment, setAttachment] = useState<{ name: string; text: string } | null>(null);
+  const [readingAttachment, setReadingAttachment] = useState(false);
+  const readAttachment = useCallback(async (file?: File) => {
+    if (!file) return;
+    if (!/\.(txt|md|csv|json)$/i.test(file.name) || file.size > 32_000) {
+      toast.error("请选择不超过32KB的 TXT、Markdown、CSV 或 JSON 文件");
+      return;
+    }
+    setReadingAttachment(true);
+    try {
+      const text = await file.text();
+      if (!text.trim() || text.includes("\u0000") || text.includes("\uFFFD")) throw new Error("请选择包含文字的 UTF-8 文件");
+      if (text.length > 1500) throw new Error("附件内容最多1500字，请缩短后重试");
+      setAttachment({ name: file.name.slice(0, 100), text });
+    } catch (error) { toast.error(error instanceof Error ? error.message : "读取附件失败"); }
+    finally { setReadingAttachment(false); }
+  }, []);
+  const [fullscreen, setFullscreen] = useState(false);
   const [turnsBySession, setTurnsBySession] = useState<Record<string, AskAiTurn[]>>({});
   const [spentIntents, setSpentIntents] = useState<string[]>([]);
   const [confirmingIntent, setConfirmingIntent] = useState<string | null>(null);
@@ -509,6 +528,15 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     void onSend("", { messages: [], signal: new AbortController().signal }, undefined, { run, reply });
   }, [onSend]);
 
+  const sendComposer = useCallback((message: string) => {
+    if (busyRef.current || readingAttachment || !restoreReady.current) return;
+    const content = attachment ? `${message}\n\n参考附件：${attachment.name}\n${attachment.text}` : message;
+    if (content.length > 2000) { toast.error("问题与附件合计过长，请缩短后发送"); return; }
+    if (!message.trim()) { toast.info("请说明你希望如何处理附件"); return; }
+    void onSend(content, { messages: [], signal: new AbortController().signal });
+    setAttachment(null);
+  }, [onSend, attachment, readingAttachment]);
+
   const askFromHost = useCallback(
     (message: string) => {
       const request: AskAiRequest = {
@@ -654,6 +682,7 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     currentSessionIdRef.current = next.id;
     setSessions((prev) => [next, ...prev].slice(0, 20));
     setCurrentSessionId(next.id);
+    setAttachment(null);
     setSearchQuery("");
     setDraft("");
     void fetchAskAiRuntime(pathname).then(next => { if (committedPath.current === pathname) applyRuntime(next); });
@@ -663,6 +692,7 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     if (id !== currentSessionIdRef.current) settleSessionPlayback(currentSessionIdRef.current);
     currentSessionIdRef.current = id;
     setCurrentSessionId(id);
+    setAttachment(null);
     setSearchQuery("");
   }, [settleSessionPlayback]);
 
@@ -673,6 +703,8 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AskAiProps>(
     () => ({
       color: siteConfig.accent,
+      fullscreen,
+      onFullscreenChange: setFullscreen,
       suggestions: runtime?.suggestions ?? ASK_AI_SUGGESTIONS,
       placeholder: ASK_AI_PLACEHOLDER,
       landingTitle: runtime?.suggestions?.length === 0 ? "你想处理什么？" : ASK_AI_LANDING_TITLE,
@@ -682,7 +714,7 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
       onSearchQueryChange: setSearchQuery,
       hasConversation: hasChat,
       messages: hasChat ? (
-        <AskAiScrollArea sessionId={currentSessionId} followKey={turns.at(-1)?.id}>
+        <AskAiScrollArea embedded={fullscreen} sessionId={currentSessionId} followKey={turns.at(-1)?.id}>
           <AskAiTranscript
             turns={turns}
             runtime={runtime}
@@ -703,22 +735,25 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
       composer: (
         <div
           data-accent={siteConfig.accent}
-          className="@container w-full min-w-0 max-w-full shrink-0 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3"
+          className={fullscreen ? "@container w-full min-w-0 max-w-full" : "@container w-full min-w-0 max-w-full shrink-0 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3"}
         >
           {restoreError ? <div className="mb-2 flex flex-wrap items-center gap-2"><p className="text-xs text-fg-grey-700">{restoreError}</p><Button color={siteConfig.accent} variant="tertiary" disabled={restoring} onClick={() => { setRestoring(true); void restoreSessions().catch(error => setRestoreError(error instanceof Error ? error.message : "恢复失败")).finally(() => setRestoring(false)); }}>重试恢复</Button></div> : null}
-          <PromptBar sourcesLabel="来源" commandsLabel="指令" connectedLabel="已连接" attachLabel="添加附件" dictateLabel="语音输入"
-            className="w-full min-w-0 max-w-full [&_button[aria-label=Attach]]:hidden [&_button[aria-label=Dictate]]:hidden @max-[440px]:[&_textarea]:h-[4.5rem] @max-[440px]:[&_textarea]:pt-3"
+          <input ref={attachmentInput} type="file" accept=".txt,.md,.csv,.json" hidden aria-label="选择文本附件"
+            onChange={(event) => { const file = event.currentTarget.files?.[0]; event.currentTarget.value = ""; void readAttachment(file); }} />
+          {attachment ? <div className="mb-2 flex min-w-0 items-center gap-2"><span className="min-w-0 truncate text-xs text-fg-black">附件：{attachment.name}</span><Button color={siteConfig.accent} variant="tertiary" size="sm" disabled={busy} onClick={() => setAttachment(null)}>移除附件</Button></div> : null}
+          <PromptBar toolsMenuLabel="添加内容" onAttach={() => attachmentInput.current?.click()} sourcesLabel="来源" commandsLabel="指令" connectedLabel="已连接" attachLabel="添加附件" dictateLabel="语音输入"
+            className="starter-ask-compact w-full min-w-0 max-w-full"
             value={draft}
             onChange={setDraft}
-            onSend={askFromHost}
+            onSend={sendComposer}
             status={responseRunning ? "running" : "idle"}
             onStop={stopResponse}
             sendLabel="发送"
             stopLabel="停止生成"
             stoppingLabel="正在停止"
-            disabled={busy || restoring}
+            disabled={busy || restoring || readingAttachment}
             color={siteConfig.accent}
-            placeholder={restoring ? "正在恢复会话…" : ASK_AI_PLACEHOLDER}
+            placeholder={restoring ? "正在恢复会话…" : "说出你的目标…"}
             models={askAiPromptModels(runtime)}
             modelMenuLabel="选择模型"
             model={modelId}
@@ -735,11 +770,16 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     }),
     [
       askFromHost,
+      sendComposer,
+      attachment,
+      readAttachment,
+      readingAttachment,
       busy,
       confirmingIntent,
       confirmIntent,
       currentSessionId,
       draft,
+      fullscreen,
       hasChat,
       modelId,
       onPresented,

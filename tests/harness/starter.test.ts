@@ -385,3 +385,21 @@ test("Starter resumes an owned real page save and exports without repeating the 
     await closeDb();
   }
 });
+
+
+test("disabled assistant writes offer a page fallback without exposing configuration", async () => {
+  const previous = process.env.SEMANTIC_ENABLED;
+  process.env.SEMANTIC_ENABLED = "false";
+  try {
+    const ports = createStarterPorts({ userId: ownerId, access: access(["accounts"], ["accounts:read", "accounts:create"]), model });
+    const result = await ports.capabilities.invoke("accounts_create", {}, run());
+    assert.equal(result.stop, true);
+    assert.match(result.summary, /暂时无法通过助手办理/);
+    assert.doesNotMatch(JSON.stringify(result), /SEMANTIC_ENABLED|操作回执/);
+    assert.equal(result.data?.fill, undefined);
+    assert.match(JSON.stringify(result.data), /打开账号管理页面/);
+  } finally {
+    if (previous === undefined) delete process.env.SEMANTIC_ENABLED;
+    else process.env.SEMANTIC_ENABLED = previous;
+  }
+});

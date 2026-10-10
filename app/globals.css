@@ -37,3 +37,10 @@ body {
 [data-starter-shell] [data-forge-app-content] > div > .overflow-auto {
   min-height: 0;
 }
+
+/* Keep model names from crowding the compact PromptBar input. */
+.starter-ask-compact button[aria-label^="选择模型"] { max-width: 10rem !important; min-width: 0; }
+.starter-ask-compact button[aria-label^="选择模型"] span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@container (max-width: 440px) {
+  .starter-ask-compact button[aria-label^="选择模型"] { max-width: 7rem !important; }
+}

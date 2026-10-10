@@ -148,7 +148,15 @@ export function createStarterPorts(input: { userId: string; access: AccessContex
           fill.commandId = crypto.randomUUID();
           return { summary: "页面操作已准备，等待页面接收。", data: jsonObject({ fill }), stop: true };
         }
-        if (!semanticEnabled()) throw new ToolInputError("写入需要启用操作回执（SEMANTIC_ENABLED）后才能使用，请联系管理员");
+        if (!semanticEnabled()) {
+          const resource = tool.id.split(".")[0];
+          const label = resource === "accounts" ? "账号管理" : "业务管理";
+          return {
+            summary: `暂时无法通过助手办理此操作，请前往${label}页面操作。`,
+            data: jsonObject({ assistantWriteUnavailable: true, blocks: [{ type: "choice", title: "继续办理", options: [{ label: `前往${label}`, question: `打开${label}页面` }] }] }),
+            stop: true,
+          };
+        }
         const binding = { runId: run.id, requestId: run.lastRequestId };
         let blocks: AgentBlock[];
         if (tool.id === "accounts.create") {
@@ -166,7 +174,7 @@ export function createStarterPorts(input: { userId: string; access: AccessContex
     presentation: { finalize(run) {
       const data: JsonObject = { ...run.output.data, live: Boolean(activeModel), model: activeModel?.modelName ?? "", failed: run.status === "failed" };
       const suggestions = [...new Map(knowledge(run.goal).entries.flatMap(e => e.nextSteps ?? []).map(s => [s.question, s])).values()].slice(0, 3);
-      if (run.status === "completed" && suggestions.length && !data.navigation && !data.fill) {
+      if (run.status === "completed" && suggestions.length && !data.navigation && !data.fill && !data.assistantWriteUnavailable) {
         data.blocks = [...(Array.isArray(data.blocks) ? data.blocks : []), jsonObject({ type: "choice", title: "接下来可以", options: suggestions.map(s => ({ label: s.label, question: s.question })) })];
       }
       return { text: run.output.text, data };

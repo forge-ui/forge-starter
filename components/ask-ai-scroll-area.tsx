@@ -4,12 +4,13 @@ import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Button } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
 
-/** Own the viewport in both Kit layouts. Content growth follows the reader only
- * while they remain at the end; sending a turn explicitly resumes following. */
-export function AskAiScrollArea({ children, sessionId, followKey }: {
+/** Own the drawer viewport; fullscreen delegates scrolling to Kit. Content growth
+ * follows the reader at the end; sending a turn explicitly resumes following. */
+export function AskAiScrollArea({ children, sessionId, followKey, embedded = false }: {
   children: ReactNode;
   sessionId: string;
   followKey?: string;
+  embedded?: boolean;
 }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -17,6 +18,7 @@ export function AskAiScrollArea({ children, sessionId, followKey }: {
   const [away, setAway] = useState(false);
 
   useLayoutEffect(() => {
+    if (embedded) return;
     const viewport = viewportRef.current;
     const content = contentRef.current;
     if (!viewport || !content) return;
@@ -133,23 +135,23 @@ export function AskAiScrollArea({ children, sessionId, followKey }: {
       viewport.removeEventListener("keydown", onKey);
       scrollToLatest.current = () => {};
     };
-  }, [sessionId]);
+  }, [sessionId, embedded]);
 
   useLayoutEffect(() => { scrollToLatest.current(true); }, [followKey]);
 
   return (
-    <div className="relative flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+    <div className={embedded ? "relative flex h-auto min-w-0 flex-col" : "relative flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden"}>
       <div
         ref={viewportRef}
         data-ask-ai-scroll-viewport=""
         role="region"
         aria-label="对话消息"
         tabIndex={0}
-        className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain [overflow-anchor:none] focus-visible:outline-2 focus-visible:outline-fg-grey-500"
+        className={embedded ? "min-w-0" : "min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain [overflow-anchor:none] focus-visible:outline-2 focus-visible:outline-fg-grey-500"}
       >
-        <div ref={contentRef} className="min-w-0 pb-12">{children}</div>
+        <div ref={contentRef} className={embedded ? "min-w-0" : "min-w-0 pb-12"}>{children}</div>
       </div>
-      {away ? (
+      {!embedded && away ? (
         <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
           <Button color={siteConfig.accent} size="sm" className="pointer-events-auto shadow-sm" onClick={() => scrollToLatest.current(true)}>回到最新</Button>
         </div>
