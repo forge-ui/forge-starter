@@ -169,25 +169,23 @@ test("Starter navigation produces an unacknowledged page command without claimin
   assert.doesNotMatch(result.summary, /已打开|已跳转/);
 });
 
-test("Starter rejects two consecutive prose-only responses after one protocol repair", async () => {
+test("Starter accepts a direct clarification without forcing a respond tool or protocol retry", async () => {
   const original = globalThis.fetch;
-  const sent: Array<{ tool_choice?: string; tools?: Array<{ function: { name: string } }>; messages: Array<{ role: string; content: string }> }> = [];
+  const sent: Array<{ tool_choice?: string; tools?: Array<{ function: { name: string } }> }> = [];
   globalThis.fetch = async (_url, init) => {
     sent.push(JSON.parse(String(init?.body)));
-    return Response.json({ choices: [{ message: { content: "请选择要查看的账号，也可以填写指定账号。" } }] });
+    return Response.json({ choices: [{ message: { content: "请告诉我想查看哪个账号。" } }] });
   };
   try {
     const ports = createStarterPorts({ userId: ownerId, access: access(["accounts"], ["accounts:read"]), model });
     ports.store = new MemoryStore();
-    const failed = await advanceRun({ ownerId, applicationId, buildId, requestId: crypto.randomUUID(), question: "打开一个账号详情，让我选择哪一个，也允许输入指定账号" }, ports);
-    assert.equal(sent.length, 2, "协议修复只能重试一次");
-    assert.ok(sent.every(request => request.tool_choice === "required"));
-    assert.ok(sent.every(request => request.tools?.some(tool => tool.function.name === "respond")));
-    assert.ok(sent[1].messages.some(message => message.role === "system" && message.content.includes("上一条没有结构化动作")));
-    assert.equal(failed.status, "failed");
-    assert.equal(failed.pending, undefined);
-    assert.equal(failed.output.data.failed, true);
-    assert.notEqual(failed.output.text, "请选择要查看的账号，也可以填写指定账号。");
+    const result = await advanceRun({ ownerId, applicationId, buildId, requestId: crypto.randomUUID(), question: "看看账号" }, ports);
+    assert.equal(sent.length, 1);
+    assert.equal(sent[0].tool_choice, "auto");
+    assert.equal(sent[0].tools?.some(tool => tool.function.name === "respond"), false);
+    assert.equal(result.status, "completed");
+    assert.equal(result.output.text, "请告诉我想查看哪个账号。");
+    assert.equal(result.pending, undefined);
   } finally { globalThis.fetch = original; }
 });
 
@@ -244,7 +242,10 @@ test("Starter accepts an exact unique specified ID, name or username in real cur
     const ports = createStarterPorts({ userId: ownerId, access: access(["accounts"], ["accounts:read"]), model });
     const row = selectionCandidates[0];
     for (const specified of [row.id, row.name, row.username, ` ${row.name} `]) {
-      const result = await ports.capabilities.invoke("accounts_get", { id: row.id }, selectionState(selectionCandidates, [{ choice: null, specified }]));
+      const state = selectionState(selectionCandidates, [{ choice: null, specified }]);
+      const facts = state.messages.find(m => m.role === "tool" && m.toolCallId === "list-current")!;
+      facts.content = JSON.stringify({ sourceToolCallId: "list-current", summary: facts.content, data: {} });
+      const result = await ports.capabilities.invoke("accounts_get", { id: row.id }, state);
       assert.equal(result.wait, undefined, specified);
     }
     assert.deepEqual(called, [row.id, row.id, row.id, row.id]);
@@ -402,4 +403,11 @@ test("disabled assistant writes offer a page fallback without exposing configura
     if (previous === undefined) delete process.env.SEMANTIC_ENABLED;
     else process.env.SEMANTIC_ENABLED = previous;
   }
+});
+
+test("registered presentation tool assembles a sourced table through the actual adapter", async () => {
+  const ports = createStarterPorts({ userId: ownerId, access: access(["dashboard","accounts"], ["dashboard:read","accounts:read"]), model });
+  const sourceRun = run({observations:[{toolCallId:"query-a",summary:"one",data:{blocks:[{type:"table",title:"账号",columns:[{key:"name",label:"姓名"}],rows:[{name:"测试员"}]}]}}]});
+  const result = await ports.capabilities.invoke("assistant_present",{blocks:[{type:"table",title:"账号",sourceToolCallId:"query-a",columns:[],rows:[]}]},sourceRun,new AbortController().signal);
+  assert.equal((result.data?.blocks as Array<{rows:Array<{name:string}>}>)[0].rows[0].name,"测试员");
 });

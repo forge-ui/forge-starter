@@ -39,3 +39,34 @@ test("model turns request a stream and emit answer text while tool arguments gro
     globalThis.fetch = original;
   }
 });
+
+test("plain prose is delivered before the model stream closes, even when tools are available", async () => {
+  const model = { id: "test", name: "Stream", provider: "openai", modelName: "fixture", apiBase: "https://model.example.test/v1", apiKey: "test-only" };
+  const original = globalThis.fetch;
+  let controller!: ReadableStreamDefaultController<Uint8Array>;
+  const encoder = new TextEncoder();
+  let first!: () => void;
+  const firstText = new Promise<void>(resolve => { first = resolve; });
+  const seen: string[] = [];
+  let finished = false;
+  globalThis.fetch = async (_url, init) => {
+    const request = JSON.parse(String(init?.body));
+    assert.equal(request.stream, true);
+    assert.equal(request.tool_choice, "auto");
+    return new Response(new ReadableStream({ start(c) { controller = c; } }), { headers: { "Content-Type": "text/event-stream" } });
+  };
+  try {
+    const result = runModelChatTurn(model, [{ role: "user", content: "写一段文字" }], {
+      tools: [{ name: "query", description: "read facts if needed", parameters: { type: "object" } }],
+      toolChoice: "auto", onText(text) { seen.push(text); first(); },
+    }).then(turn => { finished = true; return turn; });
+    controller.enqueue(encoder.encode('data: {"choices":[{"delta":{"content":"第一段"}}]}\n\n'));
+    await firstText;
+    assert.equal(finished, false, "first prose must not wait for [DONE] or stream close");
+    assert.deepEqual(seen, ["第一段"]);
+    controller.enqueue(encoder.encode('data: {"choices":[{"delta":{"content":"，第二段。"}}]}\n\ndata: [DONE]\n\n'));
+    controller.close();
+    assert.deepEqual(await result, { content: "第一段，第二段。", toolCalls: [] });
+    assert.deepEqual(seen, ["第一段", "第一段，第二段。"]);
+  } finally { globalThis.fetch = original; }
+});

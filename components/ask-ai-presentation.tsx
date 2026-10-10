@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   AgentCodeBlock, AgentDiffTable, AgentFlowchart, Button, Checklist, ChecklistItem,
-  CommandSearch, ContextCards, InsightCards, RecommendationCard, ToolChips,
+  DataTable, CellText, CommandSearch, ContextCards, InsightCards, RecommendationCard, ToolChips,
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
 import { presentationBlockSchema, type AgentPresentationBlock } from "@/lib/agent/presentation";
@@ -18,6 +18,12 @@ export function AskAiPresentation({ block, disabled, onAsk, storageKey }: {
   const ask = (question: string) => { if (!disabled) onAsk(question); };
   const interactive = (content: React.ReactNode) => <fieldset disabled={disabled} className="m-0 min-w-0 border-0 p-0 disabled:opacity-50">{content}</fieldset>;
   switch (data.type) {
+    case "table": return <div className="flex min-w-0 flex-col gap-2">
+      <h3 className="text-sm font-semibold text-fg-black">{data.title}</h3>
+      <div className="min-w-0 overflow-x-auto"><DataTable color={siteConfig.accent}
+        columns={(data.columns ?? []).map(column => ({ key: column.key, header: column.label, width: `${Math.max(12, Math.floor(100 / Math.max(1, data.columns?.length ?? 1)))}%`, render: (row: Record<string, string>) => <CellText>{row[column.key] ?? ""}</CellText> }))}
+        rows={data.rows ?? []} getRowKey={(_row, index) => String(index)} /></div>
+    </div>;
     case "checklist": return <UserChecklist key={storageKey} block={data} storageKey={storageKey} disabled={disabled} onAsk={ask} />;
     case "recommendation": return interactive(<RecommendationCard confidenceLabels={{ high: "高置信度", review: "待核对", none: "未评估" }} alternativesLabel="其他建议" title={data.title} body={data.body}
       confidence="review" confidenceLabel="建议，待核对" acceptLabel="按此建议继续"

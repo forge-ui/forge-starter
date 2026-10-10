@@ -127,6 +127,7 @@ function parseChatJson(raw: string, onToolArguments?: (call: ModelToolArgumentUp
 async function readModelTurn(
   response: Response,
   onToolArguments?: (call: ModelToolArgumentUpdate) => void,
+  onText?: (text: string) => void,
 ): Promise<ModelTurn> {
   const type = response.headers.get("content-type") ?? "";
   if (type.includes("application/json")) return parseChatJson(await response.text(), onToolArguments);
@@ -156,7 +157,10 @@ async function readModelTurn(
       const payload = JSON.parse(data) as ChatPayload;
       if (payload.error?.message) throw new Error(payload.error.message);
       const choice = payload.choices?.[0];
-      if (typeof choice?.delta?.content === "string") content += choice.delta.content;
+      if (typeof choice?.delta?.content === "string") {
+        content += choice.delta.content;
+        if (content.trimStart()) onText?.(content.trimStart());
+      }
       for (const call of choice?.delta?.tool_calls ?? []) applyToolCall(calls, call, onToolArguments);
       if (!choice?.delta && choice?.message) {
         if (typeof choice.message.content === "string") content = choice.message.content;
@@ -210,6 +214,8 @@ export async function runModelChatTurn(
     toolChoice?: "auto" | "required";
     /** Called as tool arguments grow. `arguments` is the cumulative JSON text. */
     onToolArguments?: (call: ModelToolArgumentUpdate) => void;
+    /** Cumulative visible prose; independent of structured tool-call arguments. */
+    onText?: (text: string) => void;
   } = {},
 ): Promise<ModelTurn> {
   if (!model.apiBase) throw new Error("模型没有 Chat Completions 地址");
@@ -252,7 +258,7 @@ export async function runModelChatTurn(
       const raw = await response.text();
       throw new Error(`模型接口 ${response.status}：${raw.replaceAll(model.apiKey, "***").slice(0, 200)}`);
     }
-    const turn = await readModelTurn(response, options.onToolArguments);
+    const turn = await readModelTurn(response, options.onToolArguments, options.onText);
     if (!turn.content && turn.toolCalls.length === 0) throw new Error("模型没有返回正文");
     return turn;
   } finally {

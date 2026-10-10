@@ -3,8 +3,9 @@
 import { AskAiPresentation } from "./ask-ai-presentation";
 import { isPresentationBlock } from "@/lib/agent/presentation";
 import { AskAiForm, type ConfirmFormIntent } from "./ask-ai-form";
-import { AskAiHarness, askAiToolReceipt, askAiTraceRows, type ReplyToHarness } from "./ask-ai-harness";
+import { AskAiHarness, askAiToolReceipt, type ReplyToHarness } from "./ask-ai-harness";
 import { useState } from "react";
+import { isAgentTaskRow } from "@/lib/ask-ai-progress";
 import { useRouter } from "next/navigation";
 import {
   AgentDiffTable,
@@ -20,7 +21,6 @@ import {
   InsightCards,
   RecommendationCard,
   StreamingAnswer,
-  ThinkingTrace,
   ToolChips,
 } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
@@ -136,17 +136,15 @@ function AskAiTurnView({
     : null;
   const answer = assistantAnswer(turn, choicePrompt);
   const waitingOnTrace = Boolean(turn.pending) && !result?.text;
-  const receipt = askAiToolReceipt(result?.harness);
+  const receipt = askAiToolReceipt(turn.progress ?? result?.harness);
+  const businessTasks = (turn.progress ?? result?.harness)?.tasks?.filter(isAgentTaskRow) ?? [];
   const showAnswer = Boolean(answer.text) && !waitingOnTrace && !(latest && result?.harness?.pending?.kind === "question");
 
   return (
     <div className="flex flex-col gap-5" data-ask-ai-turn={turn.id} data-ask-ai-delivery={answer.kind === "answer" ? answer.delivery.mode : "prompt"} data-ask-ai-chrome={chromeReady ? "ready" : "waiting"}>
       <ChatBubble type="sent" color={siteConfig.accent} className="w-full" content={turn.question} />
-      {waitingOnTrace ? (
-        <ThinkingTrace variant="reasoning" play activeLabel="正在思考" rows={[{ primary: "正在处理当前请求" }]} />
-      ) : (
-        <ThinkingTrace variant="steps" settled play={false} activeLabel="正在思考" doneLabel="已思考" rows={askAiTraceRows(result?.harness)} />
-      )}
+      {waitingOnTrace ? <p role="status" className="text-sm text-fg-grey-700">正在回复…</p> : null}
+      {businessTasks.length > 1 ? <AgentTaskRows statusLabels={{ running: "进行中", failed: "失败", completed: "已完成" }} tasks={businessTasks} /> : null}
       {receipt ? <ToolChips className="[&>button_svg]:transition-transform [&>button:last-child_svg]:-rotate-90" items={receipt.items} summary={receipt.summary} /> : null}
       {showAnswer ? (
         answer.kind === "prompt" ? (

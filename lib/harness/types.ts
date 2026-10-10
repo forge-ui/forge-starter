@@ -41,6 +41,8 @@ export type Run = {
   goal: string;
   capabilityNames: string[];
   messages: Message[];
+  /** Authorized read observations; reset for each request, never model-authored. */
+  observations?: Array<{ toolCallId: string; data: JsonObject; summary: string }>;
   pending?: Interaction;
   output: Output;
   exchanges: Array<{ id: string; question: string; output: Output }>;

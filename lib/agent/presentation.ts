@@ -9,12 +9,14 @@ const task = z.object({ id, label: short }).strict();
 const node = z.object({ id, kind: z.enum(["trigger", "action", "condition"]), title: short, body: text.optional() }).strict();
 const tone = z.enum(["violet", "green", "yellow", "blue"]);
 const chartValue = z.number().finite().nonnegative().max(1_000_000_000_000);
+const chartSource = { sourceToolCallId: id.optional() };
 const chart = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("spark"), series: z.array(z.object({ name: short, values: z.array(chartValue).min(2).max(24), tone: tone.optional() }).strict()).min(1).max(4) }).strict(),
-  z.object({ kind: z.literal("bars"), values: z.array(chartValue).min(1).max(24) }).strict(),
-  z.object({ kind: z.literal("segments"), items: z.array(z.object({ label: short, pct: z.number().finite().min(0).max(100), tone: tone.optional() }).strict()).min(1).max(8) }).strict(),
+  z.object({ kind: z.literal("spark"), ...chartSource, series: z.array(z.object({ name: short, values: z.array(chartValue).min(2).max(24), tone: tone.optional() }).strict()).min(1).max(4) }).strict(),
+  z.object({ kind: z.literal("bars"), ...chartSource, values: z.array(chartValue).min(1).max(24) }).strict(),
+  z.object({ kind: z.literal("segments"), ...chartSource, items: z.array(z.object({ label: short, pct: z.number().finite().min(0).max(100), tone: tone.optional() }).strict()).min(1).max(8) }).strict(),
 ]);
 export const presentationBlockSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("table"), title: short, sourceToolCallId: id, columns: z.array(column).max(12).default([]), rows: z.array(z.record(z.string(), z.string().max(1200))).max(50).default([]) }).strict(),
   z.object({ type: z.literal("checklist"), title: short, tasks: z.array(task).min(1).max(12) }).strict(),
   z.object({ type: z.literal("recommendation"), title: short, body: text, question: text, alternatives: z.array(action).max(5) }).strict(),
   z.object({ type: z.literal("insights"), cards: z.array(z.object({ id, title: short, body: text, prompt: text, chart: chart.optional() }).strict()).min(1).max(6) }).strict(),
@@ -45,5 +47,8 @@ export const presentationBlockSchema = z.discriminatedUnion("type", [
 export type AgentPresentationBlock = z.infer<typeof presentationBlockSchema>;
 export const presentationRequestSchema = z.object({ blocks: z.array(presentationBlockSchema).min(1).max(4) }).strict();
 export function isPresentationBlock(block: { type: string }): block is AgentPresentationBlock {
+  if (block.type === "table") return "sourceToolCallId" in block;
   return ["checklist", "recommendation", "insights", "diff", "code", "flow", "commands", "context"].includes(block.type);
 }
+
+export const PRESENTATION_TOOL_DESCRIPTION = "仅在组件比文字更有助于理解或需要交互时调用，普通聊天和写作直接回答，不展示组件。table展示本轮查询结果，提供sourceToolCallId与title即可，rows和columns留空，由服务端组装真实数据。checklist供用户自查；recommendation比较建议；insights解释数据，可选chart但须提供该chart的sourceToolCallId且数值与对应查询一致；diff比较差异；flow解释流程；context展示来源；commands提供可搜索入口；code只展示配置示例。不能编造业务事实或来源，不重复堆叠组件，不把建议标成已执行。此工具只展示，写入仍须业务工具与用户确认。";

@@ -1,3 +1,4 @@
+import { preparePresentation } from "./presentation-policy";
 /** Starter adapter. This is the only harness layer that knows business modules. */
 import { z } from "zod";
 import { toolsForAccess } from "@/lib/agent/registry";
@@ -54,7 +55,8 @@ function candidateEvidence(run: Run, resource: string) {
   for (const message of messages) {
     if (message.role !== "tool") continue;
     try {
-      const parsed = JSON.parse(message.content);
+      const envelope = JSON.parse(message.content);
+      const parsed = typeof envelope.summary === "string" ? JSON.parse(envelope.summary) : envelope;
       if (parsed.resource === resource && Array.isArray(parsed.records)) return parsed.records as Array<Record<string, string>>;
     } catch { /* Only structured tool facts can select a record. */ }
   }
@@ -97,19 +99,21 @@ export function createStarterPorts(input: { userId: string; access: AccessContex
   const tools = toolsForAccess(input.access).filter(tool => tool.permission.action === "read" || input.access.allowedModules.includes(tool.permission.resource));
   const knowledge = (question: string) => retrieveStarterKnowledge({ query: question, allowedCapabilityIds: tools.map(t => t.id), currentCapabilityIds: tools.filter(t => input.page?.pageId.startsWith(t.id.split(".")[0])).map(t => t.id), maxChars: 6500, maxEntries: 6 });
   return {
+    limits: { timeoutMs: 180_000 },
     store: postgresTaskStore, id: () => crypto.randomUUID(), now: () => new Date(),
     model: { async next(messages, capabilities, signal) {
       activeModel ??= await (input.model as () => Promise<ResolvedAiModel>)();
-      const options = { signal, tools: capabilities, timeoutMs: 45_000, temperature: 0.2, toolChoice: "required" as const, onToolArguments: (call: { name: string; arguments: string }) => {
+      const options = { signal, tools: capabilities, timeoutMs: 120_000, temperature: 0.2, toolChoice: "auto" as const, onText: input.onText, onToolArguments: (call: { name: string; arguments: string }) => {
         const text = call.name === "respond" ? respondAnswerText(call.arguments) : "";
         if (text) input.onText?.(text);
       } };
       let turn = await runModelChatTurn(activeModel, messages, options);
-      // Repair one protocol violation; never parse prose into an action.
-      if (!turn.toolCalls.length) {
-        turn = await runModelChatTurn(activeModel, [...messages, { role: "assistant", content: turn.content }, { role: "system", content: "上一条没有结构化动作。需要用户选择时调用ask_user或respond(question)。可以直接回答时，包括写作和一般问答，调用respond(answer)。业务查询和修改仍调用对应工具。" }], options);
+      // Repair a bare tool name only; ordinary prose is a valid final answer.
+      const bareName = turn.content.trim().replace(/^[\s()[\]`]+|[\s()[\]`]+$/g, "");
+      if (!turn.toolCalls.length && (!turn.content.trim() || capabilities.some(tool => tool.name === bareName))) {
+        turn = await runModelChatTurn(activeModel, [...messages, { role: "assistant", content: turn.content }, { role: "system", content: "上一条没有结构化动作。需要用户选择时调用ask_user。可以直接回答时，包括写作和一般问答，直接输出正文。业务查询和修改仍调用对应工具。" }], { ...options, toolChoice: "required" });
       }
-      if (!turn.toolCalls.length) throw new Error("Model did not return a structured action");
+      if (!turn.toolCalls.length && !turn.content.trim()) throw new Error("Model did not return a structured action");
       return { ...turn, content: withoutNavigationClaim(turn.content) };
     } },
     context: { async resolve(question) {
@@ -123,9 +127,9 @@ export function createStarterPorts(input: { userId: string; access: AccessContex
         knowledge(question).context,
         `结构化业务契约：${JSON.stringify(Object.fromEntries(Object.entries(publicApplication).filter(([id]) => input.access.allowedModules.includes(id as typeof input.access.allowedModules[number]))))}`,
         "业务办理时每次只给1至3个可执行的下一步。API Key、密码不得进入对话。登录用户与业务账号不同。没有对应业务工具时仍直接回答一般问题。只有生成或运行仓库代码、泄露密钥、编造业务数据时才说明做不到。",
-        "用户要求清单、推荐、分析、差异、流程、来源或可搜索入口时，使用 assistant_present 展示相应组件，再 respond 给简短结论。事实先查工具；checklist仅用户自查，不代表系统已执行；code只用于展示业务配置JSON或明确标注的示例，不能生成或运行仓库代码。多选用 ask_user multiple=true。单选用 multiple=false。不要在一轮塞满所有组件。",
-        "AgentTaskRows 已接入：只在有真实任务步骤时由界面自动展示，不能通过 assistant_present 调用或编造。用户询问是否集成时直接说明已接入，并说明普通回答不会带上它。普通回答不在消息前后附加思考过程或工具次数。真正执行查询或修改后，ToolChips 只列出这些调用。多选问题自动使用 ApprovalCard。需要演示任务进度时执行其授权的真实查询或分析步骤，不把示例计划称为已执行任务。",
-        "业务办理的回复使用纯文本中文，通常最多3个短句，结果表格已展示的字段不重复逐项罗列。用户明确要求的故事、说明或其他长文本按请求写完。不输出工具内部名称或技术实现。",
+        "根据当前请求自主决定是否使用 assistant_present；只有组件比文字更清楚或需要交互时才展示，用户要求纯文字时不用。可展示清单、推荐、分析、差异、流程、来源或搜索入口，再直接输出简短结论。事实先查工具；checklist仅用户自查，不代表系统已执行；code只用于展示业务配置JSON或明确标注的示例，不能生成或运行仓库代码。多选用 ask_user multiple=true。单选用 multiple=false。不要在一轮塞满所有组件。",
+        "AgentTaskRows 已接入：只在有多个真实业务执行步骤时由界面展示，不能通过 assistant_present 调用或编造。用户询问是否集成时直接说明已接入，并说明普通回答不会带上它。普通回答不在消息前后附加思考过程或工具次数。真正执行查询或修改后，ToolChips 只列出这些调用。多选问题自动使用 ApprovalCard。需要演示任务进度时执行其授权的真实查询或分析步骤，不把示例计划称为已执行任务。",
+        "业务办理的回复使用纯文本中文，通常最多3个短句，如果你已选择展示表格，不重复逐项罗列其中的字段。用户明确要求的故事、说明或其他长文本按请求写完。不输出工具内部名称或技术实现。",
       ].join("\n");
     } },
     capabilities: {
@@ -140,6 +144,7 @@ export function createStarterPorts(input: { userId: string; access: AccessContex
         if (choice) return choice;
         if (tool.mode === "read") {
           const output = await tool.run(args, { userId: input.userId });
+          if (tool.id === "assistant.present" && output.blocks) output.blocks = preparePresentation(output.blocks as import("@/lib/agent/presentation").AgentPresentationBlock[], run);
           const records = output.blocks?.flatMap(block => block.type === "table" ? block.rows : []) ?? [];
           return { summary: output.navigation ? output.summary : JSON.stringify({ resource: tool.id.split(".")[0], facts: output.summary, records }), data: jsonObject(output), stop: Boolean(output.navigation) };
         }
@@ -173,10 +178,6 @@ export function createStarterPorts(input: { userId: string; access: AccessContex
     operations: { retire: retireStarterOperations },
     presentation: { finalize(run) {
       const data: JsonObject = { ...run.output.data, live: Boolean(activeModel), model: activeModel?.modelName ?? "", failed: run.status === "failed" };
-      const suggestions = [...new Map(knowledge(run.goal).entries.flatMap(e => e.nextSteps ?? []).map(s => [s.question, s])).values()].slice(0, 3);
-      if (run.status === "completed" && suggestions.length && !data.navigation && !data.fill && !data.assistantWriteUnavailable) {
-        data.blocks = [...(Array.isArray(data.blocks) ? data.blocks : []), jsonObject({ type: "choice", title: "接下来可以", options: suggestions.map(s => ({ label: s.label, question: s.question })) })];
-      }
       return { text: run.output.text, data };
     } },
   };

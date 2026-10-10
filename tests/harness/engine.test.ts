@@ -194,6 +194,8 @@ test("unregistered tools and invalid JSON/schema return errors and permit correc
   const failures = f.seen[1].filter(message => message.role === "tool");
   assert.equal(failures.length, 3);
   assert.ok(failures.every(message => JSON.parse(message.content).error));
+  const correctedHistory = f.seen[1].find(message => message.role === "assistant" && message.toolCalls?.some(call => call.id === "bad-json"));
+  assert.equal(correctedHistory?.role === "assistant" && correctedHistory.toolCalls?.find(call => call.id === "bad-json")?.arguments, "{}", "invalid arguments are never executed and do not poison provider history");
   assert.equal(completed.events.filter(event => event.kind === "tool-error").length, 3);
   assert.equal(completed.tasks?.filter(task => task.status === "failed").length, 3, "correcting a tool error must preserve the failed attempt");
   assert.equal(completed.tasks?.find(task => task.id === "request-1:tool:1:0")?.status, "completed");
@@ -335,4 +337,44 @@ test("multi-select rejects invalid, duplicate, empty, mixed or single-question s
   const single = fixture([{ toolCalls: [choose()] }]);
   const one = await advanceRun(start(), single.ports);
   await assert.rejects(advanceRun(follow(one, { reply: { interactionId: one.pending!.id, optionIds: ["ticket-a"] } }), single.ports), /仅支持单选/);
+});
+
+test("the model may answer directly and is not required to call a rendering or respond tool", async () => {
+  const f = fixture();
+  f.ports.model.next = async (_messages, available) => {
+    assert.equal(available.some(tool => tool.name === "respond"), false);
+    assert.equal(available.some(tool => tool.name === "ask_user"), true);
+    return { content: "你好，有什么想聊的？", toolCalls: [] };
+  };
+  const result = await advanceRun({ ...start(), question: "你好" }, f.ports);
+  assert.equal(result.status, "completed");
+  assert.equal(result.output.text, "你好，有什么想聊的？");
+  assert.deepEqual(f.invoked, []);
+  const { publicRunTasks } = await import("../../lib/harness/progress");
+  assert.deepEqual(publicRunTasks(result), [], "internal context/model tasks must not become UI steps");
+});
+
+test("successful read facts reach the model without forcing a table, and only chosen views are displayed", async () => {
+  const f = fixture([
+    { toolCalls: [call("tickets.list", {}, "query-real")] },
+    { toolCalls: [call("assistant_present", {}, "view-real")] },
+    { content: "已按需要展示真实工单。" },
+  ]);
+  f.ports.capabilities.list = async () => [...capabilities, { name: "assistant_present", title: "整理交互内容", effect: "read", description: "按需展示", parameters: { type: "object" } }];
+  f.ports.capabilities.invoke = async (name, _args, run) => {
+    if (name === "tickets.list") return { summary: "两个真实工单", data: { blocks: [{ type: "table", rows: tickets }] } };
+    assert.equal(run.observations?.length, 1);
+    assert.equal(run.observations?.[0].toolCallId, "query-real");
+    assert.deepEqual(run.output.data.blocks, [], "query must not force a UI view");
+    return { summary: "展示工单", data: { blocks: [{ type: "checklist", title: "核对", tasks: [{ id: "a", label: "查看工单" }] }] } };
+  };
+  const done = await advanceRun(start(), f.ports);
+  assert.equal(done.status, "completed");
+  const facts = f.seen[1].find(message => message.role === "tool" && message.toolCallId === "query-real");
+  assert.ok(facts);
+  assert.deepEqual(JSON.parse(facts.content), { sourceToolCallId: "query-real", summary: "两个真实工单", data: { blocks: [{ type: "table", rows: tickets }] } });
+  assert.equal(done.observations?.length, 1, "presentation is not a new source of facts");
+  assert.equal(done.events.some(event => event.kind === "tool" && event.label === "整理交互内容"), false);
+  assert.equal(done.events.some(event => event.kind === "presentation"), true);
+  assert.equal((done.output.data.blocks as Array<{ type: string }>)[0].type, "checklist");
 });

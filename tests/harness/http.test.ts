@@ -81,8 +81,9 @@ before(async () => {
       const script = scripted.shift();
       assert.ok(script, "unexpected model invocation");
       modelRequests.push(body);
+      const reply = script(body);
       response.writeHead(200, { "Content-Type": "application/json" });
-      response.end(JSON.stringify({ choices: [{ message: { role: "assistant", ...script(body) } }] }));
+      response.end(JSON.stringify({ choices: [{ message: { role: "assistant", ...reply } }] }));
     } catch (error) {
       stubErrors.push(error instanceof Error ? error.message : "stub failed");
       response.writeHead(500, { "Content-Type": "application/json" });
@@ -279,7 +280,9 @@ test("HTTP: real account candidates and a structured selection open the chosen d
   scripted.push(body => {
     const listed = body.messages.findLast(message => message.role === "tool" && message.tool_call_id === "list-real-accounts");
     assert.ok(listed?.content);
-    const facts = JSON.parse(listed.content) as { resource: string; records: Array<{ id: string; name: string }> };
+    const envelope = JSON.parse(listed.content) as { sourceToolCallId: string; summary: string };
+    assert.equal(envelope.sourceToolCallId, "list-real-accounts");
+    const facts = JSON.parse(envelope.summary) as { resource: string; records: Array<{ id: string; name: string }> };
     assert.equal(facts.resource, "accounts");
     assert.deepEqual(facts.records.map(row => row.id).sort(), created.map(row => row.id).sort());
     return tool("respond", { outcome: "question", text: "请选择要打开的账号，也可以指定名称", options: facts.records.map(row => ({ id: row.id, label: row.name })), allowText: true }, "choose-real-account");

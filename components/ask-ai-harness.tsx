@@ -11,7 +11,7 @@ const TOOL_KINDS = new Set(["tool", "tool-error", "verified"]);
 /** Older runs stored a plain answer as a tool event with this label. */
 const PLAIN_ANSWER_LABEL = "整理回答或请求选择";
 /** The answer body already shows these. The trace keeps the work that led there. */
-const TRACE_SKIP = new Set(["message", "completed"]);
+const TRACE_SKIP = new Set(["understanding", "message", "completed"]);
 
 export type AskAiToolReceipt = {
   summary: string;
@@ -26,13 +26,13 @@ function turnEvents(state: AskAiHarnessState) {
   return state.events.slice(turnStart);
 }
 
-/** Steps for ThinkingTrace. A plain turn still gets one settled row. */
+/** Steps for ThinkingTrace. No synthetic row is added for plain answers. */
 export function askAiTraceRows(state: AskAiHarnessState | undefined): ThinkingRow[] {
-  if (!state) return [{ primary: "已理解当前请求" }];
+  if (!state) return [];
   const rows = turnEvents(state)
     .filter(event => !TRACE_SKIP.has(event.kind) && !TOOL_KINDS.has(event.kind) && event.label !== PLAIN_ANSWER_LABEL)
     .map(event => ({ primary: event.label }));
-  return rows.length ? rows : [{ primary: "已理解当前请求" }];
+  return rows;
 }
 
 /** Real tool calls for ToolChips. Plain answers are not calls. */
@@ -42,7 +42,8 @@ export function askAiToolReceipt(state: AskAiHarnessState | undefined): AskAiToo
   let messageCount = 0;
   let toolCallCount = 0;
   turnEvents(state).forEach((event, index) => {
-    const plainAnswer = event.kind === "message" || (event.kind === "tool" && event.label === PLAIN_ANSWER_LABEL);
+    if (event.kind === "presentation" || event.label === "整理交互内容") return;
+    const plainAnswer = event.label === "整理回答或请求选择" || event.kind === "message" || (event.kind === "tool" && event.label === PLAIN_ANSWER_LABEL);
     if (plainAnswer) {
       messageCount += 1;
       return;
