@@ -1,3 +1,4 @@
+import { toolsForAccess } from "@/lib/agent/registry";
 import { APPLICATION_BUILD_ID } from "@/lib/semantic/contracts";
 import { pageContextSchema, contextForPermissions } from "@/lib/semantic/context";
 import { semanticEnabled } from "@/lib/semantic/operations";
@@ -10,13 +11,15 @@ import { requireSession } from "@/lib/auth/session";
 import { resolveAccess } from "@/lib/rbac/access";
 import { databaseRequestScope } from "@/lib/db/request-scope";
 
+const COMPOSER_TOOL_LABELS: Record<string, string> = {"accounts.list": "查询账号", "accounts.get": "读取账号详情", "accounts.create": "新建账号", "accounts.update": "修改账号", "accounts.delete": "删除账号", "accounts.export": "导出账号", "roles.list": "查询角色", "menus.list": "查询菜单", "permissions.list": "查询权限", "models.list": "查询模型"};
+
 export async function GET(request: Request) {
   const auth = await requireSession();
   if (!auth.ok) return auth.response;
   try {
     const runtime = await peekAskAiRuntime();
     const access = await resolveAccess(auth.session);
-    return jsonOk({ ...runtime, suggestions: starterSuggestions(access, new URL(request.url).searchParams.get("page") ?? ""), buildId: APPLICATION_BUILD_ID, semanticEnabled: semanticEnabled(), harnessEnabled: harnessEnabled() });
+    return jsonOk({ ...runtime, sources: toolsForAccess(access).filter(tool => COMPOSER_TOOL_LABELS[tool.id]).map(tool => ({ id: tool.id, kind: "tool", label: COMPOSER_TOOL_LABELS[tool.id], placeholder: `描述${COMPOSER_TOOL_LABELS[tool.id]}的需求`, description: tool.mode === "write" ? "准备操作，确认后交给页面处理" : "已授权工具" })), suggestions: starterSuggestions(access, new URL(request.url).searchParams.get("page") ?? ""), buildId: APPLICATION_BUILD_ID, semanticEnabled: semanticEnabled(), harnessEnabled: harnessEnabled() });
   } catch (error) {
     const message = error instanceof Error ? error.message : "无法读取模型";
     return jsonError(message, 500);

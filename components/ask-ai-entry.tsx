@@ -21,7 +21,9 @@ import {
   ASK_AI_FS_LAYER_ATTR,
   AskAi,
   Button,
-  PromptBar,
+  ChatInputBar,
+  type ChatInputBarQuickAction,
+  type ChatInputBarSendContext,
   type AskAiProps,
   type AskAiRequest,
   type AskAiSessionItem,
@@ -66,6 +68,7 @@ import {
   type AgentContinuation,
 } from "@/lib/agent/fill";
 import { toast } from "@/lib/toast";
+import { ASK_AI_QUICK_ACTIONS, askAiQuickActions, composeActionMessage, composeToolContext } from "@/lib/ask-ai-quick-actions";
 import { watchAskAiProgress } from "@/lib/ask-ai-progress-client";
 import { askAiDeliveryPlaying } from "@/lib/ask-ai-playback";
 
@@ -526,14 +529,15 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     void onSend("", { messages: [], signal: new AbortController().signal }, undefined, { run, reply });
   }, [onSend]);
 
-  const sendComposer = useCallback((message: string) => {
+  const sendComposer = useCallback((draftMessage: string, action?: ChatInputBarQuickAction, context?: ChatInputBarSendContext) => {
+    const message = composeActionMessage(composeToolContext(draftMessage, context, runtime?.sources ?? []), action, ASK_AI_QUICK_ACTIONS);
     if (busyRef.current || readingAttachment || !restoreReady.current) return;
     const content = attachment ? `${message}\n\n参考附件：${attachment.name}\n${attachment.text}` : message;
     if (content.length > 2000) { toast.error("问题与附件合计过长，请缩短后发送"); return; }
     if (!message.trim()) { toast.info("请说明你希望如何处理附件"); return; }
     void onSend(content, { messages: [], signal: new AbortController().signal });
     setAttachment(null);
-  }, [onSend, attachment, readingAttachment]);
+  }, [onSend, attachment, readingAttachment, runtime?.sources]);
 
   const askFromHost = useCallback(
     (message: string) => {
@@ -739,8 +743,18 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
           <input ref={attachmentInput} type="file" accept=".txt,.md,.csv,.json" hidden aria-label="选择文本附件"
             onChange={(event) => { const file = event.currentTarget.files?.[0]; event.currentTarget.value = ""; void readAttachment(file); }} />
           {attachment ? <div className="mb-2 flex min-w-0 items-center gap-2"><span className="min-w-0 truncate text-xs text-fg-black">附件：{attachment.name}</span><Button color={siteConfig.accent} variant="tertiary" size="sm" disabled={busy} onClick={() => setAttachment(null)}>移除附件</Button></div> : null}
-          <PromptBar toolsMenuLabel="添加内容" onAttach={() => attachmentInput.current?.click()} sourcesLabel="来源" commandsLabel="指令" connectedLabel="已连接" attachLabel="添加附件" dictateLabel="语音输入"
+          <ChatInputBar toolsMenuLabel="添加内容" onAttach={() => attachmentInput.current?.click()} sourcesLabel="来源" commandsLabel="指令" connectedLabel="已连接" attachLabel="添加附件" dictateLabel="语音输入"
+            key={currentSessionId}
+            quickActions={askAiQuickActions(fullscreen, hasChat)}
+            sources={runtime?.sources ?? []} removeSourceLabel="移除对象"
+            quickActionsLabel="快捷操作"
+            removeQuickActionLabel="移除操作"
+            defaultQuickActionsOpen
             className="starter-ask-compact w-full min-w-0 max-w-full"
+            multiline
+            sendOnEnter
+            clearOnSend={false}
+            hasMessages={hasChat}
             value={draft}
             onChange={setDraft}
             onSend={sendComposer}

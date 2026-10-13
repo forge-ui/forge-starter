@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "@forge-ui-official/core/styles.css";
+@import "@forge-ui-official/core/styles.css"; /* core 0.4.3 typed context chips and avatars */
 
 /* Let Tailwind v4 scan the Forge dist so utility classes used inside core get generated. */
 @source "../node_modules/@forge-ui-official/core/dist";
@@ -65,7 +65,7 @@ body {
   min-height: 0;
 }
 
-/* Keep model names from crowding the compact PromptBar input. */
+/* Keep model names from crowding the compact ChatInputBar input. */
 .starter-ask-compact button[aria-label^="选择模型"] { max-width: 10rem !important; min-width: 0; }
 .starter-ask-compact button[aria-label^="选择模型"] span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @container (max-width: 440px) {

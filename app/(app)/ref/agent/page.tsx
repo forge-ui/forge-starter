@@ -1,5 +1,8 @@
 "use client";
 
+import { siteConfig } from "@/config/site";
+import { ASK_AI_QUICK_ACTIONS, composeActionMessage } from "@/lib/ask-ai-quick-actions";
+
 /**
  * Agent kit gallery — https://www.forgeui.org/cases/agent
  */
@@ -16,7 +19,7 @@ import {
   Grid,
   GridItem,
   InsightCards,
-  PromptBar,
+  ChatInputBar,
   RecommendationCard,
   StreamingAnswer,
   ThinkingTrace,
@@ -73,6 +76,7 @@ function AgentSection({
 export default function RefAgentPage() {
   const [followUp, setFollowUp] = useState<string | null>(null);
   const [prompt, setPrompt] = useState("");
+  const [promptModel, setPromptModel] = useState("fast");
   const [sent, setSent] = useState<string[]>([]);
 
   return (
@@ -130,15 +134,21 @@ export default function RefAgentPage() {
           </div>
         </AgentSection>
 
-        <AgentSection title="PromptBar" description="点 Sources / Commands，或输入 @ /。">
-          <PromptBar
+        <AgentSection title="ChatInputBar" description="选择快捷操作，保留草稿；也可添加来源、指令或切换模型。">
+          <ChatInputBar multiline sendOnEnter
+            color={siteConfig.accent}
+            quickActions={ASK_AI_QUICK_ACTIONS}
+            quickActionsLabel="快捷操作" removeQuickActionLabel="移除操作"
+            hasMessages={sent.length > 0}
             value={prompt}
             onChange={setPrompt}
-            onSend={(message) => setSent((current) => [...current, message])}
+            removeSourceLabel="移除对象"
+            onSend={(message, action, context) => setSent((current) => [...current, composeActionMessage([...(context?.sources ?? []).map(source => `@${source.label}`), message].join(" "), action, ASK_AI_QUICK_ACTIONS)])}
             sources={AGENT_PROMPT_SOURCES}
             commands={AGENT_PROMPT_COMMANDS}
             models={AGENT_PROMPT_MODELS}
-            model="fast"
+            model={promptModel}
+            onModelChange={setPromptModel}
           />
           {sent.length > 0 ? (
             <ul className="text-sm text-fg-grey-700">

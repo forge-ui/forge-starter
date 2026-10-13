@@ -197,6 +197,7 @@ export async function fetchAskAiRuntime(page?: string): Promise<AskAiRuntimeStat
     name: payload.name,
     provider: payload.provider,
     models,
+    sources: Array.isArray(payload.sources) ? payload.sources.filter(source => source && typeof source.id === "string" && typeof source.label === "string" && source.kind === "tool") : [],
     suggestions: Array.isArray(payload.suggestions)
       ? payload.suggestions.filter((item): item is string => typeof item === "string" && Boolean(item.trim())).map(item => item.trim()).slice(0, 4)
       : undefined,

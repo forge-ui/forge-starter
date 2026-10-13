@@ -9,9 +9,9 @@ import type {
   CommandSearchItem,
   ContextChunk,
   InsightCard,
-  PromptCommand,
-  PromptModel,
-  PromptSource,
+  ComposerCommand,
+  ComposerModel,
+  ComposerSource,
   RecommendationOption,
   StreamingSource,
   ToolChipItem,
@@ -132,17 +132,17 @@ export const AGENT_TOOL_DIFFS: ToolDiffChip[] = [
   { file: "menu.ts", add: 8, del: 2 },
 ];
 
-export const AGENT_PROMPT_SOURCES: PromptSource[] = [
-  { id: "sales", label: "Scoop Data", description: "Sales & churn metrics", connected: true },
-  { id: "flavors", label: "Flavor records", description: "26 makers, tags, links" },
+export const AGENT_PROMPT_SOURCES: ComposerSource[] = [
+  { kind: "tool", id: "sales", label: "Scoop Data", description: "Sales & churn metrics", connected: true },
+  { kind: "tool", id: "flavors", label: "Flavor records", description: "26 makers, tags, links" },
 ];
 
-export const AGENT_PROMPT_COMMANDS: PromptCommand[] = [
+export const AGENT_PROMPT_COMMANDS: ComposerCommand[] = [
   { id: "plan", label: "plan", description: "Draft a flavor launch plan" },
   { id: "forecast", label: "forecast", description: "Forecast summer demand" },
 ];
 
-export const AGENT_PROMPT_MODELS: PromptModel[] = [
+export const AGENT_PROMPT_MODELS: ComposerModel[] = [
   { id: "fast", label: "Forge Fast" },
   { id: "think", label: "Forge Think" },
 ];

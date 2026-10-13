@@ -1,3 +1,4 @@
+import type { ComposerSource } from "@forge-ui-official/core";
 export const ASK_AI_ENV_MODEL_ID = "env";
 
 export type AskAiRuntimeSource = "model" | "env" | "none";
@@ -11,6 +12,7 @@ export type AskAiModelOption = {
 };
 
 export type AskAiRuntimePublic = {
+  sources?: ComposerSource[];
   configured: boolean;
   source: AskAiRuntimeSource;
   selectedId?: string;

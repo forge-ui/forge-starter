@@ -35,7 +35,7 @@ export const REF_PAGES: RefPageMeta[] = [
     title: "Agent 组件画廊",
     role: "agent",
     summary:
-      "对照 /cases/agent：ThinkingTrace、StreamingAnswer、ApprovalCard、ToolChips、AgentTaskRows、PromptBar、ContextCards、RecommendationCard、AgentDiffTable、AgentCodeBlock、InsightCards、CommandSearch、AgentFlowchart。",
+      "对照 /cases/agent：ThinkingTrace、StreamingAnswer、ApprovalCard、ToolChips、AgentTaskRows、ChatInputBar、ContextCards、RecommendationCard、AgentDiffTable、AgentCodeBlock、InsightCards、CommandSearch、AgentFlowchart。",
     forgeTemplate: "https://www.forgeui.org/cases/agent",
     components: [
       "ThinkingTrace",
@@ -43,7 +43,7 @@ export const REF_PAGES: RefPageMeta[] = [
       "ApprovalCard",
       "ToolChips",
       "AgentTaskRows",
-      "PromptBar",
+      "ChatInputBar",
       "ContextCards",
       "RecommendationCard",
       "AgentDiffTable",

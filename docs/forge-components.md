@@ -56,10 +56,10 @@
 | 工作台、指标 | `StatCard` `ChartCard` 图表家族 `DataTable`；分栏 `Grid`/`GridItem`（core `≥0.1.13`，默认 12 列 / 16px） | `dashboard` | `card` `chart` `table` `grid` |
 | **资源工作台** | `WorkspaceSplit` `FolderNav` `ResourceCard` + `Grid` 卡组 + toast | `/ref/resource-workspace` | `grid` |
 | 设置单卡 | 头像菜单三项（资料/改密/系统偏好）用 `Modal` 表单，不要整页；应用管理仍是 collection | `settings-account-dialog`、`settings/apps` | `input-field` `modal` |
-| Ask AI | Kit `AskAi`（抽屉 + 全屏 + `sessions`）。composer 用 `PromptBar`，抽屉里必须垫 gutter + `min-w-0`；回复用几组示范问答，按题选用 Agent 组件，不要整页丢 `/cases/agent` 英文 demo。`hideHeader` 时不要传 `AppLayout.askAi` | `ask-ai-entry`、`/ref/agent` | `page-header` `agent` |
+| Ask AI | Kit `AskAi`（抽屉 + 全屏 + `sessions`）。composer 用 `ChatInputBar`，抽屉里必须垫 gutter + `min-w-0`；回复用几组示范问答，按题选用 Agent 组件，不要整页丢 `/cases/agent` 英文 demo。`hideHeader` 时不要传 `AppLayout.askAi` | `ask-ai-entry`、`/ref/agent` | `page-header` `agent` |
 | Agent 痕迹 / 任务 / 审批 | `ThinkingTrace` `StreamingAnswer` `ToolChips` `AgentTaskRows` `ApprovalCard` | `/ref/agent` | `agent` |
 | Agent 检索 / 建议 / 命令 | `ContextCards` `RecommendationCard` `InsightCards` `CommandSearch` | `/ref/agent` | `agent` |
-| Agent 产物 | `AgentDiffTable` `AgentCodeBlock` `AgentFlowchart` `PromptBar` | `/ref/agent` | `agent` |
+| Agent 产物 | `AgentDiffTable` `AgentCodeBlock` `AgentFlowchart` `ChatInputBar` | `/ref/agent` | `agent` |
 | 清单 | Kit `Checklist` / `ChecklistItem`（完成沉底；`color={siteConfig.accent}`）。core `0.1.18` 起随包导出。禁止手搓 Checkbox 行 | `/ref/checklist`、`/ref/task` | `checklist` |
 | 空态 | 文案 + `Button`；可选 solar 图标 | 各列表 empty | `button-link` |
 
@@ -117,9 +117,9 @@ import { AskAiEntry } from "@/components/ask-ai-entry";
 - 宿主：`AskAiProvider` 已挂 `AppShell`，换页不卸、对话保住
 - 入口：业务页统一直接使用 core `PageTitleToolbar`，`actions` 放 `ToolbarActions` + `AskAiEntry` + 业务按钮。`breadcrumbs` 放 Kit `Breadcrumbs`；当前预设模式没有入口插槽，采用仍受支持的组合接口保留全局 Ask AI 实例。不要逐页传 `askAi` 创建新实例。工作台与参考页仍可单独挂 `AskAiEntry`。
 - 全屏 / 会话：走 Kit 抽屉顶栏全屏钮 + `sessions` / `currentSessionId` / `landingTitle`。core 不读 localStorage，不要另挂全视口层
-- 输入：Kit `PromptBar`（模型选择 + 发送）。模型列表来自模型管理里启用且有密钥的条目，发送带 `modelId`；没有可用模型时不画选择器，退本地规则。不要手搓底栏，也不要挂未实现的附件 / Sources / Commands / 语音。抽屉 460px，自定义 `composer` 核心不带 `p-4`，宿主必须自己垫 gutter + `min-w-0`，别把宽栏直接贴边
+- 输入：Kit `ChatInputBar`（模型选择 + 发送）。模型列表来自模型管理里启用且有密钥的条目，发送带 `modelId`；没有可用模型时不画选择器，退本地规则。不要手搓底栏，也不要挂未实现的附件 / Sources / Commands / 语音。抽屉 460px，自定义 `composer` 核心不带 `p-4`，宿主必须自己垫 gutter + `min-w-0`，别把宽栏直接贴边
 - 回复：演示走 `AskAiTranscript` 四条中文问答（页面 / 下一步 / 状态 / 权限）。对照页 `/ref/agent` 只看组件，不要把英文 case 原文塞进抽屉
-- 终止（core ≥0.3.5）：`PromptBar status="running"` + `onStop`，覆盖等待响应和文字播放阶段；停止时取消当前请求及进度读取，并将回复 delivery 设为 stopped。
+- 终止（core ≥0.3.5）：`ChatInputBar status="running"` + `onStop`，覆盖等待响应和文字播放阶段；停止时取消当前请求及进度读取，并将回复 delivery 设为 stopped。
 - 发送：`lib/ask-ai.ts` 的 `sendAskAi` → `POST /api/ask-ai`。优先用所选/默认的库内模型，没有再用 `ASK_AI_LLM_*`，都没有走本地规则。不要另做一套抽屉，也不要把 key 放进前端
 
 ## 后台常用 import 清单
@@ -177,3 +177,16 @@ import { siteConfig } from "@/config/site";
 | `forge-starter-quick-start` | 报告 backlog 时按角色注明建议组件包即可 |
 
 更全的页面模式（日历/聊天/发票等）见 monorepo `page-patterns.md`；Starter 默认 CRUD 用上表足够。
+
+
+### ChatInputBar 0.4.1 快捷操作
+
+Ask AI 的快捷卡片只显示于全屏空会话；抽屉以及已有消息的会话不显示卡片。通过 `askAiQuickActions(fullscreen, hasMessages)` 统一判断，切换会话时用会话 ID 重置 composer。
+
+快捷动作配置包含 `kind`（Kit 内建动效插画）、`placeholder` 和本地 `instruction`。选择卡片只改变可移除标签和提示语，不改用户草稿；`onSend(message, action)` 由 `composeActionMessage` 按本地动作 ID 生成提问，再进入原发送链路，长度校验包括动作提示与附件。未知动作不附加提示，失败重试不重复附加。卡片不是授权或直接写入入口，权限、确认、取消与工具白名单仍由原服务端执行。
+
+模型和权限菜单继续使用真实配置；没有生图、语音或日程服务时不展示这些动作。中文输入、空白区聚焦、卡片动效与 reduced-motion 由 core 提供。
+
+### core 0.4.3 上下文对象
+
+`ComposerSource.kind` 支持 agent / skill / tool；选中后显示可移除动态标签，`avatarSrc` 用于智能体头像。`onSend(message, quickAction, context)` 的 context.sources 必须按当前可用对象 id 校验，再接回原发送处理器；选中本身不执行操作。未指定 kind 的存量来源继续插入 @ 文本。Starter / Dataset Ask AI 的候选工具来自服务端原有注册表和权限过滤；不得提供不存在或未授权的技能。
