@@ -1,24 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { jwtVerify } from "jose";
-
-const SESSION_COOKIE = "forge_session";
-
-function authMode() {
-  return (process.env.AUTH_MODE ?? "demo").trim().toLowerCase() === "local" ? "local" : "demo";
-}
-
-function guardEnabled() {
-  const explicit = process.env.AUTH_GUARD?.trim().toLowerCase();
-  if (explicit === "false") return false;
-  return true;
-}
-
-function authSecret() {
-  const secret = process.env.AUTH_SECRET?.trim();
-  if (secret && secret.length >= 16) return secret;
-  if (authMode() === "demo") return "forge-starter-demo-secret-change-me";
-  return null;
-}
+import { getAuthMode, getAuthSecret, isAuthGuardEnabled, SESSION_COOKIE } from "./lib/auth/config";
 
 function normalizePath(pathname: string) {
   if (pathname.length > 1 && pathname.endsWith("/")) {
@@ -64,8 +46,7 @@ function isProtectedAppPath(pathname: string) {
 async function hasValidSession(request: NextRequest) {
   const token = request.cookies.get(SESSION_COOKIE)?.value;
   if (!token) return false;
-  const secret = authSecret();
-  if (!secret) return false;
+  const secret = getAuthSecret();
   try {
     await jwtVerify(token, new TextEncoder().encode(secret));
     return true;
@@ -101,7 +82,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (!guardEnabled()) {
+  if (!isAuthGuardEnabled()) {
     return NextResponse.next();
   }
 
@@ -114,7 +95,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (authMode() === "demo" && isAuthPage(pathname) && loggedIn && normalizePath(pathname) !== "/reset-password") {
+  if (getAuthMode() === "demo" && isAuthPage(pathname) && loggedIn && normalizePath(pathname) !== "/reset-password") {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard/";
     url.search = "";

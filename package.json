@@ -2,7 +2,13 @@
   "name": "forge-starter",
   "version": "0.8.0",
   "private": true,
+  "license": "MIT",
   "description": "用 Forge UI 快速搭建管理后台。开箱样板 + AI skills + 布局画廊，给人和编程助手一起用。",
+  "packageManager": "pnpm@10.33.4",
+  "engines": {
+    "node": ">=20.9.0",
+    "pnpm": ">=10"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -13,7 +19,9 @@
     "typecheck": "tsc --noEmit",
     "audit:tripwire": "node scripts/audit-tripwire.mjs",
     "check": "pnpm typecheck && pnpm audit:tripwire",
-    "db:push": "drizzle-kit push",
+    "test": "NODE_ENV=test tsx --test --test-concurrency=1 tests/apps/*.test.ts tests/ask-ai/*.test.ts tests/auth/*.test.ts tests/db/*.test.ts tests/harness/*.test.ts tests/models/*.test.ts tests/navigation/*.test.ts tests/security/*.test.ts tests/semantic/*.test.ts",
+    "db:push": "node scripts/db-push.mjs",
+    "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "db:generate": "drizzle-kit generate",
     "semantic": "tsx tooling/semantic/cli.ts",

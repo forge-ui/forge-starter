@@ -16,7 +16,7 @@
 | Workers 本地 HTTP | 同一协议测试 2/2 通过 | `.semantic/workers-http.log` |
 | 浏览器账号 | 详情当前记录→AI 确认→跨页表单→修改草稿→保存→同会话核对 | `.semantic/browser-account.png`；真实稳定 Chrome 现有会话 |
 | 浏览器模型 | AI 查询真实模型 ID→确认打开→详情弹窗与 ?id= URL→关闭 | `.semantic/browser-model.png` |
-| Forge 规范审计 | 分账号、模型两批逐条完成 | `docs/agent-semantic-audit.md` |
+| Forge 规范审计 | 分账号、模型两批逐条完成 | `docs/history/agent-semantic-audit.md` |
 
 ## 本轮发现并修复
 

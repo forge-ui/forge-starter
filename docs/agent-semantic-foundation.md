@@ -37,12 +37,12 @@ pnpm semantic impact accounts.department
 **必须先应用增量迁移，再运行新代码。** `revision` 是账号读写的基础列，即使 `SEMANTIC_ENABLED=false` 也需要；该开关控制持久化操作/回执及强制 If-Match，不回退数据库 schema、页面上下文或共享校验。
 
 1. 在明确选定的环境备份并检查 `DATABASE_URL`。
-2. 执行 `migrations/semantic-v1.sql`。它只增加 revision 与 semantic_operations，不删除旧数据。
+2. 执行 `pnpm db:migrate`。`revision` 和 `semantic_operations` 已经在基线里；旧库缺列时会补上，不会删数据。当初的手写脚本留在 `docs/history/sql/semantic-v1.sql`。
 3. 部署新代码；按环境设 `SEMANTIC_ENABLED=true`。客户端正常表单自动发送幂等键和 revision。
 4. 自定义 API 客户端：POST 带 UUID `Idempotency-Key`；PATCH/DELETE 还须 `If-Match: <revision>`。确认驱动的页面用 `X-Operation-Id`。
 5. 回滚应用时可保留新增表/列。关闭开关恢复旧保存协议，但也关闭幂等/强制并发检查，不能作为数据完整性保证。
 
-2026-09-28：本地复验通过后，已完成生产增量迁移并启用 SEMANTIC_ENABLED；发布和验证证据见 `docs/agent-semantic-release.md`。
+2026-09-28：本地复验通过后，已完成生产增量迁移并启用 SEMANTIC_ENABLED；发布和验证证据见 `docs/history/agent-semantic-release.md`。
 
 ## 接入新模块
 

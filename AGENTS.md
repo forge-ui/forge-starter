@@ -14,7 +14,7 @@ Coding Agent 是第一开发界面：skills 拆开后端与页面，`accounts` �
 5. **禁止** MUI、Ant、全量 shadcn 替代 Forge；缺能力 `FORGE-GAP` 并询问。  
 6. 认证：用户名或邮箱 + 密码；库 **PostgreSQL only**；邮件 **仅 SMTP**。  
 7. 登录表 `users` ≠ 业务表（如 `admin_accounts`），不要混接。  
-8. **`AUTH_MODE=demo` 只绕过登录用户库，不提供业务持久化。** 任何 CRUD（accounts/新模块）都需要 `DATABASE_URL` + `pnpm db:push`。不要写「无 Postgres 也能做完整业务 CRUD」。  
+8. **`AUTH_MODE=demo` 只绕过登录用户库，不提供业务持久化。** 任何 CRUD（accounts/新模块）都需要 `DATABASE_URL`。新环境和生产用 `pnpm db:migrate`；`pnpm db:push` 只对开发库。不要写「无 Postgres 也能做完整业务 CRUD」。  
 9. **后端与页面分开做**：先 module（数据+API），再 page（UI）。不要一条指令无脑抄 accounts 全套且写死详情形态。  
 10. 详情 **无全局默认**：重 → `accounts` 全页；轻 → `/ref/detail-modal` + 本仓 `Modal` + `?id=`（**暂无第二业务样板**）；拿不准问用户。
 11. 列表筛选/搜索 **一条工具带**（Starter：`ButtonGroup`+`TextField`；官方：`Toolbar`+`ToolbarSearchInput`）；禁止两行 pills。页头可用 `PageTitleToolbar`，不要写死只能 h1。  
@@ -127,7 +127,7 @@ docs/product.md agent-native.md setup.md module-template.md page-roles.md refere
 
 ## 扩业务最短路径
 
-1. `new-module`：types + service + schema + `db:push` + API（**API 齐 ≠ 侧栏有**）。  
+1. `new-module`：types + service + schema + `db:migrate`（开发库迭代可用 `db:push`）+ API（**API 齐 ≠ 侧栏有**）。  
 2. `new-page`：读 page-roles → 选全页（accounts）或轻弹窗（`/ref/detail-modal`，暂无第二业务样板）→ 列表/弹窗/详情 + **菜单三处**（`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`），默认应用种子勾齐新 id。  
 3. 加菜单后清 Local Storage `forge-starter:app-registry`（或种子默认勾齐）。无权限直链由壳 `replace` 回工作台。  
 4. `pnpm typecheck` + 浏览器从侧栏点通。  

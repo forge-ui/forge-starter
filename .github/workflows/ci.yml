@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: forge
+          POSTGRES_PASSWORD: forge_ci_password
+          POSTGRES_DB: forge_semantic_test_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U forge -d forge_semantic_test_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://forge:forge_ci_password@127.0.0.1:5432/forge_semantic_test_ci
+      AUTH_MODE: local
+      AUTH_SECRET: ci-auth-secret-0123456789abcdef0
+      SEMANTIC_ENABLED: "true"
+      POSTGRES_PASSWORD: forge_ci_password
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm audit:tripwire
+      - run: pnpm db:migrate
+      - run: pnpm test

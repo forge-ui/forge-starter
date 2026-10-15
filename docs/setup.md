@@ -4,8 +4,8 @@ README 只给最短路径。本文是环境变量、目录和命令的完整说�
 
 ## 依赖
 
-- Node.js（建议 20+）
-- [pnpm](https://pnpm.io)
+- Node.js 20.9 或更新（`package.json` 的 `engines`）
+- [pnpm](https://pnpm.io) 10（版本以 `packageManager` 为准）
 - Docker（跑 Postgres；也可用自己的库，把 `DATABASE_URL` 改成实际连接串）
 
 ## 最短路径
@@ -17,14 +17,16 @@ cp .env.example .env
 # 编辑 .env：设置唯一 POSTGRES_PASSWORD，并同步 DATABASE_URL
 docker compose up -d
 pnpm install
-pnpm db:push
+pnpm db:migrate
 pnpm db:seed
 pnpm dev
 ```
 
 打开 `http://localhost:3000`。
 
-`pnpm db:push` 依赖已安装的 `drizzle-kit`，所以必须在 `pnpm install` 之后。compose 起来后若立刻 push 失败，等几秒等 Postgres 健康检查通过再试（`docker compose up -d --wait` 会等到 healthy）。
+`pnpm db:migrate` 依赖已安装的 `drizzle-kit`，所以必须在 `pnpm install` 之后。compose 起来后若立刻失败，等几秒等 Postgres 健康检查通过再试（`docker compose up -d --wait` 会等到 healthy）。再执行一次是安全的，已经记过的迁移会跳过。
+
+`pnpm db:push` 只用于开发库：它按当前 schema 直接改表，不写迁移记录。`NODE_ENV=production` 时默认拒绝。新环境、CI 和生产用 `pnpm db:migrate`。
 
 Compose 仅监听 `127.0.0.1:5432`，要求设置独立的 `POSTGRES_PASSWORD`。把密码的 URL 编码值同步到 `DATABASE_URL`。可用 `openssl rand -hex 32` 生成随机密码。已有数据卷不会因环境变量改变而自动更换数据库密码，需由运维显式轮换。
 
@@ -34,8 +36,8 @@ Compose 仅监听 `127.0.0.1:5432`，要求设置独立的 `POSTGRES_PASSWORD`�
 |--|--------------------------|-------------------|
 | 登录 | 任意用户名/邮箱 + 密码即可进后台 | 走 Postgres `users` 表，需先注册 |
 | 侧栏角色 | 见下方种子角色表。用户名 `admin` / `operator` / `auditor` / `readonly`（及中文别名）映射种子角色；**其余用户名默认超级管理员（全开）**。无库时回退种子授权 | `users.role_code`（**默认 `readonly`**）；公开注册固定只读角色。管理员须由受信任运维显式分配库字段，不是业务账号 `admin_accounts.role` |
-| `AUTH_SECRET` | 未设时用内置演示密钥 | **必填**，至少 16 位（`.env.example` 建议更长） |
-| 业务 CRUD | **仍要** `DATABASE_URL` + `pnpm db:push` | 同左 |
+| `AUTH_SECRET` | 未设时用内置演示密钥。写了就必须至少 32 位 | **必填**，至少 32 位 |
+| 业务 CRUD | **仍要** `DATABASE_URL` + `pnpm db:migrate` | 同左 |
 | 登录守卫 | 默认强制。未登录打开后台会进登录页，不出现访客壳（`AUTH_GUARD=false` 可关） | 默认强制登录 |
 
 ### 种子角色与侧栏（管理员 / 合理默认）
@@ -64,7 +66,9 @@ API 一律先 `requireSession`（未登录 401）。账号 / 角色 / 菜单 / �
 
 RBAC 初始角色与授权由 `pnpm db:seed` 显式创建；已有角色授权不会自动补回。运行时授权不会初始化角色。
 
-本地会话保存在 `auth_sessions`：注销撤销当前会话，改密或密码重置使此前所有会话失效。升级时先运行 `pnpm db:push` 新增会话表；既有本地 JWT 需重新登录。演示模式仍为无用户数据库的静态演示认证，不能用于真实访问控制。
+本地会话保存在 `auth_sessions`：注销撤销当前会话，改密或密码重置使此前所有会话失效。升级时先运行 `pnpm db:migrate`；既有本地 JWT 需重新登录。演示模式仍为无用户数据库的静态演示认证，不能用于真实访问控制。
+
+`NODE_ENV=production` 时，demo（含没写 `AUTH_MODE`）或缺少 `AUTH_SECRET` 都会拒绝启动。Workers 在第一次请求做同样的检查。确要公开演示才设置 `ALLOW_INSECURE_AUTH=true`。`local` 即使开了这个开关，仍然要 32 位密钥。`next build` 不会因为开发用的 demo 配置中断。
 
 ## 环境变量
 
@@ -72,8 +76,9 @@ RBAC 初始角色与授权由 `pnpm db:seed` 显式创建；已有角色授权�
 
 | 变量 | 说明 |
 |------|------|
-| `AUTH_MODE` | `demo` 或 `local`，默认 `demo` |
-| `AUTH_SECRET` | 会话签名。`local` 至少 16 位 |
+| `AUTH_MODE` | `demo` 或 `local`。不写时开发环境是 `demo`；生产里这会被拒绝 |
+| `AUTH_SECRET` | 会话签名。至少 32 位。`local` 和生产必填 |
+| `ALLOW_INSECURE_AUTH` | 仅 `true` 时允许生产环境跑 demo。不要当默认 |
 | `APP_URL` | 对外地址，用于重置密码链接，默认 `http://localhost:3000` |
 | `DATABASE_URL` | PostgreSQL 连接串。`local` 登录和任何业务 CRUD 都需要 |
 | `AUTH_GUARD` | 默认开启。设 `false` 才允许未登录进入后台 |
@@ -106,10 +111,12 @@ RBAC 初始角色与授权由 `pnpm db:seed` 显式创建；已有角色授权�
 | `pnpm build` / `pnpm start` | 生产构建与启动 |
 | `pnpm typecheck` | TypeScript 检查 |
 | `pnpm check` | typecheck + 规范绊线 |
-| `pnpm db:push` | 把 Drizzle schema 推到当前库（开发） |
+| `pnpm test` | 跑 `tests/` 下全部测试。需要库的用例见下方 |
+| `pnpm db:migrate` | 按 `migrations/` 应用到当前库。可重复执行 |
+| `pnpm db:push` | 仅开发库。按 schema 直接改表，不写迁移记录 |
 | `pnpm db:seed` | 显式初始化 RBAC 角色与授权；保留已有角色授权 |
-| `pnpm test:security` | 本地隔离测试库运行安全回归；可设置 SECURITY_TEST_ORIGIN 为 127.0.0.1:3167/3168 验证 HTTP |
-| `pnpm db:generate` | 生成 migration |
+| `pnpm test:security` | 安全回归的旧入口，已被 `pnpm test` 覆盖 |
+| `pnpm db:generate` | 根据 schema 差异生成下一份 migration |
 | `pnpm db:studio` | Drizzle Studio |
 | `docker compose up -d` | 启动本仓库 Postgres 16 |
 
@@ -132,6 +139,8 @@ AGENTS.md
 
 ## 安全回归验证
 
-使用独立的本地 PostgreSQL 数据库（名称以 `forge_semantic_test_` 开头），将 `DATABASE_URL` 指向它，设置 `AUTH_MODE=local` 和测试专用 `AUTH_SECRET`。先 `pnpm db:push`，再 `pnpm test:security`。测试仅使用合成账户和密钥；需要本机 Docker 命令校验 Compose。若要覆盖真实 HTTP，会话测试服务也必须使用同一测试库和密钥，设置 `SECURITY_TEST_ORIGIN=http://127.0.0.1:3168` 后运行。未设置该变量时 HTTP 用例明确跳过。
+使用独立的本地 PostgreSQL 数据库（名称以 `forge_semantic_test_` 开头，主机必须是 `127.0.0.1`），将 `DATABASE_URL` 指向它，设置 `AUTH_MODE=local` 和至少 32 位的测试专用 `AUTH_SECRET`。先 `pnpm db:migrate`，再 `pnpm test`。测试仅使用合成账户和密钥；安全用例里有一条会调用本机 `docker compose config`。
+
+没配隔离库时，依赖数据库的用例会 skip。skip 不是通过。HTTP 用例另外要求本机已有服务：`SEMANTIC_HTTP_ORIGIN` 或 `SECURITY_TEST_ORIGIN` 只能是 `http://127.0.0.1:3167` 或 `3168`。语义和 harness 的 HTTP 用例按 demo 登录来写，安全用例的 HTTP 按 `local` 来写，所以一次进程环境跑不齐这两类。没设 origin 时它们明确跳过。`pnpm test` 会把 `NODE_ENV` 设为 `test`，避免本机生产变量把启动检查当成正在对外服务。
 
 模型供应商或实际 Chat Completions 地址（含路径和查询）变更时须重新提供 API Key；等价地址与普通名称编辑可以保留密钥。无密钥的本地服务可显式提供占位值 `ollama`，从而不会携带旧供应商密钥。
