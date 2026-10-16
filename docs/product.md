@@ -52,9 +52,9 @@
 | `demo` | 任意账号可进后台（UI、Agent 开发） |
 | `local` | 真库 + 守卫 + SMTP 找回 |
 
-`demo` 只绕过登录用户库，不提供业务持久化。CRUD 仍要 `DATABASE_URL` + `pnpm db:push`。
+`demo` 只绕过登录用户库，不提供业务持久化。CRUD 仍要 `DATABASE_URL` + `pnpm db:migrate`。生产进程拒绝 demo 和缺失的 `AUTH_SECRET`，细节见 `docs/setup.md`。
 
-## 4. 模块现状（0.5 agent-native）
+## 4. 模块现状
 
 | 模块 | 状态 |
 |------|------|
@@ -86,14 +86,18 @@
 - 芋道模块清单复刻
 - 默认云邮件 API
 
-## 5. 版本节奏
+## 5. 版本
 
-| 版本 | 目标 |
-|------|------|
+当前版本以 `package.json` 为准，是 **0.8.0**。更新记录见仓库根目录的 `CHANGELOG.md`。
+
+下面是早期计划，不是现状。0.5 之后，角色 / 菜单 / 权限、模型服务和 Ask AI harness 已经在仓库里，不要再把它们写成下一期。
+
+| 版本 | 当时的目标 |
+|------|------------|
 | 0.3 | 认证 + Postgres + SMTP |
 | 0.4 | 账号 CRUD + ecommerce 模板对齐 |
-| **0.5（当前）** | **Agent-native 定位 + skills + 文档合约** |
-| 0.6 | skill 脚本化检查、可选 RBAC、部署说明 |
+| 0.5 | Agent-native 定位 + skills + 文档合约 |
+| 0.6 的原计划 | 曾写「可选 RBAC」。这项已经落地，见上一节 |
 
 ## 6. 成功标准
 

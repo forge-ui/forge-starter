@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: forge
+          POSTGRES_PASSWORD: forge_ci_password
+          POSTGRES_DB: forge_semantic_test_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U forge -d forge_semantic_test_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://forge:forge_ci_password@127.0.0.1:5432/forge_semantic_test_ci
+      AUTH_MODE: local
+      AUTH_SECRET: ci-auth-secret-0123456789abcdef0
+      SEMANTIC_ENABLED: "true"
+      POSTGRES_PASSWORD: forge_ci_password
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec next typegen
+      - run: pnpm typecheck
+      - run: pnpm audit:tripwire
+      - run: pnpm db:migrate
+      - run: pnpm test
+      - name: Demo HTTP workflows
+        env:
+          AUTH_MODE: demo
+          SEMANTIC_HTTP_ORIGIN: http://127.0.0.1:3167
+        run: |
+          node node_modules/next/dist/bin/next dev --hostname 127.0.0.1 --port 3167 > /tmp/forge-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          ready=false
+          for attempt in {1..60}; do
+            if curl --fail --silent http://127.0.0.1:3167/login/ > /dev/null; then ready=true; break; fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then cat /tmp/forge-http.log; exit 1; fi
+          pnpm exec tsx --test --test-concurrency=1 tests/semantic/http.test.ts tests/semantic/resource-http.test.ts tests/harness/http.test.ts
+      - name: Local authentication HTTP
+        env:
+          SECURITY_TEST_ORIGIN: http://127.0.0.1:3168
+        run: |
+          node node_modules/next/dist/bin/next dev --hostname 127.0.0.1 --port 3168 > /tmp/forge-auth-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          ready=false
+          for attempt in {1..60}; do
+            if curl --fail --silent http://127.0.0.1:3168/login/ > /dev/null; then ready=true; break; fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then cat /tmp/forge-auth-http.log; exit 1; fi
+          pnpm exec tsx --test --test-concurrency=1 --test-name-pattern="real HTTP login" tests/security/boundaries.test.ts
+      - run: pnpm build

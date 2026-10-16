@@ -18,7 +18,7 @@ Ask AI 的运行时、业务适配器、知识来源、数据库迁移与测试�
 ## 推荐流程
 
 ```text
-1. clone → 按 docs/setup.md 起库、.env、install、db:push
+1. clone → 按 docs/setup.md 起库、.env、install、db:migrate
 2. 读 AGENTS.md；范围与 non-goals 见 docs/product.md
 3. 品牌/env → forge-starter-quick-start
 4. 每个业务对象：
@@ -85,7 +85,7 @@ Ask AI 的运行时、业务适配器、知识来源、数据库迁移与测试�
 ## 环境注意
 
 - `AUTH_MODE=demo` **只**简化登录，**不**提供业务表内存存储。  
-- 凡 CRUD 必须有 `DATABASE_URL` + `pnpm db:push`。详见 `docs/setup.md`。  
+- 凡 CRUD 必须有 `DATABASE_URL` + `pnpm db:migrate`。开发库改 schema 可以用 `pnpm db:push`。详见 `docs/setup.md`。
 - `DataTable.sortable` 未接排序逻辑时不要开。  
 
 ## 质量门禁

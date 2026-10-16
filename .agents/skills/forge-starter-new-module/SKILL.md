@@ -39,7 +39,7 @@ UI 下一步：`forge-starter-new-page`（菜单三处）。
 
 - 路由段、API：`/<res>/`  
 - 表名：清晰英文（如 `orders`）  
-- 加到 `lib/db/schema.ts` → `pnpm db:push`  
+- 加到 `lib/db/schema.ts`。开发库可 `pnpm db:push`；要提交的结构用 `pnpm db:generate`，其他环境用 `pnpm db:migrate`
 
 ### 2. types + service
 
@@ -93,7 +93,7 @@ lib/agent/registry.ts  # 把工具数组拼进 AGENT_TOOLS
 
 ```bash
 pnpm typecheck
-pnpm db:push   # 业务表必须 Postgres；demo 登录模式不能代替 DATABASE_URL
+pnpm db:migrate   # 业务表必须 Postgres；demo 登录模式不能代替 DATABASE_URL
 ```
 
 - `AUTH_MODE=demo`：可不建 `users`，但 **CRUD API 仍要 DATABASE_URL**。  

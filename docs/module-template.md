@@ -18,7 +18,7 @@ Skill：`forge-starter-new-module` → `forge-starter-new-page`。
 lib/<resource>/types.ts
 lib/<resource>/service.ts
 lib/<resource>/agent.ts          # 要被 Ask AI 操作时；并登记到 lib/agent/registry.ts
-lib/db/schema.ts              # + pnpm db:push
+lib/db/schema.ts              # 开发库可 pnpm db:push；提交用 db:generate，环境用 db:migrate
 app/api/<resource>/route.ts
 app/api/<resource>/[id]/route.ts
 components/<resource>-store.tsx   # 可选；列表页若 client fetch 需要

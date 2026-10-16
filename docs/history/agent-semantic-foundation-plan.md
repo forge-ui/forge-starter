@@ -145,7 +145,7 @@ PostgreSQL 保存最小操作信息：操作 ID、用户、动作 ID/版本、�
 | P3 页面 | 上下文 Provider、动作注册/接收回执、通用表单填充 | components、accounts 页面、Ask AI API | 当前对象和筛选准确传递，跨页动作可确认 |
 | P4 执行 | PG 操作记录、revision、事务回执、幂等和恢复 | lib/db、lib/agent、accounts service/API/store | 真实数据库并发、断线与重试场景通过 |
 | P5 复用 | 模型资源工作台上下文、筛选与详情动作；更新新增模块技能说明 | models 页面与契约、.agents/skills、docs | 第二模块接入不改变核心执行循环 |
-| P6 验收 | 固定评测、浏览器流程、规范审计、Node/Workers 构建与本地预览 | tests、docs/audits、验收记录 | 证据完整，状态 ready_for_user_review |
+| P6 验收 | 固定评测、浏览器流程、规范审计、Node/Workers 构建与本地预览 | tests、docs/history/audits、验收记录 | 证据完整，状态 ready_for_user_review |
 
 P3 与 P4 在开发中分步完成，对用户启用新执行流程前必须共同通过验收。数据库/API 变更先于页面接线，业务页面修改完成后按 canonical forge-starter-audit 全流程审计。
 

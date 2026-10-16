@@ -101,7 +101,7 @@ flowchart TD
 ## 本地启动与迁移
 
 - PostgreSQL 是持久化前提；demo 登录不替代数据库。
-- 新库按正常 `pnpm db:push` 创建 schema。已有库在指定数据库应用 `migrations/0003_ask_ai_harness.sql`（要求已存在 semantic-v1 operation 表）；这是新增表/可空列迁移。
+- 新库和已有库都用 `pnpm db:migrate`。它会建出当前结构，并给旧库补上 harness 表和列。开发时对自己的库改 schema 才用 `pnpm db:push`。当初那份手写增量留在 `docs/history/sql/0003_ask_ai_harness.sql`，不再单独执行。
 - 启用 `SEMANTIC_ENABLED=true`，确保页面保存走版本/幂等/回执链路。
 - `ASK_AI_HARNESS_ENABLED` 默认启用，false 为停止接收新 harness 操作的开关。不要静默退回旧意图规则并声称具有持久化能力。
 - 在模型服务中启用支持工具调用的模型，或设置服务端 ASK_AI_LLM_*。取消待办不需要模型调用。
@@ -117,7 +117,7 @@ SEMANTIC_HTTP_ORIGIN=http://127.0.0.1:3167 node scripts/semantic-test-env.mjs \
 
 隔离数据库测试强制 localhost + forge_semantic_test_* 名称。HTTP 测试临时注册自己的本地假模型并清理，不修改现有模型；真实模型另通过 Chrome 验证。
 
-覆盖：纯核心、知识来源/权限/预算、真实 PostgreSQL、JSON/HTTP 往返、竞争 CAS、重复请求、取消、旧按钮、记录版本、用户/应用隔离、保存读回、断线续办。UI 审计见 `ask-ai-harness-ui-audit.md`。
+覆盖：纯核心、知识来源/权限/预算、真实 PostgreSQL、JSON/HTTP 往返、竞争 CAS、重复请求、取消、旧按钮、记录版本、用户/应用隔离、保存读回、断线续办。当时的 UI 审计见 `history/ask-ai-harness-ui-audit.md`。日常回归用 `pnpm test`；需要库的用例不会在缺少隔离库时假装通过。
 
 当前采用请求内执行和租约，不是后台作业队列；页面写入仍需人确认保存。运行中刷新可恢复检查点，但不会自动重放尚无回执的工具。长任务、跨会话记忆、全仓代码生成不在 v1 的已实现能力中。
 

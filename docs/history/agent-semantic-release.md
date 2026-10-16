@@ -22,13 +22,13 @@
 |索引重建|151文件、2423事实、10053关系、8 unresolved|.semantic/release-index-final.log|
 |生产包构建|通过|.semantic/release-build-final.log|
 
-规范审计沿用 docs/agent-semantic-audit.md 的逐条页面审计及 docs/ask-ai-navigation-fix.md 的助手审计。本次仅改变确认完成时机，无新增 JSX/style。C6/F4/D3/E2/Q1-Q4 复核通过。本地控制台只有修改共享模块触发的 Fast Refresh full reload 警告；保存续办无运行时异常。
+规范审计沿用 docs/history/agent-semantic-audit.md 的逐条页面审计及 docs/history/ask-ai-navigation-fix.md 的助手审计。本次仅改变确认完成时机，无新增 JSX/style。C6/F4/D3/E2/Q1-Q4 复核通过。本地控制台只有修改共享模块触发的 Fast Refresh full reload 警告；保存续办无运行时异常。
 
 ## 发布
 
 - 隔离发布目录：/Users/hesong/.codex/worktrees/ask-ai-navigation/forge-starter。
 - 来源：当前主工作区完整底座；基线697eebe，显式文件清单及哈希 .semantic/release-manifest.json；构建后核对无偏移。
-- 先备份受影响账号表数据和列定义，再执行 migrations/semantic-v1.sql。只增加 revision 和 semantic_operations。迁移前后账号数量均0；备份位置与哈希见 .semantic/release-migration.log。
+- 先备份受影响账号表数据和列定义，再执行 docs/history/sql/semantic-v1.sql。只增加 revision 和 semantic_operations。迁移前后账号数量均0；备份位置与哈希见 .semantic/release-migration.log。
 - SEMANTIC_ENABLED=true。
 - 发布到 starter.forgeui.org；Cloudflare 当前 version 6d62b78e-dce8-48dc-acc0-31a20f4d06f7（首次完整 V1 为 8ffddfad-3453-4ae4-aebc-9a86cde3fe4f）。
 - 上一版本261c1e0e-b6ac-4dfa-bee3-7cedca7fad20可用于应用回退，新增数据库表/列可保留。未commit/push。
@@ -72,7 +72,7 @@ V1重点是账号和模型页面的登记契约、页面状态、确认执行和
 - 明确新增账号请求若模型只返回文本，最多纠正一次；不把“已准备好”当作已生成表单。
 - 本地 Chrome 完整完成：新增abc草稿→字段校验→取消恢复→关闭重开保留→补齐并修改用户名chat_form_0928→自动露出页面表单→页面创建成功，生成995867c9-81f2-492e-a901-d13da30cfcce（仅隔离测试库）。
 - 63/63测试无跳过；pnpm check通过（既有15条ref警告）；源码hash一致，生产构建成功。
-- 完整65条规范审计见docs/ask-ai-interaction-audit.md，响应式375/768/1024/1440无横向溢出，Chrome控制台无error/warn。
+- 完整65条规范审计见docs/history/ask-ai-interaction-audit.md，响应式375/768/1024/1440无横向溢出，Chrome控制台无error/warn。
 - 证据：.semantic/interaction-tests.log、interaction-check.log、interaction-build.log、interaction-manifest.json、interaction-form-local.png、interaction-*.png。
 - 范围：本次完成新建账号的信息收集表单；其他工具仍使用现有查询表、确认卡和下载块，不宣称所有操作都已转成表单。
 

@@ -273,7 +273,7 @@ function localAnswer(question: string, pageLabel: string, snapshot: AskAiAccount
   if (demo?.id === "status") {
     return snapshot.ready
       ? `刚读了账号表：${snapshotText(snapshot)} 点名称进详情，改状态走编辑弹窗。`
-      : `账号表还读不到：${snapshot.note || "先配 DATABASE_URL 并 pnpm db:push"}。`;
+      : `账号表还读不到：${snapshot.note || "先配 DATABASE_URL 并 pnpm db:migrate"}。`;
   }
   if (demo?.id === "rbac") {
     return "新账号不带侧栏。要同时改菜单三处、当前应用勾选、角色的 {module}:read。只改 rbac_menus 目录不会出现入口。";

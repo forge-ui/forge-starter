@@ -1,5 +1,7 @@
 # Forge Starter v0.8.0
 
+> 这是 0.8.0 发布当时的说明。手写 SQL 后来收进了 `pnpm db:migrate`，原文在 `docs/history/sql/`。现在不要按下面的文件名再手工执行一遍。
+
 Ask AI 接入 Forge Agent 与 Checklist 原生组件，支持多选收集、用户自查清单、推荐与分析卡、来源摘要、可搜索追问、差异核对、代码视图和流程图；交互结果可以继续真实任务。消息末尾统一使用 StreamingAnswer 追问，处理记录默认收起并与任务状态同排。
 
 - 接入持久化任务、对话恢复、页面状态及操作回执；页面确认、保存后继续原任务。
@@ -9,7 +11,7 @@ Ask AI 接入 Forge Agent 与 Checklist 原生组件，支持多选收集、用�
 
 ## 升级
 
-已有数据库先应用 migrations/semantic-v1.sql（未安装时），再应用 migrations/0003_ask_ai_harness.sql。迁移新增 revision、操作回执及 harness 表/列。配置参见 .env.example。生产源码不包含本地密钥、测试环境或截图。
+已有数据库先应用 docs/history/sql/semantic-v1.sql（未安装时），再应用 docs/history/sql/0003_ask_ai_harness.sql。迁移新增 revision、操作回执及 harness 表/列。配置参见 .env.example。生产源码不包含本地密钥、测试环境或截图。
 
 ## 验证
 
