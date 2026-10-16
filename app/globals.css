@@ -65,6 +65,11 @@ body {
   min-height: 0;
 }
 
+/* Clip the inner scrolling area to the Kit content surface's rounded corners. */
+[data-starter-shell] [data-forge-app-content] > div {
+  overflow: hidden;
+}
+
 /* Keep model names from crowding the compact ChatInputBar input. */
 .starter-ask-compact button[aria-label^="选择模型"] { max-width: 10rem !important; min-width: 0; }
 .starter-ask-compact button[aria-label^="选择模型"] span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
