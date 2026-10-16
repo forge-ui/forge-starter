@@ -2,7 +2,7 @@ import type { PageContext } from "@/lib/semantic/context";
 import { SignJWT, jwtVerify } from "jose";
 import { getAuthSecret } from "@/lib/auth/config";
 import type { TaskBinding } from "@/lib/harness/starter-operations";
-type IntentBinding = { page?: PageContext; revision?: number; harness?: TaskBinding };
+type IntentBinding = { page?: PageContext; revision?: number; updatedAt?: string; harness?: TaskBinding };
 
 const INTENT_AUDIENCE = "agent-intent";
 const EXPORT_AUDIENCE = "agent-export";

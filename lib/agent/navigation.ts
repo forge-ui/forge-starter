@@ -6,6 +6,11 @@ export type AgentNavigation = { href: string; label: string };
 export function parseAgentNavigation(value: unknown): AgentNavigation | undefined {
   if (!value || typeof value !== "object") return undefined;
   const href = (value as Record<string, unknown>).href;
+  if (typeof href === "string") {
+    const match = href.match(/^(\/roles\/|\/menus\/|\/permissions\/|\/models\/|\/settings\/apps\/)\?(create=1|(?:id|edit)=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
+    const entry = match && APP_MODULE_IDS.find(id => APP_MODULE_META[id].href === match[1]);
+    if (entry && (entry !== "settings" || match![2] === "create=1")) return { href, label: APP_MODULE_META[entry].label };
+  }
   const moduleId = APP_MODULE_IDS.find((id) => APP_MODULE_META[id].href === href);
   if (typeof href === "string" && /^\/accounts\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/$/i.test(href)) {
     return { href, label: "账号详情" };
@@ -28,9 +33,9 @@ export async function executeAgentNavigation(
   const navigation = parseAgentNavigation(value);
   if (!navigation) throw new Error("页面未登记，无法跳转");
   const normalize = (path: string) => path.replace(/\/+$/, "");
-  const target = normalize(navigation.href);
+  const target = normalize(navigation.href.split("?")[0]);
   if (options.signal.aborted) throw new Error("已取消页面跳转");
-  if (normalize(options.getPath()) !== target) options.push(navigation.href);
+  if (navigation.href.includes("?") || normalize(options.getPath()) !== target) options.push(navigation.href);
   const started = Date.now();
   let arrivedAt: number | undefined;
   while (Date.now() - started < (options.timeoutMs ?? 10_000)) {

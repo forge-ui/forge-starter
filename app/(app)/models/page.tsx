@@ -1,4 +1,6 @@
 "use client";
+import { useResourceAgent } from "@/components/resource-agent";
+import { notifyAgentPageDone } from "@/lib/agent/fill";
 
 import { Modal } from "@/components/ui/modal";
 
@@ -97,6 +99,19 @@ function ModelsPageContent() {
 
 
   useSemanticPage({ pageId: "models.workspace", entityId: detailId ?? undefined, query: { provider: providerFilter || undefined, query: searchText || undefined, modelType: modelTypeFilter || undefined } }, "models", (fill) => {
+    if (fill.mode === "probe") {
+      if (loading) return false;
+      if (formOpen || deleteTarget) throw new Error("请先关闭当前表单");
+      const row = models.find(row => row.id === fill.recordId);
+      if (!row || row.updatedAt !== fill.expectedUpdatedAt) throw new Error("模型已变化，请重新核对");
+      void probeModel(row.id, { operationId: fill.operationId, updatedAt: fill.expectedUpdatedAt }).then(saved => {
+        notifyAgentPageDone("probe", saved.receipt);
+        if (saved.lastProbeOk !== true) throw new Error(saved.lastProbeMessage || "连接测试失败");
+        setProbeMap(prev => ({ ...prev, [row.id]: { state: "ok" } })); toast.success("模型连接测试通过");
+      }).catch(err => { setProbeMap(prev => ({ ...prev, [row.id]: { state: "error", error: err instanceof Error ? err.message : "测连失败" } })); toast.error(err instanceof Error ? err.message : "测连失败"); });
+      return true;
+    }
+    if (["create", "edit", "delete"].includes(fill.mode)) return agent.receive(fill);
     if (loading) return false;
     if (error) throw new Error(error);
     if (formOpen) throw new Error("请先关闭模型编辑表单");
@@ -110,6 +125,11 @@ function ModelsPageContent() {
     throw new Error("不支持的模型页面操作");
   });
 
+  const agent = useResourceAgent({ resource: "models", rows: models, loading, error, busy: formOpen || Boolean(deleteTarget),
+    create: openCreate, edit: openEdit, remove: setDeleteTarget,
+    close: () => { setFormOpen(false); setEditId(null); setDeleteTarget(null); },
+  });
+
   function openCreate() {
     setEditId(null);
     setFormOpen(true);
@@ -121,6 +141,7 @@ function ModelsPageContent() {
   }
 
   function closeForm() {
+    agent.clear();
     setFormOpen(false);
     setEditId(null);
   }
@@ -219,7 +240,8 @@ function ModelsPageContent() {
         if (!current) return;
         setProbeMap((prev) => ({ ...prev, [current]: { state: "testing" } }));
         try {
-          await probeModel(current);
+          const tested = await probeModel(current);
+          if (tested.lastProbeOk !== true) throw new Error(tested.lastProbeMessage || "连接测试失败");
           if (cancelled) return;
           setProbeMap((prev) => ({ ...prev, [current]: { state: "ok" } }));
         } catch (err) {
@@ -244,7 +266,8 @@ function ModelsPageContent() {
   async function retestOne(id: string) {
     setProbeMap((prev) => ({ ...prev, [id]: { state: "testing" } }));
     try {
-      await probeModel(id);
+      const tested = await probeModel(id);
+      if (tested.lastProbeOk !== true) throw new Error(tested.lastProbeMessage || "连接测试失败");
       setProbeMap((prev) => ({ ...prev, [id]: { state: "ok" } }));
       toast.success("连接正常");
     } catch (err) {
@@ -257,6 +280,7 @@ function ModelsPageContent() {
   return (
     <>
       <ModelFormDialog
+        agentFill={agent.fill}
         open={formOpen}
         onClose={closeForm}
         modelId={editId}
@@ -271,6 +295,7 @@ function ModelsPageContent() {
 
       <Modal open={deleteTarget != null} onClose={() => {
               if (deleting) return;
+              agent.clear();
               setDeleteTarget(null);
             }} overlayClassName="z-[70]">
         {deleteTarget ? (
@@ -278,20 +303,24 @@ function ModelsPageContent() {
             title={`删除模型「${deleteTarget.name}」？`}
             description="删除后不可恢复。Ask AI 将不再使用这条配置。"
             color="red"
-            icon={<TrashBinMinimalisticLinear size={32} color="#EA580C" />}
+            icon={<TrashBinMinimalisticLinear size={32} color="var(--fg-red-500)" />}
             confirmLabel={deleting ? "删除中…" : "确认"}
             cancelLabel="取消"
             onCancel={() => {
               if (deleting) return;
+              agent.clear();
               setDeleteTarget(null);
             }}
             onConfirm={() => {
               if (deleting) return;
               setDeleting(true);
-              void deleteModel(deleteTarget.id)
-                .then(() => {
+              void deleteModel(deleteTarget.id, { operationId: agent.fill?.operationId, key: crypto.randomUUID(), updatedAt: agent.fill?.expectedUpdatedAt ?? deleteTarget.updatedAt })
+                .then((receipt) => {
+                  if (agent.fill) notifyAgentPageDone("delete", receipt);
+                  agent.clear(false);
                   toast.success("模型已删除");
-                  setDeleteTarget(null);
+                  agent.clear();
+              setDeleteTarget(null);
                   if (detailId === deleteTarget.id) closeDetail();
                 })
                 .catch((err: unknown) => {
@@ -307,13 +336,10 @@ function ModelsPageContent() {
         <PageTitleToolbar
           title="模型服务"
           breadcrumbs={
-            <Breadcrumbs
-              color={siteConfig.accent}
-              items={[
+            <Breadcrumbs color={siteConfig.accent} items={[
                 { label: "工作台", href: "/dashboard/" },
                 { label: "模型服务" },
-              ]}
-            />
+              ]} />
           }
           actions={
             <ToolbarActions className="flex-wrap">

@@ -1,4 +1,8 @@
 "use client";
+import { resourceFormDraft } from "@/lib/agent/resource-fields";
+import type { AgentFormFill } from "@/lib/agent/types";
+import { notifyAgentPageDone } from "@/lib/agent/fill";
+import { useRef } from "react";
 
 import { useEffect, useMemo, useState } from "react";
 import { Button, SelectOption, TextArea, TextField } from "@forge-ui-official/core";
@@ -28,6 +32,7 @@ const emptyForm = (): FormState => ({
 });
 
 type Props = {
+  agentFill?: AgentFormFill | null;
   open: boolean;
   onClose: () => void;
   roleId?: string | null;
@@ -39,7 +44,7 @@ const statusOptions = (Object.keys(RBAC_STATUS_META) as RbacStatus[]).map((value
   label: RBAC_STATUS_META[value].label,
 }));
 
-export function RoleFormDialog({ open, onClose, roleId = null, onCreated }: Props) {
+export function RoleFormDialog({ open, onClose, roleId = null, onCreated, agentFill }: Props) {
   const { getById, createRole, updateRole } = useRolesStore();
   const { permissions, refresh: refreshPermissions } = usePermissionsStore();
   const mode = roleId ? "edit" : "create";
@@ -48,6 +53,7 @@ export function RoleFormDialog({ open, onClose, roleId = null, onCreated }: Prop
   const [form, setForm] = useState<FormState>(emptyForm);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [saving, setSaving] = useState(false);
+  const saveKey = useRef(crypto.randomUUID());
 
   const permissionOptions = useMemo(
     () =>
@@ -60,20 +66,21 @@ export function RoleFormDialog({ open, onClose, roleId = null, onCreated }: Prop
 
   useEffect(() => {
     if (!open) return;
+    saveKey.current = crypto.randomUUID();
     setFieldErrors({});
     setSaving(false);
     if (mode === "edit" && existing) {
-      setForm({
+      setForm(resourceFormDraft("roles", agentFill?.fields, {
         name: existing.name,
         code: existing.code,
         description: existing.description,
         status: existing.status,
         permissionIds: existing.permissionIds,
-      });
+      }));
     } else if (mode === "create") {
-      setForm(emptyForm());
+      setForm(resourceFormDraft("roles", agentFill?.fields, emptyForm()));
     }
-  }, [open, mode, existing]);
+  }, [open, mode, existing, agentFill]);
 
   function setField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -117,14 +124,16 @@ export function RoleFormDialog({ open, onClose, roleId = null, onCreated }: Prop
     };
     try {
       if (mode === "edit" && existing) {
-        await updateRole(existing.id, payload);
+        const saved = await updateRole(existing.id, payload, { operationId: agentFill?.operationId, key: saveKey.current, updatedAt: agentFill?.expectedUpdatedAt ?? existing.updatedAt });
+        if (agentFill) notifyAgentPageDone("edit", saved.receipt);
         await refreshPermissions();
         toast.success("角色已保存");
         setSaving(false);
         onClose();
         return;
       }
-      const created = await createRole(payload);
+      const created = await createRole(payload, { operationId: agentFill?.operationId, key: saveKey.current });
+      if (agentFill) notifyAgentPageDone("create", created.receipt);
       await refreshPermissions();
       toast.success("角色已创建");
       setSaving(false);

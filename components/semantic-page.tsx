@@ -1,4 +1,5 @@
 "use client";
+import { loadAppRegistry } from "@/lib/apps/registry";
 import { useEffect, useRef } from "react";
 import { CONTRACT_VERSION, APPLICATION_BUILD_ID } from "@/lib/semantic/contracts";
 import { pageContextSchema, type PageContext, type PageState } from "@/lib/semantic/context";
@@ -6,7 +7,14 @@ import type { AgentFormFill } from "@/lib/agent/types";
 import { AGENT_FILL_EVENT, peekAgentFormFill, consumeAgentFormFill, discardAgentCommand } from "@/lib/agent/fill";
 
 let current: PageContext | undefined;
-export function currentPageContext() { return current; }
+let fallbackInstance: string | undefined;
+export function currentPageContext() {
+  if (typeof window === "undefined") return current;
+  fallbackInstance ??= crypto.randomUUID();
+  const page = current ?? { version: CONTRACT_VERSION, buildId: APPLICATION_BUILD_ID, pageId: "dashboard.home" as const, instanceId: fallbackInstance, revision: 0, query: {} };
+  const localApps = loadAppRegistry().slice(0, 50).map(({ id, name, subtitle, kind, href, openMode, authMode, modules, isCurrentProduct }) => ({ id, name, subtitle, kind, href: href ?? "", openMode, authMode, modules, isCurrentProduct }));
+  return { ...page, localApps };
+}
 export const PAGE_ACK_EVENT = "forge:page-action-ack";
 
 /** Explicit page state; no DOM scraping and no form values or secrets. */

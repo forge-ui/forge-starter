@@ -8,7 +8,9 @@ export async function routeDialogue(input:{question:string;history?:DialogueMess
   const q=input.question.trim(),action=classifyIntent(q),previous=previousSelection(input.history),n=ordinalSelection(q);
   if(action==="cancel")return {reply:reply("已取消当前操作。请告诉我接下来要查询、打开或处理什么。")};
   if(action==="continue")return {reply:reply("请明确要继续的操作和目标；待确认表单请使用对应确认按钮。")};
-  if(action==="help")return {};
+  if(action==="help" || /哪些功能|什么功能|功能介绍|支持什么|能做什么|能干什么|系统介绍/.test(q))return {};
+  // These surfaces have page capabilities but no server record-list tool.
+  if (/应用|工作台|个人资料|修改密码|登录|注册|找回密码|通知偏好/.test(q)) return {};
   let resource=resources.find(r=>r.pattern.test(q));
   if(n!==undefined||(!resource&&previous&&["unknown","read","navigate"].includes(action)))resource=resources.find(r=>r.id===previous?.resource);
   if(n!==undefined&&!previous)return {reply:reply("当前没有待选择的候选，请先说明操作和目标。")};
@@ -21,7 +23,7 @@ export async function routeDialogue(input:{question:string;history?:DialogueMess
   if(!list||list.mode!=="read")return {reply:reply(`没有${resource.label}的读取权限。`)};
   const effective=previous&&resource.id===previous.resource&&(n!==undefined||action==="unknown")?previous.request:q;
   const requested=classifyIntent(effective);
-  if(["create","update","delete","export"].includes(requested)&&!tools.some(t=>t.id===`${resource.id}.${requested}`))return {reply:reply(`当前没有可用的${resource.label}${({create:"新建",update:"修改",delete:"删除",export:"导出"} as Record<string,string>)[requested]}工具。`,[{label:`打开${resource.label}页面`,href:`/${resource.id}/`}])};
+  if(["create","update","delete","export","probe"].includes(requested)&&!tools.some(t=>t.id===`${resource.id}.${requested}` || (requested === "create" && t.id === `${resource.id}.create_form`) || (requested === "update" && t.id === `${resource.id}.edit_form`)))return {reply:reply(`${resource.label}的这项${({create:"新建",update:"修改",delete:"删除",export:"导出",probe:"连接测试"} as Record<string,string>)[requested]}当前不能由助手自动办理，请打开页面查看可用操作。`,[{label:`打开${resource.label}页面`,href:`/${resource.id}/`}])};
   if(requested==="create"||requested==="export")return {};
   if(action==="unknown"&&!previous)return {reply:clarifyAction(resource.label,[{label:"查看已有记录",question:`查看已有${resource.label}`},...(tools.some(t=>t.id===`${resource!.id}.create`)?[{label:"新建记录",question:`新建${resource.label}`}]:[])])};
   if(/多少|统计|分布|占比/.test(q)&&action==="read")return {};
@@ -38,7 +40,7 @@ export async function routeDialogue(input:{question:string;history?:DialogueMess
   const selected=selectCandidate(q,rows,previous);
   if(selected.error)return {reply:reply(selected.error)};
   if(selected.row){
-    if(["update","delete"].includes(requested))return {question:`${effective}。明确目标 ID：${selected.row.id}，名称：${selected.row.name}`};
+    if(["update","delete","probe"].includes(requested))return {question:`${effective}。明确目标 ID：${selected.row.id}，名称：${selected.row.name}`};
     return {reply:reply(`已选中「${selected.row.name}」（${selected.row.id}）。点击下方打开详情。`,[{label:`查看 ${selected.row.name}`,href:selected.row.href}])};
   }
   return {reply:selectionReply(resource.id,effective,selected.matches??rows)};

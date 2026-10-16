@@ -1,4 +1,8 @@
 "use client";
+import { useResourceAgent } from "@/components/resource-agent";
+import { useSemanticPage } from "@/components/semantic-page";
+import { localAppSnapshot } from "@/lib/agent/app-fields";
+import { notifyLocalAppDone } from "@/lib/agent/local-result";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { AppDetailDialog } from "@/components/app-detail-dialog";
@@ -76,6 +80,14 @@ function SettingsAppsContent() {
   const [formOpen, setFormOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AppEntry | null>(null);
+
+  const agent = useResourceAgent({ resource: "settings", rows: apps.map(row => ({ ...row, updatedAt: localAppSnapshot(row) })), loading: false, error: null, busy: formOpen || Boolean(deleteTarget),
+    create: () => { if (!canCreate) throw new Error("没有权限"); setEditId(null); setFormOpen(true); },
+    edit: (id) => { if (!canUpdate) throw new Error("没有权限"); setEditId(id); setFormOpen(true); },
+    remove: (row) => { if (!canDelete || row.isCurrentProduct) throw new Error("当前产品不能删除或没有权限"); setDeleteTarget(row); },
+    close: () => { setFormOpen(false); setEditId(null); setDeleteTarget(null); },
+  });
+  useSemanticPage({ pageId: "settings.apps", query: {}, ...(formOpen || deleteTarget ? { form: { mode: deleteTarget ? "delete" as const : editId ? "edit" as const : "create" as const, entityId: deleteTarget?.id ?? editId ?? undefined, dirty: true } } : {}) }, "settings", agent.receive);
 
   const openDetail = useCallback((id: string | null) => {
     const query = new URLSearchParams(searchParams.toString());
@@ -227,10 +239,17 @@ function SettingsAppsContent() {
     [openDetail, canUpdate, canDelete],
   );
 
-  function confirmDelete() {
+  async function confirmDelete() {
     if (!canDelete || !deleteTarget || deleteTarget.isCurrentProduct) return;
+    const current = loadAppRegistry().find(row => row.id === deleteTarget.id);
+    if (agent.fill?.expectedUpdatedAt !== undefined && (!current || localAppSnapshot(current) !== agent.fill.expectedUpdatedAt)) { toast.error("应用配置已变化，请重新核对"); return; }
     const all = loadAppRegistry().filter((a) => a.id !== deleteTarget.id);
     try { saveAppRegistry(all); } catch { toast.error("删除失败，请检查浏览器存储是否可用"); return; }
+    if (agent.fill) {
+      try { await notifyLocalAppDone(agent.fill, deleteTarget.id, null); }
+      catch (err) { toast.error(err instanceof Error ? err.message : "回执未同步"); return; }
+    }
+    agent.clear(false);
     toast.success("应用已删除");
     setDeleteTarget(null);
     refresh();
@@ -240,8 +259,10 @@ function SettingsAppsContent() {
     <div className="flex flex-col gap-6">
       <AppDetailDialog app={apps.find((app) => app.id === detailId)} open={detailId != null} onClose={() => openDetail(null)} onEdit={canUpdate ? (id) => { setEditId(id); setFormOpen(true); } : undefined} />
       <AppFormDialog
+        agentFill={agent.fill}
         open={formOpen && (editId ? canUpdate : canCreate)}
         onClose={() => {
+          agent.clear();
           setFormOpen(false);
           setEditId(null);
         }}
@@ -249,16 +270,16 @@ function SettingsAppsContent() {
         onSaved={(id) => { refresh(); openDetail(id); }}
       />
 
-      <Modal open={deleteTarget != null} onClose={() => setDeleteTarget(null)}>
+      <Modal open={deleteTarget != null} onClose={() => { agent.clear(); setDeleteTarget(null); }}>
         {deleteTarget ? (
           <ConfirmationDialog
             title="删除应用？"
             description={`确定删除「${deleteTarget.name}」？将从侧栏应用切换器中移除。`}
             color="red"
-            icon={<TrashBinMinimalisticLinear size={32} color="#EA580C" />}
+            icon={<TrashBinMinimalisticLinear size={32} color="var(--fg-red-500)" />}
             confirmLabel="删除"
             cancelLabel="取消"
-            onCancel={() => setDeleteTarget(null)}
+            onCancel={() => { agent.clear(); setDeleteTarget(null); }}
             onConfirm={confirmDelete}
           />
         ) : null}
@@ -267,14 +288,11 @@ function SettingsAppsContent() {
       <PageTitleToolbar
         title="应用管理"
         breadcrumbs={
-          <Breadcrumbs
-            color={siteConfig.accent}
-            items={[
+            <Breadcrumbs color={siteConfig.accent} items={[
               { label: "工作台", href: "/dashboard/" },
               { label: "应用管理" },
-            ]}
-          />
-        }
+            ]} />
+          }
         actions={
           <ToolbarActions className="flex-wrap">
             <AskAiEntry />

@@ -1,4 +1,6 @@
 import { routeDialogue } from "./agent/dialogue";
+import { toolsForAccess } from "./agent/registry";
+import { systemFeatureContext } from "./agent/system-features";
 import type { PageContext } from "@/lib/semantic/context";
 import { hasPermission } from "@/lib/rbac/access";
 import { prepareContinuationReadback } from "@/lib/semantic/continuation";
@@ -304,6 +306,12 @@ export async function answerAskAi(input: {
 
   if (runtime.source === "none" || !isUsableKey(runtime.apiKey)) {
     if (readback) return { text: "已根据保存回执重新读取记录。", live: false, blocks: readback.blocks ?? [], links: [] };
+    if (/功能|如何|怎么|能做什么|能干什么|支持什么|系统介绍/.test(question)) {
+      const inventory = JSON.parse(systemFeatureContext(toolsForAccess(input.access).map(tool => tool.id))) as { modules: Array<{ id: string; label: string; route: string; summary: string; fields: string; rules: string }>; personal: string };
+      const matched = inventory.modules.filter(module => question.includes(module.label) || question.includes(module.id));
+      const modules = matched.length ? matched : inventory.modules;
+      return { text: modules.map(module => `${module.label}：${module.summary}${matched.length ? module.fields + module.rules : ""}`).join("\n") + `\n${inventory.personal}\n当前未接可用模型，以上为系统功能说明；可在对应页面办理。`, live: false, blocks: [], links: modules.map(module => ({ label: `打开${module.label}`, href: module.route })) };
+    }
     const snapshot = hasPermission(input.access, "accounts", "read") ? await loadAskAiSnapshot() : { ready: false, total: 0, byStatus: { active: 0, disabled: 0, pending: 0, locked: 0 }, byRole: {}, recent: [], note: "没有账号读取权限" };
     return {
       text: localAnswer(question, pageLabel, snapshot),

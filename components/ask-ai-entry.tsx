@@ -68,7 +68,7 @@ import {
   type AgentContinuation,
 } from "@/lib/agent/fill";
 import { toast } from "@/lib/toast";
-import { ASK_AI_QUICK_ACTIONS, askAiQuickActions, composeActionMessage, composeToolContext } from "@/lib/ask-ai-quick-actions";
+import { ASK_AI_QUICK_ACTIONS, composeActionMessage, composeToolContext } from "@/lib/ask-ai-quick-actions";
 import { watchAskAiProgress } from "@/lib/ask-ai-progress-client";
 import { askAiDeliveryPlaying } from "@/lib/ask-ai-playback";
 
@@ -145,6 +145,7 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     finally { setReadingAttachment(false); }
   }, []);
   const [fullscreen, setFullscreen] = useState(false);
+  const [docked, setDocked] = useState(false);
   const [turnsBySession, setTurnsBySession] = useState<Record<string, AskAiTurn[]>>({});
   const [spentIntents, setSpentIntents] = useState<string[]>([]);
   const [confirmingIntent, setConfirmingIntent] = useState<string | null>(null);
@@ -414,14 +415,14 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
       }
       if (!stillCurrent()) return abandon();
       if (result.fill) {
-        if (["create", "edit", "delete"].includes(result.fill.mode)) {
+        if (["create", "edit", "delete", "probe"].includes(result.fill.mode)) {
           queueAgentContinuation({ sessionId, question: message, mode: result.fill.mode, operationId: result.fill.operationId, modelId: modelIdRef.current });
         }
         const accepted = waitForPageAction(result.fill.commandId!);
         queueAgentFormFill(result.fill);
         const target = result.fill.href.endsWith("/") ? result.fill.href : `${result.fill.href}/`;
         const here = committedPath.current.endsWith("/") ? committedPath.current : `${committedPath.current}/`;
-        if (here !== target) router.push(target, { scroll: false });
+        if (result.fill.href && here !== target) router.push(target, { scroll: false });
         await accepted;
         if (!stillCurrent()) return abandon();
         result.text = ["open", "filter"].includes(result.fill.mode) ? "页面已更新" : "已带入页面，请核对后确认";
@@ -608,7 +609,7 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
             turn.result?.blocks?.some((block) => block.type === "confirm" && block.intent === intent),
           );
           const question = sourceQuestion ?? sourceTurn?.question.trim() ?? "";
-          if (question && ["create", "edit", "delete"].includes(result.fill.mode)) {
+          if (question && ["create", "edit", "delete", "probe"].includes(result.fill.mode)) {
             queueAgentContinuation({
               sessionId,
               question,
@@ -621,7 +622,7 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
           queueAgentFormFill(result.fill);
           const target = result.fill.href.endsWith("/") ? result.fill.href : `${result.fill.href}/`;
           const here = pathname.endsWith("/") ? pathname : `${pathname}/`;
-          if (here !== target) router.push(target);
+          if (result.fill.href && here !== target) router.push(target);
           await accepted;
           if (!isCurrentAskAiRequest(activeRequest.current, ticket)) return false;
           result.text = result.fill.mode === "delete"
@@ -705,6 +706,10 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AskAiProps>(
     () => ({
       color: siteConfig.accent,
+      panelMode: "responsive",
+      onDockedChange: setDocked,
+      headerLayout: "session",
+      landingDescription: `可以围绕${shell.title}查询信息、梳理数据，或协助处理操作。`,
       fullscreen,
       onFullscreenChange: setFullscreen,
       suggestions: runtime?.suggestions ?? ASK_AI_SUGGESTIONS,
@@ -729,10 +734,6 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
             busy={busy}
           />
         </AskAiScrollArea>
-      ) : runtime?.suggestions?.length === 0 ? (
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3 p-5">
-          <p role="status" className="text-sm leading-6 text-fg-grey-700">当前页面暂无快捷建议，可以直接描述你要了解或处理的目标。</p>
-        </div>
       ) : undefined,
       composer: (
         <div
@@ -745,7 +746,7 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
           {attachment ? <div className="mb-2 flex min-w-0 items-center gap-2"><span className="min-w-0 truncate text-xs text-fg-black">附件：{attachment.name}</span><Button color={siteConfig.accent} variant="tertiary" size="sm" disabled={busy} onClick={() => setAttachment(null)}>移除附件</Button></div> : null}
           <ChatInputBar toolsMenuLabel="添加内容" onAttach={() => attachmentInput.current?.click()} sourcesLabel="来源" commandsLabel="指令" connectedLabel="已连接" attachLabel="添加附件" dictateLabel="语音输入"
             key={currentSessionId}
-            quickActions={askAiQuickActions(fullscreen, hasChat)}
+            quickActions={ASK_AI_QUICK_ACTIONS}
             sources={runtime?.sources ?? []} removeSourceLabel="移除对象"
             quickActionsLabel="快捷操作"
             removeQuickActionLabel="移除操作"
@@ -850,7 +851,7 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
       const fullscreen = document.querySelector(`[${ASK_AI_FS_LAYER_ATTR}]`);
       if (trigger?.getAttribute("aria-expanded") !== "true" && !fullscreen) return;
       const target = event.target as HTMLElement | null;
-      const link = target?.closest?.(`dialog[aria-modal='true'] a[href], [${ASK_AI_FS_LAYER_ATTR}] a[href]`);
+      const link = target?.closest?.(`dialog[data-ask-ai-panel] a[href], [${ASK_AI_FS_LAYER_ATTR}] a[href]`);
       if (!link) return;
       const href = link.getAttribute("href")?.trim();
       if (!href || !href.startsWith("/")) return;
@@ -863,7 +864,8 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
 
   return (
     <AskAiPlaceContext.Provider value={place}>
-      {children}
+      {/* Keep the existing AppLayout gutter and scrolling; reserve space only for the Kit's docked panel. */}
+      <div data-starter-ask-layout style={{ paddingRight: docked ? 460 : 0 }}>{children}</div>
       {/* Kit AskAi 无受控 open。portal 到稳定 mount，换页只挪触发器，本轮对话保住。 */}
       <div data-ask-ai-host ref={hostRef} className="hidden" />
       {mountNode ? createPortal(<AskAiFormStateProvider><AskAi {...value} /></AskAiFormStateProvider>, mountNode) : null}

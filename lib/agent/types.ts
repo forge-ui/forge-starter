@@ -15,7 +15,8 @@ export type AgentFormFill = {
   commandId?: string;
   operationId?: string;
   expectedRevision?: number;
-  mode: "create" | "edit" | "delete" | "open" | "filter";
+  expectedUpdatedAt?: string;
+  mode: "create" | "edit" | "delete" | "open" | "filter" | "probe";
   href: string;
   recordId?: string;
   fields: Record<string, string>;
@@ -49,6 +50,7 @@ export type AgentToolOutput = {
 
 export type AgentToolContext = {
   userId: string;
+  page?: import("@/lib/semantic/context").PageContext;
 };
 
 type AgentToolBase = {

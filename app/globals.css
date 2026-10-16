@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "@forge-ui-official/core/styles.css"; /* core 0.4.3 typed context chips and avatars */
+@import "@forge-ui-official/core/styles.css"; /* core 0.4.6 Ask AI responsive panel */
 
 /* Let Tailwind v4 scan the Forge dist so utility classes used inside core get generated. */
 @source "../node_modules/@forge-ui-official/core/dist";

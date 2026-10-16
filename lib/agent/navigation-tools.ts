@@ -7,7 +7,7 @@ export const navigationTools: AgentTool[] = APP_MODULE_IDS.map((id) => ({
   id: `${id}.navigate`,
   mode: "read",
   permission: { resource: id, action: "read" },
-  description: `打开${APP_MODULE_META[id].label}页面（${APP_MODULE_META[id].href}）。用户要求去此页面或先去此页面新增时调用。仅导航，不修改数据，不需要表单字段。`,
+  description: `打开${APP_MODULE_META[id].label}页面（${APP_MODULE_META[id].href}）。用户明确要求仅前往此页面或先去页面时调用。用户直接要求创建角色/菜单/权限/模型/应用时，改用该模块的create_form打开新建表单，不能用导航代替。仅导航，不修改数据。`,
   schema: inputSchema,
   parameters: { type: "object", properties: {}, additionalProperties: false },
   async run(args) {

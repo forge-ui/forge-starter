@@ -36,11 +36,6 @@ export const ASK_AI_QUICK_ACTIONS: ComposerAction[] = [
   }
 ];
 
-/** Ask AI cards belong only to the empty fullscreen landing, never the drawer. */
-export function askAiQuickActions(fullscreen: boolean, hasMessages: boolean) {
-  return fullscreen && !hasMessages ? ASK_AI_QUICK_ACTIONS : [];
-}
-
 /** A context preference never expands the server's available tools or bypasses confirmation. */
 export function composeToolContext(message: string, context: ChatInputBarSendContext | undefined, available: readonly ComposerSource[]) {
   if (!message.trim()) return "";

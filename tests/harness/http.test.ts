@@ -221,7 +221,7 @@ test("HTTP: real page save returns an idempotent receipt and resumes with server
 
   scripted.push(modelBody => {
     const readback = modelBody.messages.findLast(message => message.role === "tool");
-    assert.ok(readback?.content?.includes("保存已由服务器核实"));
+    assert.ok(readback?.content?.includes("已收到保存结果"));
     assert.ok(readback?.content?.includes(final.name));
     assert.ok(readback?.content?.includes(saved.data.account!.id));
     return tool("respond", { outcome: "answer", text: "已核实页面保存的最终账号信息。可以继续查看账号列表。", options: [], allowText: false });

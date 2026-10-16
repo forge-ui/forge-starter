@@ -1,4 +1,8 @@
 "use client";
+import { resourceFormDraft } from "@/lib/agent/resource-fields";
+import type { AgentFormFill } from "@/lib/agent/types";
+import { notifyAgentPageDone } from "@/lib/agent/fill";
+import { useRef } from "react";
 
 import { useEffect, useMemo, useState } from "react";
 import { SelectOption, TextArea, TextField, Button } from "@forge-ui-official/core";
@@ -37,6 +41,7 @@ function emptyForm(providerId: string): FormState {
 }
 
 type Props = {
+  agentFill?: AgentFormFill | null;
   open: boolean;
   onClose: () => void;
   modelId?: string | null;
@@ -55,6 +60,7 @@ export function ModelFormDialog({
   modelId = null,
   initialProvider = null,
   onCreated,
+  agentFill,
 }: Props) {
   const { getById, createModel, updateModel, providers } = useModelsStore();
   const mode = modelId ? "edit" : "create";
@@ -64,6 +70,7 @@ export function ModelFormDialog({
   const [form, setForm] = useState<FormState>(() => emptyForm(firstProvider));
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [saving, setSaving] = useState(false);
+  const saveKey = useRef(crypto.randomUUID());
 
   const providerOptions = useMemo(
     () => providers.map((item) => ({ value: item.id, label: item.name })),
@@ -73,10 +80,11 @@ export function ModelFormDialog({
 
   useEffect(() => {
     if (!open) return;
+    saveKey.current = crypto.randomUUID();
     setFieldErrors({});
     setSaving(false);
     if (mode === "edit" && existing) {
-      setForm({
+      setForm(resourceFormDraft("models", agentFill?.fields, {
         name: existing.name,
         provider: existing.provider,
         modelName: existing.modelName,
@@ -85,11 +93,11 @@ export function ModelFormDialog({
         status: existing.status,
         isDefault: existing.isDefault ? "yes" : "no",
         notes: existing.notes,
-      });
+      }));
     } else if (mode === "create") {
-      setForm(emptyForm(firstProvider));
+      setForm(resourceFormDraft("models", agentFill?.fields, emptyForm(firstProvider)));
     }
-  }, [open, mode, existing, firstProvider]);
+  }, [open, mode, existing, firstProvider, agentFill]);
 
   function setField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -146,13 +154,15 @@ export function ModelFormDialog({
     };
     try {
       if (mode === "edit" && existing) {
-        await updateModel(existing.id, payload);
+        const saved = await updateModel(existing.id, payload, { operationId: agentFill?.operationId, key: saveKey.current, updatedAt: agentFill?.expectedUpdatedAt ?? existing.updatedAt });
+        if (agentFill) notifyAgentPageDone("edit", saved.receipt);
         toast.success("模型已保存");
         setSaving(false);
         onClose();
         return;
       }
-      const created = await createModel(payload);
+      const created = await createModel(payload, { operationId: agentFill?.operationId, key: saveKey.current });
+      if (agentFill) notifyAgentPageDone("create", created.receipt);
       toast.success("模型已创建");
       setSaving(false);
       onClose();

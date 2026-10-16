@@ -1,5 +1,5 @@
 import { asc, eq, inArray } from "drizzle-orm";
-import { getDb } from "@/lib/db";
+import { resourceDb as getDb } from "@/lib/semantic/resource-db";
 import {
   rbacPermissions,
   rbacRolePermissions,

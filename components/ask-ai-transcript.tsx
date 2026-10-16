@@ -158,7 +158,7 @@ function AskAiTurnView({
       ) : null}
       {result?.links?.length ? <div className="flex flex-wrap gap-2">{result.links.map(link => <Button key={link.href} variant="secondary" color={siteConfig.accent} onClick={() => router.push(link.href)}>{link.label}</Button>)}</div> : null}
       {result?.blocks?.filter(block => block.type !== "choice" && !(latest && result.harness?.pending?.kind === "question" && block.type === "table")).map((block, index) => (
-        !latest && (block.type === "form" || block.type === "confirm") ? <p key={`closed-${index}`} className="text-sm text-fg-grey-700">此轮操作已结束，请按最新请求继续。</p> :
+        !latest && (block.type === "form" || block.type === "confirm") ? <p key={`closed-${index}`} className="text-sm text-fg-grey-700">此前确认单已收起，办理状态请看最新消息。</p> :
         <AgentBlockView
           key={`${turn.id}-${block.type}-${index}`}
           block={block}

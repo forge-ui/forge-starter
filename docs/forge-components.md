@@ -117,7 +117,7 @@ import { AskAiEntry } from "@/components/ask-ai-entry";
 - 宿主：`AskAiProvider` 已挂 `AppShell`，换页不卸、对话保住
 - 入口：业务页统一直接使用 core `PageTitleToolbar`，`actions` 放 `ToolbarActions` + `AskAiEntry` + 业务按钮。`breadcrumbs` 放 Kit `Breadcrumbs`；当前预设模式没有入口插槽，采用仍受支持的组合接口保留全局 Ask AI 实例。不要逐页传 `askAi` 创建新实例。工作台与参考页仍可单独挂 `AskAiEntry`。
 - 全屏 / 会话：走 Kit 抽屉顶栏全屏钮 + `sessions` / `currentSessionId` / `landingTitle`。core 不读 localStorage，不要另挂全视口层
-- 输入：Kit `ChatInputBar`（模型选择 + 发送）。模型列表来自模型管理里启用且有密钥的条目，发送带 `modelId`；没有可用模型时不画选择器，退本地规则。不要手搓底栏，也不要挂未实现的附件 / Sources / Commands / 语音。抽屉 460px，自定义 `composer` 核心不带 `p-4`，宿主必须自己垫 gutter + `min-w-0`，别把宽栏直接贴边
+- 输入：Kit `ChatInputBar`（模型选择 + 发送）。模型列表来自模型管理里启用且有密钥的条目，发送带 `modelId`；没有可用模型时不画选择器，退本地规则。不要手搓底栏，也不要挂未实现的附件 / Sources / Commands / 语音。core ≥0.4.6 通过 `panelMode="responsive"` + `onDockedChange` 在 ≥1440px 时并排，稳定宿主仅在 docked 时给业务壳预留右侧 460px；窄屏仍由 Kit 管理模态抽屉，不能只隐藏遮罩。`headerLayout="session"` 以会话标题领头，右侧提供新建、全屏和关闭。空会话使用 `landingTitle` + `landingDescription`，无推荐问题时也保留欢迎区。抽屉 460px，自定义 `composer` 核心不带 `p-4`，宿主必须自己垫 gutter + `min-w-0`，别把宽栏直接贴边
 - 回复：演示走 `AskAiTranscript` 四条中文问答（页面 / 下一步 / 状态 / 权限）。对照页 `/ref/agent` 只看组件，不要把英文 case 原文塞进抽屉
 - 终止（core ≥0.3.5）：`ChatInputBar status="running"` + `onStop`，覆盖等待响应和文字播放阶段；停止时取消当前请求及进度读取，并将回复 delivery 设为 stopped。
 - 发送：`lib/ask-ai.ts` 的 `sendAskAi` → `POST /api/ask-ai`。优先用所选/默认的库内模型，没有再用 `ASK_AI_LLM_*`，都没有走本地规则。不要另做一套抽屉，也不要把 key 放进前端
@@ -181,7 +181,7 @@ import { siteConfig } from "@/config/site";
 
 ### ChatInputBar 0.4.1 快捷操作
 
-Ask AI 的快捷卡片只显示于全屏空会话；抽屉以及已有消息的会话不显示卡片。通过 `askAiQuickActions(fullscreen, hasMessages)` 统一判断，切换会话时用会话 ID 重置 composer。
+Ask AI 在侧栏和全屏都传入同一组业务快捷卡片。由 Kit `defaultQuickActionsOpen` + `hasMessages` 管理：空会话默认展开，发送后收起，加号菜单可以重新展开；切换会话时用会话 ID 重置 composer。
 
 快捷动作配置包含 `kind`（Kit 内建动效插画）、`placeholder` 和本地 `instruction`。选择卡片只改变可移除标签和提示语，不改用户草稿；`onSend(message, action)` 由 `composeActionMessage` 按本地动作 ID 生成提问，再进入原发送链路，长度校验包括动作提示与附件。未知动作不附加提示，失败重试不重复附加。卡片不是授权或直接写入入口，权限、确认、取消与工具白名单仍由原服务端执行。
 

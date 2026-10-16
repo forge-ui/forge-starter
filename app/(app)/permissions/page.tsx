@@ -1,4 +1,7 @@
 "use client";
+import { useSemanticPage } from "@/components/semantic-page";
+import { useResourceAgent } from "@/components/resource-agent";
+import { notifyAgentPageDone } from "@/lib/agent/fill";
 
 import { Modal } from "@/components/ui/modal";
 
@@ -60,6 +63,12 @@ function PermissionsPageContent() {
   const [editId, setEditId] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
 
+  const agent = useResourceAgent({ resource: "permissions", rows: permissions, loading, error, busy: formOpen || Boolean(deleteTarget),
+    create: openCreate, edit: openEdit, remove: setDeleteTarget,
+    close: () => { setFormOpen(false); setEditId(null); setDeleteTarget(null); },
+  });
+  useSemanticPage({ pageId: "permissions.list", query: {}, ...(formOpen || deleteTarget ? { form: { mode: deleteTarget ? "delete" as const : editId ? "edit" as const : "create" as const, entityId: deleteTarget?.id ?? editId ?? undefined, dirty: true } } : {}) }, "permissions", agent.receive);
+
   function openCreate() {
     setEditId(null);
     setFormOpen(true);
@@ -71,6 +80,7 @@ function PermissionsPageContent() {
   }
 
   function closeForm() {
+    agent.clear();
     setFormOpen(false);
     setEditId(null);
   }
@@ -217,6 +227,7 @@ function PermissionsPageContent() {
   return (
     <div className="flex flex-col gap-6">
       <PermissionFormDialog
+        agentFill={agent.fill}
         open={formOpen}
         onClose={closeForm}
         permissionId={editId}
@@ -230,6 +241,7 @@ function PermissionsPageContent() {
 
       <Modal open={deleteTarget != null} onClose={() => {
               if (deleting) return;
+              agent.clear();
               setDeleteTarget(null);
             }}>
         {deleteTarget ? (
@@ -237,20 +249,24 @@ function PermissionsPageContent() {
             title="删除权限？"
             description={`确定删除「${deleteTarget.name}」？角色上的对应授权会一并移除。`}
             color="red"
-            icon={<TrashBinMinimalisticLinear size={32} color="#EA580C" />}
+            icon={<TrashBinMinimalisticLinear size={32} color="var(--fg-red-500)" />}
             confirmLabel={deleting ? "删除中…" : "删除"}
             cancelLabel="取消"
             onCancel={() => {
               if (deleting) return;
+              agent.clear();
               setDeleteTarget(null);
             }}
             onConfirm={() => {
               if (deleting) return;
               setDeleting(true);
-              void deletePermission(deleteTarget.id)
-                .then(() => {
+              void deletePermission(deleteTarget.id, { operationId: agent.fill?.operationId, key: crypto.randomUUID(), updatedAt: agent.fill?.expectedUpdatedAt ?? deleteTarget.updatedAt })
+                .then((receipt) => {
+                  if (agent.fill) notifyAgentPageDone("delete", receipt);
+                  agent.clear(false);
                   toast.success("权限已删除");
-                  setDeleteTarget(null);
+                  agent.clear();
+              setDeleteTarget(null);
                   if (detailId === deleteTarget.id) closeDetail();
                 })
                 .catch((err: unknown) => {
@@ -265,14 +281,11 @@ function PermissionsPageContent() {
       <PageTitleToolbar
         title="权限"
         breadcrumbs={
-          <Breadcrumbs
-            color={siteConfig.accent}
-            items={[
+            <Breadcrumbs color={siteConfig.accent} items={[
               { label: "工作台", href: "/dashboard/" },
               { label: "权限" },
-            ]}
-          />
-        }
+            ]} />
+          }
         actions={
           <ToolbarActions className="flex-wrap">
             <AskAiEntry />

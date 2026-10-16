@@ -1,4 +1,7 @@
 "use client";
+import { useSemanticPage } from "@/components/semantic-page";
+import { useResourceAgent } from "@/components/resource-agent";
+import { notifyAgentPageDone } from "@/lib/agent/fill";
 
 import { Modal } from "@/components/ui/modal";
 
@@ -51,6 +54,12 @@ function RolesPageContent() {
   const [editId, setEditId] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
 
+  const agent = useResourceAgent({ resource: "roles", rows: roles, loading, error, busy: formOpen || Boolean(deleteTarget),
+    create: openCreate, edit: openEdit, remove: setDeleteTarget,
+    close: () => { setFormOpen(false); setEditId(null); setDeleteTarget(null); },
+  });
+  useSemanticPage({ pageId: "roles.list", query: {}, ...(formOpen || deleteTarget ? { form: { mode: deleteTarget ? "delete" as const : editId ? "edit" as const : "create" as const, entityId: deleteTarget?.id ?? editId ?? undefined, dirty: true } } : {}) }, "roles", agent.receive);
+
   function openCreate() {
     setEditId(null);
     setFormOpen(true);
@@ -62,6 +71,7 @@ function RolesPageContent() {
   }
 
   function closeForm() {
+    agent.clear();
     setFormOpen(false);
     setEditId(null);
   }
@@ -205,6 +215,7 @@ function RolesPageContent() {
   return (
     <div className="flex flex-col gap-6">
       <RoleFormDialog
+        agentFill={agent.fill}
         open={formOpen}
         onClose={closeForm}
         roleId={editId}
@@ -218,6 +229,7 @@ function RolesPageContent() {
 
       <Modal open={deleteTarget != null} onClose={() => {
               if (deleting) return;
+              agent.clear();
               setDeleteTarget(null);
             }}>
         {deleteTarget ? (
@@ -225,20 +237,24 @@ function RolesPageContent() {
             title="删除角色？"
             description={`确定删除「${deleteTarget.name}」？已绑定的权限授权会一并移除。`}
             color="red"
-            icon={<TrashBinMinimalisticLinear size={32} color="#EA580C" />}
+            icon={<TrashBinMinimalisticLinear size={32} color="var(--fg-red-500)" />}
             confirmLabel={deleting ? "删除中…" : "删除"}
             cancelLabel="取消"
             onCancel={() => {
               if (deleting) return;
+              agent.clear();
               setDeleteTarget(null);
             }}
             onConfirm={() => {
               if (deleting) return;
               setDeleting(true);
-              void deleteRole(deleteTarget.id)
-                .then(() => {
+              void deleteRole(deleteTarget.id, { operationId: agent.fill?.operationId, key: crypto.randomUUID(), updatedAt: agent.fill?.expectedUpdatedAt ?? deleteTarget.updatedAt })
+                .then((receipt) => {
+                  if (agent.fill) notifyAgentPageDone("delete", receipt);
+                  agent.clear(false);
                   toast.success("角色已删除");
-                  setDeleteTarget(null);
+                  agent.clear();
+              setDeleteTarget(null);
                   if (detailId === deleteTarget.id) closeDetail();
                 })
                 .catch((err: unknown) => {
@@ -253,14 +269,11 @@ function RolesPageContent() {
       <PageTitleToolbar
         title="角色"
         breadcrumbs={
-          <Breadcrumbs
-            color={siteConfig.accent}
-            items={[
+            <Breadcrumbs color={siteConfig.accent} items={[
               { label: "工作台", href: "/dashboard/" },
               { label: "角色" },
-            ]}
-          />
-        }
+            ]} />
+          }
         actions={
           <ToolbarActions className="flex-wrap">
             <AskAiEntry />

@@ -1,4 +1,8 @@
 "use client";
+import { resourceFormDraft } from "@/lib/agent/resource-fields";
+import type { AgentFormFill } from "@/lib/agent/types";
+import { notifyAgentPageDone } from "@/lib/agent/fill";
+import { useRef } from "react";
 
 import { useEffect, useMemo, useState } from "react";
 import { Button, SelectOption, TextArea, TextField } from "@forge-ui-official/core";
@@ -38,19 +42,21 @@ const statusOptions = (Object.keys(RBAC_STATUS_META) as RbacStatus[]).map((value
 }));
 
 type Props = {
+  agentFill?: AgentFormFill | null;
   open: boolean;
   onClose: () => void;
   menuId?: string | null;
   onCreated?: (id: string) => void;
 };
 
-export function MenuFormDialog({ open, onClose, menuId = null, onCreated }: Props) {
+export function MenuFormDialog({ open, onClose, menuId = null, onCreated, agentFill }: Props) {
   const { menus, getById, createMenu, updateMenu } = useMenusStore();
   const mode = menuId ? "edit" : "create";
   const existing = menuId ? getById(menuId) : undefined;
   const [form, setForm] = useState<FormState>(emptyForm);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [saving, setSaving] = useState(false);
+  const saveKey = useRef(crypto.randomUUID());
 
   const parentOptions = useMemo(
     () => [
@@ -64,10 +70,11 @@ export function MenuFormDialog({ open, onClose, menuId = null, onCreated }: Prop
 
   useEffect(() => {
     if (!open) return;
+    saveKey.current = crypto.randomUUID();
     setFieldErrors({});
     setSaving(false);
     if (mode === "edit" && existing) {
-      setForm({
+      setForm(resourceFormDraft("menus", agentFill?.fields, {
         name: existing.name,
         code: existing.code,
         path: existing.path,
@@ -75,11 +82,11 @@ export function MenuFormDialog({ open, onClose, menuId = null, onCreated }: Prop
         sort: String(existing.sort),
         status: existing.status,
         description: existing.description,
-      });
+      }));
     } else if (mode === "create") {
-      setForm(emptyForm());
+      setForm(resourceFormDraft("menus", agentFill?.fields, emptyForm()));
     }
-  }, [open, mode, existing]);
+  }, [open, mode, existing, agentFill]);
 
   function setField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -132,13 +139,15 @@ export function MenuFormDialog({ open, onClose, menuId = null, onCreated }: Prop
     };
     try {
       if (mode === "edit" && existing) {
-        await updateMenu(existing.id, payload);
+        const saved = await updateMenu(existing.id, payload, { operationId: agentFill?.operationId, key: saveKey.current, updatedAt: agentFill?.expectedUpdatedAt ?? existing.updatedAt });
+        if (agentFill) notifyAgentPageDone("edit", saved.receipt);
         toast.success("菜单已保存");
         setSaving(false);
         onClose();
         return;
       }
-      const created = await createMenu(payload);
+      const created = await createMenu(payload, { operationId: agentFill?.operationId, key: saveKey.current });
+      if (agentFill) notifyAgentPageDone("create", created.receipt);
       toast.success("菜单已创建");
       setSaving(false);
       onClose();

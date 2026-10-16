@@ -1,3 +1,5 @@
+import { APP_MODULE_IDS, APP_MODULE_META } from "@/config/apps";
+import { SYSTEM_FEATURES, PERSONAL_FEATURES } from "@/lib/agent/system-features";
 import { APPLICATION_BUILD_ID, moduleContracts } from "../semantic/contracts";
 import { retrieveKnowledge, type KnowledgeEntry, type KnowledgeQuery, type KnowledgeSource } from "./knowledge";
 
@@ -73,7 +75,7 @@ const definitions: readonly Definition[] = [
     summary: "角色工具提供名称、编码、启用状态、已分配权限条数和说明。权限条数只能说明数量，不能据此判断可访问哪些模块；具体授权需结合权限目录的真实关联分析。",
     keywords: ["角色", "权限", "能做什么", "能看什么", "管理员", "roles"],
     source: { path: "lib/roles/agent.ts", symbol: "roleAgentTools" },
-    prerequisites: ["需角色读取权限。角色修改未登记助手写工具；需要配置时在角色页面操作。"],
+    prerequisites: ["需角色读取权限。新建、编辑、删除使用roles.create/update/delete准备草稿。授权先查询permissions.list取真实id，字段带入页面后由用户核对保存，收到回执再续办。"],
     nextSteps: [
       { label: "查看角色", question: "查看角色列表", capabilityIds: ["roles.list"] },
       { label: "分析角色权限", question: "结合角色和权限目录，分析各角色可以访问哪些模块", capabilityIds: ["roles.list", "permissions.list"] },
@@ -116,7 +118,7 @@ const definitions: readonly Definition[] = [
   },
   {
     id: "models.open", title: "查看模型详情", capabilityIds: ["models.open"],
-    summary: "用已查询到的真实模型 ID 打开模型详情。需要调整模型、测试连接或配置默认模型时引导到模型服务页面；当前助手登记的模型工具只支持查询、筛选和打开。",
+    summary: "用已查询到的真实模型 ID 打开模型详情。调整模型或默认状态使用models.update准备草稿；创建、删除使用对应工具，确认后由页面保存。密钥只在页面填写。连接测试使用models.probe，经确认后在页面执行。",
     keywords: ["模型", "详情", "配置", "连接", "测连", "不通", "换模型", "models.open"],
     source: { path: "lib/semantic/page-tools.ts", symbol: "pageTools" },
     relatedSources: [{ path: moduleContracts.models.sources.page }, { path: moduleContracts.models.sources.service, symbol: "probeAiModel" }],
@@ -127,7 +129,15 @@ const definitions: readonly Definition[] = [
 
 /** Bind the checked-in explanations to the deployment that ships them. */
 export function getStarterKnowledge(buildId: string = APPLICATION_BUILD_ID): KnowledgeEntry[] {
-  return definitions.map((definition) => ({
+  const inventory: Definition[] = APP_MODULE_IDS.map(id => ({
+    id: `${id}.features`, title: `${APP_MODULE_META[id].label}全部页面功能`,
+    summary: [SYSTEM_FEATURES[id].summary, SYSTEM_FEATURES[id].fields, SYSTEM_FEATURES[id].rules].join(" "),
+    keywords: [APP_MODULE_META[id].label, id, "功能", "如何", "怎么", "创建", "编辑", "删除", "配置"],
+    capabilityIds: [`${id}.navigate`], source: { path: SYSTEM_FEATURES[id].source },
+    nextSteps: [{ label: `打开${APP_MODULE_META[id].label}`, question: `打开${APP_MODULE_META[id].label}页面`, capabilityIds: [`${id}.navigate`] }],
+  }));
+  inventory.push({ id: "personal.features", title: "个人资料、安全、系统设置和Ask AI", summary: PERSONAL_FEATURES, keywords: ["个人", "资料", "密码", "登录", "注册", "找回", "通知", "系统设置", "Ask AI", "附件", "会话"], capabilityIds: ["dashboard.navigate"], source: { path: "components/settings-account-dialog.tsx" } });
+  return [...definitions, ...inventory].map((definition) => ({
     ...definition,
     platformId: STARTER_PLATFORM_ID,
     buildId,

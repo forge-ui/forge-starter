@@ -353,7 +353,7 @@ test("Starter resumes an owned real page save and exports without repeating the 
     turn += 1;
     if (turn === 1) return Response.json({ choices: [{ message: { content: null, tool_calls: [{ id: "create-once", type: "function", function: { name: "accounts_create", arguments: JSON.stringify({ username: values.username }) } }] } }] });
     if (turn === 2) {
-      assert(request.messages.some((message: { role: string; content?: string }) => message.role === "tool" && message.content?.includes("保存已由服务器核实") && message.content.includes(values.username)));
+      assert(request.messages.some((message: { role: string; content?: string }) => message.role === "tool" && message.content?.includes("已收到保存结果") && message.content.includes(values.username)));
       return Response.json({ choices: [{ message: { content: null, tool_calls: [{ id: "export-after-save", type: "function", function: { name: "accounts_export", arguments: JSON.stringify({ query: values.username }) } }] } }] });
     }
     assert.equal(turn, 3, "续办只应查询导出一次");
@@ -395,7 +395,7 @@ test("disabled assistant writes offer a page fallback without exposing configura
   process.env.SEMANTIC_ENABLED = "false";
   try {
     const ports = createStarterPorts({ userId: ownerId, access: access(["accounts"], ["accounts:read", "accounts:create"]), model });
-    const result = await ports.capabilities.invoke("accounts_create", {}, run());
+    const result = await ports.capabilities.invoke("accounts_create", {}, run({ goal: "创建账号" }));
     assert.equal(result.stop, true);
     assert.match(result.summary, /暂时无法通过助手办理/);
     assert.doesNotMatch(JSON.stringify(result), /SEMANTIC_ENABLED|操作回执/);

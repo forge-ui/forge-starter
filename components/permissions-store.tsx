@@ -1,4 +1,6 @@
 "use client";
+import { resourceWriteHeaders, type ResourceSaveOptions, type ResourceSaved } from "@/lib/semantic/resource-save-options";
+import type { Receipt } from "@/lib/semantic/operations";
 
 import {
   createContext,
@@ -20,9 +22,9 @@ type PermissionsStoreValue = {
   error: string | null;
   refresh: () => Promise<void>;
   getById: (id: string) => PermissionRecord | undefined;
-  createPermission: (input: PermissionInput) => Promise<PermissionRecord>;
-  updatePermission: (id: string, input: PermissionInput) => Promise<PermissionRecord>;
-  deletePermission: (id: string) => Promise<void>;
+  createPermission: (input: PermissionInput, options?: ResourceSaveOptions) => Promise<ResourceSaved<PermissionRecord>>;
+  updatePermission: (id: string, input: PermissionInput, options?: ResourceSaveOptions) => Promise<ResourceSaved<PermissionRecord>>;
+  deletePermission: (id: string, options?: ResourceSaveOptions) => Promise<Receipt | undefined>;
   countsByResource: Record<string, number>;
 };
 
@@ -31,6 +33,7 @@ const PermissionsStoreContext = createContext<PermissionsStoreValue | null>(null
 type PermissionsResponse = {
   permissions?: PermissionRecord[];
   permission?: PermissionRecord;
+  receipt?: Receipt;
 };
 
 export function PermissionsStoreProvider({ children }: { children: ReactNode }) {
@@ -75,10 +78,10 @@ export function PermissionsStoreProvider({ children }: { children: ReactNode }) 
     [permissions],
   );
 
-  const createPermission = useCallback(async (input: PermissionInput) => {
+  const createPermission = useCallback(async (input: PermissionInput, options?: ResourceSaveOptions) => {
     const res = await apiFetch("/api/permissions/", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: resourceWriteHeaders(options),
       body: JSON.stringify(input),
     });
     const data = await parseApiJson<PermissionsResponse>(res);
@@ -89,13 +92,13 @@ export function PermissionsStoreProvider({ children }: { children: ReactNode }) 
       const next = [data.permission!, ...prev.filter((item) => item.id !== data.permission!.id)];
       return next;
     });
-    return data.permission;
+    return { ...data.permission, receipt: data.receipt };
   }, []);
 
-  const updatePermission = useCallback(async (id: string, input: PermissionInput) => {
+  const updatePermission = useCallback(async (id: string, input: PermissionInput, options?: ResourceSaveOptions) => {
     const res = await apiFetch(`/api/permissions/${id}/`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: resourceWriteHeaders(options),
       body: JSON.stringify(input),
     });
     const data = await parseApiJson<PermissionsResponse>(res);
@@ -103,16 +106,17 @@ export function PermissionsStoreProvider({ children }: { children: ReactNode }) 
       throw new Error(data.error ?? "更新失败");
     }
     setPermissions((prev) => prev.map((item) => (item.id === id ? data.permission! : item)));
-    return data.permission;
+    return { ...data.permission, receipt: data.receipt };
   }, []);
 
-  const deletePermission = useCallback(async (id: string) => {
-    const res = await apiFetch(`/api/permissions/${id}/`, { method: "DELETE" });
+  const deletePermission = useCallback(async (id: string, options?: ResourceSaveOptions) => {
+    const res = await apiFetch(`/api/permissions/${id}/`, { method: "DELETE", headers: resourceWriteHeaders(options) });
     const data = await parseApiJson<PermissionsResponse>(res);
     if (!res.ok || !data.ok) {
       throw new Error(data.error ?? "删除失败");
     }
     setPermissions((prev) => prev.filter((item) => item.id !== id));
+    return data.receipt;
   }, []);
 
   const countsByResource = useMemo(() => {

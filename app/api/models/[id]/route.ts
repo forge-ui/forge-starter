@@ -1,3 +1,5 @@
+import { resourceWrite } from "@/lib/semantic/resource-write";
+import { OperationError } from "@/lib/semantic/operations";
 import { z } from "zod";
 import { jsonError, jsonOk } from "@/lib/auth/http";
 import { requirePermission } from "@/lib/rbac/access";
@@ -25,6 +27,7 @@ export async function GET(_request: Request, ctx: Ctx) {
     if (!model) return jsonError("模型不存在", 404);
     return jsonOk({ model });
   } catch (error) {
+    if (error instanceof OperationError) return jsonError(error.message, error.status);
     const message = error instanceof Error ? error.message : "加载失败";
     return jsonError(message, 500);
   }
@@ -40,22 +43,24 @@ export async function PATCH(request: Request, ctx: Ctx) {
     if (!parsed.success) {
       return jsonError(parsed.error.issues[0]?.message ?? "参数无效");
     }
-    const model = await updateAiModel(id, parsed.data);
-    return jsonOk({ model });
+    const result = await resourceWrite(request, auth.session.id, "models", "update", id, parsed.data, async () => ({ model: await updateAiModel(id, parsed.data) }));
+    return jsonOk(result);
   } catch (error) {
+    if (error instanceof OperationError) return jsonError(error.message, error.status);
     const message = error instanceof Error ? error.message : "更新失败";
     return jsonError(message, message.includes("不存在") ? 404 : 400);
   }
 }
 
-export async function DELETE(_request: Request, ctx: Ctx) {
+export async function DELETE(request: Request, ctx: Ctx) {
   try {
     const auth = await requirePermission("models", "delete");
     if (!auth.ok) return auth.response;
     const { id } = await ctx.params;
-    await deleteAiModel(id);
-    return jsonOk({ deleted: true });
+    const result = await resourceWrite(request, auth.session.id, "models", "delete", id, {}, async () => { await deleteAiModel(id); return { deleted: true }; });
+    return jsonOk(result);
   } catch (error) {
+    if (error instanceof OperationError) return jsonError(error.message, error.status);
     const message = error instanceof Error ? error.message : "删除失败";
     return jsonError(message, message.includes("不存在") ? 404 : 400);
   }

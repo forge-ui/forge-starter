@@ -1,3 +1,4 @@
+import { AGENT_TOOLS } from "../../lib/agent/registry";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { readFileSync, existsSync } from "node:fs";
@@ -105,9 +106,7 @@ test("Starter read-only knowledge never recommends ungranted account mutations",
 
 test("Starter knowledge references existing source anchors and registered tool IDs", () => {
   const repo = resolve(import.meta.dirname, "../..");
-  const toolFiles = ["lib/accounts/agent.ts", "lib/roles/agent.ts", "lib/permissions/agent.ts", "lib/menus/agent.ts", "lib/models/agent.ts", "lib/semantic/page-tools.ts"];
-  const toolIds = new Set(toolFiles.flatMap((file) => [...readFileSync(resolve(repo, file), "utf8").matchAll(/id:\s*"([\w.]+)"/g)].map((match) => match[1])));
-  for (const module of ["accounts", "roles", "permissions", "menus", "models"]) toolIds.add(`${module}.navigate`);
+  const toolIds = new Set(AGENT_TOOLS.map(tool => tool.id));
   for (const item of getStarterKnowledge()) {
     for (const id of [...item.capabilityIds, ...(item.nextSteps ?? []).flatMap((step) => step.capabilityIds)]) assert(toolIds.has(id), `unregistered tool: ${id}`);
     for (const source of [item.source, ...(item.relatedSources ?? [])]) {

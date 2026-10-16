@@ -1,6 +1,9 @@
 "use client";
+import { decodeAppDraft, localAppSnapshot } from "@/lib/agent/app-fields";
+import type { AgentFormFill } from "@/lib/agent/types";
+import { notifyLocalAppDone } from "@/lib/agent/local-result";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button, SelectOption, TextField } from "@forge-ui-official/core";
 import { Modal } from "@/components/ui/modal";
 import { toast } from "@/lib/toast";
@@ -66,13 +69,15 @@ const emptyDraft = (): Draft => ({
 });
 
 type Props = {
+  agentFill?: AgentFormFill | null;
   open: boolean;
   onClose: () => void;
   appId: string | null;
   onSaved?: (id: string) => void;
 };
 
-export function AppFormDialog({ open, onClose, appId, onSaved }: Props) {
+export function AppFormDialog({ open, onClose, appId, onSaved, agentFill }: Props) {
+  const createId = useRef("");
   const isHost = appId === DEFAULT_APP_ID;
   const mode = appId ? "edit" : "create";
   const [draft, setDraft] = useState<Draft>(emptyDraft);
@@ -81,6 +86,7 @@ export function AppFormDialog({ open, onClose, appId, onSaved }: Props) {
 
   useEffect(() => {
     if (!open) return;
+    createId.current = createAppId();
     setError(null);
     setFieldErrors({});
     if (mode === "edit" && appId) {
@@ -98,11 +104,12 @@ export function AppFormDialog({ open, onClose, appId, onSaved }: Props) {
         openMode: app.openMode,
         authMode: app.authMode,
         modules: modulesForApp(app),
+        ...(agentFill ? decodeAppDraft(agentFill.fields) : {}),
       });
     } else {
-      setDraft(emptyDraft());
+      setDraft({ ...emptyDraft(), ...(agentFill ? decodeAppDraft(agentFill.fields) : {}) });
     }
-  }, [open, mode, appId]);
+  }, [open, mode, appId, agentFill]);
 
   function handleClose() {
     setError(null);
@@ -110,7 +117,7 @@ export function AppFormDialog({ open, onClose, appId, onSaved }: Props) {
     onClose();
   }
 
-  function submit() {
+  async function submit() {
     setError(null);
     setFieldErrors({});
     const name = draft.name.trim();
@@ -148,11 +155,12 @@ export function AppFormDialog({ open, onClose, appId, onSaved }: Props) {
       modules: draft.kind === "internal" ? draft.modules : [],
     };
 
-    const savedId = appId ?? createAppId();
+    const savedId = appId ?? createId.current;
     try {
       const list = loadAppRegistry();
       if (mode === "edit" && appId) {
         const existing = list.find((a) => a.id === appId);
+        if (existing && agentFill?.expectedUpdatedAt !== undefined && localAppSnapshot(existing) !== agentFill.expectedUpdatedAt) { toast.error("应用配置已变化，请重新核对"); return; }
         if (!existing) {
           setError("无法编辑该应用");
           return;
@@ -164,13 +172,17 @@ export function AppFormDialog({ open, onClose, appId, onSaved }: Props) {
         );
       } else {
         saveAppRegistry([
-          ...list,
+          ...list.filter(row => row.id !== savedId),
           normalizeAppEntry({ id: savedId, ...payload }),
         ]);
       }
     } catch {
       toast.error("保存失败，请检查浏览器存储是否可用");
       return;
+    }
+    if (agentFill) {
+      try { await notifyLocalAppDone(agentFill, savedId, loadAppRegistry().find(row => row.id === savedId) ?? null); }
+      catch (err) { toast.error(err instanceof Error ? err.message : "回执同步失败"); return; }
     }
     toast.success(mode === "edit" ? "应用配置已保存" : "应用已创建");
     onSaved?.(savedId);

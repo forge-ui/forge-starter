@@ -1,13 +1,14 @@
 /** Shared dialogue policy. Current request wins over history; history is never authorization. */
-export type IntentAction = "read" | "navigate" | "create" | "update" | "delete" | "export" | "cancel" | "continue" | "help" | "unknown";
-const RESOURCE_LABELS: Record<string,string> = { accounts:"账号", models:"模型", roles:"角色", menus:"菜单", permissions:"权限", annotation:"标注任务", datasets:"数据集" };
+export type IntentAction = "probe" | "read" | "navigate" | "create" | "update" | "delete" | "export" | "cancel" | "continue" | "help" | "unknown";
+const RESOURCE_LABELS: Record<string,string> = { accounts:"账号", models:"模型", roles:"角色", menus:"菜单", permissions:"权限", settings:"应用", annotation:"标注任务", datasets:"数据集" };
 export type DialogueMessage = { role: "user" | "assistant"; content: string };
-const verbs = { create: /新建|创建|新增|添加|建一个|建一条|准备(?:一个|一条|个).*(?:账号|账户|任务|表单)|加(?:一个|一条|个)|开(?:一个|一条|个)?标注任务|\bcreate\b/i, update: /修改|更新|编辑|启用|停用|禁用|改成|改为|设置为|\bupdate\b|\bedit\b/i, delete: /删除|移除|清空|\bdelete\b/i, export: /导出|下载|\bexport\b/i };
+const verbs = { create: /新建|创建|新增|添加|准备新(?:的)?(?:账号|角色|菜单|权限|模型|应用)|建一个|建一条|准备(?:一个|一条|个).*(?:账号|账户|任务|表单)|加(?:一个|一条|个)|开(?:一个|一条|个)?标注任务|\bcreate\b/i, update: /修改|更新|编辑|启用|停用|禁用|改成|改为|设置为|\bupdate\b|\bedit\b/i, delete: /删除|移除|清空|\bdelete\b/i, export: /导出|下载|\bexport\b/i };
 export function classifyIntent(question: string): IntentAction {
   const q = question.trim();
   // Negated clauses cannot authorize an action. Keep the request after a correction.
   const positive = q.replace(/[「“"][^」”"]+[」”"]/g, "目标").replace(/(?:不要|不用|别|不想|不需要|取消|不是(?:要)?|并非)(?:再)?[^，,。；;！!]*[，,。；;！!]?/g, "").trim();
   if (/^(?:取消|算了|不用了|停止|结束|放弃|cancel)[。！!\s]*$/i.test(q) || (!positive && /不要|不用|别|取消/.test(q))) return "cancel";
+  if (/测试.{0,8}连接|测连|检测.{0,8}连接/.test(positive) && !/怎么|如何|能不能/.test(positive)) return "probe";
   if (/怎么|如何|为什么|是什么意思|能否|能不能|可以.{0,8}吗|\bhow\b/i.test(positive)) return "help";
   if (/(?:查|看|打开).*(?:新建的|创建的|删除的|修改的|历史)/.test(positive)) return "read";
   if (Object.values(verbs).filter(r => r.test(positive)).length > 1 && /还是|或者|然后|接着|并|同时|再/.test(positive)) return "unknown";
@@ -19,6 +20,7 @@ export function classifyIntent(question: string): IntentAction {
   return "unknown";
 }
 export function toolIntentAction(id: string): IntentAction {
+  if (/\.probe$/.test(id)) return "probe";
   if (/export|download/.test(id)) return "export";
   if (/create|add/.test(id)) return "create";
   if (/delete|remove/.test(id)) return "delete";
@@ -30,7 +32,13 @@ export function allowsToolIntent(question: string, toolId: string) {
   const intent = classifyIntent(question);
   const action = toolIntentAction(toolId);
   if (intent === "cancel" || intent === "help" || intent === "continue") return action === "read";
-  if (["create", "update", "delete", "export"].includes(action)) return intent === action;
+  if (["create", "update", "delete", "export", "probe"].includes(action)) {
+    if (intent === action) return true;
+    // A sequential multi-step request authorizes its explicit positive clauses;
+    // an alternative (create OR delete) still requires clarification.
+    const positive = question.replace(/[「“"][^」”"]+[」”"]/g, "目标").replace(/(?:不要|不用|别|不想|不需要|取消|不是(?:要)?|并非)(?:再)?[^，,。；;！!]*[，,。；;！!]?/g, "");
+    return (intent === "unknown" || /后|然后|接着|并且|同时/.test(positive)) && !/还是|或者/.test(positive) && action !== "probe" && Object.hasOwn(verbs, action) && verbs[action as keyof typeof verbs].test(positive);
+  }
   return true;
 }
 export type ChoiceBlock = { type: "choice"; title: string; options: Array<{ label: string; question: string }> };

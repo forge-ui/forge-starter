@@ -1,5 +1,5 @@
 import { desc, eq } from "drizzle-orm";
-import { getDb } from "@/lib/db";
+import { resourceDb as getDb } from "@/lib/semantic/resource-db";
 import { aiModels, type AiModelRow } from "@/lib/db/schema";
 import { formatRbacDate, uniqueConstraintMessage } from "@/lib/rbac/constants";
 import {
@@ -203,7 +203,6 @@ export async function probeAiModel(id: string) {
         lastProbeAt: new Date(),
         lastProbeOk: true,
         lastProbeMessage: preview,
-        updatedAt: new Date(),
       })
       .where(eq(aiModels.id, id))
       .returning();
@@ -216,7 +215,6 @@ export async function probeAiModel(id: string) {
         lastProbeAt: new Date(),
         lastProbeOk: false,
         lastProbeMessage: message.slice(0, 200),
-        updatedAt: new Date(),
       })
       .where(eq(aiModels.id, id))
       .returning();

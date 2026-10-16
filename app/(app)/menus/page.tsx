@@ -1,4 +1,7 @@
 "use client";
+import { useSemanticPage } from "@/components/semantic-page";
+import { useResourceAgent } from "@/components/resource-agent";
+import { notifyAgentPageDone } from "@/lib/agent/fill";
 
 import { Modal } from "@/components/ui/modal";
 
@@ -51,6 +54,12 @@ function MenusPageContent() {
   const [editId, setEditId] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
 
+  const agent = useResourceAgent({ resource: "menus", rows: menus, loading, error, busy: formOpen || Boolean(deleteTarget),
+    create: openCreate, edit: openEdit, remove: setDeleteTarget,
+    close: () => { setFormOpen(false); setEditId(null); setDeleteTarget(null); },
+  });
+  useSemanticPage({ pageId: "menus.list", query: {}, ...(formOpen || deleteTarget ? { form: { mode: deleteTarget ? "delete" as const : editId ? "edit" as const : "create" as const, entityId: deleteTarget?.id ?? editId ?? undefined, dirty: true } } : {}) }, "menus", agent.receive);
+
   function openCreate() {
     setEditId(null);
     setFormOpen(true);
@@ -62,6 +71,7 @@ function MenusPageContent() {
   }
 
   function closeForm() {
+    agent.clear();
     setFormOpen(false);
     setEditId(null);
   }
@@ -216,6 +226,7 @@ function MenusPageContent() {
   return (
     <div className="flex flex-col gap-6">
       <MenuFormDialog
+        agentFill={agent.fill}
         open={formOpen}
         onClose={closeForm}
         menuId={editId}
@@ -229,6 +240,7 @@ function MenusPageContent() {
 
       <Modal open={deleteTarget != null} onClose={() => {
               if (deleting) return;
+              agent.clear();
               setDeleteTarget(null);
             }}>
         {deleteTarget ? (
@@ -236,20 +248,24 @@ function MenusPageContent() {
             title="删除菜单？"
             description={`确定删除「${deleteTarget.name}」？内置侧栏不会因此增减条目。`}
             color="red"
-            icon={<TrashBinMinimalisticLinear size={32} color="#EA580C" />}
+            icon={<TrashBinMinimalisticLinear size={32} color="var(--fg-red-500)" />}
             confirmLabel={deleting ? "删除中…" : "删除"}
             cancelLabel="取消"
             onCancel={() => {
               if (deleting) return;
+              agent.clear();
               setDeleteTarget(null);
             }}
             onConfirm={() => {
               if (deleting) return;
               setDeleting(true);
-              void deleteMenu(deleteTarget.id)
-                .then(() => {
+              void deleteMenu(deleteTarget.id, { operationId: agent.fill?.operationId, key: crypto.randomUUID(), updatedAt: agent.fill?.expectedUpdatedAt ?? deleteTarget.updatedAt })
+                .then((receipt) => {
+                  if (agent.fill) notifyAgentPageDone("delete", receipt);
+                  agent.clear(false);
                   toast.success("菜单已删除");
-                  setDeleteTarget(null);
+                  agent.clear();
+              setDeleteTarget(null);
                   if (detailId === deleteTarget.id) closeDetail();
                 })
                 .catch((err: unknown) => {
@@ -264,14 +280,11 @@ function MenusPageContent() {
       <PageTitleToolbar
         title="菜单"
         breadcrumbs={
-          <Breadcrumbs
-            color={siteConfig.accent}
-            items={[
+            <Breadcrumbs color={siteConfig.accent} items={[
               { label: "工作台", href: "/dashboard/" },
               { label: "菜单" },
-            ]}
-          />
-        }
+            ]} />
+          }
         actions={
           <ToolbarActions className="flex-wrap">
             <AskAiEntry />

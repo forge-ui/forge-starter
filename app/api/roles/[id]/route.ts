@@ -1,3 +1,5 @@
+import { resourceWrite } from "@/lib/semantic/resource-write";
+import { OperationError } from "@/lib/semantic/operations";
 import { z } from "zod";
 import { jsonError, jsonOk } from "@/lib/auth/http";
 import { requirePermission } from "@/lib/rbac/access";
@@ -22,6 +24,7 @@ export async function GET(_request: Request, ctx: Ctx) {
     if (!role) return jsonError("角色不存在", 404);
     return jsonOk({ role });
   } catch (error) {
+    if (error instanceof OperationError) return jsonError(error.message, error.status);
     const message = error instanceof Error ? error.message : "加载失败";
     return jsonError(message, 500);
   }
@@ -37,28 +40,30 @@ export async function PATCH(request: Request, ctx: Ctx) {
     if (!parsed.success) {
       return jsonError(parsed.error.issues[0]?.message ?? "参数无效");
     }
-    const role = await updateRole(id, {
+    const result = await resourceWrite(request, auth.session.id, "roles", "update", id, parsed.data, async () => ({ role: await updateRole(id, {
       name: parsed.data.name,
       code: parsed.data.code ?? "",
       description: parsed.data.description,
       status: parsed.data.status,
       permissionIds: parsed.data.permissionIds,
-    });
-    return jsonOk({ role });
+    }) }));
+    return jsonOk(result);
   } catch (error) {
+    if (error instanceof OperationError) return jsonError(error.message, error.status);
     const message = error instanceof Error ? error.message : "更新失败";
     return jsonError(message, message.includes("不存在") ? 404 : 400);
   }
 }
 
-export async function DELETE(_request: Request, ctx: Ctx) {
+export async function DELETE(request: Request, ctx: Ctx) {
   try {
     const auth = await requirePermission("roles", "delete");
     if (!auth.ok) return auth.response;
     const { id } = await ctx.params;
-    await deleteRole(id);
-    return jsonOk({ deleted: true });
+    const result = await resourceWrite(request, auth.session.id, "roles", "delete", id, {}, async () => { await deleteRole(id); return { deleted: true }; });
+    return jsonOk(result);
   } catch (error) {
+    if (error instanceof OperationError) return jsonError(error.message, error.status);
     const message = error instanceof Error ? error.message : "删除失败";
     return jsonError(message, message.includes("不存在") ? 404 : 400);
   }

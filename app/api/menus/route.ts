@@ -1,3 +1,5 @@
+import { resourceWrite } from "@/lib/semantic/resource-write";
+import { OperationError } from "@/lib/semantic/operations";
 import { z } from "zod";
 import { jsonError, jsonOk } from "@/lib/auth/http";
 import { requirePermission } from "@/lib/rbac/access";
@@ -25,6 +27,7 @@ export async function GET() {
     const menus = await listMenus();
     return jsonOk({ menus });
   } catch (error) {
+    if (error instanceof OperationError) return jsonError(error.message, error.status);
     const message = error instanceof Error ? error.message : "加载失败";
     if (dbUnavailable(error)) {
       return jsonError("未配置 DATABASE_URL，无法读写菜单数据", 503);
@@ -42,7 +45,7 @@ export async function POST(request: Request) {
     if (!parsed.success) {
       return jsonError(parsed.error.issues[0]?.message ?? "参数无效");
     }
-    const menu = await createMenu({
+    const result = await resourceWrite(request, auth.session.id, "menus", "create", undefined, parsed.data, async () => ({ menu: await createMenu({
       name: parsed.data.name,
       code: parsed.data.code,
       path: parsed.data.path,
@@ -50,9 +53,10 @@ export async function POST(request: Request) {
       sort: parsed.data.sort,
       status: parsed.data.status,
       description: parsed.data.description,
-    });
-    return jsonOk({ menu }, { status: 201 });
+    }) }));
+    return jsonOk(result, { status: 201 });
   } catch (error) {
+    if (error instanceof OperationError) return jsonError(error.message, error.status);
     const message = error instanceof Error ? error.message : "创建失败";
     if (dbUnavailable(error)) {
       return jsonError("未配置 DATABASE_URL，无法读写菜单数据", 503);

@@ -1,3 +1,5 @@
+import { resourceWrite } from "@/lib/semantic/resource-write";
+import { OperationError } from "@/lib/semantic/operations";
 import { z } from "zod";
 import { jsonError, jsonOk } from "@/lib/auth/http";
 import { requirePermission } from "@/lib/rbac/access";
@@ -24,6 +26,7 @@ export async function GET(_request: Request, ctx: Ctx) {
     if (!menu) return jsonError("菜单不存在", 404);
     return jsonOk({ menu });
   } catch (error) {
+    if (error instanceof OperationError) return jsonError(error.message, error.status);
     const message = error instanceof Error ? error.message : "加载失败";
     return jsonError(message, 500);
   }
@@ -39,7 +42,7 @@ export async function PATCH(request: Request, ctx: Ctx) {
     if (!parsed.success) {
       return jsonError(parsed.error.issues[0]?.message ?? "参数无效");
     }
-    const menu = await updateMenu(id, {
+    const result = await resourceWrite(request, auth.session.id, "menus", "update", id, parsed.data, async () => ({ menu: await updateMenu(id, {
       name: parsed.data.name,
       code: parsed.data.code ?? "",
       path: parsed.data.path,
@@ -47,22 +50,24 @@ export async function PATCH(request: Request, ctx: Ctx) {
       sort: parsed.data.sort,
       status: parsed.data.status,
       description: parsed.data.description,
-    });
-    return jsonOk({ menu });
+    }) }));
+    return jsonOk(result);
   } catch (error) {
+    if (error instanceof OperationError) return jsonError(error.message, error.status);
     const message = error instanceof Error ? error.message : "更新失败";
     return jsonError(message, message.includes("不存在") ? 404 : 400);
   }
 }
 
-export async function DELETE(_request: Request, ctx: Ctx) {
+export async function DELETE(request: Request, ctx: Ctx) {
   try {
     const auth = await requirePermission("menus", "delete");
     if (!auth.ok) return auth.response;
     const { id } = await ctx.params;
-    await deleteMenu(id);
-    return jsonOk({ deleted: true });
+    const result = await resourceWrite(request, auth.session.id, "menus", "delete", id, {}, async () => { await deleteMenu(id); return { deleted: true }; });
+    return jsonOk(result);
   } catch (error) {
+    if (error instanceof OperationError) return jsonError(error.message, error.status);
     const message = error instanceof Error ? error.message : "删除失败";
     return jsonError(message, message.includes("不存在") ? 404 : 400);
   }

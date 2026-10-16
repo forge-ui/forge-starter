@@ -1,3 +1,4 @@
+import { resourceReaders, type ReadbackResource } from "./resource-readback";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { semanticOperations } from "@/lib/db/schema";
@@ -9,6 +10,16 @@ export async function verifyOperation(id: string, userId: string): Promise<Recei
   if (!["committed", "verified"].includes(operation.state) || !operation.receipt) return undefined;
   const receipt = operation.receipt as Receipt;
   if (receipt.status === "verified") return receipt;
+  const resource = receipt.actionId.split(".")[0] as ReadbackResource;
+  if (Object.hasOwn(resourceReaders, resource)) {
+    const current = await resourceReaders[resource](receipt.entityId);
+    const saved = Object.values(receipt.result).find(value => value && typeof value === "object" && "updatedAt" in value) as { updatedAt: string } | undefined;
+    const matches = receipt.actionId.endsWith(".delete") ? !current : current && current.updatedAt === saved?.updatedAt;
+    if (!matches) return receipt;
+    const verified: Receipt = { ...receipt, status: "verified", verifiedAt: new Date().toISOString() };
+    await getDb().update(semanticOperations).set({ state: "verified", receipt: verified, updatedAt: new Date() }).where(eq(semanticOperations.id, id));
+    return verified;
+  }
   if (!receipt.actionId.startsWith("accounts.")) return receipt;
   const current = await getAdminAccountById(receipt.entityId);
   const matches = receipt.actionId === "accounts.delete" ? !current : current && current.revision === receipt.revision;

@@ -215,7 +215,7 @@ function isAgentFormFill(value: unknown): value is AgentFormFill {
   const fill = value as Record<string, unknown>;
   return (
     typeof fill.formId === "string"
-    && (["create", "edit", "delete", "open", "filter"].includes(String(fill.mode)))
+    && (["create", "edit", "delete", "open", "filter", "probe"].includes(String(fill.mode)))
     && typeof fill.href === "string"
     && Boolean(fill.fields)
     && typeof fill.fields === "object"

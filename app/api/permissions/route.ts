@@ -1,3 +1,5 @@
+import { resourceWrite } from "@/lib/semantic/resource-write";
+import { OperationError } from "@/lib/semantic/operations";
 import { z } from "zod";
 import { jsonError, jsonOk } from "@/lib/auth/http";
 import { requirePermission } from "@/lib/rbac/access";
@@ -24,6 +26,7 @@ export async function GET() {
     const permissions = await listPermissions();
     return jsonOk({ permissions });
   } catch (error) {
+    if (error instanceof OperationError) return jsonError(error.message, error.status);
     const message = error instanceof Error ? error.message : "加载失败";
     if (dbUnavailable(error)) {
       return jsonError("未配置 DATABASE_URL，无法读写权限数据", 503);
@@ -41,9 +44,10 @@ export async function POST(request: Request) {
     if (!parsed.success) {
       return jsonError(parsed.error.issues[0]?.message ?? "参数无效");
     }
-    const permission = await createPermission(parsed.data);
-    return jsonOk({ permission }, { status: 201 });
+    const result = await resourceWrite(request, auth.session.id, "permissions", "create", undefined, parsed.data, async () => ({ permission: await createPermission(parsed.data) }));
+    return jsonOk(result, { status: 201 });
   } catch (error) {
+    if (error instanceof OperationError) return jsonError(error.message, error.status);
     const message = error instanceof Error ? error.message : "创建失败";
     if (dbUnavailable(error)) {
       return jsonError("未配置 DATABASE_URL，无法读写权限数据", 503);

@@ -1,4 +1,6 @@
 "use client";
+import { AGENT_FILL_EVENT, consumeAgentFormFill, peekAgentFormFill } from "@/lib/agent/fill";
+import { PAGE_ACK_EVENT } from "@/components/semantic-page";
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -83,6 +85,17 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [apps, setApps] = useState<AppEntry[]>(() => getDefaultAppRegistry());
   const [activeAppId, setActiveAppId] = useState(DEFAULT_APP_ID);
   const [accountDialog, setAccountDialog] = useState<SettingsAccountDialogKind | null>(null);
+  useEffect(() => {
+    const receive = () => {
+      const fill = peekAgentFormFill("personal");
+      if (!fill || !["profile", "security", "notifications"].includes(fill.fields.kind)) return;
+      consumeAgentFormFill("personal");
+      setAccountDialog(fill.fields.kind as SettingsAccountDialogKind);
+      window.dispatchEvent(new CustomEvent(PAGE_ACK_EVENT, { detail: { commandId: fill.commandId, ok: true } }));
+    };
+    receive(); window.addEventListener(AGENT_FILL_EVENT, receive);
+    return () => window.removeEventListener(AGENT_FILL_EVENT, receive);
+  }, []);
 
   const syncRegistry = useCallback(() => {
     const list = loadAppRegistry();

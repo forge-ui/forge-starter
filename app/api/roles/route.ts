@@ -1,3 +1,5 @@
+import { resourceWrite } from "@/lib/semantic/resource-write";
+import { OperationError } from "@/lib/semantic/operations";
 import { z } from "zod";
 import { jsonError, jsonOk } from "@/lib/auth/http";
 import { requirePermission } from "@/lib/rbac/access";
@@ -23,6 +25,7 @@ export async function GET() {
     const roles = await listRoles();
     return jsonOk({ roles });
   } catch (error) {
+    if (error instanceof OperationError) return jsonError(error.message, error.status);
     const message = error instanceof Error ? error.message : "加载失败";
     if (dbUnavailable(error)) {
       return jsonError("未配置 DATABASE_URL，无法读写角色数据", 503);
@@ -40,15 +43,16 @@ export async function POST(request: Request) {
     if (!parsed.success) {
       return jsonError(parsed.error.issues[0]?.message ?? "参数无效");
     }
-    const role = await createRole({
+    const result = await resourceWrite(request, auth.session.id, "roles", "create", undefined, parsed.data, async () => ({ role: await createRole({
       name: parsed.data.name,
       code: parsed.data.code,
       description: parsed.data.description,
       status: parsed.data.status,
       permissionIds: parsed.data.permissionIds,
-    });
-    return jsonOk({ role }, { status: 201 });
+    }) }));
+    return jsonOk(result, { status: 201 });
   } catch (error) {
+    if (error instanceof OperationError) return jsonError(error.message, error.status);
     const message = error instanceof Error ? error.message : "创建失败";
     if (dbUnavailable(error)) {
       return jsonError("未配置 DATABASE_URL，无法读写角色数据", 503);

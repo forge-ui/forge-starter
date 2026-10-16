@@ -1,5 +1,5 @@
 import { asc, eq } from "drizzle-orm";
-import { getDb } from "@/lib/db";
+import { resourceDb as getDb } from "@/lib/semantic/resource-db";
 import { rbacMenus, type RbacMenuRow } from "@/lib/db/schema";
 import { ensureRbacDefaults } from "@/lib/rbac/seed";
 import {

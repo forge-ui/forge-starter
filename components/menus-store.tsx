@@ -1,4 +1,6 @@
 "use client";
+import { resourceWriteHeaders, type ResourceSaveOptions, type ResourceSaved } from "@/lib/semantic/resource-save-options";
+import type { Receipt } from "@/lib/semantic/operations";
 
 import {
   createContext,
@@ -19,9 +21,9 @@ type MenusStoreValue = {
   error: string | null;
   refresh: () => Promise<void>;
   getById: (id: string) => MenuRecord | undefined;
-  createMenu: (input: MenuInput) => Promise<MenuRecord>;
-  updateMenu: (id: string, input: MenuInput) => Promise<MenuRecord>;
-  deleteMenu: (id: string) => Promise<void>;
+  createMenu: (input: MenuInput, options?: ResourceSaveOptions) => Promise<ResourceSaved<MenuRecord>>;
+  updateMenu: (id: string, input: MenuInput, options?: ResourceSaveOptions) => Promise<ResourceSaved<MenuRecord>>;
+  deleteMenu: (id: string, options?: ResourceSaveOptions) => Promise<Receipt | undefined>;
   countsByStatus: Record<string, number>;
 };
 
@@ -30,6 +32,7 @@ const MenusStoreContext = createContext<MenusStoreValue | null>(null);
 type MenusResponse = {
   menus?: MenuRecord[];
   menu?: MenuRecord;
+  receipt?: Receipt;
 };
 
 export function MenusStoreProvider({ children }: { children: ReactNode }) {
@@ -74,10 +77,10 @@ export function MenusStoreProvider({ children }: { children: ReactNode }) {
     [menus],
   );
 
-  const createMenu = useCallback(async (input: MenuInput) => {
+  const createMenu = useCallback(async (input: MenuInput, options?: ResourceSaveOptions) => {
     const res = await apiFetch("/api/menus/", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: resourceWriteHeaders(options),
       body: JSON.stringify(input),
     });
     const data = await parseApiJson<MenusResponse>(res);
@@ -85,13 +88,13 @@ export function MenusStoreProvider({ children }: { children: ReactNode }) {
       throw new Error(data.error ?? "创建失败");
     }
     await refresh();
-    return data.menu;
+    return { ...data.menu, receipt: data.receipt };
   }, [refresh]);
 
-  const updateMenu = useCallback(async (id: string, input: MenuInput) => {
+  const updateMenu = useCallback(async (id: string, input: MenuInput, options?: ResourceSaveOptions) => {
     const res = await apiFetch(`/api/menus/${id}/`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: resourceWriteHeaders(options),
       body: JSON.stringify(input),
     });
     const data = await parseApiJson<MenusResponse>(res);
@@ -99,16 +102,17 @@ export function MenusStoreProvider({ children }: { children: ReactNode }) {
       throw new Error(data.error ?? "更新失败");
     }
     await refresh();
-    return data.menu;
+    return { ...data.menu, receipt: data.receipt };
   }, [refresh]);
 
-  const deleteMenu = useCallback(async (id: string) => {
-    const res = await apiFetch(`/api/menus/${id}/`, { method: "DELETE" });
+  const deleteMenu = useCallback(async (id: string, options?: ResourceSaveOptions) => {
+    const res = await apiFetch(`/api/menus/${id}/`, { method: "DELETE", headers: resourceWriteHeaders(options) });
     const data = await parseApiJson<MenusResponse>(res);
     if (!res.ok || !data.ok) {
       throw new Error(data.error ?? "删除失败");
     }
     setMenus((prev) => prev.filter((item) => item.id !== id));
+    return data.receipt;
   }, []);
 
   const countsByStatus = useMemo(() => {

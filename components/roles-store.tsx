@@ -1,4 +1,6 @@
 "use client";
+import { resourceWriteHeaders, type ResourceSaveOptions, type ResourceSaved } from "@/lib/semantic/resource-save-options";
+import type { Receipt } from "@/lib/semantic/operations";
 
 import {
   createContext,
@@ -19,9 +21,9 @@ type RolesStoreValue = {
   error: string | null;
   refresh: () => Promise<void>;
   getById: (id: string) => RoleRecord | undefined;
-  createRole: (input: RoleInput) => Promise<RoleRecord>;
-  updateRole: (id: string, input: RoleInput) => Promise<RoleRecord>;
-  deleteRole: (id: string) => Promise<void>;
+  createRole: (input: RoleInput, options?: ResourceSaveOptions) => Promise<ResourceSaved<RoleRecord>>;
+  updateRole: (id: string, input: RoleInput, options?: ResourceSaveOptions) => Promise<ResourceSaved<RoleRecord>>;
+  deleteRole: (id: string, options?: ResourceSaveOptions) => Promise<Receipt | undefined>;
   countsByStatus: Record<string, number>;
 };
 
@@ -30,6 +32,7 @@ const RolesStoreContext = createContext<RolesStoreValue | null>(null);
 type RolesResponse = {
   roles?: RoleRecord[];
   role?: RoleRecord;
+  receipt?: Receipt;
 };
 
 export function RolesStoreProvider({ children }: { children: ReactNode }) {
@@ -74,10 +77,10 @@ export function RolesStoreProvider({ children }: { children: ReactNode }) {
     [roles],
   );
 
-  const createRole = useCallback(async (input: RoleInput) => {
+  const createRole = useCallback(async (input: RoleInput, options?: ResourceSaveOptions) => {
     const res = await apiFetch("/api/roles/", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: resourceWriteHeaders(options),
       body: JSON.stringify(input),
     });
     const data = await parseApiJson<RolesResponse>(res);
@@ -85,13 +88,13 @@ export function RolesStoreProvider({ children }: { children: ReactNode }) {
       throw new Error(data.error ?? "创建失败");
     }
     setRoles((prev) => [data.role!, ...prev.filter((item) => item.id !== data.role!.id)]);
-    return data.role;
+    return { ...data.role, receipt: data.receipt };
   }, []);
 
-  const updateRole = useCallback(async (id: string, input: RoleInput) => {
+  const updateRole = useCallback(async (id: string, input: RoleInput, options?: ResourceSaveOptions) => {
     const res = await apiFetch(`/api/roles/${id}/`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: resourceWriteHeaders(options),
       body: JSON.stringify(input),
     });
     const data = await parseApiJson<RolesResponse>(res);
@@ -99,16 +102,17 @@ export function RolesStoreProvider({ children }: { children: ReactNode }) {
       throw new Error(data.error ?? "更新失败");
     }
     setRoles((prev) => prev.map((item) => (item.id === id ? data.role! : item)));
-    return data.role;
+    return { ...data.role, receipt: data.receipt };
   }, []);
 
-  const deleteRole = useCallback(async (id: string) => {
-    const res = await apiFetch(`/api/roles/${id}/`, { method: "DELETE" });
+  const deleteRole = useCallback(async (id: string, options?: ResourceSaveOptions) => {
+    const res = await apiFetch(`/api/roles/${id}/`, { method: "DELETE", headers: resourceWriteHeaders(options) });
     const data = await parseApiJson<RolesResponse>(res);
     if (!res.ok || !data.ok) {
       throw new Error(data.error ?? "删除失败");
     }
     setRoles((prev) => prev.filter((item) => item.id !== id));
+    return data.receipt;
   }, []);
 
   const countsByStatus = useMemo(() => {

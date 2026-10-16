@@ -1,4 +1,8 @@
 "use client";
+import { resourceFormDraft } from "@/lib/agent/resource-fields";
+import type { AgentFormFill } from "@/lib/agent/types";
+import { notifyAgentPageDone } from "@/lib/agent/fill";
+import { useRef } from "react";
 
 import { useEffect, useState } from "react";
 import { Button, SelectOption, TextArea, TextField } from "@forge-ui-official/core";
@@ -44,6 +48,7 @@ const actionOptions = RBAC_ACTIONS.map((value) => ({
 }));
 
 type Props = {
+  agentFill?: AgentFormFill | null;
   open: boolean;
   onClose: () => void;
   permissionId?: string | null;
@@ -55,6 +60,7 @@ export function PermissionFormDialog({
   onClose,
   permissionId = null,
   onCreated,
+  agentFill,
 }: Props) {
   const { getById, createPermission, updatePermission } = usePermissionsStore();
   const mode = permissionId ? "edit" : "create";
@@ -62,23 +68,25 @@ export function PermissionFormDialog({
   const [form, setForm] = useState<FormState>(emptyForm);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [saving, setSaving] = useState(false);
+  const saveKey = useRef(crypto.randomUUID());
 
   useEffect(() => {
     if (!open) return;
+    saveKey.current = crypto.randomUUID();
     setFieldErrors({});
     setSaving(false);
     if (mode === "edit" && existing) {
-      setForm({
+      setForm(resourceFormDraft("permissions", agentFill?.fields, {
         name: existing.name,
         code: existing.code,
         resource: existing.resource,
         action: existing.action,
         description: existing.description,
-      });
+      }));
     } else if (mode === "create") {
-      setForm(emptyForm());
+      setForm(resourceFormDraft("permissions", agentFill?.fields, emptyForm()));
     }
-  }, [open, mode, existing]);
+  }, [open, mode, existing, agentFill]);
 
   function setField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => {
@@ -128,13 +136,15 @@ export function PermissionFormDialog({
     };
     try {
       if (mode === "edit" && existing) {
-        await updatePermission(existing.id, payload);
+        const saved = await updatePermission(existing.id, payload, { operationId: agentFill?.operationId, key: saveKey.current, updatedAt: agentFill?.expectedUpdatedAt ?? existing.updatedAt });
+        if (agentFill) notifyAgentPageDone("edit", saved.receipt);
         toast.success("权限已保存");
         setSaving(false);
         onClose();
         return;
       }
-      const created = await createPermission(payload);
+      const created = await createPermission(payload, { operationId: agentFill?.operationId, key: saveKey.current });
+      if (agentFill) notifyAgentPageDone("create", created.receipt);
       toast.success("权限已创建");
       setSaving(false);
       onClose();
@@ -187,6 +197,7 @@ export function PermissionFormDialog({
               value={form.resource}
               onChange={(v) => setField("resource", v as RbacResource)}
             />
+
             <SelectOption
               color={siteConfig.accent}
               label="操作"

@@ -1,14 +1,7 @@
 import { composeToolContext } from "../../lib/ask-ai-quick-actions";
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { ASK_AI_QUICK_ACTIONS, askAiQuickActions, composeActionMessage } from "../../lib/ask-ai-quick-actions";
-
-test("Ask AI 快捷卡片只出现在全屏空会话", () => {
-  assert.deepEqual(askAiQuickActions(false, false), []);
-  assert.deepEqual(askAiQuickActions(false, true), []);
-  assert.deepEqual(askAiQuickActions(true, true), []);
-  assert.equal(askAiQuickActions(true, false), ASK_AI_QUICK_ACTIONS);
-});
+import { ASK_AI_QUICK_ACTIONS, composeActionMessage } from "../../lib/ask-ai-quick-actions";
 
 test("未选动作不改变普通提问", () => {
   assert.equal(composeActionMessage("  查看最近的数据\n@资料  ", undefined, ASK_AI_QUICK_ACTIONS), "查看最近的数据\n@资料");
