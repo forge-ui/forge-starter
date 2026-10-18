@@ -32,6 +32,7 @@ import {
   type ProfileUpdatedDetail,
 } from "@/lib/auth/profile-events";
 import { AskAiProvider } from "@/components/ask-ai-entry";
+import { PageTransition } from "@/components/page-transition";
 import { ToastProvider } from "@/components/ui/toast-provider";
 import {
   SettingsAccountDialog,
@@ -283,7 +284,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           showDatePicker={false}
           showKebab={false}
         >
-          {forbiddenModule ? null : children}
+          {forbiddenModule ? null : <PageTransition>{children}</PageTransition>}
           <SettingsAccountDialog kind={accountDialog} onClose={() => setAccountDialog(null)} />
           <ToastProvider />
         </AppLayout>

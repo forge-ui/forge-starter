@@ -76,3 +76,32 @@ body {
 @container (max-width: 440px) {
   .starter-ask-compact button[aria-label^="选择模型"] { max-width: 7rem !important; }
 }
+
+/* Route animation changes only compositing properties, never layout geometry.
+ * display: contents preserves the Kit's flex/scroll sizing and portal hosts.
+ * Each page's top-level sections enter in order; the delay caps at 60ms.
+ */
+.starter-page-transition { display: contents; }
+.starter-page-transition > * > * {
+  animation: starter-section-enter 220ms ease-out backwards;
+}
+.starter-page-transition > * > :nth-child(2) { animation-delay: 20ms; }
+.starter-page-transition > * > :nth-child(3) { animation-delay: 40ms; }
+.starter-page-transition > * > :nth-child(n + 4) { animation-delay: 60ms; }
+.starter-page-transition[data-leaving] > * {
+  animation: starter-page-leave 100ms ease-out both;
+  pointer-events: none;
+}
+@keyframes starter-section-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes starter-page-leave {
+  to { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .starter-page-transition > *,
+  .starter-page-transition > * > * {
+    animation: none !important;
+  }
+}
