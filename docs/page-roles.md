@@ -1,5 +1,7 @@
 # 页面角色 → 官方 Template 对照表
 
+所有业务角色同时遵循 [页面切换与刷新动效](page-motion.md)：沿用 AppShell 自动接入，页面区块结构与导航方式仍须按 Q5 实测。
+
 写后台页时 **先定角色，再抄 template**。  
 权威：Forge monorepo `templates/` + 本表 + `docs/module-template.md`。
 

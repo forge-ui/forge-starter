@@ -5,6 +5,10 @@ Coding Agent 是第一开发界面：skills 拆开后端与页面，`accounts` �
 
 必读：`docs/product.md`、`docs/agent-native.md`、`docs/module-template.md`、`docs/page-roles.md`、`docs/forge-components.md`、`docs/audit-checklist.md`。
 
+## 页面动效（新页面必读）
+
+业务页面沿用现有 `AppShell` 即自动接入正文动效，不得重复包裹或让侧栏参与动画。开发前读 `docs/page-motion.md`（参数、DOM 分段与导航边界）；交付按 `docs/audit-checklist.md` **Q5** 实测切页、刷新和减少动态效果。
+
 ## 铁律
 
 1. 组件只 `import { … } from "@forge-ui-official/core"`。  
