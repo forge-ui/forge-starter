@@ -1,8 +1,67 @@
 # Forge Starter
 
-这是一份用 Forge UI 搭管理后台的起点。它存在，是因为只拿着组件库从头搭后台时，每做一个项目就要重新决定登录、列表、详情和颜色；人和 Coding Agent 还容易各自再发明一套界面。这个仓库把已经定过的选择放在一起，让下一个后台从同一套壳开始。
+[![GitHub stars](https://img.shields.io/github/stars/forge-ui/forge-starter?style=flat-square)](https://github.com/forge-ui/forge-starter/stargazers)
+[![License: MIT](https://img.shields.io/github/license/forge-ui/forge-starter?style=flat-square)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/forge-ui/forge-starter?style=flat-square)](https://github.com/forge-ui/forge-starter/releases)
+[![Live Demo](https://img.shields.io/badge/demo-starter.forgeui.org-0ea5e9?style=flat-square)](https://starter.forgeui.org/)
+[![Use this template](https://img.shields.io/badge/GitHub-Use_this_template-238636?style=flat-square&logo=github)](https://github.com/forge-ui/forge-starter/generate)
 
-它不是可以拿去卖的产品，也不是「克隆下来就有一家公司」的模板。
+**AI 原生的企业级 B 端脚手架** — 用 [Forge UI](https://github.com/forge-ui/forge) 搭管理后台时，把登录、列表、详情、RBAC 样板和 Agent skills 已经定过的选择收进同一套壳，人和 Coding Agent 从同一起点开工。
+
+> 这是可 fork / Use this template 的起点，不是可直接售卖的成品 SaaS，也不是「克隆下来就有一家公司」的全家桶。边界见下方「适合 / 不适合 / 取舍」。
+
+<p align="center">
+  <a href="https://starter.forgeui.org/">
+    <img
+      src="docs/assets/readme-hero.png"
+      alt="Forge Starter — 管理后台工作台预览"
+      width="920"
+    />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://starter.forgeui.org/"><strong>Live Demo</strong></a>
+  ·
+  <a href="https://github.com/forge-ui/forge-starter/generate"><strong>Use this template</strong></a>
+  ·
+  <a href="docs/README.md">文档索引</a>
+  ·
+  <a href="https://github.com/forge-ui/forge">Forge UI</a>
+  ·
+  <a href="https://forgeui.org">官网</a>
+</p>
+
+### 仓库镜像
+
+| 平台 | 仓库 |
+| --- | --- |
+| GitHub（权威） | https://github.com/forge-ui/forge-starter |
+| AtomGit | https://atomgit.com/bitlink/forge-starter |
+
+### 60 秒上手
+
+需要 Node.js **22.14+**、pnpm **11**、Docker（或自备 Postgres）。
+
+**方式 A — Use this template（推荐）**
+
+1. 打开 [Use this template](https://github.com/forge-ui/forge-starter/generate) 生成自己的仓库  
+2. Clone 后执行下方命令  
+
+**方式 B — Clone**
+
+```bash
+git clone https://github.com/forge-ui/forge-starter.git
+cd forge-starter
+cp .env.example .env
+# 设 POSTGRES_PASSWORD，并同步写进 DATABASE_URL（特殊字符需 URL 编码）
+docker compose up -d --wait
+pnpm install && pnpm db:migrate && pnpm db:seed && pnpm dev
+```
+
+本地打开 [http://localhost:3000](http://localhost:3000)。线上预览：[https://starter.forgeui.org/](https://starter.forgeui.org/)。
+
+更完整的环境变量、种子与排错见下方「快速开始」与 [docs/setup.md](docs/setup.md)。组件库：[forge-ui/forge](https://github.com/forge-ui/forge) · 官网：[forgeui.org](https://forgeui.org)。
 
 ## 它解决谁的什么问题
 
