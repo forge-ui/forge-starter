@@ -37,6 +37,7 @@
 | 平台 | 仓库 |
 | --- | --- |
 | GitHub（权威） | https://github.com/forge-ui/forge-starter |
+| Gitee | https://gitee.com/forgeui/forge-starter |
 | AtomGit | https://atomgit.com/bitlink/forge-starter |
 
 ### 60 秒上手
