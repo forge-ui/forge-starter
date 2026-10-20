@@ -37,7 +37,13 @@ export type AgentDownloadBlock = {
   filename: string;
 };
 
-export type AgentBlock = import("./presentation").AgentPresentationBlock | import("./intent-policy").ChoiceBlock | AgentTableBlock | AgentConfirmBlock | AgentDownloadBlock | AgentFormBlock;
+/** OpenUI Lang 1.0。只由报销 PoC 的组件库渲染，不执行工具。 */
+export type AgentOpenUiBlock = {
+  type: "openui";
+  lang: string;
+};
+
+export type AgentBlock = import("./presentation").AgentPresentationBlock | import("./intent-policy").ChoiceBlock | AgentTableBlock | AgentConfirmBlock | AgentDownloadBlock | AgentFormBlock | AgentOpenUiBlock;
 
 export type AgentToolOutput = {
   /** 回给模型的短事实，不要塞密钥或整文件。 */

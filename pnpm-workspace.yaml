@@ -1,4 +1,5 @@
 allowBuilds:
+  '@openuidev/lang-core': false
   esbuild: true
   sharp: true
   workerd: true

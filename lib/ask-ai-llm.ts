@@ -278,7 +278,7 @@ function localAnswer(question: string, pageLabel: string, snapshot: AskAiAccount
   if (demo?.id === "rbac") {
     return "新账号不带侧栏。要同时改菜单三处、当前应用勾选、角色的 {module}:read。只改 rbac_menus 目录不会出现入口。";
   }
-  return `未接模型，不能查库、填数或导出。可以先问：${ASK_AI_DEMOS.map((item) => item.title).join("；")}。`;
+  return `未接模型，不能查库、填数或导出。可以先问：${ASK_AI_DEMOS.map((item) => item.title).join("；")}。也可以输入「用 OpenUI 展示报销结果」看一张流式报销卡片。`;
 }
 
 export async function answerAskAi(input: {

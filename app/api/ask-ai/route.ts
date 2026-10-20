@@ -5,6 +5,8 @@ import { semanticEnabled } from "@/lib/semantic/operations";
 import { z } from "zod";
 import { ASK_AI_ENV_MODEL_ID } from "@/lib/ask-ai-types";
 import { answerAskAi, peekAskAiRuntime, resolveHarnessModel } from "@/lib/ask-ai-llm";
+import { isExpenseOpenUiQuestion } from "@/lib/openui/expense-demo";
+import { expenseOpenUiResponse } from "@/lib/openui/expense-stream";
 import { answerWithHarness, harnessEnabled, harnessRequestSchema, starterSuggestions } from "@/lib/harness/starter";
 import { apiError, jsonError, jsonOk } from "@/lib/auth/http";
 import { requireSession } from "@/lib/auth/session";
@@ -69,6 +71,19 @@ export async function POST(request: Request) {
 
   try {
     const access = await resolveAccess(auth.session);
+    if (isExpenseOpenUiQuestion(parsed.data.question) && !parsed.data.harness?.reply && !parsed.data.continuationOperationId) {
+      return expenseOpenUiResponse({
+        question: parsed.data.question,
+        signal: request.signal,
+        loadModel: async () => {
+          try {
+            return await resolveHarnessModel(parsed.data.modelId);
+          } catch {
+            return null;
+          }
+        },
+      });
+    }
     const harness = parsed.data.harness;
     if (harness) {
       const encoder = new TextEncoder();

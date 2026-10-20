@@ -1,5 +1,6 @@
 "use client";
 
+import { AskAiOpenUi } from "./ask-ai-openui";
 import { AskAiPresentation } from "./ask-ai-presentation";
 import { isPresentationBlock } from "@/lib/agent/presentation";
 import { AskAiForm, type ConfirmFormIntent } from "./ask-ai-form";
@@ -169,6 +170,7 @@ function AskAiTurnView({
           spent={block.type === "confirm" && spentIntents.includes(block.intent)}
           confirming={block.type === "confirm" && confirmingIntent === block.intent}
           onConfirm={onConfirm}
+          streaming={block.type === "openui" && turn.delivery?.mode === "incremental" && turn.delivery.status === "streaming"}
           onCancel={latest && result?.harness?.pending && onReply ? () => onReply(result.harness!, { interactionId: result.harness!.pending!.id, cancel: true }) : undefined}
         />
       ))}
@@ -248,6 +250,7 @@ function AgentBlockView({
   onAsk,
   spent,
   confirming,
+  streaming,
   onConfirm,
   onCancel,
 }: {
@@ -258,9 +261,11 @@ function AgentBlockView({
   draftKey: string;
   spent: boolean;
   confirming: boolean;
+  streaming: boolean;
   onConfirm: ConfirmFormIntent;
   onCancel?: () => void;
 }) {
+  if (block.type === "openui") return <AskAiOpenUi lang={block.lang} streaming={streaming} />;
   if (isPresentationBlock(block)) return <AskAiPresentation block={block} storageKey={draftKey} disabled={disabled} onAsk={onAsk} />;
   if (block.type === "choice") return null;
   if (block.type === "form") return <AskAiForm block={block} draftKey={draftKey} question={question} disabled={disabled} onConfirm={onConfirm} onCancel={onCancel} />;

@@ -389,6 +389,25 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
             };
           });
         },
+        (lang) => {
+          if (!stillCurrent() || !lang) return;
+          const session = ticket.sessionId;
+          setTurnsBySession((prev) => {
+            if (!stillCurrent()) return prev;
+            const turns = prev[session];
+            if (!turns) return prev;
+            return {
+              ...prev,
+              [session]: turns.map((turn) => turn.id === id ? {
+                ...turn,
+                pending: false,
+                progress: undefined,
+                result: { text: turn.result?.text ?? "", live: true, blocks: [{ type: "openui", lang }] },
+                delivery: { mode: "incremental", status: "streaming" },
+              } : turn),
+            };
+          });
+        },
       );
       stopProgress();
       if (!stillCurrent()) return abandon();

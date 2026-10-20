@@ -237,6 +237,9 @@ function isAgentBlock(value: unknown): value is AgentBlock {
   if (block.type === "table") {
     return typeof block.title === "string" && Array.isArray(block.columns) && Array.isArray(block.rows);
   }
+  if (block.type === "openui") {
+    return typeof block.lang === "string" && block.lang.includes("root") && block.lang.length <= 8000;
+  }
   return false;
 }
 
@@ -322,6 +325,7 @@ export async function sendAskAi(
   continuationOperationId?: string,
   harness?: AskAiHarnessRequest,
   onText?: (text: string) => void,
+  onOpenUi?: (lang: string) => void,
 ): Promise<AskAiClientResult> {
   const response = await fetch("/api/ask-ai/", {
     method: "POST",
@@ -338,7 +342,7 @@ export async function sendAskAi(
     signal: request.signal,
   });
   const type = response.headers.get("content-type") ?? "";
-  if (type.includes("ndjson") || type.includes("event-stream")) return readAskAiStream(response, onText);
+  if (type.includes("ndjson") || type.includes("event-stream")) return readAskAiStream(response, onText, onOpenUi);
   const payload = (await response.json().catch(() => null)) as Record<string, unknown> | null;
   if (!response.ok || !payload?.ok || typeof payload.text !== "string") {
     throw new AskAiRequestError(typeof payload?.error === "string" ? payload.error : ASK_AI_FALLBACK_SUMMARY, response.status);
@@ -346,7 +350,11 @@ export async function sendAskAi(
   return parseResult(payload);
 }
 
-async function readAskAiStream(response: Response, onText?: (text: string) => void): Promise<AskAiClientResult> {
+async function readAskAiStream(
+  response: Response,
+  onText?: (text: string) => void,
+  onOpenUi?: (lang: string) => void,
+): Promise<AskAiClientResult> {
   if (!response.ok || !response.body) {
     const payload = await response.json().catch(() => null) as { error?: string } | null;
     throw new AskAiRequestError(payload?.error || ASK_AI_FALLBACK_SUMMARY, response.status);
@@ -357,8 +365,9 @@ async function readAskAiStream(response: Response, onText?: (text: string) => vo
   let result: AskAiClientResult | null = null;
   const consume = (line: string) => {
     if (!line.trim()) return;
-    const event = JSON.parse(line) as { type?: string; text?: string; error?: string; status?: number; ok?: boolean };
+    const event = JSON.parse(line) as { type?: string; text?: string; lang?: string; error?: string; status?: number; ok?: boolean };
     if (event.type === "text" && typeof event.text === "string") onText?.(event.text);
+    else if (event.type === "openui" && typeof event.lang === "string") onOpenUi?.(event.lang);
     else if (event.type === "error") throw new AskAiRequestError(event.error || ASK_AI_FALLBACK_SUMMARY, event.status || 502);
     else if (event.type === "done") {
       if (event.ok !== true || typeof event.text !== "string") throw new AskAiRequestError(ASK_AI_FALLBACK_SUMMARY, 502);
