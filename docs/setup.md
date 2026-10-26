@@ -131,7 +131,7 @@ components/          app-shell · *-store · *-dialog · ui/modal
 config/              site · menu · apps
 lib/                 auth · db · accounts · roles · menus · permissions · rbac · apps · mail · reference
 docs/                产品说明 · 工作流 · 安装环境 · 组件选型
-.agents/skills/      quick-start · new-module · new-page · audit
+.agents/skills/      quick-start · new-module · new-page · audit · dimensional-drawing
 AGENTS.md
 ```
 

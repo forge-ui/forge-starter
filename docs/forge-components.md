@@ -178,6 +178,8 @@ import { siteConfig } from "@/config/site";
 
 更全的页面模式（日历/聊天/发票等）见 monorepo `page-patterns.md`；Starter 默认 CRUD 用上表足够。
 
+组件级尺寸图主要放在 ForgeUI / forge core 的组件 skill。Starter 用同一套 [dimensional-drawing](../.agents/skills/dimensional-drawing/SKILL.md) 画整页和布局：变量来自源码或 token，未知写 `[TBD]`，画槽位不画文案。
+
 
 ### ChatInputBar 0.4.1 快捷操作
 

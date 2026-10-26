@@ -171,6 +171,10 @@ pnpm check   # typecheck + 规范绊线
 - 菜单三处：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用是否勾齐新 id；是否已清 `forge-starter:app-registry`  
 - 无权限直链是否 `replace` 回工作台（不要只藏侧栏）  
 
+## 可选：整页结构尺寸图
+
+需要交代页面骨架时，用 `.agents/skills/dimensional-drawing` 出一张独立 HTML。变量来自源码或 Forge token，没有的写 `[TBD]`，画架构槽位，不画文案。组件级尺寸图主要在 ForgeUI / forge core；starter 用同一套 skill 画页面和布局。这张图不代替本 skill 写 UI，也不算审计通过。
+
 ## 可选语义底座接入
 
 已登记语义契约的模块按 `docs/agent-semantic-foundation.md` 使用 `useSemanticPage` 暴露白名单状态并实现页面动作适配器。加载、未保存表单和过期记录必须明确处理；页面接收 ACK 不等于数据保存成功。仍执行完整页面审计。
