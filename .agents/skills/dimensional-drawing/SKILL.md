@@ -2,22 +2,32 @@
 name: dimensional-drawing
 description: >
   Make an Apple-style monochrome dimensional drawing of a whole Forge Starter
-  page or layout — one sheet, variable codes, architecture slots. Use when
-  building or reviewing starter pages and a structural anatomy is needed.
-  Component-level drawings live primarily with the ForgeUI / forge core skill;
-  this copy is for pages and layouts. Never invent numbers; unknown dims stay
-  [TBD]. Upstream MIT: enesozturk/dimensional-drawing.
+  page or layout — one sheet, variable codes, architecture slots. Required by
+  forge-starter-audit (missing HTML fails the audit; a written skip is still
+  a fail) and by forge-starter-new-page (design is not complete without it).
+  Component-level Kit examples live in the forge repo; this copy draws starter
+  pages, dialogs and tables. Never invent numbers; unknown dims stay [TBD].
+  Not a runtime dependency. Upstream MIT: enesozturk/dimensional-drawing.
 ---
 
 # Dimensional drawing
 
-Draw one subject the way Apple's accessory dimensional drawings do (developer.apple.com/accessories/dimensional-drawings): everything on one sheet, notes top-left, views spread across the sheet with smaller detail views, tables beside the views that use them. Output is one self-contained HTML file (on claude.ai, publish it as an Artifact). Worked examples: `examples/dialog-sheet.html` and `examples/card-sheet.html` next to this file — copy their drawing kit instead of starting from zero.
+Draw one subject the way Apple's accessory dimensional drawings do (developer.apple.com/accessories/dimensional-drawings): everything on one sheet, notes top-left, views spread across the sheet with smaller detail views, tables beside the views that use them. Output is one self-contained HTML file (on claude.ai, publish it as an Artifact). Worked examples: `examples/dialog-sheet.html`, `examples/card-sheet.html`, and `examples/list-table-sheet.html` next to this file — copy their drawing kit instead of starting from zero. In this repo, audit and new-page deliveries also save a copy under `artifacts/dimensional-drawing/`.
 
 ## Forge Starter（优先于下文的「单个组件」默认）
 
-搭 starter 页面时，用本 skill 画**整页 / 布局**结构图（列表、详情、看板、壳层分栏）。它只出独立 HTML，不代替 `forge-starter-new-page` 写 UI，也不改产品功能代码。
+搭 starter 页面、或审计已有页面时，用本 skill 画**整页 / Dialog / 表**的结构图。它只出独立 HTML，不代替 `forge-starter-new-page` 写 UI，也不改产品功能代码。
 
-组件级尺寸图主要放在 ForgeUI / forge core 的组件 skill；starter 用同一套 skill 画页面和布局。
+**强制（DD4-1 / DD4-2 / DD4-3）**
+
+- `forge-starter-audit` 主路径必须调用本 skill。没有 HTML = 审计 **FAIL**。写了跳过原因也不通过。
+- `forge-starter-new-page` 把设计标完成之前必须出图（整页，或该页关键 Dialog / 表）。无图不得交审。
+- 交付路径：`artifacts/dimensional-drawing/<模块>-<对象>.html`（相对仓库根）。`examples/` 是画法范例，不代替这份交付。
+- 解剖图不是浏览器验收截图。截图通道挂了，不能用来跳过这张图。
+- 仍只是 Agent skill：不进 `package.json`，不进 runtime，不打进 `@forge-ui-official/core`。
+- Dialog / DataTable 各一张 Kit 解剖示例和文档门禁句在 **forge 仓**做。本仓不补 Kit。
+
+组件级尺寸图的 Kit 示例在 forge 仓；starter 用同一套画法画页面、本页 Dialog 和本页表。
 
 - 变量来自页面源码、Forge token 或已经量到的值。源码里没有的写 `[TBD]`，禁止编造数字。
 - 画架构槽位（`TITLE SLOT · FLEX` 等），不画真实文案。

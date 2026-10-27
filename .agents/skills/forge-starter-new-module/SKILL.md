@@ -106,7 +106,7 @@ pnpm db:migrate   # 业务表必须 Postgres；demo 登录模式不能代替 DAT
 - 表名、API 路径与方法  
 - 若登记了 Ask AI 工具：工具 id，以及哪些是写入（需确认）  
 - **API 齐 ≠ 侧栏有。** 本步没有挂应用模块。  
-- **下一步**：`forge-starter-new-page`（store + 列表/表单/详情 UI，并挂应用模块）  
+- **下一步**：`forge-starter-new-page`（store + 列表/表单/详情 UI，并挂应用模块）。UI 只走 new-page，本 skill 不画界面；new-page 在把设计标完成前必须有 dimensional-drawing 解剖图。  
   - 菜单三处：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用种子勾齐新 id  
   - 重详情 → 对照 `accounts`  
   - 轻详情 → 对照 `/ref/detail-modal` + `components/ui/modal.tsx`（暂无第二业务样板）  

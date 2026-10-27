@@ -7,6 +7,8 @@ description: >
   Requires API/store already
   present or created via new-module first.
   Use for dashboard pages or finishing a resource after new-module.
+  Design is not done until a dimensional-drawing HTML exists for the
+  page or its key dialog/table. Do not mark the design complete without it.
 ---
 
 # Forge Starter New Page（只 UI）
@@ -99,6 +101,28 @@ description: >
 
 交付说明里写 **选了哪种 + 一句话理由**。
 
+## Step 1b — 解剖图（设计门，禁止跳过）
+
+角色定了之后、把设计标完成之前，读并执行 `.agents/skills/dimensional-drawing/SKILL.md`。
+
+出一张自包含 HTML，对象是下面其一（页面实际有的都画更好）：
+
+- **整页**：页头、一条工具带、主体、壳 gutter
+- **关键 Dialog / 表单弹窗**
+- **列表表**（DataTable 列、单元格垫、分页槽）
+
+路径（相对仓库根，交付报告必须列出）：
+
+```text
+artifacts/dimensional-drawing/<模块>-<对象>.html
+```
+
+- 变量来自将要抄的样板源码、Forge token 或已经量到的值。没有的写 `[TBD]`。画槽位，不画文案。
+- **没有这张 HTML，不得把设计标为完成**，也不得声称页面可以交审。
+- 图不是浏览器验收，也不代替 Step 3 的点击，更不算审计通过。审计在 Step 4 还会按解剖门复核；图过期了要按最终源码重画。
+- 本步只出图，不在这里改 Kit。Dialog / DataTable 的 Kit 示例归 forge 仓。
+- 不进 `package.json` / runtime。
+
 ## Step 2 — 实现
 
 ### 列表
@@ -161,7 +185,7 @@ pnpm check   # typecheck + 规范绊线
 
 ## Step 4 — Audit（必做，不可省略）
 
-按 `.agents/skills/forge-starter-audit/SKILL.md` 对本次改动执行完整四步审计（对照 `docs/audit-checklist.md` 逐条核查 → 样板结构对照 → 截图 → 修复重验），修复全部红线后才算交付。
+按 `.agents/skills/forge-starter-audit/SKILL.md` 对本次改动执行完整审计（对照 `docs/audit-checklist.md` 逐条核查 → 样板结构对照 → **解剖门** → 截图 → 修复重验）。解剖图缺失 = 审计 FAIL，写了原因也不通过。修复全部红线，且解剖门有 HTML 之后，才算交付。Step 1b 的图如果和最终源码不一致，先重画再交审。
 
 ## Report
 
@@ -170,10 +194,11 @@ pnpm check   # typecheck + 规范绊线
 - 对照样板：accounts（重）或 `/ref/detail-modal`（轻，暂无第二业务样板）  
 - 菜单三处：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用是否勾齐新 id；是否已清 `forge-starter:app-registry`  
 - 无权限直链是否 `replace` 回工作台（不要只藏侧栏）  
+- **解剖图路径**（`artifacts/dimensional-drawing/...html`）。没有路径 = 设计未完成，不得交审。  
 
-## 可选：整页结构尺寸图
+## 解剖图（设计完成的条件）
 
-需要交代页面骨架时，用 `.agents/skills/dimensional-drawing` 出一张独立 HTML。变量来自源码或 Forge token，没有的写 `[TBD]`，画架构槽位，不画文案。组件级尺寸图主要在 ForgeUI / forge core；starter 用同一套 skill 画页面和布局。这张图不代替本 skill 写 UI，也不算审计通过。
+Step 1b 是设计门，不是可选项。整页或关键 Dialog/表至少一张 HTML。组件级 Kit 示例在 forge 仓；starter 用同一套 `.agents/skills/dimensional-drawing` 画本页。变量不编造，未知写 `[TBD]`，画槽位不画文案。这张图不代替本 skill 写 UI，也不算审计通过。
 
 ## 可选语义底座接入
 

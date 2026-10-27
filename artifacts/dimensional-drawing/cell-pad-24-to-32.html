@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cell pad drill · 24 to 32</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&display=swap">
+<style>
+:root{--paper:#ececec;--sheet:#fff;--ink:#111;--ink2:#444;--fill:#f3f3f3;--f:'Arimo','Helvetica Neue',Helvetica,Arial,sans-serif;color-scheme:light}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f)}
+.wrap{max-width:1400px;margin:0 auto;padding:28px 20px 48px}
+.tb{background:var(--sheet);border:1.2px solid var(--ink);border-radius:16px;padding:16px 18px;margin-bottom:18px}
+h1{margin:6px 0 0;font-weight:400;letter-spacing:.12em;text-transform:uppercase;font-size:32px}
+.lbl{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+p{margin:8px 0 0;font-size:13px;letter-spacing:.04em;text-transform:uppercase;line-height:1.6}
+.scroll{background:var(--sheet);box-shadow:0 1px 3px rgba(0,0,0,.12);overflow-x:auto}
+svg{display:block;width:100%;min-width:980px;height:auto}
+.obj{fill:var(--sheet);stroke:var(--ink);stroke-width:1.6}
+.slot{fill:none;stroke:#444;stroke-width:.8;stroke-dasharray:4 3}
+.hug{fill:#e6e6e6;stroke:var(--ink);stroke-width:1}
+.band{fill:#d5d5d5;stroke:var(--ink);stroke-width:.8}
+.dl{stroke:var(--ink);stroke-width:.7;fill:none}
+.dt{font:400 13px var(--f);fill:var(--ink)}
+.vt{font:400 14px var(--f);fill:var(--ink);letter-spacing:.12em}
+.dts{font:400 11px var(--f);fill:var(--ink2);letter-spacing:.06em}
+.sl{font:400 11px var(--f);fill:#444;letter-spacing:.08em}
+.foot{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);padding-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="tb">
+    <div class="lbl">Skill drill · not a product change</div>
+    <h1>Cell pad 24 → 32</h1>
+    <p>Before is the real TableCell pad: px-6 = 24. After draws the same cell with pad 32 so a one-token change is visible on the sheet. The list-table grid on the page sheet stays 20 / 14. This drill does not edit component source.</p>
+  </header>
+  <div class="scroll"><svg id="sh" viewBox="0 0 1200 640" role="img" aria-label="Before and after cell padding, 24 versus 32"></svg></div>
+  <div class="foot"><span>2026-10-27 · pad drill</span><span><b>24 → 32</b></span></div>
+</div>
+<script>
+const NS='http://www.w3.org/2000/svg';
+const sv=document.getElementById('sh');
+function mk(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);sv.appendChild(e);return e}
+function tx(x,y,s,c,a){const t=mk('text',Object.assign({x,y,class:c||'dt'},a||{}));t.textContent=s;return t}
+function cell(x,y,pad,label,note){
+  const innerW=168, innerH=72;
+  const p=pad*3;
+  const w=innerW+p*2, h=innerH+p*2;
+  tx(x+w/2,y-28,label,'vt',{'text-anchor':'middle'});
+  tx(x+w/2,y-10,note,'dts',{'text-anchor':'middle'});
+  mk('rect',{x,y,width:w,height:h,class:'obj'});
+  mk('rect',{x:x+p,y:y+p,width:innerW,height:innerH,class:'slot'});
+  mk('rect',{x,y:y,width:p,height:h,class:'band'});
+  mk('rect',{x:x+w-p,y:y,width:p,height:h,class:'band'});
+  mk('rect',{x,y:y,width:w,height:p,class:'band'});
+  mk('rect',{x,y:y+h-p,width:w,height:p,class:'band'});
+  tx(x+w/2,y+h/2+4,'CONTENT SLOT','sl',{'text-anchor':'middle'});
+  tx(x+w/2,y+h+22,'PAD '+pad,'dt',{'text-anchor':'middle'});
+  return w;
+}
+mk('rect',{x:16,y:16,width:1168,height:608,rx:16,fill:'none',stroke:'#111','stroke-width':'1.2'});
+const w1=cell(70,120,24,'BEFORE','TABLECELL PX-6 · IN SOURCE');
+cell(70+w1+80,120,32,'AFTER','DRILL ONLY · NOT IN SOURCE');
+tx(600,560,'Same content slot. Only the pad band changes. 24 and 32 are not the list-table grid pad.','dts',{'text-anchor':'middle'});
+</script>
+</body>
+</html>
