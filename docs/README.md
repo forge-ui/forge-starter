@@ -14,6 +14,7 @@
 | --- | --- |
 | 加一个业务模块 | [module-template.md](module-template.md)，再看 [page-roles.md](page-roles.md) |
 | 选组件、对视觉 | [forge-components.md](forge-components.md) |
+| 画整页/布局结构尺寸图 | `.agents/skills/dimensional-drawing`（audit / new-page 必用；缺图审计 FAIL；不进 runtime；Kit 示例在 forge 仓；上游 MIT） |
 | 页面做完，要按规范查 | [audit-checklist.md](audit-checklist.md) |
 | 看布局参考 | [reference-pages.md](reference-pages.md)，开发环境打开 `/ref/` |
 | 接 Ask AI 的任务和确认 | [ask-ai-harness.md](ask-ai-harness.md)、[ask-ai-agent-components.md](ask-ai-agent-components.md) |

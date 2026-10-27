@@ -28,7 +28,7 @@ Coding Agent 是第一开发界面：skills 拆开后端与页面，`accounts` �
 15. 不做无行为装饰按钮；要么实现要么隐藏。  
 16. **操作反馈用全站 toast**，禁止页面内嵌「创建成功」绿条：`import { toast } from "@/lib/toast"` → `toast.success/error/info(...)`。宿主已在 `AppShell`。  
 17. 交付：`pnpm check`（typecheck + 规范绊线）；改 UI 后 **浏览器点主路径**（禁止只 curl）。
-18. **任何业务页面新建/修改完成后，必须执行完整规范审计**：按 `.agents/skills/forge-starter-audit/SKILL.md` 四步流程，对照 `docs/audit-checklist.md` 逐条核查并修复。绊线（`pnpm check`）通过 ≠ 合规，审计不可省略——无论代码由谁、用什么流程写出。
+18. **任何业务页面新建/修改完成后，必须执行完整规范审计**：按 `.agents/skills/forge-starter-audit/SKILL.md`（清单四步 + **解剖门**），对照 `docs/audit-checklist.md` 逐条核查并修复。解剖门必须调用 `dimensional-drawing` 出 HTML；没有图 = 审计 FAIL，写了跳过原因也不通过。绊线（`pnpm check`）通过 ≠ 合规，审计不可省略——无论代码由谁、用什么流程写出。
 19. **语义状态用 Kit `StatusBadge`（默认 soft）**：浅底细边、语义色（绿/黄/红/灰）。禁止 `variant="solid"`、`Label`、手搓 pill、本仓 `StatusText`。分类/角色/标签用 `CellText`，不要彩虹胶囊。一张表最多一列状态胶囊。
 20. **表格详情入口放在名称/标题列的数据上**：点击名称打开所选的全页详情或详情弹窗，支持键盘操作，并保留筛选上下文。不要另设箭头或眼睛图标作为重复的“查看详情”操作。操作列仅放编辑、删除等实际业务动作；没有这些动作就省略整列。`DataTable` 不会自动生成操作列；可选 `CellLink` 带箭头，不作为普通名称详情入口的默认样式。
 
@@ -67,11 +67,12 @@ docs/forge-components.md
 | `forge-starter-new-page` | 列表、详情、看板 UI | **只** 页面 + 菜单；对照样板选型 |
 | `forge-starter-audit` | 页面写完/改完后的规范审计（**必跑**） | 只审计与修复规范违规；不重构业务逻辑 |
 | `hairline-create` | 按业务含义生成自定义交互线稿 | 先独立 HTML 视觉确认，再接入；不默认添加到 Ask AI；遵循现有 Chrome 复用规则 |
+| `dimensional-drawing` | **audit 主路径必调**；**new-page 设计完成前必出图**。整页 / Dialog / 表的结构尺寸图 | 跳过 = 审计 FAIL，写原因也不通过。无图不得把设计标完成。变量不编造，未知写 `[TBD]`；画槽位不画文案。产物 `artifacts/dimensional-drawing/*.html`。不进 runtime。Kit 示例在 forge 仓。可选 `dimensional-drawing-motion` 不是交付 |
 
 路径：`.agents/skills/<name>/SKILL.md`（canonical）。  
 Skills 只维护 **`.agents/skills/`**。
 
-人类说「加 xxx 管理」→ 先 `new-module`，再 `new-page`，最后 **`forge-starter-audit`**（可同会话顺序执行）。
+人类说「加 xxx 管理」→ 先 `new-module`，再 `new-page`（设计完成前出解剖图），最后 **`forge-starter-audit`**（含解剖门；可同会话顺序执行）。
 
 ## 菜单三处（扩业务必做）
 

@@ -39,8 +39,11 @@ Ask AI 的运行时、业务适配器、知识来源、数据库迁移与测试�
 | 加数据与接口 | `forge-starter-new-module` | **只后端**（schema + service + API） |
 | 加列表/详情/看板页 | `forge-starter-new-page` | **只 UI** + 菜单 |
 | 页面写完/改完 | `forge-starter-audit` | 只审计与修规范，不重构业务 |
+| 整页/布局结构尺寸图 | `dimensional-drawing` | **audit 必调，缺图 = FAIL**；**new-page 无图不得标设计完成**。只出独立 HTML（`artifacts/dimensional-drawing/`）。变量不编造；画槽位不画文案。不进 runtime。Kit 示例在 forge 仓 |
 
 路径：`.agents/skills/<name>/SKILL.md`。Skills **只**维护在 `.agents/skills/`。
+
+搭 starter 页面或审计页面时，必须用 `dimensional-drawing`（上游 MIT：[enesozturk/dimensional-drawing](https://github.com/enesozturk/dimensional-drawing)）。`new-page` 无图不得把设计标完成；`audit` 缺图即 FAIL，写了跳过原因也不通过。它不代替 `new-page` 写 UI，也不是浏览器截图。未知尺寸写 `[TBD]`。不进 runtime。Kit 的 Dialog / DataTable 示例在 forge 仓。成片技能 `dimensional-drawing-motion` 只有明确要求时才用。
 
 - store 归 **new-page**；new-module 只保证 API。  
 - 选组件：`docs/forge-components.md` → Starter 样板 → 旁路 monorepo cases。

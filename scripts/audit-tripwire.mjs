@@ -190,7 +190,7 @@ if (hits.error.length > 0) {
       "",
       ">>> 给 coding agent 的指令 <<<",
       "1. 阅读 docs/audit-checklist.md（页面规范单一事实来源）；",
-      "2. 按 .agents/skills/forge-starter-audit/SKILL.md 对本次改动执行完整四步审计；",
+      "2. 按 .agents/skills/forge-starter-audit/SKILL.md 对本次改动执行完整审计（清单四步 + 解剖门；缺 dimensional-drawing HTML = FAIL）；",
       "3. 修复全部红线违规后重新运行 pnpm check。",
       "注意：绊线只覆盖极少数机械信号，通过绊线 ≠ 合规，完整审计不可省略。",
     ].join("\n"),
