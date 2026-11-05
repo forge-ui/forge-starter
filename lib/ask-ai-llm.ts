@@ -1,4 +1,6 @@
 import { routeDialogue } from "./agent/dialogue";
+import { MODULES } from "@/config/modules.generated";
+import { localModuleAnswer } from "@/lib/modules/local-answer";
 import { toolsForAccess } from "./agent/registry";
 import { systemFeatureContext } from "./agent/system-features";
 import type { PageContext } from "@/lib/semantic/context";
@@ -293,6 +295,11 @@ export async function answerAskAi(input: {
   access: AccessContext;
 }): Promise<AskAiChatResult> {
   let question = input.question.trim();
+  const runtime = await resolveAskAiRuntime(input.modelId);
+  if (!input.continuationOperationId && (runtime.source === "none" || !isUsableKey(runtime.apiKey))) {
+    const local = await localModuleAnswer(question, { userId: input.userId, page: input.page }, MODULES, toolsForAccess(input.access));
+    if (local) return local;
+  }
   if (!input.continuationOperationId) {
     const dialogue = await routeDialogue(input);
     if (dialogue.reply) return { ...dialogue.reply, live: false };
@@ -301,7 +308,6 @@ export async function answerAskAi(input: {
   const pageLabel = input.context?.trim() || "";
   const demo = matchAskAiDemo(question);
   const readback = input.continuationOperationId ? await prepareContinuationReadback(input.continuationOperationId, input.userId, input.access) : undefined;
-  const runtime = await resolveAskAiRuntime(input.modelId);
   const model = runtime.model;
 
   if (runtime.source === "none" || !isUsableKey(runtime.apiKey)) {

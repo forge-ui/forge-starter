@@ -97,7 +97,14 @@ before(async () => {
   const response = await fetch(`${base}/api/auth/login/`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ login: "harness_http", password: "test-only" }) });
   assert.equal(response.status, 200);
   cookie = response.headers.get("set-cookie")!.split(";")[0];
-  otherCookie = `${SESSION_COOKIE}=${await createSessionToken({ id: `harness-other-${modelId}`, username: "harness_other", email: "other@example.test", displayName: "Other test owner", roleCode: "super_admin" })}`;
+  const authMode = process.env.AUTH_MODE;
+  try {
+    process.env.AUTH_MODE = "demo";
+    otherCookie = `${SESSION_COOKIE}=${await createSessionToken({ id: `harness-other-${modelId}`, username: "harness_other", email: "other@example.test", displayName: "Other test owner", roleCode: "super_admin" })}`;
+  } finally {
+    if (authMode === undefined) delete process.env.AUTH_MODE;
+    else process.env.AUTH_MODE = authMode;
+  }
 });
 
 after(async () => {

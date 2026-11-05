@@ -8,6 +8,7 @@ import { z } from "zod";
 import { defineModule } from "@/lib/modules/definition";
 import { moduleReadTools } from "@/lib/modules/read-tools";
 import { moduleDraftTools } from "@/lib/modules/draft-tools";
+import { localModuleAnswer } from "@/lib/modules/local-answer";
 import { publicModuleRow } from "@/lib/modules/sanitize";
 import { toolsForAccess, AGENT_TOOLS } from "@/lib/agent/registry";
 import { getStarterKnowledge, STARTER_PLATFORM_ID } from "@/lib/harness/starter-knowledge";
@@ -68,6 +69,34 @@ test("generic drafts use shared schema and never execute a writer", async () => 
 
 test("registry preserves unique tool identities", () => {
   assert.equal(new Set(AGENT_TOOLS.map(tool => tool.id)).size, AGENT_TOOLS.length);
+});
+
+test("local rules discover manifests, read real rows and only propose authorized creates", async () => {
+  const readers = { widgets: async () => [{ id: recordId, name: "齿轮", stock: 3 }] };
+  const tools = [
+    ...moduleReadTools([fake], readers),
+    ...moduleDraftTools([fake], { widgets: z.object({ name: z.string().min(1) }) }, readers),
+  ];
+  const navigate = { ...tools[0], id: "widgets.navigate" };
+  const context = { userId: "local-module-test" };
+  const available = [...tools, navigate];
+  const inventory = await localModuleAnswer("系统有哪些模块", context, [fake], available);
+  assert.match(inventory!.text, /零件仓库/);
+  const help = await localModuleAnswer("零件仓库是做什么的", context, [fake], available);
+  assert.match(help!.text, /精密零件库存/);
+  const listed = await localModuleAnswer("列出零件仓库", context, [fake], available);
+  assert.match(JSON.stringify(listed!.blocks), /齿轮/);
+  const filtered = await localModuleAnswer("列出零件仓库中不存在的零件", context, [fake], available);
+  assert.equal(filtered!.blocks.length, 0);
+  const proposal = await localModuleAnswer("新建一条零件仓库", context, [fake], available);
+  assert.equal(proposal!.blocks[0].type, "confirm");
+  assert.match(proposal!.text, /尚未写入/);
+  const denied = await localModuleAnswer("新建一条零件仓库", context, [fake], [tools[0], navigate]);
+  assert.equal(denied!.blocks.length, 0);
+  const hidden = await localModuleAnswer("零件仓库是做什么的", context, [fake], []);
+  assert.doesNotMatch(hidden!.text, /精密零件库存/);
+  assert.deepEqual(hidden!.links, []);
+  assert.equal(await localModuleAnswer("如何修改个人密码", context, [fake], available), undefined);
 });
 
 function fixture() {
