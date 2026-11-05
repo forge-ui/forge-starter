@@ -15,7 +15,7 @@ description: >
 地图：`docs/module-template.md` §A。  
 通用规范入口：`docs/forge-skill/upstream/SKILL.md`；本 skill 只维护 Starter 后端装配。  
 **API 齐 ≠ 侧栏有。** 本步不挂应用模块。  
-UI 下一步：`forge-starter-new-page`（菜单三处）。
+UI 下一步：`forge-starter-new-page`（manifest 派生菜单）。
 
 ## When to use
 
@@ -67,7 +67,7 @@ app/api/<res>/[id]/route.ts     # GET one, PATCH/DELETE/POST actions
 - `jsonOk`、`jsonError`（`lib/auth/http.ts`）  
 - Zod 校 body  
 
-本步 **不** 挂侧栏。权限资源可先登记到 `RBAC_RESOURCES` / `defaults.ts`，菜单三处留给 new-page。
+模块权限、知识与菜单统一由 manifest 派生；先完成服务，再由 new-page 验收页面和入口。不要手改派生常量。
 
 ### 4. store 归属
 
@@ -75,21 +75,13 @@ app/api/<res>/[id]/route.ts     # GET one, PATCH/DELETE/POST actions
 Client store（`components/<res>-store.tsx` + layout Provider）归 **new-page、UI 层**。  
 本步只保证 REST API 可被 `fetch` 调用。
 
-### 5. Ask AI 工具（可选）
+### 5. Ask AI 声明（必做）
 
-模块要被对话里问数、填数或导出时才做。不登记 = Ask AI 不知道这个模块。
+创建 config/modules/<id>.json：知识 summary/fields/rules/source、权限资源、菜单入口与读取服务/导出名/字段白名单；不可读必须说明原因。运行 pnpm modules:generate，不再手写 SYSTEM_FEATURES 或拼接 lib/agent/registry.ts。专用工具通过 manifest.tools 挂接。读取复用当前会话并递归剔除敏感字段。
 
-```text
-lib/<res>/agent.ts     # 工具：权限、Zod、说明、run
-lib/agent/registry.ts  # 把工具数组拼进 AGENT_TOOLS
-```
+写草稿共用 API Zod，在 manifest 声明字段、动作与 pageAdapter；页面接收并保存，保留 If-Match、事务、回执和读回，工具不直接写库。页面适配未完成不得启用写动作。
 
-参考：`lib/accounts/agent.ts`。
-
-- 入参用 API 同一份 Zod，`run` 只调已有 service，不写 SQL  
-- `mode: "read"` 立即执行；`mode: "write"` 提供 `describe` 和 `fill`，确认后把字段填进页面表单，不在工具里写库。页面保存成功后同一会话继续剩下的查询或导出
-- 不把密钥、密码哈希放进 `summary`  
-- 不在这里生成页面或改菜单三处
+pnpm module:new <id> [中文名称] 生成已注册的 service/API/页面开发骨架；数据服务在实现前明确报错，不是完整 CRUD。后端和 UI 仍分步完成。
 
 ### 6. Verify
 
@@ -106,13 +98,13 @@ corepack pnpm check
 告诉用户：
 
 - 表名、API 路径与方法  
-- 若登记了 Ask AI 工具：工具 id，以及哪些是写入（需确认）  
-- **API 齐 ≠ 侧栏有。** 本步没有挂应用模块。  
+- Ask AI 自动登记的工具：工具 id，以及哪些是写入（需确认）  
+- **声明齐 ≠ UI 完成。** 页面与真实持久化仍需独立验收。  
 - **下一步**：`forge-starter-new-page`（store + 列表/表单/详情 UI，并挂应用模块）  
-  - 菜单三处：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用种子勾齐新 id  
+  - manifest 派生菜单：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用种子勾齐新 id  
   - 重详情 → 对照 `accounts`  
   - 轻详情 → 对照 `/ref/detail-modal` + `components/ui/modal.tsx`（暂无第二业务样板）  
 
-## 可选语义底座接入
+## 必做声明与按需写入适配
 
-需要 Ask AI / Coding Agent 理解新模块时，按 `docs/agent-semantic-foundation.md` 登记业务契约，工具 JSON Schema 从共享 Zod 派生；写入回执必须与业务事务原子提交。后端完成不代表页面适配已完成。
+所有模块必须登记知识和读取；启用写动作时，按 `docs/agent-semantic-foundation.md` 登记业务契约，工具 JSON Schema 从共享 Zod 派生；写入回执必须与业务事务原子提交。后端完成不代表页面适配已完成。
