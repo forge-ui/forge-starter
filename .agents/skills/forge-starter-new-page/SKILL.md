@@ -4,8 +4,8 @@ description: >
   Add admin UI only in Forge Starter: list, form modal, detail (modal or full
   page), menu entry. Chooses layout by cloning accounts (heavy) or
   /ref/detail-modal + Modal + ?id= (light; no second business template).
-  Requires API/store already
-  present or created via new-module first.
+  Requires API already present or created via new-module first; creates or
+  reuses the UI store in this stage.
   Use for dashboard pages or finishing a resource after new-module.
 ---
 
@@ -37,11 +37,12 @@ description: >
 
 写代码前 **必须**：
 
-1. 打开 **`docs/forge-components.md`**  
-   - 按页面角色选组件包  
+1. 先按 `docs/page-roles.md` 定角色与主 Screen，再打开 **`docs/forge-components.md`**  
+   - 按主 Screen 选 Blocks，最后选 Components；通用规范读 `docs/forge-skill/upstream/SKILL.md`，线框读其 `references/page-design-dimensional.md` 与 `page-recommended-standard.md`  
+   - 看板必须选一个官方 Screen 做主对照，记录实测栅格比例、区块尺寸和密度；尚未导出的 Blocks/Panel 标 `FORGE-GAP` 并询问，不虚构 import 或手搓替代  
    - 记下要抄的 Starter 样板 + monorepo case 名  
 2. 旁路有 monorepo 时：  
-   - `../forge/.agents/skills/forge/SKILL.md`  
+   - `../forge/skills/forge-skill/SKILL.md`（实际 checkout 路径以当前环境为准）  
    - props 不确定 → 打开 `../forge/src/app/cases/<name>/page.tsx`（case 名见 forge-components 表）  
 3. Modal 宿主：`components/ui/modal.tsx`  
 4. 表里没有的组件 → `FORGE-GAP`，禁止 div 手搓  
@@ -50,7 +51,7 @@ description: >
 
 ## Step 1 — 定角色与样板
 
-从用户描述确定。**先打开 `/ref/` 对照范式，再抄业务样板接真数据。**
+从用户描述确定。**先打开 `/ref/` 对照范式，再抄业务样板接真数据。** 下表只是 Starter 路由捷径；路由与角色目录以 `docs/reference-pages.md` 为准，通用选型以同步规范为准。
 
 | 角色 | 参考页（不进菜单） | 业务可运行样板 |
 |------|-------------------|----------------|
@@ -132,7 +133,7 @@ description: >
 
 - 抄 `app/(app)/accounts/[id]/page.tsx`  
 - 顶栏主操作；侧栏只 meta；页内 `←` 或面包屑  
-- 主次分栏用 `Grid`/`GridItem`（core `≥0.1.13`）。页级 8+4；主栏内辅栏+图用 `5+7` / `6+6`，不要再套页面 `4+8`。`gap` 是像素。  
+- 主次分栏用 `Grid`/`GridItem`，比例、固定侧轨宽度和 gap 继承选定模板的实测值；8+4 只是可选比例，不是全局默认。`gap` 是像素。  
 
 ### 数据层（UI 侧）
 
@@ -143,7 +144,7 @@ description: >
 
 ### 删除确认
 
-- 使用 `ConfirmationDialog` 时，外层必须包 `Modal` 或半透明遮罩宿主（抄 `accounts/page` 删除流程），不要只渲染裸 Dialog 卡。  
+- 独立确认直接用受控 `ConfirmationDialog` 的 `open` / `onOpenChange`，无需再套 Modal；省略 `open` 的内联卡模式才需要已有宿主。accounts 现有内联方式可保留，不做无关重构。  
 
 ## Step 3 — Verify
 

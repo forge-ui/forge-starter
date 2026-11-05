@@ -19,7 +19,7 @@ description: 页面规范审计。任何业务页面写完/改完后必须执行
 ## 输入
 
 1. 审计范围：默认 `git diff`（含未提交）涉及的 `app/(app)/**`、`components/**`、`config/**` 文件；用户指定模块时以模块为范围。**一次只审一个模块**，多模块分批。
-2. 规范：`docs/audit-checklist.md`（必须完整读取）。
+2. 规范：`docs/forge-skill/upstream/SKILL.md` 与 `docs/forge-skill/upstream/references/audit-checklist.md`（通用唯一清单，完整读取）；`docs/audit-checklist.md` 仅补 Starter 适配。副本缺失则停止完整审计并报告，不伪造通过。
 3. 对照物：第 0 步选定的角色匹配页 + 该页实际选用的 Forge chrome（A 紧凑 h1+面包屑 / B 正文 `PageTitleToolbar` / C 壳 `PageHeader` 顶栏）。先分清「正文页头」还是「AppLayout 顶栏」。
 
 ## 第 0 步：定角色与对照物（禁止跳过）
@@ -44,64 +44,34 @@ description: 页面规范审计。任何业务页面写完/改完后必须执行
 | auth | `app/(auth)` | — |
 
 选 B 时打开 `/cases/toolbar` 与 CRM/Finance 模板页头，**不要**强行对照 accounts 的 h1，也**不要**对照 `/cases/page-header`（那是壳顶栏）。  
-核 H6：业务 `page.tsx` 是否 `import { PageHeader }`；有则默认违规，除非清单点名的沉浸式工作台。
+核 H6：检查 `PageHeader` 实际 JSX 用法及宿主位置；import 本身不是违规证据，合法壳顶栏与清单点名的沉浸式工作台须按上下文判定。
 轻详情对照 `/ref/detail-modal`（暂无第二业务样板）。
 
 报告开头必须写出：`角色 / chrome A|B|C / 对照页 / case`。
 
-## 由外到内（第 1 步之前必须走完，禁止从组件起审）
-
-清单仍要逐条勾，但**取证顺序固定为四层**。先看到「用了 DataTable / Button」就给 C2 过关，是衍生仓详情漏检的根因。
-
-每一层先写「本层看到的 DOM/JSX 结构」再对照第 0 步对照页，再映射到清单条目。外层未过，不要开始内层的「组件用对了吗」。
-
-| 层 | 看什么 | 典型漏检 | 主要映射 |
-|----|--------|----------|----------|
-| **S 页面结构** | 整页区块顺序是否等于该角色骨架（见 `docs/page-roles.md`）。页头正下方每一块都要能说出「这是什么」 | 详情做成胶囊导航墙；页头下孤飘「进行中」；列表缺工具带或两行 pills | R1 L3 L4 L5 H1 **H7** |
-| **O 内容区最外层** | AppLayout 右侧正文根：只应是纵向 stack。禁止第二套壳、根再 `p-6`、整页包白卡、页内 `PageHeader` 冒充标题栏。**首屏必须看见内容面底 gutter**，溢出在面内滚，不要整页滚掉底边距 | 把 Kit `PageHeader` 当内容卡；内容面贴死视口底边 | L1 L2 **L10** H6 |
-| **N 节/区块** | 每个 h2 区块的外壳。`DataTable` 节：标题 + 可选 CTA + 表直接落 stack，禁止外套白卡。描述 / History / 文件 / 阶段列表等正文：官方 `Panel`/`rounded-card`，行内用 `ListItem`/`DescriptionItem`，禁止整页宽进度条、禁止手搓 pill 栅格。页面分栏 / 等宽卡组核 **L9**（有 `Grid` 必须用；嵌套栅格相对父列，主栏内不要再套页面 `4+8`；`gap` 是像素） | 表外包白卡；正文列表裸铺长条；一排 secondary Button 当流程；手搓页面栅格；主栏里套整页 4+8 | L6 L7 **L8** **L9** C1 |
-| **C 组件** | 选对组件 + props + token。嵌套表也要审，C2 对 detail「不适用」≠ 表免审。字色按 V7 分层，不要只看「用了 fg-*」 | `ProgressStatCard` 画假进度或只重复本页已有字段；`flex` 吃剩宽；标题/正文写成 `text-fg-grey-500` | C* V* F* L7 |
-
-截图也按这四层看：先整页骨架，再内容根，再每一节外壳，最后才盯单元格。范围内**每张** `DataTable`（含详情嵌套表）都必须截到并核 L7/L8。
+看板还须选一个官方主 Screen，按其实际测量值核栅格比例、区块尺寸与密度，并提交目标页/模板并排截图；不以 accounts 或任意固定比例代替模板基准。
 
 ## 流程（四步，缺一不可）
 
+通用六维度、S→O→N→C 取证顺序、组件/token/状态与字色规则，统一执行 `docs/forge-skill/upstream/references/audit-checklist.md`，不在 Starter 复制第二套判据。
+
 ### 第 1 步：清单逐条核查
 
-对范围内每个文件，逐条执行清单 M/R/H/L/C/V/F/D/E/Q 各项。勾条时按上面 S→O→N→C 取证，不要按 C→H 倒着扫。
+完整执行上游编号清单与本仓适配，按第 0 步角色与主对照取证。每条记录 `条目ID | 通过/违规/不适用/未验证 | 文件:行号或运行证据 | 修复方案`，不得跳条。菜单三处、应用勾选、RBAC、auth、toast/Ask AI 宿主等接线按本仓文档核对。
 
-- 每条输出：`条目ID | 通过/违规/不适用 | 证据（文件:行号）| 修复方案`
-- **禁止跳条**，禁止"整体符合规范"式笼统结论
-- 🔴 红线违规 → 直接修复；🟡 判断项 → 明显违规直接修，边界情况列入"建议复核"
-- 「对齐样板」指第 0 步选定的对照页，不是 accounts
+### 第 2 步：Forge 样式对照
 
-### 第 2 步：Forge 样式对照（抓清单没枚举的问题）
-
-仍按 S→O→N→C。问三件事，不要问「像不像 accounts」：
-
-1. **该用 Forge 组件却手搓了吗？**（页头、搜索、按钮、表格、状态、页面分栏）对照 `/cases/` 与 `docs/forge-components.md`。已导出 `Grid` 却写 `grid-cols-*` → L9。
-2. **颜色 / 圆角 / 尺寸 / 字体跑出 `fg-*` 和 Kit case 了吗？** 字色必须过 **V7**：标题、实体名、主键值、该读的正文 = `text-fg-black`（正文最浅 `text-fg-grey-700`）；label / 副行 = `text-fg-grey-700`；`text-fg-grey-500` 只给 disabled / 空态 / 时间戳。V1 过关 ≠ 字色过关——整页灰字是红线。
-3. **内容区边距、间距、栅格乱了吗？**（根再 `p-6`、**底 gutter 被整页滚动吃掉**、两行 pills、密度忽大忽小、表外套白卡、页面分栏没用 `Grid`）首屏看不见内容面底边距 → **L10**。
-
-结构 diff：对照页的 页头 → 工具带/指标 → 各节外壳 → 表/卡内部 → 状态 → 弹窗。每个偏差判定合理业务差异 / 违规。清单未覆盖的新模式 → 报告「清单反哺建议」。
-
-**禁止**：因为用了 `PageTitleToolbar` 就判 H1 违规，或要求改回 accounts 的 h1。
+依上游清单逐层比较结构与视觉，记录合理业务差异和违规；表格外壳、比例和侧轨继承选定模板，不能把所有 DataTable 一律判为不能入卡。缺组件标 FORGE-GAP 并询问，不虚构导出。
 
 ### 第 3 步：截图视觉审查
 
-**截图通道**（按优先级）：① 环境自带的浏览器工具（IDE 内置浏览器 / playwright / puppeteer CLI）直接访问 dev server；② 无头 Chromium 命令行截图（`--headless --screenshot=... --window-size=1440,900 http://127.0.0.1:<port>/<path>`）。**不要**依赖 forge-design 浏览器插件的桥接来截审计页面——它面向用户当前正在看的 Chrome 标签，审计场景下通常截不到目标页。两种通道都不可用时，本步降级为跳过，但必须在报告"重验记录"中显式声明"视觉审查未执行（原因）"，不得静默略过。
+先检查已有 Chrome 会话，优先已安装 Chrome 插件或 Chrome DevTools MCP。禁止 Playwright/Puppeteer 启动系统 Chrome 或另建系统 Chrome profile；明确需要隔离时才用 bundled Chromium / Chrome for Testing，结束后停进程并移除临时 profile。
 
-1. 确认 dev server 运行（端口与 `AUTH_MODE` 以项目 `.env` / `package.json` 为准，勿凭空假设），浏览器打开被审模块主路径（列表、详情、弹窗打开态）
-2. 截图按 S→O→N→C：整页骨架、内容根有没有白卡/PageHeader、每一节外壳、最后才是单元格。范围内每张 `DataTable` 都要截到并核 L7/L8。再看手搓控件、颜色/圆角/字号、卡片对齐/等高、空态/加载态。**指着每一颗 `StatusBadge` 问「这是谁的状态」**（H7）；答不出就修，不得因 V6 用了 `StatusBadge` 就放过。**指着标题和正文问「这是不是该读的字」**（V7）：发灰、像未选中 → 修成 `text-fg-black` / 最浅 `text-fg-grey-700`，不得因 V1 用了 `fg-*` 就放过。**指着内容面底边问「和右侧是不是同一圈间距」**（L10）：贴死视口底、或要往下滚才看见 → 壳列锁视口、面内 `overflow-auto`，不要再垫一层页面 padding。
-3. 同时检查 console 与 Next dev overlay（清单 Q4）：本次改动不得新增 console error / React 警告；范围外的既有警告记入"建议复核"
-4. 与第 0 步对照页 / case 比视觉印象，不要只跟 accounts 比像素
+确认实际服务端口与认证模式（从运行参数或用户确认获取，不读取 .env*）；浏览器从侧栏点主路径、详情和弹窗，记录 console/overlay。按上游 T 项在同视口与壳状态下测量并排截图。页面动效还须依 `docs/page-motion.md` 和本仓 Q5 实测切页、刷新及减少动态效果。没有可用浏览器时显式记录「视觉审查未执行（原因）」，不得宣称通过。
 
 ### 第 4 步：修复与重验
 
-1. 应用全部修复
-2. `pnpm check`（typecheck + 绊线）必须通过（包管理器版本以 `package.json` 的 `packageManager` 字段为准，版本不符时用 `corepack pnpm@<版本>` 执行，勿动依赖目录）
-3. 重新截图确认视觉问题已消除
-4. 修复涉及清单条目的，重跑该条核查确认闭环
+仅修复规范违规，不重构业务逻辑。运行 `corepack pnpm check`，修复后重新核查受影响条目并截图；技术检查通过不代替视觉/交互验收。清单变更先向用户提反哺建议，不直接改对照页或上游副本。
 
 ## 输出报告格式
 
