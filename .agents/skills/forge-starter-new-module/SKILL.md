@@ -17,6 +17,8 @@ description: >
 **API 齐 ≠ 侧栏有。** 本步不挂应用模块。  
 UI 下一步：`forge-starter-new-page`（manifest 派生菜单）。
 
+访问策略默认不声明 `access`，保留角色读授权与内部应用勾选交集。只有明确要求所有登录用户可见/可读才加 `access: "authenticated"`：它优先于角色读授权与内部应用勾选，API / Ask AI reader 同步获得 read，但匿名、行级隔离、脱敏与写权限不变。详见 `docs/module-template.md`；不得用它绕过普通模块配置遗漏。
+
 ## When to use
 
 - 「加 xxx 的数据和接口」「后端模块」「表 + API」

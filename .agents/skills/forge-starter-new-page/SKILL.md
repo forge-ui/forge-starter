@@ -15,6 +15,8 @@ description: >
 
 选型：`docs/page-roles.md`、`docs/module-template.md` §B。
 
+权限接线：默认模块仍需角色 `{module}:read` 与内部应用勾选。只有明确要求所有登录用户可见/可读才声明 `access: "authenticated"`，其读授权优先于角色与应用勾选，菜单、直链、API 和 Ask AI reader 统一生效；不扩匿名、行级数据或写权限。正式交付分别验无读角色、人工配置应用和写操作拒绝，不靠页面内临时拼菜单。
+
 ## When to use
 
 - 「加列表页」「做详情 UI」「看板页」  
