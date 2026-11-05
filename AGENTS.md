@@ -11,6 +11,8 @@ Coding Agent 是第一开发界面：skills 拆开后端与页面，`accounts` �
 
 ## 通用规范来源
 
+实施时先读项目内 `docs/forge-skill/README.md` 与锁定的 `docs/forge-skill/upstream/SKILL.md`，再按任务读取其 references；Starter 接线以本文件和本仓 docs 为准。全局安装的 `forge-skill` 仅作发现入口，不得覆盖项目同步副本，即使全局版本更新。副本缺失或版本不匹配时按 README 同步，不回退到全局规则冒充本项目已审计；开发模式提示不代表当前 core 与副本完全兼容。
+
 通用规范唯一正文：[forge-skill](https://github.com/forge-ui/forge/tree/main/skills/forge-skill)。版本同步入口：`docs/forge-skill/README.md`；同步后正文在 `docs/forge-skill/upstream/SKILL.md`，通用清单在 `docs/forge-skill/upstream/references/audit-checklist.md`。副本不可手改，本仓只维护 Starter 适配。
 
 ## Starter 适配规则
@@ -79,8 +81,8 @@ Skills 只维护 **`.agents/skills/`**。
 
 默认产品自动合并新增模块；用户自建或显式配置的应用保留原勾选，需要在应用管理勾选。`rbac_menus` 只是目录，不会生成模块。
 
-侧栏实际可见 = manifest 派生菜单 ∩ 当前应用勾选 ∩ 登录角色 `{module}:read`。
-无 `{module}:read` 时直链业务页必须壳层 `replace` 回工作台，别只藏侧栏或停在空态/403 列表。
+默认侧栏实际可见 = manifest 派生菜单 ∩ 当前应用勾选 ∩ 登录角色 `{module}:read`。
+显式声明 `access: "authenticated"` 的模块对所有登录用户开放读权限，在内部应用中不受角色读授权与应用勾选限制；菜单、直链、API 和 Ask AI reader 统一生效。不放开匿名访问、行级隔离或写权限。未声明的模块仍遵循默认交集；无有效读权限时直链由壳层 `replace` 回工作台。
 
 ## 仓库地图
 

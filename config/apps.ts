@@ -21,9 +21,10 @@ export type AppAuthMode = "none" | "passthrough" | "oidc" | "platform";
  * Built-in nav modules for internal apps.
  *
  * Sidebar modules are derived from config/modules/*.json.
- * Default app seeds include new modules; login roles still require :read.
+ * Default app seeds include new modules; authenticated access explicitly grants read.
  */
 export const APP_MODULE_IDS = MODULES.map(module => module.id);
+export const AUTHENTICATED_MODULE_IDS = MODULES.filter(module => module.access === "authenticated").map(module => module.id);
 
 export type AppModuleId = RegisteredModuleId;
 
@@ -146,7 +147,11 @@ export const APPS_UPDATED_EVENT = "forge-starter:apps-updated";
 
 export const APP_ENTRIES = DEFAULT_APP_ENTRIES;
 
-export function modulesForApp(app: AppEntry): AppModuleId[] {
+export function modulesForApp(app: AppEntry, authenticatedModules: readonly AppModuleId[] = AUTHENTICATED_MODULE_IDS): AppModuleId[] {
+  return [...new Set([...selectedModulesForApp(app), ...(app.kind === "internal" ? authenticatedModules : [])])];
+}
+
+function selectedModulesForApp(app: AppEntry): AppModuleId[] {
   if (app.kind !== "internal") return [];
   if (app.modules?.length) return app.modules;
   if (app.menuPreset && MENU_PRESET_META[app.menuPreset]) {

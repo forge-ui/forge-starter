@@ -3,6 +3,7 @@ export type ModuleDefinition = {
   label: string;
   order: number;
   permissionResource: string;
+  access?: "authenticated";
   menu: { href: string; icon: string; group: string };
   knowledge: { summary: string; fields: string; rules: string; source: string };
   read: { service: string; export: string; fields: string[]; fieldLabels?: Record<string, string>; sensitiveFields?: string[] } | { unavailable: string };
@@ -18,6 +19,9 @@ export type ModuleDefinition = {
 };
 
 export function defineModule<const Definition extends ModuleDefinition>(definition: Definition): Definition & ModuleDefinition {
+  if (definition.access !== undefined && definition.access !== "authenticated") {
+    throw new Error("模块访问策略无效");
+  }
   if (!definition.id || !definition.knowledge.summary.trim() || !definition.knowledge.rules.trim()) {
     throw new Error("模块声明缺少标识或知识说明");
   }

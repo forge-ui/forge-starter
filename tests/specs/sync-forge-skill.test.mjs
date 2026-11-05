@@ -27,6 +27,39 @@ async function fixture(context) {
   return root;
 }
 
+test("local dependencies and newer core versions check snapshot integrity in development mode", async (context) => {
+  for (const dependency of ["file:/tmp/core.tgz", "link:../core", "workspace:*", "0.5.0", "0.4.10", "1.0.0"]) {
+    const root = await fixture(context);
+    await run({ root, fetcher, log() {} });
+    await writeFile(join(root, "package.json"), JSON.stringify({ dependencies: { "@forge-ui-official/core": dependency } }));
+    await mkdir(join(root, "node_modules/@forge-ui-official/core"), { recursive: true });
+    await writeFile(join(root, "node_modules/@forge-ui-official/core/package.json"), '{"version":"0.5.0"}');
+    const messages = [];
+    const noNetwork = () => { throw new Error("development checks must stay local"); };
+    await run({ root, check: true, fetcher: noNetwork, log: message => messages.push(message) });
+    assert.equal(messages.length, 1);
+    assert.match(messages[0], /开发模式.*SHA256.*未验证.*corepack pnpm sync:forge-skill --from.*--ref/);
+    await writeFile(join(root, "docs/forge-skill/upstream/SKILL.md"), "tampered");
+    await assert.rejects(run({ root, check: true, fetcher: noNetwork, log() {} }), /内容漂移/);
+  }
+});
+
+test("development mode never hides missing snapshots or unsafe versions", async (context) => {
+  const root = await fixture(context);
+  await mkdir(join(root, "node_modules/@forge-ui-official/core"), { recursive: true });
+  await writeFile(join(root, "node_modules/@forge-ui-official/core/package.json"), '{"version":"0.5.0"}');
+  await writeFile(join(root, "package.json"), '{"dependencies":{"@forge-ui-official/core":"workspace:*"}}');
+  await assert.rejects(run({ root, check: true, log() {} }), /缺少版本化规范副本/);
+  await writeFile(join(root, "node_modules/@forge-ui-official/core/package.json"), '{"version":"latest"}');
+  await assert.rejects(run({ root, check: true, log() {} }), /精确 core 版本/);
+  await writeFile(join(root, "package.json"), '{"dependencies":{"@forge-ui-official/core":"0.4.7"}}');
+  await run({ root, fetcher, log() {} });
+  for (const dependency of ["0.4.6", "0.3.99", "^0.5.0", "latest"]) {
+    await writeFile(join(root, "package.json"), JSON.stringify({ dependencies: { "@forge-ui-official/core": dependency } }));
+    await assert.rejects(run({ root, check: true, fetcher, log() {} }), /core 版本/);
+  }
+});
+
 test("sync writes a real versioned snapshot and check detects tampering", async (context) => {
   const root = await fixture(context);
   await run({ root, fetcher, log() {} });

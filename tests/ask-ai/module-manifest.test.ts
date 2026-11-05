@@ -124,6 +124,15 @@ test("checks reject missing manifests and empty knowledge; scaffolding registers
     assert.match(readFileSync(resolve(root, "lib/modules/server.generated.ts"), "utf8"), /widgetsReader/);
     const generated = generateModules(root);
     for (const [path, content] of Object.entries(generated)) assert.equal(readFileSync(resolve(root, path), "utf8"), content);
+    const widget = JSON.parse(readFileSync(resolve(root, "config/modules/widgets.json"), "utf8"));
+    write("config/modules/widgets.json", JSON.stringify({ ...widget, access: "authenticated" }));
+    assert.equal(readModules(root).find(module => module.id === "widgets")?.access, "authenticated");
+    assert.match(generateModules(root)["config/modules.generated.ts"], /"access":"authenticated"/);
+    for (const access of ["public", "role", "", null, true]) {
+      write("config/modules/widgets.json", JSON.stringify({ ...widget, access }));
+      assert.throws(() => readModules(root), /Invalid module access/);
+    }
+    write("config/modules/widgets.json", JSON.stringify(widget));
     const before = moduleSourceFingerprint(root);
     write("lib/widgets/service.ts", "export const changed = true;");
     assert.notEqual(moduleSourceFingerprint(root), before);

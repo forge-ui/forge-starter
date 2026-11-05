@@ -11,6 +11,7 @@ export function readModules(root) {
       if (typeof value !== "string" || !value.trim()) throw new Error(`Incomplete manifest: ${name}`);
     }
     if (definition.permissionResource !== definition.id) throw new Error(`Permission resource must match module: ${name}`);
+    if (definition.access !== undefined && definition.access !== "authenticated") throw new Error(`Invalid module access: ${name}`);
     if (!Number.isFinite(definition.order) || !/^\/[a-z0-9/-]+\/$/.test(definition.menu?.href ?? "")) throw new Error(`Invalid menu: ${name}`);
     if (!/^[A-Za-z]+BoldDuotone$/.test(definition.menu?.icon ?? "")) throw new Error(`Invalid icon: ${name}`);
     const source = definition.knowledge.source;

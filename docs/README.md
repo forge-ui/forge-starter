@@ -1,5 +1,9 @@
 # 文档索引
 
+## 规范入口优先级
+
+先读本项目 `AGENTS.md` 与 [forge-skill/README.md](forge-skill/README.md)，再读项目锁定的 `docs/forge-skill/upstream/SKILL.md` 和按任务需要的 references；Starter 宿主、权限与接线差异读本仓 docs。项目同步副本优先于全局安装的 `forge-skill`，全局 skill 只负责引导，不用其较新规则覆盖项目锁定版本。副本缺失或版本不匹配时按同步入口修复；开发模式继续检查仅验证副本完整性，不代表兼容性或完整规范审计通过。
+
 `docs/` 根目录只放还在生效的规范。某次页面改完后的审计、修复和发布记录在 [history/](history/)。那些记录能帮你看当时为什么这么改，不要把它们当成现在的做法。
 
 ## 人先读什么
