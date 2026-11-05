@@ -87,11 +87,15 @@ flowchart TD
 - **代码索引**：现有 `pnpm semantic build` 建立源码锚点与依赖关系；源指纹随部署绑定。在线助手不扫描源码、不把仓库文件发送给模型。
 - **业务解释**：`starter-knowledge.ts` 的 10 条审阅说明，带 source path/symbol/version、前置条件和后续建议；按应用、build、权限、字符预算检索。
 
-当前业务解释是经过源码核对的登记目录，不是全仓自动生成知识库。以后扩展自动抽取或语义检索，仍需满足 source/version/permission 协议，不能把推断当已验证事实。动态记录由工具实时读取，不放入静态知识目录。
+模块功能解释来自 `config/modules/*.json`，新增声明后自动进入知识检索与工具目录；无需另改 SYSTEM_FEATURES 或 registry.ts。声明内容仍须依据真实页面核实，不自动猜测源码语义。知识版本与语义索引共用源码指纹，构建可通过 NEXT_PUBLIC_SEMANTIC_BUILD_ID 绑定部署版本。动态记录仅由工具读取，不放入静态知识。
+
+`pnpm modules:generate` 更新浏览器安全目录与独立服务端注册表；`pnpm typecheck`、`pnpm check` 拒绝未登记模块、空知识、缺少 reader/不可读理由或生成漂移。通用 reader 先校验当前用户会话与读取权限，再调用已有服务，按白名单与敏感字段黑名单递归裁剪。专用工具保留原语义。
+
+通用写草稿使用 manifest.draft 的共享 Zod、字段及动作白名单；必须声明真实页面适配器，不生成直接写库工具。确认单、页面保存、If-Match、事务回执和保存后读回仍各自生效。骨架默认不开启写入，未完成业务服务时明确报错。按用户配置 Ask AI 权限（工场 access.ts）不在本轮范围。
 
 ## 接入一个新业务
 
-1. 在业务自己的 `agent.ts` 注册只读能力和写入提案，复用 service/schema/RBAC。
+1. 必须新增 `config/modules/<id>.json` 并运行 `pnpm modules:generate`，复用 service/schema/RBAC 自动派生知识、读取工具与允许的写入提案；仅有特殊业务逻辑时再通过 manifest 挂接专用 `agent.ts`。
 2. 在平台适配器中声明效果、页面入口、确认与回执读回方式；补来源明确的业务规则。
 3. 界面复用 AskAiHarness；新增领域表单由该业务单独提供。
 4. 用该领域测试数据验证查询→选择→提案→页面保存→回执续办。不得修改 engine 增加资源名判断。

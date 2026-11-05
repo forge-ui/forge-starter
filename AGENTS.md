@@ -50,7 +50,7 @@ docs/forge-components.md
 
 - Modal：core 0.4.7 已导出 `Modal` / `Drawer`；Starter 既有表单沿用 `components/ui/modal.tsx`，不表示 core 缺能力
 - 操作 Toast：core 已导出 `ToastProvider` / `useToast`；Starter 沿用既有全局宿主 → `lib/toast.ts` + `components/ui/toast-provider.tsx`（已挂 AppShell）
-- **Ask AI**：Kit `AskAi`（core `≥0.1.17`）。业务页默认 `hideHeader: true`，`AppLayout.askAi` 不会出现。壳层 `AskAiProvider` 保活唯一实例，页头右侧用 `PageTitleActions` / `AskAiEntry`。composer 用 `ChatInputBar`（宽栏，抽屉里必须垫 gutter + `min-w-0`，核心自定义 composer 不带默认 `p-4`）；回复是几组中文示范问答（`AskAiTranscript`），按问题选用 Agent 组件，不要整页铺 `/cases/agent` 英文死 demo。`onSend` 打 `POST /api/ask-ai`：`modelId` 对应模型管理里启用的条目；没有可用模型再看 `ASK_AI_LLM_*`，都没有用本地规则。已接模型时只调用已登记工具（`lib/<resource>/agent.ts` 登记进 `lib/agent/registry.ts`），按当前用户权限过滤。读立即执行；写入和删除先出确认单，确认后把字段填进页面表单或打开页面上的删除确认，由页面自己的保存逻辑处理，不直接写库。页面保存或删除成功后，同一会话继续原请求里还没做的查询或导出。不读仓库源码，不生成页面。未登记的模块助手不知道。密钥只放服务端，禁止请求体传 `apiKey`。组件对照仍看 `/ref/agent`。全屏、会话栏走 Kit props，禁止自研抽屉或全视口层。
+- **Ask AI**：Kit `AskAi`（core `≥0.1.17`）。业务页默认 `hideHeader: true`，`AppLayout.askAi` 不会出现。壳层 `AskAiProvider` 保活唯一实例，页头右侧用 `PageTitleActions` / `AskAiEntry`。composer 用 `ChatInputBar`（宽栏，抽屉里必须垫 gutter + `min-w-0`，核心自定义 composer 不带默认 `p-4`）；回复是几组中文示范问答（`AskAiTranscript`），按问题选用 Agent 组件，不要整页铺 `/cases/agent` 英文死 demo。`onSend` 打 `POST /api/ask-ai`：`modelId` 对应模型管理里启用的条目；没有可用模型再看 `ASK_AI_LLM_*`，都没有用本地规则。已接模型时只调用由模块 manifest 自动登记的工具（`config/modules/<id>.json`）；通用读取复用现有服务，敏感字段递归剔除，专用工具通过 manifest 挂接，按当前用户权限过滤。读立即执行；写入和删除先出确认单，确认后把字段填进页面表单或打开页面上的删除确认，由页面自己的保存逻辑处理，不直接写库。页面保存或删除成功后，同一会话继续原请求里还没做的查询或导出。不读仓库源码，不生成页面。新增模块必须有 manifest；缺声明或知识/读取说明时检查失败。密钥只放服务端，禁止请求体传 `apiKey`。组件对照仍看 `/ref/agent`。全屏、会话栏走 Kit props，禁止自研抽屉或全视口层。
 - **Checklist**：Kit `Checklist` / `ChecklistItem`（对照 `/ref/checklist`，任务页禁止手搓 Checkbox 行）。core `0.1.18` 起随包导出。  
 - 资源工作台：`WorkspaceSplit` + `FolderNav` + `ResourceCard`（见 `/ref/resource-workspace`）  
 - 时间格式：`lib/format/datetime.ts`（客户端安全，勿塞 next/headers）  
@@ -71,19 +71,15 @@ Skills 只维护 **`.agents/skills/`**。
 
 人类说「加 xxx 管理」→ 先 `new-module`，再 `new-page`，最后 **`forge-starter-audit`**（可同会话顺序执行）。
 
-## 菜单三处（扩业务必做）
+## 模块声明（扩业务必做）
 
-新模块要进侧栏，必须同时改这三处：
+唯一来源是 `config/modules/<id>.json`。运行 `pnpm modules:generate` 自动派生 `APP_MODULE_IDS`、`APP_MODULE_META`、`MODULE_MENU`、权限资源、知识与服务端工具注册；不要再手改菜单三处或 `lib/agent/registry.ts`。`pnpm typecheck` / `pnpm check` 校验遗漏与漂移。
 
-1. `config/apps.ts` → `APP_MODULE_IDS`
-2. `config/apps.ts` → `APP_MODULE_META`
-3. `config/menu.tsx` → `MODULE_MENU`（`BoldDuotone` `size={20}`）
+`pnpm module:new <id> [中文名称]` 生成并注册开发骨架；数据服务默认明确报未实现，不提供假 CRUD。后端与正式页面仍分阶段完成。声明必须提供知识与白名单 reader，或不可读原因；专用工具通过 `tools` 挂接。写草稿共用 API Zod，只有接好页面表单、If-Match、事务回执及读回验证后才能开启，绝不直接写库。
 
-默认应用种子勾齐新 id（`modules: [...APP_MODULE_IDS]` 或把新 id 写进 `DEFAULT_APP_ENTRIES`）。  
-`rbac_menus` 可选，只是目录：不进 `APP_MODULE_IDS` 侧栏仍看不见。  
-默认产品自动合并 `APP_MODULE_IDS` 新模块；用户自建应用需手动勾选。仅明确需要重置时清 `forge-starter:app-registry`，不要默认删除用户配置。
+默认产品自动合并新增模块；用户自建或显式配置的应用保留原勾选，需要在应用管理勾选。`rbac_menus` 只是目录，不会生成模块。
 
-侧栏实际可见 = 菜单三处 ∩ 当前应用勾选 ∩ 登录角色 `{module}:read`。  
+侧栏实际可见 = manifest 派生菜单 ∩ 当前应用勾选 ∩ 登录角色 `{module}:read`。
 无 `{module}:read` 时直链业务页必须壳层 `replace` 回工作台，别只藏侧栏或停在空态/403 列表。
 
 ## 仓库地图
@@ -120,8 +116,8 @@ docs/product.md agent-native.md setup.md module-template.md page-roles.md refere
 ## 扩业务最短路径
 
 1. `new-module`：types + service + schema + `db:migrate`（开发库迭代可用 `db:push`）+ API（**API 齐 ≠ 侧栏有**）。
-2. `new-page`：列表/弹窗/详情、菜单三处与默认应用种子；按 `docs/page-roles.md` 选型。
-3. 加菜单后验证默认产品合并及用户自建应用勾选，不默认清用户配置。无权限直链由壳 `replace` 回工作台。
+2. `new-page`：读 page-roles → 选全页（accounts）或轻弹窗（`/ref/detail-modal`，暂无第二业务样板）→ 列表/弹窗/详情 + **模块 manifest**；生成菜单与工具注册，默认产品自动合并新 id。
+3. 核对应用勾选；默认产品自动合并，人工配置应用须显式勾选。无权限直链由壳 `replace` 回工作台。
 4. `pnpm check` + 完整规范审计 + 浏览器从侧栏点通，分别记录结果。
 
 详见 `docs/module-template.md`。
