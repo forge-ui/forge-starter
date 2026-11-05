@@ -1,3 +1,4 @@
+import { MODULES } from "@/config/modules.generated";
 import { systemFeatureContext, SYSTEM_FEATURE_POLICY } from "@/lib/agent/system-features";
 import { allowsToolIntent } from "@/lib/agent/intent-policy";
 import { preparePresentation } from "./presentation-policy";
@@ -37,7 +38,7 @@ function jsonObject(value: unknown): JsonObject { return jsonValue(value) as Jso
 export function starterSuggestions(access: AccessContext, pathname = "") {
   const tools = toolsForAccess(access);
   const resource = pathname.split("/").filter(Boolean)[0];
-  const labels: Record<string, string> = { accounts: "账号", models: "模型", roles: "角色", menus: "菜单", permissions: "权限", settings: "应用", dashboard: "工作台", personal: "个人设置" };
+  const labels: Record<string, string> = { ...Object.fromEntries(MODULES.map(module => [module.id, module.label])), personal: "个人设置" };
   const result = retrieveStarterKnowledge({ query: labels[resource] ?? "下一步", allowedCapabilityIds: tools.map(t => t.id), currentCapabilityIds: tools.filter(t => t.id.startsWith(`${resource}.`)).map(t => t.id), maxEntries: 4 });
   return [...new Set(result.entries.flatMap(entry => entry.nextSteps?.map(step => step.question) ?? []))].slice(0, 4);
 }
@@ -46,7 +47,7 @@ function capability(tool: AgentTool): Capability {
   if (tool.id === "assistant.present") return { name: agentFunctionName(tool.id), title: "整理交互内容", description: tool.description, parameters: tool.parameters, effect: "read" };
   const effect = tool.id.endsWith(".navigate") || tool.id.endsWith(".open") || (tool.mode === "write" && tool.permission.action === "read") ? "page" : tool.mode === "write" ? "proposal" : "read";
   const [resource, action] = tool.id.split(".");
-  const names: Record<string, string> = { accounts: "账号", models: "模型", roles: "角色", menus: "菜单", permissions: "权限", settings: "应用", dashboard: "工作台", personal: "个人设置" };
+  const names: Record<string, string> = { ...Object.fromEntries(MODULES.map(module => [module.id, module.label])), personal: "个人设置" };
   const verbs: Record<string, string> = { list: "查询", get: "读取", create: "准备新建", update: "准备修改", delete: "准备删除", export: "准备导出", filter: "筛选", open: "打开", navigate: "前往", probe: "准备测试连接" };
   const title = action === "create_form" || action === "edit_form"
     ? `打开${names[resource] ?? (resource === "settings" ? "应用" : resource)}${action === "create_form" ? "新建" : "编辑"}表单`
@@ -86,7 +87,7 @@ function selectedRecord(run: Run, id: string, records: Array<Record<string, stri
 }
 
 function chooseTarget(tool: AgentTool, args: JsonObject, run: Run, page?: PageContext): ToolResult | undefined {
-  if (![...(["roles", "menus", "permissions", "models", "settings"].flatMap(resource => [resource + ".update", resource + ".delete", resource + ".probe"])), "accounts.get", "accounts.open", "accounts.update", "accounts.delete", "models.open", "roles.open", "menus.open", "permissions.open", "roles.edit_form", "menus.edit_form", "permissions.edit_form", "models.edit_form"].includes(tool.id) || typeof args.id !== "string") return;
+  if (!/\.(get|open|update|delete|probe|edit_form)$/.test(tool.id) || typeof args.id !== "string") return;
   const resource = tool.id.split(".")[0];
   if ((page?.pageId.startsWith(resource) && page.entityId === args.id) || run.goal.includes(args.id)) return;
   const records = candidateEvidence(run, resource);

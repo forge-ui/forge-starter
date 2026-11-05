@@ -1,7 +1,9 @@
+import { MODULE_SOURCE_BUILD_ID } from "@/lib/modules/build.generated";
+import { MODULES, type RegisteredModuleId } from "@/config/modules.generated";
 /** Pure declarations: safe to import at build time and in the browser. */
-export const APPLICATION_BUILD_ID = process.env.NEXT_PUBLIC_SEMANTIC_BUILD_ID ?? "local-test";
+export const APPLICATION_BUILD_ID = process.env.NEXT_PUBLIC_SEMANTIC_BUILD_ID ?? MODULE_SOURCE_BUILD_ID;
 export const CONTRACT_VERSION = "forge.application/v1";
-export type ModuleId = "accounts" | "models" | "roles" | "menus" | "permissions" | "settings" | "dashboard";
+export type ModuleId = RegisteredModuleId;
 export const moduleContracts = {
   accounts: {
     entity: "adminAccount", table: "admin_accounts", tableSymbol: "adminAccounts",
@@ -36,7 +38,8 @@ export function moduleForPage(pageId: string): ModuleId | undefined {
   if (pageId === "dashboard.home") return "dashboard";
   if (pageId === "settings.apps") return "settings";
   return (Object.keys(moduleContracts) as Array<keyof typeof moduleContracts>).find((id) =>
-    (moduleContracts[id].pages as readonly string[]).includes(pageId));
+    (moduleContracts[id].pages as readonly string[]).includes(pageId))
+    ?? MODULES.find(module => pageId === `${module.id}.list`)?.id;
 }
 
 /** Public projection intentionally excludes source paths and private fields. */

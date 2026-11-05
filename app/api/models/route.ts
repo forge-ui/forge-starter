@@ -1,21 +1,10 @@
 import { resourceWrite } from "@/lib/semantic/resource-write";
 import { OperationError } from "@/lib/semantic/operations";
-import { z } from "zod";
+import { createSchema as bodySchema } from "@/lib/models/input";
 import { jsonError, jsonOk } from "@/lib/auth/http";
 import { requirePermission } from "@/lib/rbac/access";
 import { MODEL_PROVIDERS } from "@/lib/models/providers";
 import { createAiModel, listAiModels } from "@/lib/models/service";
-
-const bodySchema = z.object({
-  name: z.string().min(1),
-  provider: z.string().min(1),
-  modelName: z.string().min(1),
-  apiBase: z.string().optional().default(""),
-  apiKey: z.string().optional().default(""),
-  status: z.enum(["active", "disabled"]),
-  isDefault: z.boolean().optional().default(false),
-  notes: z.string().optional().default(""),
-});
 
 function dbUnavailable(error: unknown) {
   const message = error instanceof Error ? error.message : "";

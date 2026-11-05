@@ -1,15 +1,11 @@
+import { moduleSpecializedTools } from "@/lib/modules/server.generated";
+import { genericModuleTools } from "@/lib/modules/tools";
 import { personalAgentTools } from "./personal-tools";
-import { appAgentTools } from "./app-tools";
 import { resourceAgentTools } from "./resource-tools";
 import { presentationTools } from "./presentation-tool";
 import { pageTools } from "@/lib/semantic/page-tools";
 import { navigationTools } from "./navigation-tools";
 import { pageEntryTools } from "./page-entry-tools";
-import { accountAgentTools } from "@/lib/accounts/agent";
-import { menuAgentTools } from "@/lib/menus/agent";
-import { modelAgentTools } from "@/lib/models/agent";
-import { permissionAgentTools } from "@/lib/permissions/agent";
-import { roleAgentTools } from "@/lib/roles/agent";
 import { hasPermission, type AccessContext } from "@/lib/rbac/access";
 import { agentFunctionName, type AgentTool } from "./types";
 
@@ -17,19 +13,18 @@ export const AGENT_TOOLS: AgentTool[] = [
   ...presentationTools,
   ...pageTools,
   ...navigationTools,
-  ...pageEntryTools.filter(tool => !/^(roles|menus|permissions|models|settings)\.(create_form|edit_form)$/.test(tool.id)),
+  ...pageEntryTools.filter(tool => {
+    const draftId = tool.id.replace(/create_form$/, "create").replace(/edit_form$/, "update");
+    return ![...resourceAgentTools, ...moduleSpecializedTools, ...genericModuleTools].some(draft => draft.id === draftId);
+  }),
   ...resourceAgentTools,
-  ...appAgentTools,
   ...personalAgentTools,
-  ...accountAgentTools,
-  ...roleAgentTools,
-  ...menuAgentTools,
-  ...permissionAgentTools,
-  ...modelAgentTools,
+  ...moduleSpecializedTools,
+  ...genericModuleTools,
 ];
 
-export function toolsForAccess(access: AccessContext) {
-  return AGENT_TOOLS.filter((tool) =>
+export function toolsForAccess(access: AccessContext, tools: readonly AgentTool[] = AGENT_TOOLS) {
+  return tools.filter((tool) =>
     hasPermission(access, tool.permission.resource, "read") &&
     hasPermission(access, tool.permission.resource, tool.permission.action),
   );

@@ -1,3 +1,5 @@
+import { MODULES, type RegisteredModuleId } from "./modules.generated";
+
 /**
  * App registry model:
  * - link: external bookmark URL
@@ -18,23 +20,12 @@ export type AppAuthMode = "none" | "passthrough" | "oidc" | "platform";
 /**
  * Built-in nav modules for internal apps.
  *
- * Sidebar contract（菜单三处，缺一不可）:
- * - `APP_MODULE_IDS` + `APP_MODULE_META`（本文件）+ `MODULE_MENU`（`config/menu.tsx`）。
- * - Default app seed must include the new id (`modules: [...APP_MODULE_IDS]`).
- * - `rbac_menus` is optional catalog only; catalog-only rows stay hidden.
- * - Login role then hides modules the user cannot `:read`.
+ * Sidebar modules are derived from config/modules/*.json.
+ * Default app seeds include new modules; login roles still require :read.
  */
-export const APP_MODULE_IDS = [
-  "dashboard",
-  "accounts",
-  "roles",
-  "menus",
-  "permissions",
-  "models",
-  "settings",
-] as const;
+export const APP_MODULE_IDS = MODULES.map(module => module.id);
 
-export type AppModuleId = (typeof APP_MODULE_IDS)[number];
+export type AppModuleId = RegisteredModuleId;
 
 export function isAppModuleId(value: string): value is AppModuleId {
   return (APP_MODULE_IDS as readonly string[]).includes(value);
@@ -106,18 +97,7 @@ export const APP_OPEN_META: Record<AppOpenMode, { label: string }> = {
   new_tab: { label: "新标签页" },
 };
 
-export const APP_MODULE_META: Record<
-  AppModuleId,
-  { label: string; href: string }
-> = {
-  dashboard: { label: "工作台", href: "/dashboard/" },
-  accounts: { label: "账号管理", href: "/accounts/" },
-  roles: { label: "角色", href: "/roles/" },
-  menus: { label: "菜单", href: "/menus/" },
-  permissions: { label: "权限", href: "/permissions/" },
-  models: { label: "模型服务", href: "/models/" },
-  settings: { label: "应用管理", href: "/settings/apps/" },
-};
+export const APP_MODULE_META = Object.fromEntries(MODULES.map(module => [module.id, { label: module.label, href: module.menu.href }])) as Record<AppModuleId, { label: string; href: string }>;
 
 /** Legacy presets → modules (migration) */
 export const MENU_PRESET_META: Record<

@@ -1,4 +1,5 @@
 import { APP_MODULE_IDS, APP_MODULE_META } from "@/config/apps";
+import { MODULES } from "@/config/modules.generated";
 
 /** Only registered entrances and concrete detail routes are navigable. */
 export type AgentNavigation = { href: string; label: string };
@@ -7,9 +8,13 @@ export function parseAgentNavigation(value: unknown): AgentNavigation | undefine
   if (!value || typeof value !== "object") return undefined;
   const href = (value as Record<string, unknown>).href;
   if (typeof href === "string") {
-    const match = href.match(/^(\/roles\/|\/menus\/|\/permissions\/|\/models\/|\/settings\/apps\/)\?(create=1|(?:id|edit)=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
-    const entry = match && APP_MODULE_IDS.find(id => APP_MODULE_META[id].href === match[1]);
-    if (entry && (entry !== "settings" || match![2] === "create=1")) return { href, label: APP_MODULE_META[entry].label };
+    const [pathname, query, extra] = href.split("?");
+    const module = MODULES.find(entry => entry.menu.href === pathname);
+    if (module && query && !extra) {
+      const entries = module.entries;
+      const validTarget = /^(id|edit)=[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(query);
+      if ((entries.create && query === "create=1") || (validTarget && ((entries.detail && query.startsWith("id=")) || (entries.edit && query.startsWith("edit=")) || (module.id === "models" && query.startsWith("id="))))) return { href, label: module.label };
+    }
   }
   const moduleId = APP_MODULE_IDS.find((id) => APP_MODULE_META[id].href === href);
   if (typeof href === "string" && /^\/accounts\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/$/i.test(href)) {

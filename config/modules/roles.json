@@ -1,0 +1,44 @@
+{
+  "id": "roles",
+  "label": "角色",
+  "order": 2,
+  "permissionResource": "roles",
+  "menu": {
+    "href": "/roles/",
+    "icon": "ShieldUserBoldDuotone",
+    "group": "main"
+  },
+  "knowledge": {
+    "summary": "角色管理支持列表搜索、状态筛选、详情弹窗、新建、编辑、删除；在角色表单中选择权限，维护角色与权限的关联。",
+    "fields": "角色名称、唯一编码、启用/停用、权限多选、说明。",
+    "rules": "编码2–48位，以小写字母开头，只含小写字母、数字、下划线、冒号、连字符；编辑时编码不可改。权限数不等于授权范围，须查权限关联。权限变更由用户在页面核对并保存。",
+    "source": "components/role-form-dialog.tsx"
+  },
+  "read": {
+    "service": "lib/roles/service.ts",
+    "export": "listRoles",
+    "fields": [
+      "id",
+      "name",
+      "code",
+      "status",
+      "description",
+      "permissionCount",
+      "updatedAt"
+    ]
+  },
+  "entries": {
+    "create": true,
+    "detail": true,
+    "edit": true
+  },
+  "tools": [
+    {
+      "source": "lib/roles/agent.ts",
+      "export": "roleAgentTools"
+    }
+  ],
+  "draft": {
+    "adapter": "resource"
+  }
+}

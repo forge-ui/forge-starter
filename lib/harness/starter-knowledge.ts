@@ -1,9 +1,10 @@
-import { APP_MODULE_IDS, APP_MODULE_META } from "@/config/apps";
-import { SYSTEM_FEATURES, PERSONAL_FEATURES } from "@/lib/agent/system-features";
+import { MODULES } from "@/config/modules.generated";
+import type { ModuleDefinition } from "@/lib/modules/definition";
+import { PERSONAL_FEATURES } from "@/lib/agent/system-features";
 import { APPLICATION_BUILD_ID, moduleContracts } from "../semantic/contracts";
 import { retrieveKnowledge, type KnowledgeEntry, type KnowledgeQuery, type KnowledgeSource } from "./knowledge";
 
-export const STARTER_KNOWLEDGE_VERSION = "forge.starter-knowledge/v1";
+export const STARTER_KNOWLEDGE_VERSION = APPLICATION_BUILD_ID;
 export const STARTER_PLATFORM_ID = "forge-starter";
 
 type Definition = Omit<KnowledgeEntry, "platformId" | "buildId" | "source" | "relatedSources"> & {
@@ -128,13 +129,13 @@ const definitions: readonly Definition[] = [
 ];
 
 /** Bind the checked-in explanations to the deployment that ships them. */
-export function getStarterKnowledge(buildId: string = APPLICATION_BUILD_ID): KnowledgeEntry[] {
-  const inventory: Definition[] = APP_MODULE_IDS.map(id => ({
-    id: `${id}.features`, title: `${APP_MODULE_META[id].label}全部页面功能`,
-    summary: [SYSTEM_FEATURES[id].summary, SYSTEM_FEATURES[id].fields, SYSTEM_FEATURES[id].rules].join(" "),
-    keywords: [APP_MODULE_META[id].label, id, "功能", "如何", "怎么", "创建", "编辑", "删除", "配置"],
-    capabilityIds: [`${id}.navigate`], source: { path: SYSTEM_FEATURES[id].source },
-    nextSteps: [{ label: `打开${APP_MODULE_META[id].label}`, question: `打开${APP_MODULE_META[id].label}页面`, capabilityIds: [`${id}.navigate`] }],
+export function getStarterKnowledge(buildId: string = APPLICATION_BUILD_ID, modules: readonly ModuleDefinition[] = MODULES): KnowledgeEntry[] {
+  const inventory: Definition[] = modules.map(module => ({
+    id: `${module.id}.features`, title: `${module.label}全部页面功能`,
+    summary: [module.knowledge.summary, module.knowledge.fields, module.knowledge.rules].join(" "),
+    keywords: [module.label, module.id, "功能", "如何", "怎么", "创建", "编辑", "删除", "配置"],
+    capabilityIds: [`${module.id}.navigate`], source: { path: module.knowledge.source },
+    nextSteps: [{ label: `打开${module.label}`, question: `打开${module.label}页面`, capabilityIds: [`${module.id}.navigate`] }],
   }));
   inventory.push({ id: "personal.features", title: "个人资料、安全、系统设置和Ask AI", summary: PERSONAL_FEATURES, keywords: ["个人", "资料", "密码", "登录", "注册", "找回", "通知", "系统设置", "Ask AI", "附件", "会话"], capabilityIds: ["dashboard.navigate"], source: { path: "components/settings-account-dialog.tsx" } });
   return [...definitions, ...inventory].map((definition) => ({

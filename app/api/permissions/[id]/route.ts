@@ -1,22 +1,13 @@
 import { resourceWrite } from "@/lib/semantic/resource-write";
 import { OperationError } from "@/lib/semantic/operations";
-import { z } from "zod";
+import { updateSchema as bodySchema } from "@/lib/permissions/input";
 import { jsonError, jsonOk } from "@/lib/auth/http";
 import { requirePermission } from "@/lib/rbac/access";
-import { RBAC_ACTIONS, RBAC_RESOURCES } from "@/lib/rbac/constants";
 import {
   deletePermission,
   getPermissionById,
   updatePermission,
 } from "@/lib/permissions/service";
-
-const bodySchema = z.object({
-  name: z.string().min(1),
-  code: z.string().min(2).optional(),
-  resource: z.enum(RBAC_RESOURCES),
-  action: z.enum(RBAC_ACTIONS),
-  description: z.string().optional().default(""),
-});
 
 type Ctx = { params: Promise<{ id: string }> };
 

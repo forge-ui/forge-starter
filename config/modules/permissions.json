@@ -1,0 +1,44 @@
+{
+  "id": "permissions",
+  "label": "权限",
+  "order": 4,
+  "permissionResource": "permissions",
+  "menu": {
+    "href": "/permissions/",
+    "icon": "ShieldKeyholeBoldDuotone",
+    "group": "main"
+  },
+  "knowledge": {
+    "summary": "权限管理支持搜索、资源/操作筛选、详情、新建、编辑、删除，并展示已分配角色；角色授权在角色表单维护。",
+    "fields": "名称、资源、操作、权限编码、说明。",
+    "rules": "资源为工作台、账号、角色、菜单、权限、模型、应用；操作为read/create/update/delete。权限编码唯一，编辑限制以页面为准；创建权限目录不等于已经授权给角色。",
+    "source": "components/permission-form-dialog.tsx"
+  },
+  "read": {
+    "service": "lib/permissions/service.ts",
+    "export": "listPermissions",
+    "fields": [
+      "id",
+      "name",
+      "code",
+      "resource",
+      "action",
+      "description",
+      "updatedAt"
+    ]
+  },
+  "entries": {
+    "create": true,
+    "detail": true,
+    "edit": true
+  },
+  "tools": [
+    {
+      "source": "lib/permissions/agent.ts",
+      "export": "permissionAgentTools"
+    }
+  ],
+  "draft": {
+    "adapter": "resource"
+  }
+}

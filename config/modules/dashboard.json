@@ -1,0 +1,23 @@
+{
+  "id": "dashboard",
+  "label": "工作台",
+  "order": 0,
+  "permissionResource": "dashboard",
+  "menu": {
+    "href": "/dashboard/",
+    "icon": "HomeSmileBoldDuotone",
+    "group": "main"
+  },
+  "knowledge": {
+    "summary": "工作台展示账号总数、启用及待处理统计、状态趋势、状态占比、区域和角色分布、最近账号；可切换趋势周期、查看账号和新建账号。",
+    "fields": "指标、图表、最近账号列表。",
+    "rules": "账号统计读取业务账号；页面标注的演示曲线、区域示意不能当作真实趋势。实时数值须查账号工具。",
+    "source": "app/(app)/dashboard/page.tsx"
+  },
+  "read": {
+    "unavailable": "统计复用 accounts.list；示意曲线不可作为真实业务数据。"
+  },
+  "entries": {
+    "create": false
+  }
+}

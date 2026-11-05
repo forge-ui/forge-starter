@@ -1,0 +1,46 @@
+{
+  "id": "models",
+  "label": "模型服务",
+  "order": 5,
+  "permissionResource": "models",
+  "menu": {
+    "href": "/models/",
+    "icon": "WidgetBoldDuotone",
+    "group": "main"
+  },
+  "knowledge": {
+    "summary": "模型服务按供应商分组，支持搜索、详情、新建接入、编辑、删除、启用/停用、设默认及测试连接。Ask AI 可选择已启用可用模型。",
+    "fields": "显示名称、供应商、模型ID、调用地址、API Key、状态、是否默认、备注。",
+    "rules": "Key只在模型页面输入，不进对话；列表不返回明文Key。配置存在、启用与连接成功是不同事实，连接测试须实际执行。助手可准备非密钥字段的创建、修改及删除草稿，经确认后在页面保存；连接测试须明确请求并确认。",
+    "source": "components/model-form-dialog.tsx"
+  },
+  "read": {
+    "service": "lib/models/service.ts",
+    "export": "listAiModels",
+    "fields": [
+      "id",
+      "name",
+      "provider",
+      "modelName",
+      "apiBase",
+      "status",
+      "isDefault",
+      "notes",
+      "updatedAt"
+    ]
+  },
+  "entries": {
+    "create": true,
+    "detail": false,
+    "edit": true
+  },
+  "tools": [
+    {
+      "source": "lib/models/agent.ts",
+      "export": "modelAgentTools"
+    }
+  ],
+  "draft": {
+    "adapter": "resource"
+  }
+}
