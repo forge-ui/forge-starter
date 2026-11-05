@@ -1,11 +1,14 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { fetchText, OfflineError, run } from "../../scripts/sync-forge-skill.mjs";
 
 const revision = "a".repeat(40);
+const execute = promisify(execFile);
 const contents = { "SKILL.md": "# Forge\n", "references/audit-checklist.md": "# Audit\n" };
 const fetcher = async (url) => {
   let value;
@@ -76,4 +79,53 @@ test("truncated and unsafe upstream trees cannot be synchronized", async (contex
     const invalid = async (url) => url.includes("/git/trees/") ? new Response(JSON.stringify(tree)) : fetcher(url);
     await assert.rejects(run({ root, fetcher: invalid, log() {} }), /上游文件树不完整|不安全的规范路径/);
   }
+});
+
+test("checkout sync records committed provenance and rejects dirty sources", async (context) => {
+  const root = await fixture(context);
+  const from = await fixture(context);
+  const git = (...args) => execute("git", ["-C", from, ...args]);
+  await git("init");
+  await mkdir(join(from, "core"));
+  await writeFile(join(from, "core/package.json"), '{"version":"0.4.7"}');
+  await mkdir(join(from, "skills/forge-skill/references"), { recursive: true });
+  for (const [path, content] of Object.entries(contents)) await writeFile(join(from, "skills/forge-skill", path), content);
+  await git("add", "core", "skills");
+  await git("-c", "user.name=Test", "-c", "user.email=test@example.test", "commit", "-m", "test: source");
+  await run({ root, from, log() {} });
+  const manifest = JSON.parse(await readFile(join(root, "docs/forge-skill/manifest.json"), "utf8"));
+  assert.equal(manifest.sourceKind, "checkout");
+  assert.equal(manifest.revision, (await git("rev-parse", "HEAD")).stdout.trim());
+  await run({ root, from, check: true, log() {} });
+  const messages = [];
+  for (const status of [404, 422]) {
+    await run({ root, check: true, fetcher: async () => new Response("missing", { status }), log: (message) => messages.push(message) });
+  }
+  assert.ok(messages.every((message) => /SKIP.*尚未 push.*SHA256/.test(message)));
+  for (const status of [403, 429]) {
+    await run({ root, check: true, fetcher: async () => new Response("limited", { status, headers: { "x-ratelimit-remaining": "0" } }), log: (message) => assert.match(message, /SKIP.*限流.*SHA256/) });
+  }
+  await assert.rejects(run({ root, check: true, fetcher: async () => new Response("denied", { status: 403 }), log() {} }), /HTTP 403/);
+  await assert.rejects(run({ root, check: true, ref: "main", fetcher: async () => new Response("missing", { status: 404 }), log() {} }), /HTTP 404/);
+  await writeFile(join(from, "skills/forge-skill/SKILL.md"), "dirty");
+  await assert.rejects(run({ root, from, log() {} }), /未提交改动/);
+  await git("restore", "skills/forge-skill/SKILL.md");
+  await writeFile(join(from, "skills/forge-skill/untracked.md"), "untracked");
+  await assert.rejects(run({ root, from, log() {} }), /未提交改动/);
+  await rm(join(from, "skills/forge-skill/untracked.md"));
+  await writeFile(join(from, "core/package.json"), '{"version":"0.4.6"}');
+  await git("add", "core/package.json");
+  await git("-c", "user.name=Test", "-c", "user.email=test@example.test", "commit", "-m", "test: mismatched version");
+  await assert.rejects(run({ root, from, log() {} }), /Starter 0.4.7 不同/);
+  await run({ root, from, ref: manifest.revision, check: true, log() {} });
+  await git("rm", "skills/forge-skill/references/audit-checklist.md");
+  await writeFile(join(from, "core/package.json"), '{"version":"0.4.7"}');
+  await git("add", "core/package.json");
+  await git("-c", "user.name=Test", "-c", "user.email=test@example.test", "commit", "-m", "test: missing checklist");
+  await assert.rejects(run({ root, from, log() {} }), /上游尚无完整/);
+  await git("rm", "core/package.json");
+  await git("-c", "user.name=Test", "-c", "user.email=test@example.test", "commit", "-m", "test: missing core manifest");
+  await assert.rejects(run({ root, from, log() {} }), /本地规范源读取失败/);
+  await writeFile(join(root, "docs/forge-skill/upstream/SKILL.md"), "tampered");
+  await assert.rejects(run({ root, check: true, fetcher: async () => new Response("missing", { status: 404 }), log() {} }), /内容漂移/);
 });

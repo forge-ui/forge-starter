@@ -5,6 +5,7 @@
 ```sh
 corepack pnpm sync:forge-skill
 corepack pnpm sync:forge-skill --ref <匹配当前-core-版本的提交或标签>
+corepack pnpm sync:forge-skill --from <本地主仓-checkout> [--ref <已提交-revision>]
 corepack pnpm check:forge-skill
 ```
 
@@ -12,6 +13,8 @@ corepack pnpm check:forge-skill
 
 成功后生成 `upstream/` 原文副本及 `manifest.json`（仓库、core 版本、源 ref、固定 revision、逐文件 SHA-256），一并提交。不要手改 `upstream/`。通用规则引用本目录的 `upstream/SKILL.md`、`upstream/references/audit-checklist.md`，角色与线框参考 `upstream/references/page-recommended-standard.md` / `page-design-dimensional.md`。
 
-`pnpm check` 与 CI 同时核本地摘要及同一 core 版本来源的规范漂移；仅网络连接/传输失败时打印 SKIP、不失败。离线仍检查已有副本的版本、清单、摘要，不允许以离线掩盖本地改写。HTTP 404、版本不匹配、缺必需文件、摘要漂移均失败。SKIP 不能当完整漂移校验通过。
+`pnpm check` 与 CI 同时核本地摘要及同一 core 版本来源的规范漂移；网络连接/传输失败时打印 SKIP、不失败。已有副本通过本地校验后，GitHub 明确限流（HTTP 429 或 403 且 `x-ratelimit-remaining: 0`）也明确 SKIP，恢复后重跑；普通 403 仍失败。离线仍检查已有副本的版本、清单、摘要，不允许以离线掩盖本地改写。除下述本地来源未发布场景，HTTP 404、版本不匹配、缺必需文件、摘要漂移均失败。SKIP 不能当完整漂移校验通过。
 
-本轮主仓新目录及统一清单尚未在远端 main 提供，暂不伪造同步副本；主仓迁移合并后执行上述同步并补交生成文件。未同步或无法打开主清单时，只能报告 Starter 局部核查，不能宣称完整规范审计通过。
+本地模式只读取 Git 已提交内容，拒绝来源 `core/package.json` 或 `skills/forge-skill/` 的未提交改动（包括未跟踪文件），同样校验版本、完整清单和 SHA-256；manifest 用 `sourceKind: checkout`、`sourceRef` 和固定 `revision` 记录来源，不保存机器绝对路径。无 `--ref` 时使用 checkout 的 HEAD。
+
+本地来源尚未 push 时，默认远端检查查询已记录的固定 revision；仅该提交查询返回 HTTP 404/422 时明确 SKIP，且仍先验证本地副本。其他 HTTP 错误、文件缺失及摘要漂移仍失败。上游发布后重跑远端检查；需要追踪更新时显式 `--ref main` 或重新同步。未同步或无法打开主清单时，只能报告 Starter 局部核查，不能宣称完整规范审计通过。

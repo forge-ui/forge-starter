@@ -3,11 +3,43 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, readdir, rename, rm, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const PREFIX = "skills/forge-skill/";
 const REQUIRED = ["SKILL.md", "references/audit-checklist.md"];
 const REPOSITORY = "https://github.com/forge-ui/forge";
+const execute = promisify(execFile);
+class LocalSourceError extends Error {}
+
+async function checkoutSource(directory, ref) {
+  const git = async (...args) => {
+    try {
+      return (await execute("git", ["-C", directory, ...args], { maxBuffer: 16 * 1024 * 1024 })).stdout;
+    } catch (error) {
+      throw new LocalSourceError(`本地规范源读取失败：${error.message}`);
+    }
+  };
+  const revision = (await git("rev-parse", "--verify", `${ref ?? "HEAD"}^{commit}`)).trim();
+  const status = await git("status", "--porcelain", "--untracked-files=all", "--", "core/package.json", PREFIX);
+  if (status) throw new Error("本地规范源有未提交改动；先提交来源再同步");
+  const sourceRef = ref ?? (await git("symbolic-ref", "--short", "-q", "HEAD").catch(() => revision)).trim();
+  const fetcher = async (url) => {
+    if (url.includes("/commits/")) return new Response(JSON.stringify({ sha: revision }));
+    if (url.includes("/git/trees/")) {
+      const entries = (await git("ls-tree", "-r", revision, "--", PREFIX)).trim().split("\n").filter(Boolean);
+      return new Response(JSON.stringify({ tree: entries.map((entry) => {
+        const [metadata, path] = entry.split("\t");
+        const [mode, type] = metadata.split(" ");
+        return { mode, type, path };
+      }) }));
+    }
+    const path = url.split(`/${revision}/`)[1];
+    return new Response(await git("show", `${revision}:${path}`));
+  };
+  return { fetcher, sourceRef };
+}
 
 export function digest(content) {
   return createHash("sha256").update(content).digest("hex");
@@ -57,15 +89,24 @@ export async function verifySnapshot(directory, manifest, version) {
 }
 
 export class OfflineError extends Error {}
+export class HttpError extends Error {
+  constructor(status, url, rateLimited = false) {
+    super(`规范源 HTTP ${status}：${url}`);
+    this.status = status;
+    this.rateLimited = rateLimited;
+  }
+}
 
 export async function fetchText(url, fetcher = fetch) {
   let response;
   try {
     response = await fetcher(url, { signal: AbortSignal.timeout(15000) });
   } catch (error) {
+    if (error instanceof LocalSourceError) throw error;
     throw new OfflineError(`无法连接规范源：${error.message}`);
   }
-  if (!response.ok) throw new Error(`规范源 HTTP ${response.status}：${url}`);
+  if (!response.ok) throw new HttpError(response.status, url,
+    response.status === 429 || (response.status === 403 && response.headers.get("x-ratelimit-remaining") === "0"));
   try {
     return await response.text();
   } catch (error) {
@@ -73,7 +114,7 @@ export async function fetchText(url, fetcher = fetch) {
   }
 }
 
-export async function run({ root = ROOT, check = false, ref, fetcher = fetch, log = console.log } = {}) {
+export async function run({ root = ROOT, check = false, ref, from, fetcher = fetch, log = console.log } = {}) {
   const version = (await json(join(root, "package.json"))).dependencies["@forge-ui-official/core"];
   if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error("规范同步要求精确 core 版本");
   const destination = join(root, "docs/forge-skill");
@@ -84,10 +125,23 @@ export async function run({ root = ROOT, check = false, ref, fetcher = fetch, lo
     if (error.code !== "ENOENT") throw error;
   }
   if (check && manifest) await verifySnapshot(join(destination, "upstream"), manifest, version);
-  const sourceRef = ref ?? manifest?.sourceRef ?? "main";
+  const local = from ? await checkoutSource(resolve(from), ref) : undefined;
+  if (local) fetcher = local.fetcher;
+  const sourceRef = local?.sourceRef ?? ref ?? manifest?.sourceRef ?? "main";
+  const lookupRef = !from && !ref && manifest?.sourceKind === "checkout" ? manifest.revision : sourceRef;
   let tree, revision;
   try {
-    const commit = JSON.parse(await fetchText(`https://api.github.com/repos/forge-ui/forge/commits/${encodeURIComponent(sourceRef)}`, fetcher));
+    let commit;
+    try {
+      commit = JSON.parse(await fetchText(`https://api.github.com/repos/forge-ui/forge/commits/${encodeURIComponent(lookupRef)}`, fetcher));
+    } catch (error) {
+      if (check && manifest?.sourceKind === "checkout" && lookupRef === manifest.revision
+        && error instanceof HttpError && [404, 422].includes(error.status)) {
+        log(`SKIP forge-skill 远端漂移检查：来源 revision ${manifest.revision} 尚未 push 或远端不可见；本地版本、清单和 SHA256 已校验。发布上游后重跑；不代表远端检查通过。`);
+        return;
+      }
+      throw error;
+    }
     revision = commit.sha;
     if (!/^[a-f0-9]{40}$/.test(revision)) throw new Error("上游返回非法 Git revision");
     const core = JSON.parse(await fetchText(`https://raw.githubusercontent.com/forge-ui/forge/${revision}/core/package.json`, fetcher));
@@ -125,7 +179,7 @@ export async function run({ root = ROOT, check = false, ref, fetcher = fetch, lo
         await mkdir(dirname(join(staging, path)), { recursive: true });
         await writeFile(join(staging, path), content);
       }
-      const next = { schemaVersion: 1, repository: REPOSITORY, coreVersion: version, sourceRef, revision, files: hashes };
+      const next = { schemaVersion: 1, repository: REPOSITORY, coreVersion: version, sourceKind: from ? "checkout" : "remote", sourceRef, revision, files: hashes };
       await verifySnapshot(staging, next, version);
       try {
         await rename(join(destination, "upstream"), backup);
@@ -148,6 +202,10 @@ export async function run({ root = ROOT, check = false, ref, fetcher = fetch, lo
     }
     log(`已同步 forge-skill（core ${version}，${revision}）`);
   } catch (error) {
+    if (check && manifest && error instanceof HttpError && error.rateLimited) {
+      log(`SKIP forge-skill 远端漂移检查：GitHub API 限流（HTTP ${error.status}）；本地版本、清单和 SHA256 已校验。限流恢复后重跑；不代表远端检查通过。`);
+      return;
+    }
     if (!(error instanceof OfflineError)) throw error;
     log(`SKIP forge-skill 远端漂移检查：${error.message}。${manifest && check ? "本地版本和摘要已校验" : manifest ? "未执行本地副本校验" : "本地副本缺失，未完成规范同步"}；不代表完整检查通过。`);
   }
@@ -158,12 +216,16 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const check = args.includes("--check");
   const refIndex = args.indexOf("--ref");
   const ref = refIndex === -1 ? undefined : args[refIndex + 1];
-  if (args.some((arg, index) => arg !== "--check" && arg !== "--ref" && (refIndex < 0 || index !== refIndex + 1))
-    || (refIndex !== -1 && (!ref || ref.startsWith("--")))) {
-    console.error("用法：node scripts/sync-forge-skill.mjs [--check] [--ref <Git revision>]");
+  const fromIndex = args.indexOf("--from");
+  const from = fromIndex === -1 ? undefined : args[fromIndex + 1];
+  if (args.some((arg, index) => !["--check", "--ref", "--from"].includes(arg)
+    && !(refIndex >= 0 && index === refIndex + 1) && !(fromIndex >= 0 && index === fromIndex + 1))
+    || (refIndex !== -1 && (!ref || ref.startsWith("--")))
+    || (fromIndex !== -1 && (!from || from.startsWith("--")))) {
+    console.error("用法：node scripts/sync-forge-skill.mjs [--check] [--ref <Git revision>] [--from <checkout>]");
     process.exitCode = 1;
   } else {
-    await run({ check, ref }).catch((error) => {
+    await run({ check, ref, from }).catch((error) => {
       console.error(error.message);
       process.exitCode = 1;
     });
