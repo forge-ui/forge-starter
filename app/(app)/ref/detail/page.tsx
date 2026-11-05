@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { AltArrowLeftLinear } from "solar-icon-set";
+import { AltArrowLeftLinear } from "@forge-ui-official/core/icons";
 import { Button, StatusBadge } from "@forge-ui-official/core";
 import { RefChrome } from "@/components/reference/ref-chrome";
 import { siteConfig } from "@/config/site";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MagniferLinear } from "solar-icon-set";
+import { MagniferLinear } from "@forge-ui-official/core/icons";
 import { Button, StatusBadge, TextField } from "@forge-ui-official/core";
 import { RefChrome } from "@/components/reference/ref-chrome";
 import { siteConfig } from "@/config/site";

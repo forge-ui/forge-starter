@@ -22,6 +22,8 @@
 
 ## Agent 先读什么
 
+通用规范唯一正文是主仓 [forge-skill](https://github.com/forge-ui/forge/tree/main/skills/forge-skill)。按 core 版本同步的本地副本与漂移检查见 [forge-skill/README.md](forge-skill/README.md)；本仓清单只维护 Starter 适配规则。
+
 先读仓库根目录的 [AGENTS.md](../AGENTS.md)。它点名的必读是：
 
 - [product.md](product.md)

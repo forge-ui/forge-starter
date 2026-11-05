@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { KebabMenu } from "@forge-ui-official/core";
-import { PenLinear, TrashBinMinimalisticLinear } from "solar-icon-set";
+import { PenLinear, TrashBinMinimalisticLinear } from "@forge-ui-official/core/icons";
 import { siteConfig } from "@/config/site";
 
 export type WorkspaceFolder = {

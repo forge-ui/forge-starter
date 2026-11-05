@@ -129,7 +129,7 @@ app/
   api/               auth · accounts · roles · menus · permissions
 components/          app-shell · *-store · *-dialog · ui/modal
 config/              site · menu · apps
-lib/                 auth · db · accounts · roles · menus · permissions · rbac · apps · mail · reference
+lib/                 auth · db · accounts · roles · menus · permissions · models · rbac · apps · mail · reference · agent · harness · semantic
 docs/                产品说明 · 工作流 · 安装环境 · 组件选型
 .agents/skills/      quick-start · new-module · new-page · audit
 AGENTS.md

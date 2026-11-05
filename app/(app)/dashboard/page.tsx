@@ -13,7 +13,7 @@ import {
   ArrowRightUpLinear,
   BoxBoldDuotone,
   PenLinear,
-} from "solar-icon-set";
+} from "@forge-ui-official/core/icons";
 import {
   BarChartStatCard,
   BubbleChart,

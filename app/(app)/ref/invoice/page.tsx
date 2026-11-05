@@ -5,7 +5,7 @@
  * Line items + totals + payment summary rail.
  */
 
-import { CloudDownloadLinear, Pen2Linear } from "solar-icon-set";
+import { CloudDownloadLinear, Pen2Linear } from "@forge-ui-official/core/icons";
 import {
   Avatar,
   Button,

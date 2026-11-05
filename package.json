@@ -18,7 +18,10 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "audit:tripwire": "node scripts/audit-tripwire.mjs",
-    "check": "pnpm typecheck && pnpm audit:tripwire",
+    "check": "pnpm typecheck && pnpm audit:tripwire && pnpm test:specs && pnpm check:forge-skill",
+    "sync:forge-skill": "node scripts/sync-forge-skill.mjs",
+    "check:forge-skill": "node scripts/sync-forge-skill.mjs --check",
+    "test:specs": "node --test tests/specs/*.test.mjs",
     "test": "NODE_ENV=test tsx --test --test-concurrency=1 tests/apps/*.test.ts tests/ask-ai/*.test.ts tests/auth/*.test.ts tests/db/*.test.ts tests/harness/*.test.ts tests/models/*.test.ts tests/navigation/*.test.ts tests/security/*.test.ts tests/semantic/*.test.ts",
     "db:push": "node scripts/db-push.mjs",
     "db:migrate": "drizzle-kit migrate",
@@ -33,7 +36,7 @@
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.8",
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
-    "@forge-ui-official/core": "0.4.6",
+    "@forge-ui-official/core": "0.4.7",
     "@opennextjs/cloudflare": "1.20.6",
     "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.2",
@@ -43,7 +46,6 @@
     "postgres": "^3.4.9",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "solar-icon-set": "^2.0.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

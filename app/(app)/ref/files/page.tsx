@@ -6,7 +6,7 @@
  */
 
 import { useState } from "react";
-import { MagniferLinear } from "solar-icon-set";
+import { MagniferLinear } from "@forge-ui-official/core/icons";
 import {
   Button,
   FileCard,

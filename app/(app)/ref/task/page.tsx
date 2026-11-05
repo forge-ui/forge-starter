@@ -5,7 +5,7 @@
  * Left meta/members/files + right progress/checklist/activity.
  */
 
-import { AddCircleLinear, Pen2Linear, UserPlusLinear } from "solar-icon-set";
+import { AddCircleLinear, Pen2Linear, UserPlusLinear } from "@forge-ui-official/core/icons";
 import {
   Avatar,
   AvatarGroup,

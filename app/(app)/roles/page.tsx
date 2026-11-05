@@ -11,7 +11,7 @@ import {
   MagniferLinear,
   PenLinear,
   TrashBinMinimalisticLinear,
-} from "solar-icon-set";
+} from "@forge-ui-official/core/icons";
 import {
   Breadcrumbs,
   PageTitleToolbar,

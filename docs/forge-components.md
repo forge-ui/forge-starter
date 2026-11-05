@@ -1,103 +1,41 @@
-# Forge 组件怎么选（Starter 专用）
+# Forge 组件接入（Starter 适配）
 
-问题：写业务页时 AI 不知道 Kit 里有什么、该用哪个。  
-解法：**本表选型 → 抄 Starter 样板 → monorepo 总表/cases 查 props**。
+通用选型唯一正文：[forge-skill](https://github.com/forge-ui/forge/tree/main/skills/forge-skill)。版本同步入口见 [forge-skill/README.md](forge-skill/README.md)，同步后正文在 `forge-skill/upstream/SKILL.md`。先定角色与主 Screen，再选 Blocks / Components，最后查安装包声明和主仓 cases。
 
-## 权威入口（有旁路 forge 时优先）
+## Starter 接线入口
 
-### 表格详情入口约定
+角色与路由统一见 [page-roles.md](page-roles.md)、[reference-pages.md](reference-pages.md)，不在此维护第二份模板对照表。
 
-`DataTable` 的列由调用方定义，不会默认追加箭头操作列。普通详情通过名称/标题列的数据打开，保持文字样式，支持键盘操作；全页详情与弹窗详情都遵守此约定。重详情参照 accounts 名称列，轻详情链接到当前列表的 `?id=` 状态，并保留筛选参数。
+| 接入点 | Starter 约定 |
+|---|---|
+| 页面壳 | 复用 `components/app-shell.tsx`；业务控件 `color={siteConfig.accent}` |
+| 图标 | Solar，唯一入口 `@forge-ui-official/core/icons` |
+| 表单与轻详情 | 既有 `components/ui/modal.tsx`；轻详情以 `?id=` 保留筛选上下文 |
+| 删除确认 | core `ConfirmationDialog` 受控 `open` / `onOpenChange` 独立使用；省略 open 的内联模式才需要已有 Modal 宿主 |
+| 资源台 | `WorkspaceSplit` / `FolderNav` / `ResourceCard` 是本仓适配，不是 core 根导出 |
+| 时间 | `lib/format/datetime.ts`，客户端安全 |
 
-`CellLink` 是带箭头的可选链接单元格，不用于默认名称详情入口。操作列只放编辑、删除等真实业务动作，没有这些动作则省略整列。详见审计清单 C9。
+涉及 Ask AI 的原接线表本轮保留，交由任务 A 维护：
 
-### 组件索引
-
-```text
-../forge/docs/for-agents/README.md      ← 总入口
-../forge/docs/for-agents/routes.md      ← /cases 路由表
-../forge/docs/for-agents/components.md  ← 全量介绍表 + Case 列
-```
-
-原稿还在 `../forge-readdy/catalog/`（sync 脚本、codegen）；**Agent 日常读 forge/docs/for-agents**。
-
-## 权威链路（必须按序）
-
-```text
-1. 定页面角色          → docs/page-roles.md
-2. 本表或 for-agents 选组件
-3. 抄 Starter 样板     → accounts、dashboard、`/ref/detail-modal`
-4. 查 props            → ../forge/src/app/cases/<name>/page.tsx
-5. 仍没有              → FORGE-GAP
-```
-
-旁路 monorepo（与 starter 同级）：
-
-| 用途 | 路径 |
-|------|------|
-| **Agent 组件总入口** | **`../forge/docs/for-agents/README.md`** |
-| Skill 铁律 | `../forge/.agents/skills/forge/SKILL.md` |
-| 页面模式长文 | `../forge/.agents/skills/forge/references/page-patterns.md` |
-| 活文档 | `../forge/src/app/cases/<name>/page.tsx` |
-| readdy catalog 原稿 | `../forge-readdy/catalog/forge-components.md` |
-
-**无 `../forge` 时：** 只用本表 + Starter 样板 import 列表；不要猜 Kit API。
-## 角色 → 组件包 → Starter 样板 → Case
-
-| 页面/业务意图 | 先用这些组件 | Starter 抄谁 | monorepo case（查 props） |
-|---------------|--------------|--------------|---------------------------|
-| 列表、管理 | `DataTable` `StatusBadge` `Button`；页头见下行 | `accounts/page` 或官方 wallets/customers | `table` `toolbar` `button-link` |
+| 场景 | 约定 | Starter 入口 | Kit case |
+|---|---|---|---|
 | 列表页头 + 工具带 | Kit `PageTitleToolbar`，`actions` 内放 `ToolbarActions` + `AskAiEntry` + 业务按钮；单行工具带用 `ButtonGroup`+`TextField` 或 `Toolbar`/`ToolbarSearchInput` | 同上 | `toolbar` |
-| 筛选条 | 一条工具带，禁止两行 pills。Starter：`ButtonGroup`+`TextField`。官方：`Toolbar`+`ToolbarSearchInput` | 同上 | `tab` `input-field` `toolbar` |
-| 新建/编辑弹窗 | `TextField` `TextArea` `SelectOption` + 本仓 `Modal` | `account-form-dialog` | `input-field` `modal` |
-| 轻详情（看完回列表） | `StatusBadge` `DescriptionItem` + `Modal` 底栏按钮 | `/ref/detail-modal` + `Modal` + `?id=`（暂无第二业务样板） | `list` `modal` |
-| 重详情（档案） | `Breadcrumbs` `StatusBadge` `StatCard` `TabBar` `DataTable` 侧栏字段；页级主次栏 `span` 8+4。主栏内辅栏+图用 `5+7` / `6+6`，不要再套页面 `4+8` | `accounts/[id]` | `grid` `card` `tab` `list` `table` |
-| 删除确认 | `ConfirmationDialog` **外包** `Modal`/遮罩 | `accounts/page` 删除 | `modal` |
-| 工作台、指标 | `StatCard` `ChartCard` 图表家族 `DataTable`；分栏 `Grid`/`GridItem`（core `≥0.1.13`，默认 12 列 / 16px） | `dashboard` | `card` `chart` `table` `grid` |
-| **资源工作台** | `WorkspaceSplit` `FolderNav` `ResourceCard` + `Grid` 卡组 + toast | `/ref/resource-workspace` | `grid` |
-| 设置单卡 | 头像菜单三项（资料/改密/系统偏好）用 `Modal` 表单，不要整页；应用管理仍是 collection | `settings-account-dialog`、`settings/apps` | `input-field` `modal` |
 | Ask AI | Kit `AskAi`（抽屉 + 全屏 + `sessions`）。composer 用 `ChatInputBar`，抽屉里必须垫 gutter + `min-w-0`；回复用几组示范问答，按题选用 Agent 组件，不要整页丢 `/cases/agent` 英文 demo。`hideHeader` 时不要传 `AppLayout.askAi` | `ask-ai-entry`、`/ref/agent` | `page-header` `agent` |
 | Agent 痕迹 / 任务 / 审批 | `ThinkingTrace` `StreamingAnswer` `ToolChips` `AgentTaskRows` `ApprovalCard` | `/ref/agent` | `agent` |
 | Agent 检索 / 建议 / 命令 | `ContextCards` `RecommendationCard` `InsightCards` `CommandSearch` | `/ref/agent` | `agent` |
 | Agent 产物 | `AgentDiffTable` `AgentCodeBlock` `AgentFlowchart` `ChatInputBar` | `/ref/agent` | `agent` |
-| 清单 | Kit `Checklist` / `ChecklistItem`（完成沉底；`color={siteConfig.accent}`）。core `0.1.18` 起随包导出。禁止手搓 Checkbox 行 | `/ref/checklist`、`/ref/task` | `checklist` |
-| 空态 | 文案 + `Button`；可选 solar 图标 | 各列表 empty | `button-link` |
 
-> **状态呈现纪律**：语义状态用 Kit `StatusBadge`（默认 `variant="soft"`，浅底+细边+同色字）。禁止 `variant="solid"`、`Label`、手搓 pill、本仓 `StatusText`。分类/角色/标签用 `CellText`/`CellMuted`，不要彩虹胶囊。一张表最多一列状态胶囊。
->
-> **字色分层**（Forge `--text-*`，审计 V7）：标题 / 实体名 / 主键值 / `CellText` / `DescriptionItem` content → `text-fg-black`；字段 label / `CellMuted` / 副行 → `text-fg-grey-700`；disabled、空态、时间戳才 `text-fg-grey-500`。说明性正文最浅到 `text-fg-grey-700`，不要整页浅灰。
->
-> **内容壳 gutter**（审计 L10）：右侧圆角内容面顶/右/底间距等距且锁在首屏（Kit `md:p-2`）。表/正文超高时在面内滚，禁止整页滚动把底边距顶没。
+core 0.4.7 已导出 `Modal`、`Drawer`、`ToastProvider` / `useToast`。本地宿主是既有集成选择，不是缺能力；不要围绕受控确认重复套遮罩，不在业务页另挂 ToastProvider。语义状态保留 Kit `StatusBadge` 默认 soft；分类/角色保持文字，一表最多一列状态胶囊。
 
-### 不要默认上的（除非业务明确要）
+以下涉及 Ask AI 的旧表项冻结给任务 A，Drawer 导出判断已被上一段的 0.4.7 事实替代，不作当前通用选型依据：
 
-| 组件/能力 | 原因 |
-|-----------|------|
-| `DataTable.sortable: true` | **不会自动排序**，未实现逻辑=假按钮 |
-| 把工具带改成 `Grid` | 一维排列继续 Flex / `Toolbar`；`Grid` 只管页面分栏 |
-| `gap={4}` 当 `gap-4` | Grid 的 gap 是像素；页面级用 16 或 24 |
-| 自拼 sidebar、topbar | 用本仓 `AppShell`、Kit `AppLayout` |
+| 原表项 | 冻结内容 |
+|---|---|
 | Drawer | Kit 可能未导出；先 FORGE-GAP。Ask AI 用 Kit `AskAi`，不要自研抽屉或全屏层 |
-| `AppLayout.askAi` + `hideHeader: true` | 顶栏被藏，按钮不会出现；走页头槽 |
-| 右下角 Ask 浮钮 | 入口只挂带标题的那条栏右侧 |
-| 页面内嵌成功绿条 / 红条 | **禁止**；用全站 `toast`（见下） |
-| 两行 `ButtonGroup` | Starter 禁止 |
 
-### 全站 Toast（Starter 内置，非 Kit）
+## 全站 Toast
 
-操作成功/失败提示 **不要** 写进页面正文，统一弹层：
-
-```tsx
-import { toast } from "@/lib/toast";
-
-toast.success("保存成功");
-toast.error("删除失败");
-toast.info("请填写名称");
-```
-
-- 宿主：`ToastProvider` 已挂在 `components/app-shell.tsx`（登录后页面可用）
-- 实现：`lib/toast.ts`（总线）+ `components/ui/toast-provider.tsx`（浮层 UI）
-- 底部居中，约 2.6s 自动消失，可点关闭
+沿用 `import { toast } from "@/lib/toast"`，调用 `toast.success/error/info(...)`。宿主在 AppShell，实现在 `lib/toast.ts` 与 `components/ui/toast-provider.tsx`；不要页内成功横幅。
 
 ### 全站 Ask AI（Kit，core ≥0.1.17）
 
@@ -122,62 +60,10 @@ import { AskAiEntry } from "@/components/ask-ai-entry";
 - 终止（core ≥0.3.5）：`ChatInputBar status="running"` + `onStop`，覆盖等待响应和文字播放阶段；停止时取消当前请求及进度读取，并将回复 delivery 设为 stopped。
 - 发送：`lib/ask-ai.ts` 的 `sendAskAi` → `POST /api/ask-ai`。优先用所选/默认的库内模型，没有再用 `ASK_AI_LLM_*`，都没有走本地规则。不要另做一套抽屉，也不要把 key 放进前端
 
-## 后台常用 import 清单
 
-```tsx
-import {
-  Breadcrumbs,
-  Button,
-  ButtonGroup,
-  ConfirmationDialog,
-  DataTable,
-  IconButton,
-  PlusIcon,
-  StatusBadge,
-  TextField,
-  TextArea,
-  SelectOption,
-  // 详情/档案按需：
-  StatCard,
-  TabBar,
-  DescriptionItem,
-  Grid,
-  GridItem,
-  type ColumnDef,
-} from "@forge-ui-official/core";
-// Grid/GridItem：core ≥0.1.13。弹窗/确认层不要放进 Grid 当子节点。
-import { Modal } from "@/components/ui/modal";
-import { ResourceCard } from "@/components/resource-card";
-import { FolderNav, WorkspaceSplit } from "@/components/workspace-split";
-import { toast } from "@/lib/toast";
-import { AskAiEntry } from "@/components/ask-ai-entry";
-import { formatDateOnly, formatTime } from "@/lib/format/datetime";
-import { siteConfig } from "@/config/site";
-// color={siteConfig.accent}
-// toast.success("已保存") — 不要在页面里塞成功横幅
-// 资源台：WorkspaceSplit + FolderNav + ResourceCard 网格
-```
+## 检查入口
 
-图标：`solar-icon-set`（菜单 `BoldDuotone` size 20；行内操作 `Linear` size 16）。
-
-## Agent 执行口令（写页面前默念）
-
-1. 这是 **列表、表单弹窗、轻详情、重详情、看板** 哪一种？  
-2. 上表对应组件包抄了没有？  
-3. Starter 样板文件打开对照了没有？  
-4. 不确定的 props 是否打开了 `../forge/src/app/cases/...`？  
-5. 没有的组件是否写了 `FORGE-GAP` 而不是 div 手搓？  
-
-## 与 skills 的关系
-
-| Skill | 何时读本文件 |
-|-------|----------------|
-| `forge-starter-new-page` | **必读** Step 0 |
-| `forge-starter-new-module` | 不读（无 UI） |
-| `forge-starter-quick-start` | 报告 backlog 时按角色注明建议组件包即可 |
-
-更全的页面模式（日历/聊天/发票等）见 monorepo `page-patterns.md`；Starter 默认 CRUD 用上表足够。
-
+通用检查引用主仓唯一清单；Starter 差异见 [audit-checklist.md](audit-checklist.md)。执行 `.agents/skills/forge-starter-audit/SKILL.md`；技术检查不能代替浏览器验收。
 
 ### ChatInputBar 0.4.1 快捷操作
 

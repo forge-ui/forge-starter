@@ -53,4 +53,10 @@
 2. 接业务时抄 **accounts** 的数据层；轻详情接线用本仓 `Modal` + `?id=`  
 3. props 查 `../forge/docs/for-agents/` 与 cases  
 
-**优先级：** 可运行业务样板 > `/ref/*` > monorepo 全文 template。
+**视觉优先级：** 主仓 Screens / template 是基准，尤其看板；按角色选一个主 Screen。**集成优先级：** Starter 可运行业务样板负责数据、query、宿主和权限接线，`/ref/*` 仅示范布局。
+
+通用标准：[forge-skill](https://github.com/forge-ui/forge/tree/main/skills/forge-skill)，版本副本见 [forge-skill/README.md](forge-skill/README.md)。
+
+## 对照证据元数据
+
+现有目录对应 core 0.4.7 依赖目标；并不表示已完成该版本全页面浏览器验收。按 `page-roles.md` 映射逐页建记录：角色、主 Screen 源码路径或 node、core 实际安装版本、截图日期、已验收/仅静态/已知债。尚无本轮截图的页面统一记“仅静态，截图日期未记录”，不得补造通过。看板缺主 Screen 测量基线时不能交付视觉通过。

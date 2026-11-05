@@ -9,23 +9,21 @@ Coding Agent 是第一开发界面：skills 拆开后端与页面，`accounts` �
 
 业务页面沿用现有 `AppShell` 即自动接入正文动效，不得重复包裹或让侧栏参与动画。开发前读 `docs/page-motion.md`（参数、DOM 分段与导航边界）；交付按 `docs/audit-checklist.md` **Q5** 实测切页、刷新和减少动态效果。
 
-## 铁律
+## 通用规范来源
 
-1. 组件只 `import { … } from "@forge-ui-official/core"`。  
-2. 颜色只用 `fg-*`；业务控件 `color={siteConfig.accent}`（默认 `blue`）。字色分层：标题/主键值/`CellText` 用 `text-fg-black`；label/`CellMuted`/副行用 `text-fg-grey-700`；`text-fg-grey-500` 只给 disabled、空态、时间戳。禁止正文也写成浅灰。  
-3. 图标 `solar-icon-set`；侧栏主菜单 `BoldDuotone`、`size={20}`。  
+通用规范唯一正文：[forge-skill](https://github.com/forge-ui/forge/tree/main/skills/forge-skill)。版本同步入口：`docs/forge-skill/README.md`；同步后正文在 `docs/forge-skill/upstream/SKILL.md`，通用清单在 `docs/forge-skill/upstream/references/audit-checklist.md`。副本不可手改，本仓只维护 Starter 适配。
+
+## Starter 适配规则
+
+3. 图标统一从 `@forge-ui-official/core/icons` 导入（Solar）；侧栏主菜单 `BoldDuotone`、`size={20}`。
 4. 登录后页面在 `AppLayout`（`components/app-shell.tsx`）。右侧内容面顶/右/底 gutter 等距且锁在首屏，溢出在面内滚（L10），不要整页滚掉底边距。  
-5. **禁止** MUI、Ant、全量 shadcn 替代 Forge；缺能力 `FORGE-GAP` 并询问。  
 6. 认证：用户名或邮箱 + 密码；库 **PostgreSQL only**；邮件 **仅 SMTP**。  
 7. 登录表 `users` ≠ 业务表（如 `admin_accounts`），不要混接。  
 8. **`AUTH_MODE=demo` 只绕过登录用户库，不提供业务持久化。** 任何 CRUD（accounts/新模块）都需要 `DATABASE_URL`。新环境和生产用 `pnpm db:migrate`；`pnpm db:push` 只对开发库。不要写「无 Postgres 也能做完整业务 CRUD」。
 9. **后端与页面分开做**：先 module（数据+API），再 page（UI）。不要一条指令无脑抄 accounts 全套且写死详情形态。  
 10. 详情 **无全局默认**：重 → `accounts` 全页；轻 → `/ref/detail-modal` + 本仓 `Modal` + `?id=`（**暂无第二业务样板**）；拿不准问用户。
-11. 列表筛选/搜索 **一条工具带**（Starter：`ButtonGroup`+`TextField`；官方：`Toolbar`+`ToolbarSearchInput`）；禁止两行 pills。页头可用 `PageTitleToolbar`，不要写死只能 h1。  
-12. **`DataTable` 的 `sortable` 只画排序 UI，不会自动排序。** 未实现点击排序逻辑时 **禁止** 设 `sortable: true`（假按钮）。  
-13. `ConfirmationDialog` 只是内容卡：必须用本仓 `components/ui/modal.tsx`（或等价宿主）包一层；对齐 `accounts` 删除确认。  
+13. `ConfirmationDialog` 支持受控 `open` / `onOpenChange`，独立确认直接使用，无需再套 Modal；省略 `open` 时是内联卡，才需要已有宿主。accounts 既有内联模式可保留，不做无关重构。
 14. 侧栏/摘要卡禁止塞「返回列表」；`hideHeader: true` 时壳 `onBack` 不渲染。  
-15. 不做无行为装饰按钮；要么实现要么隐藏。  
 16. **操作反馈用全站 toast**，禁止页面内嵌「创建成功」绿条：`import { toast } from "@/lib/toast"` → `toast.success/error/info(...)`。宿主已在 `AppShell`。  
 17. 交付：`pnpm check`（typecheck + 规范绊线）；改 UI 后 **浏览器点主路径**（禁止只 curl）。
 18. **任何业务页面新建/修改完成后，必须执行完整规范审计**：按 `.agents/skills/forge-starter-audit/SKILL.md` 四步流程，对照 `docs/audit-checklist.md` 逐条核查并修复。绊线（`pnpm check`）通过 ≠ 合规，审计不可省略——无论代码由谁、用什么流程写出。
@@ -46,12 +44,12 @@ docs/forge-components.md
 
 ```text
 ../forge/docs/for-agents/README.md      ← 组件路由表 + 介绍表（优先）
-../forge/.agents/skills/forge/SKILL.md
+../forge/skills/forge-skill/SKILL.md
 ../forge/src/app/cases/<name>/page.tsx
 ```
 
-- 通用 Modal：core 无导出 → `components/ui/modal.tsx`  
-- 操作 Toast：core 无导出 → `lib/toast.ts` + `components/ui/toast-provider.tsx`（已挂 AppShell）  
+- Modal：core 0.4.7 已导出 `Modal` / `Drawer`；Starter 既有表单沿用 `components/ui/modal.tsx`，不表示 core 缺能力
+- 操作 Toast：core 已导出 `ToastProvider` / `useToast`；Starter 沿用既有全局宿主 → `lib/toast.ts` + `components/ui/toast-provider.tsx`（已挂 AppShell）
 - **Ask AI**：Kit `AskAi`（core `≥0.1.17`）。业务页默认 `hideHeader: true`，`AppLayout.askAi` 不会出现。壳层 `AskAiProvider` 保活唯一实例，页头右侧用 `PageTitleActions` / `AskAiEntry`。composer 用 `ChatInputBar`（宽栏，抽屉里必须垫 gutter + `min-w-0`，核心自定义 composer 不带默认 `p-4`）；回复是几组中文示范问答（`AskAiTranscript`），按问题选用 Agent 组件，不要整页铺 `/cases/agent` 英文死 demo。`onSend` 打 `POST /api/ask-ai`：`modelId` 对应模型管理里启用的条目；没有可用模型再看 `ASK_AI_LLM_*`，都没有用本地规则。已接模型时只调用已登记工具（`lib/<resource>/agent.ts` 登记进 `lib/agent/registry.ts`），按当前用户权限过滤。读立即执行；写入和删除先出确认单，确认后把字段填进页面表单或打开页面上的删除确认，由页面自己的保存逻辑处理，不直接写库。页面保存或删除成功后，同一会话继续原请求里还没做的查询或导出。不读仓库源码，不生成页面。未登记的模块助手不知道。密钥只放服务端，禁止请求体传 `apiKey`。组件对照仍看 `/ref/agent`。全屏、会话栏走 Kit props，禁止自研抽屉或全视口层。
 - **Checklist**：Kit `Checklist` / `ChecklistItem`（对照 `/ref/checklist`，任务页禁止手搓 Checkbox 行）。core `0.1.18` 起随包导出。  
 - 资源工作台：`WorkspaceSplit` + `FolderNav` + `ResourceCard`（见 `/ref/resource-workspace`）  
@@ -77,13 +75,13 @@ Skills 只维护 **`.agents/skills/`**。
 
 新模块要进侧栏，必须同时改这三处：
 
-1. `config/apps.ts` → `APP_MODULE_IDS`  
-2. `config/apps.ts` → `APP_MODULE_META`  
+1. `config/apps.ts` → `APP_MODULE_IDS`
+2. `config/apps.ts` → `APP_MODULE_META`
 3. `config/menu.tsx` → `MODULE_MENU`（`BoldDuotone` `size={20}`）
 
 默认应用种子勾齐新 id（`modules: [...APP_MODULE_IDS]` 或把新 id 写进 `DEFAULT_APP_ENTRIES`）。  
 `rbac_menus` 可选，只是目录：不进 `APP_MODULE_IDS` 侧栏仍看不见。  
-加菜单后须清浏览器 Local Storage **`forge-starter:app-registry`**（或确认种子默认应用已勾齐），否则同事还是旧勾选。
+默认产品自动合并 `APP_MODULE_IDS` 新模块；用户自建应用需手动勾选。仅明确需要重置时清 `forge-starter:app-registry`，不要默认删除用户配置。
 
 侧栏实际可见 = 菜单三处 ∩ 当前应用勾选 ∩ 登录角色 `{module}:read`。  
 无 `{module}:read` 时直链业务页必须壳层 `replace` 回工作台，别只藏侧栏或停在空态/403 列表。
@@ -117,24 +115,14 @@ docs/product.md agent-native.md setup.md module-template.md page-roles.md refere
 
 ## 官方视觉对照
 
-角色表：`docs/page-roles.md`。
-
-| 角色 | Starter 样板 | Forge monorepo template（旁路） |
-|------|--------------|----------------------------------|
-| 工作台 | `dashboard` | `dashboards/ecommerce-2` |
-| 列表 | `accounts` 列表 | `ecommerce/customers` |
-| 表单弹窗 | `account-form-dialog` | customers Add Modal |
-| 详情弹窗 | `/ref/detail-modal` + `Modal` + `?id=`（暂无第二业务样板） | 官网列表 view dialog |
-| 全页详情 | `accounts/[id]` | `ecommerce/customers/[id]` |
-
-模板源码：`../forge/src/app/templates/...`（若存在）。
+视觉以主仓 Screens 为准；接线与角色目录统一见 `docs/page-roles.md`、`docs/reference-pages.md`。看板先选主 Screen，再选 Blocks / Components；未导出的区块不能虚构 import。
 
 ## 扩业务最短路径
 
 1. `new-module`：types + service + schema + `db:migrate`（开发库迭代可用 `db:push`）+ API（**API 齐 ≠ 侧栏有**）。
-2. `new-page`：读 page-roles → 选全页（accounts）或轻弹窗（`/ref/detail-modal`，暂无第二业务样板）→ 列表/弹窗/详情 + **菜单三处**（`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`），默认应用种子勾齐新 id。  
-3. 加菜单后清 Local Storage `forge-starter:app-registry`（或种子默认勾齐）。无权限直链由壳 `replace` 回工作台。  
-4. `pnpm typecheck` + 浏览器从侧栏点通。  
+2. `new-page`：列表/弹窗/详情、菜单三处与默认应用种子；按 `docs/page-roles.md` 选型。
+3. 加菜单后验证默认产品合并及用户自建应用勾选，不默认清用户配置。无权限直链由壳 `replace` 回工作台。
+4. `pnpm check` + 完整规范审计 + 浏览器从侧栏点通，分别记录结果。
 
 详见 `docs/module-template.md`。
 

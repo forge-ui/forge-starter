@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { DangerCircleLinear } from "solar-icon-set";
+import { DangerTriangleLinear } from "@forge-ui-official/core/icons";
 import { Button, SurfaceCard, StatusBadge, Tooltip } from "@forge-ui-official/core";
 import { siteConfig } from "@/config/site";
 
@@ -68,7 +68,7 @@ export function ModelCard({
         {statusError ? (
           <Tooltip content={statusError} position="top">
             <span tabIndex={0} aria-label={`异常原因：${statusError}`} className="relative z-10 inline-flex">
-              <DangerCircleLinear size={16} color="var(--fg-red)" />
+              <DangerTriangleLinear size={16} color="var(--fg-red)" />
             </span>
           </Tooltip>
         ) : null}

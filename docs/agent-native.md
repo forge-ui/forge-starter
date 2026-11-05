@@ -42,7 +42,7 @@ Ask AI 的运行时、业务适配器、知识来源、数据库迁移与测试�
 
 路径：`.agents/skills/<name>/SKILL.md`。Skills **只**维护在 `.agents/skills/`。
 
-- store 归 **new-page**；new-module 只保证 API。  
+- store 默认归 **new-page**；只有显式授权时 new-module 才提前提供无 UI 的 store，默认只保证 API。
 - 选组件：`docs/forge-components.md` → Starter 样板 → 旁路 monorepo cases。
 
 ## 详情怎么选（无全局默认）
@@ -54,7 +54,7 @@ Ask AI 的运行时、业务适配器、知识来源、数据库迁移与测试�
 
 用户指定听用户；否则按内容；拿不准就问。  
 禁止 skill 写死「默认全页」或「默认弹窗」。  
-文件地图：`docs/module-template.md`。新菜单必须写**菜单三处**（`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`），默认应用种子勾齐新 id；加完清 `forge-starter:app-registry`。无 `{module}:read` 直链业务页壳层 `replace` 回工作台，别只藏侧栏。见 `AGENTS.md`。别只改 `menu.tsx`。
+文件地图：`docs/module-template.md`。新菜单必须写**菜单三处**（`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`），默认产品合并新 id；自建应用手动勾选，不默认清 `forge-starter:app-registry`。无 `{module}:read` 直链业务页壳层 `replace` 回工作台，别只藏侧栏。见 `AGENTS.md`。别只改 `menu.tsx`。
 
 ## 可运行样板
 
@@ -77,7 +77,7 @@ Ask AI 的运行时、业务适配器、知识来源、数据库迁移与测试�
 写任何业务 UI 前：
 
 1. **`docs/forge-components.md`**（角色 → 组件 → 样板 → case）  
-2. 旁路 monorepo：`../forge/.agents/skills/forge/SKILL.md` + `cases/<name>`  
+2. 旁路 monorepo：`../forge/skills/forge-skill/SKILL.md` + `cases/<name>`
 3. 缺能力 → `FORGE-GAP`  
 
 没有 monorepo 时仍可用 forge-components + Starter 样板；不要猜 props。
@@ -90,13 +90,6 @@ Ask AI 的运行时、业务适配器、知识来源、数据库迁移与测试�
 
 ## 质量门禁
 
-- 像 Forge 官方后台，不像玩具 UI  
-- 颜色用 `fg-*`；业务控件 `color={siteConfig.accent}`；字色分层见审计 V7（主文字黑，辅助 `grey-700`，`grey-500` 只给空态/禁用）  
-- 右侧内容面顶/右/底 gutter 锁在首屏，溢出面内滚（L10）  
-- 列表筛选 **一行** pills + 搜索  
-- 侧栏摘要卡 **不** 塞「返回列表」  
-- 操作反馈用全站 `toast`，禁止页内绿条  
-- `pnpm check`；改 UI 要浏览器点过，**禁止只 curl**  
-- 不引入第二 UI 库、支付、假按钮  
+通用方法与唯一清单见主仓 [forge-skill](https://github.com/forge-ui/forge/tree/main/skills/forge-skill)；本地适配与检查见 `docs/audit-checklist.md`。Starter 保留全站 toast、AppShell、菜单三处与权限边界。`pnpm check`、完整规范审计、浏览器主路径分别报告；未验不能宣称交付。
 
 本仓库胜负手：**Forge-only + 清晰 skill 边界 + 可抄样板**。

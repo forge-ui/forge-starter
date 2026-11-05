@@ -6,7 +6,7 @@
  */
 
 import Link from "next/link";
-import { AddCircleLinear } from "solar-icon-set";
+import { AddCircleLinear } from "@forge-ui-official/core/icons";
 import {
   Avatar,
   AvatarGroup,

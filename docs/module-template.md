@@ -21,7 +21,7 @@ lib/<resource>/agent.ts          # 要被 Ask AI 操作时；并登记到 lib/ag
 lib/db/schema.ts              # 开发库可 pnpm db:push；提交用 db:generate，环境用 db:migrate
 app/api/<resource>/route.ts
 app/api/<resource>/[id]/route.ts
-components/<resource>-store.tsx   # 可选；列表页若 client fetch 需要
+components/<resource>-store.tsx   # 默认 new-page；仅显式授权时在后端阶段提前做
 ```
 
 - session 守卫、`jsonOk`/`jsonError`、Zod、中文错误  
@@ -64,7 +64,7 @@ app/(app)/<resource>/[id]/page.tsx
 
 ### 表格列表（accounts / list-table）
 
-1. `h1` + Breadcrumbs + 主按钮  
+1. `PageTitleToolbar` + Breadcrumbs + 主按钮
 2. **单行** `ButtonGroup` + 搜索  
 3. DataTable + 分页 + 空态  
 4. 新建/编辑：form modal（`components/ui/modal.tsx`）  
@@ -73,7 +73,7 @@ app/(app)/<resource>/[id]/page.tsx
 
 适合：模型 / 工具 / 知识库 / Agent 等「资源台」，不是行表 CRUD。
 
-1. `h1` + Breadcrumbs + 主按钮（+ 可选顶栏 `KebabMenu` 多类型创建）  
+1. `PageTitleToolbar` + Breadcrumbs + 主按钮（+ 可选顶栏 `KebabMenu` 多类型创建）
 2. **可选** `WorkspaceSplit`：左 `FolderNav`，右主区  
 3. 主区：**单行** `ButtonGroup` + 搜索 + 计数  
 4. `ResourceCard` 网格 + 空态  
@@ -90,7 +90,7 @@ lib/format/datetime.ts           # formatTime / formatDateOnly
 
 ## 组件
 
-写 UI 前读 `../forge/.agents/skills/forge/SKILL.md`。  
+写 UI 前读 [forge-skill](https://github.com/forge-ui/forge/tree/main/skills/forge-skill)（版本副本见 `docs/forge-skill/README.md`）。新业务页推荐 `PageTitleToolbar`；紧凑 h1 是现有合法例外，不为统一改旧页。
 Modal 宿主：`components/ui/modal.tsx`。  
 操作反馈：`import { toast } from "@/lib/toast"`。
 
@@ -100,6 +100,6 @@ Modal 宿主：`components/ui/modal.tsx`。
 - [ ] 详情形态有选择与理由  
 - [ ] 筛选单行  
 - [ ] **菜单三处**：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用勾齐新 id  
-- [ ] 加菜单后已清 Local Storage `forge-starter:app-registry`（或种子默认勾齐）  
+- [ ] 默认产品已合并新模块；自建应用已手动勾选（仅明确重置时清 Local Storage）
 - [ ] 无 `{module}:read` 直链业务页会 `replace` 回工作台（壳层，不只藏侧栏）  
-- [ ] typecheck + 浏览器从侧栏点通  
+- [ ] 技术：`pnpm check`；规范：完整 forge-starter-audit；浏览器：从侧栏点主路径，分别记录，未验不冒充通过
