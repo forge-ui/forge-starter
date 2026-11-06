@@ -5,7 +5,7 @@ import { CONTRACT_VERSION, APPLICATION_BUILD_ID, moduleForPage } from "./contrac
 export const pageContextSchema = z.object({
   version: z.literal(CONTRACT_VERSION),
   buildId: z.literal(APPLICATION_BUILD_ID),
-  pageId: z.enum(["accounts.list", "accounts.detail", "models.workspace", "roles.list", "menus.list", "permissions.list", "settings.apps", "dashboard.home"]),
+  pageId: z.string().max(120).refine(pageId => Boolean(moduleForPage(pageId)), "未登记的模块页面"),
   instanceId: z.string().uuid(),
   revision: z.number().int().nonnegative(),
   entityId: z.string().min(1).max(120).optional(),

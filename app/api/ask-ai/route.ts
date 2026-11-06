@@ -70,7 +70,8 @@ export async function POST(request: Request) {
   try {
     const access = await resolveAccess(auth.session);
     const harness = parsed.data.harness;
-    if (harness) {
+    const localFallback = harness && !harness.runId && !harness.reply && !parsed.data.modelId && !(await peekAskAiRuntime()).configured;
+    if (harness && !localFallback) {
       const encoder = new TextEncoder();
       const scope = databaseRequestScope.getStore();
       let settle!: () => void;

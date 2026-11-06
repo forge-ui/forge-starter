@@ -1,19 +1,9 @@
 import { resourceWrite } from "@/lib/semantic/resource-write";
 import { OperationError } from "@/lib/semantic/operations";
-import { z } from "zod";
+import { createSchema as bodySchema } from "@/lib/menus/input";
 import { jsonError, jsonOk } from "@/lib/auth/http";
 import { requirePermission } from "@/lib/rbac/access";
 import { createMenu, listMenus } from "@/lib/menus/service";
-
-const bodySchema = z.object({
-  name: z.string().min(1),
-  code: z.string().min(2),
-  path: z.string().min(1),
-  parentId: z.string().uuid().nullable().optional(),
-  sort: z.number().int().min(0).max(9999),
-  status: z.enum(["active", "disabled"]),
-  description: z.string().optional().default(""),
-});
 
 function dbUnavailable(error: unknown) {
   const message = error instanceof Error ? error.message : "";

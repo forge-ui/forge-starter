@@ -1,6 +1,6 @@
 # 仓库与应用语义底座 V1
 
-本期覆盖业务账号和模型工作台。Coding Agent 在本地读取源码索引；后台 Ask AI 只接收公开业务声明和当前页面状态，通过已登记工具行动。两条路径共享业务标识，权限仍由服务端检查。
+模块知识、菜单和读取覆盖所有 manifest；事务写入与页面动作仍须逐模块适配。Coding Agent 在本地读取源码索引；后台 Ask AI 只接收公开业务声明和当前页面状态，通过已登记工具行动。两条路径共享业务标识，权限仍由服务端检查。
 
 ## 使用
 
@@ -47,10 +47,10 @@ pnpm semantic impact accounts.department
 ## 接入新模块
 
 1. 先完成原来的 module/service/API 与共享 Zod 输入规则。
-2. 在 `lib/semantic/contracts.ts` 登记 entity/table/fields/actions/sources，fields 仅公开业务字段。
+2. 必做：在 `config/modules/<id>.json` 声明知识、权限、菜单与读取白名单，运行 `pnpm modules:generate`。工具与知识自动进入目录。复杂页面的 entity/table/actions/sources 索引仍在 `lib/semantic/contracts.ts` 补充，不能以自动知识登记代替保存协议。
 3. 工具参数用 `toolParameters(schema)` 派生；运行时仍 parse，同一模块的列表、页面、导出复用过滤函数。
 4. 页面用 `useSemanticPage` 提供白名单状态和动作适配器。适配器加载未完成返回 false；冲突抛出中文错误；接收成功返回 true。不得改通用循环加入模块分支。
-5. 写操作接入持久化事务回执与该实体的读回验证；V1 账号为参考。模型管理仅支持查询、筛选、打开详情，未开放模型配置写入。
+5. 写操作接入持久化事务回执与该实体的读回验证；V1 账号为参考。模型管理保留查询、筛选、详情及配置草稿、删除和测连；配置仍由页面确认并保存。
 6. 补符号解析、JSON/HTTP、权限、并发、浏览器与实际模型案例，执行 Forge 审计。
 
 ## 架构决策

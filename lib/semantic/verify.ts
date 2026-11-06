@@ -14,7 +14,7 @@ export async function verifyOperation(id: string, userId: string): Promise<Recei
   if (Object.hasOwn(resourceReaders, resource)) {
     const current = await resourceReaders[resource](receipt.entityId);
     const saved = Object.values(receipt.result).find(value => value && typeof value === "object" && "updatedAt" in value) as { updatedAt: string } | undefined;
-    const matches = receipt.actionId.endsWith(".delete") ? !current : current && current.updatedAt === saved?.updatedAt;
+    const matches = receipt.actionId.endsWith(".delete") ? !current : current && typeof current.updatedAt === "string" && typeof saved?.updatedAt === "string" && current.updatedAt === saved.updatedAt;
     if (!matches) return receipt;
     const verified: Receipt = { ...receipt, status: "verified", verifiedAt: new Date().toISOString() };
     await getDb().update(semanticOperations).set({ state: "verified", receipt: verified, updatedAt: new Date() }).where(eq(semanticOperations.id, id));

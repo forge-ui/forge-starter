@@ -1,3 +1,5 @@
+import { MODULES } from "./modules.generated";
+
 export const siteConfig = {
   name: "Forge Starter",
   teamName: "Forge Starter 基础后台",
@@ -14,12 +16,7 @@ export type RouteShell = {
 
 /** Keys without trailing slash */
 export const routeShells: Record<string, RouteShell> = {
-  "/dashboard": { title: "工作台", hideHeader: true },
-  "/accounts": { title: "账号管理", hideHeader: true },
-  "/roles": { title: "角色", hideHeader: true },
-  "/menus": { title: "菜单", hideHeader: true },
-  "/permissions": { title: "权限", hideHeader: true },
-  "/models": { title: "模型服务", hideHeader: true },
+  ...Object.fromEntries(MODULES.map(module => [module.menu.href.replace(/\/$/, ""), { title: module.label, hideHeader: true }])),
   "/settings": { title: "设置", hideHeader: true },
   "/settings/apps": { title: "应用管理", hideHeader: true },
   "/ref": { title: "页面参考库", hideHeader: true },

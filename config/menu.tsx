@@ -1,13 +1,7 @@
 "use client";
 
-import {
-  HamburgerMenuBoldDuotone,
-  HomeSmileBoldDuotone,
-  ShieldKeyholeBoldDuotone,
-  ShieldUserBoldDuotone,
-  UsersGroupTwoRoundedBoldDuotone,
-  WidgetBoldDuotone,
-} from "@forge-ui-official/core/icons";
+import { moduleIcons } from "./module-icons.generated";
+import { MODULES } from "./modules.generated";
 import type { AppLayoutMenuItem, AppLayoutProfile } from "@forge-ui-official/core";
 import {
   APP_MODULE_IDS,
@@ -17,43 +11,10 @@ import {
 } from "@/config/apps";
 
 // 个人资料、改密、系统偏好走侧栏 profile 菜单，不占主菜单。
-const MODULE_MENU: Record<AppModuleId, AppLayoutMenuItem> = {
-  dashboard: {
-    icon: <HomeSmileBoldDuotone size={20} />,
-    label: "工作台",
-    href: "/dashboard/",
-  },
-  accounts: {
-    icon: <UsersGroupTwoRoundedBoldDuotone size={20} />,
-    label: "账号管理",
-    href: "/accounts/",
-  },
-  roles: {
-    icon: <ShieldUserBoldDuotone size={20} />,
-    label: "角色",
-    href: "/roles/",
-  },
-  menus: {
-    icon: <HamburgerMenuBoldDuotone size={20} />,
-    label: "菜单",
-    href: "/menus/",
-  },
-  permissions: {
-    icon: <ShieldKeyholeBoldDuotone size={20} />,
-    label: "权限",
-    href: "/permissions/",
-  },
-  models: {
-    icon: <WidgetBoldDuotone size={20} />,
-    label: "模型服务",
-    href: "/models/",
-  },
-  settings: {
-    icon: <WidgetBoldDuotone size={20} />,
-    label: "应用管理",
-    href: "/settings/apps/",
-  },
-};
+export const MODULE_MENU = Object.fromEntries(MODULES.map(module => {
+  const Icon = moduleIcons[module.menu.icon as keyof typeof moduleIcons];
+  return [module.id, { icon: <Icon size={20} />, label: module.label, href: module.menu.href }];
+})) as Record<AppModuleId, AppLayoutMenuItem>;
 
 /** Default full product menu */
 export const menuItems: AppLayoutMenuItem[] = APP_MODULE_IDS.map((id) => MODULE_MENU[id]);

@@ -42,7 +42,7 @@ Compose 仅监听 `127.0.0.1:5432`，要求设置独立的 `POSTGRES_PASSWORD`�
 
 ### 种子角色与侧栏（管理员 / 合理默认）
 
-侧栏可见 = **菜单三处** ∩ 当前应用勾选 ∩ 角色 `{module}:read`。无 `:read` 的模块不出现；直链业务页由壳层 `replace` 回工作台，不要停在空态/403 列表。不是完整 IAM（没有用户-角色管理 UI）。
+侧栏可见 = **manifest 派生菜单** ∩ 当前应用勾选 ∩ 角色 `{module}:read`。无 `:read` 的模块不出现；直链业务页由壳层 `replace` 回工作台，不要停在空态/403 列表。不是完整 IAM（没有用户-角色管理 UI）。
 
 | 角色码 | 演示登录用户名（及别名） | 侧栏可见 | 写操作 |
 |--------|--------------------------|----------|--------|
@@ -141,6 +141,6 @@ AGENTS.md
 
 使用独立的本地 PostgreSQL 数据库（名称以 `forge_semantic_test_` 开头，主机必须是 `127.0.0.1`），将 `DATABASE_URL` 指向它，设置 `AUTH_MODE=local` 和至少 32 位的测试专用 `AUTH_SECRET`。先 `pnpm db:migrate`，再 `pnpm test`。测试仅使用合成账户和密钥；安全用例里有一条会调用本机 `docker compose config`。
 
-没配隔离库时，依赖数据库的用例会 skip。skip 不是通过。HTTP 用例另外要求本机已有服务：`SEMANTIC_HTTP_ORIGIN` 或 `SECURITY_TEST_ORIGIN` 只能是 `http://127.0.0.1:3167` 或 `3168`。语义和 harness 的 HTTP 用例按 demo 登录来写，安全用例的 HTTP 按 `local` 来写，所以一次进程环境跑不齐这两类。没设 origin 时它们明确跳过。`pnpm test` 会把 `NODE_ENV` 设为 `test`，避免本机生产变量把启动检查当成正在对外服务。
+没配隔离库时，依赖数据库的用例会 skip。skip 不是通过。HTTP 用例另外要求本机已有服务：`SEMANTIC_HTTP_ORIGIN` 或 `SECURITY_TEST_ORIGIN` 只能是 `http://127.0.0.1:3167` 或 `3168`。语义和 harness 的 HTTP 服务使用 `AUTH_MODE=demo`，安全 HTTP 服务使用 `AUTH_MODE=local`。要一次跑齐，启动两个共享隔离库和测试专用 `AUTH_SECRET` 的服务：demo 服务占用 3167；local 服务设置 `SEMANTIC_TEST_DIST=true`，使用独立构建目录并占用 3168。两个服务及测试进程均设置 `SEMANTIC_ENABLED=true`。测试进程使用 `AUTH_MODE=local`、`SEMANTIC_HTTP_ORIGIN=http://127.0.0.1:3167`、`SECURITY_TEST_ORIGIN=http://127.0.0.1:3168`，然后运行 `pnpm test`。没设 origin 时对应 HTTP 用例明确跳过。`pnpm test` 会把 `NODE_ENV` 设为 `test`，避免本机生产变量把启动检查当成正在对外服务。
 
 模型供应商或实际 Chat Completions 地址（含路径和查询）变更时须重新提供 API Key；等价地址与普通名称编辑可以保留密钥。无密钥的本地服务可显式提供占位值 `ollama`，从而不会携带旧供应商密钥。

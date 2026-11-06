@@ -1,4 +1,6 @@
 import { routeDialogue } from "./agent/dialogue";
+import { MODULES } from "@/config/modules.generated";
+import { localModuleAnswer } from "@/lib/modules/local-answer";
 import { toolsForAccess } from "./agent/registry";
 import { systemFeatureContext } from "./agent/system-features";
 import type { PageContext } from "@/lib/semantic/context";
@@ -276,7 +278,7 @@ function localAnswer(question: string, pageLabel: string, snapshot: AskAiAccount
       : `账号表还读不到：${snapshot.note || "先配 DATABASE_URL 并 pnpm db:migrate"}。`;
   }
   if (demo?.id === "rbac") {
-    return "新账号不带侧栏。要同时改菜单三处、当前应用勾选、角色的 {module}:read。只改 rbac_menus 目录不会出现入口。";
+    return "新账号不带侧栏。模块须在 config/modules/<id>.json 声明并运行 pnpm modules:generate 生成菜单，再核对当前应用勾选和角色的 {module}:read；声明 access: authenticated 的模块对所有登录用户开放读取，不受应用勾选和角色读授权限制。只改 rbac_menus 目录不会出现入口。";
   }
   return `未接模型，不能查库、填数或导出。可以先问：${ASK_AI_DEMOS.map((item) => item.title).join("；")}。`;
 }
@@ -293,6 +295,11 @@ export async function answerAskAi(input: {
   access: AccessContext;
 }): Promise<AskAiChatResult> {
   let question = input.question.trim();
+  const runtime = await resolveAskAiRuntime(input.modelId);
+  if (!input.continuationOperationId && (runtime.source === "none" || !isUsableKey(runtime.apiKey))) {
+    const local = await localModuleAnswer(question, { userId: input.userId, page: input.page }, MODULES, toolsForAccess(input.access));
+    if (local) return local;
+  }
   if (!input.continuationOperationId) {
     const dialogue = await routeDialogue(input);
     if (dialogue.reply) return { ...dialogue.reply, live: false };
@@ -301,7 +308,6 @@ export async function answerAskAi(input: {
   const pageLabel = input.context?.trim() || "";
   const demo = matchAskAiDemo(question);
   const readback = input.continuationOperationId ? await prepareContinuationReadback(input.continuationOperationId, input.userId, input.access) : undefined;
-  const runtime = await resolveAskAiRuntime(input.modelId);
   const model = runtime.model;
 
   if (runtime.source === "none" || !isUsableKey(runtime.apiKey)) {

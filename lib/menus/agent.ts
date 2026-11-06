@@ -11,7 +11,7 @@ export const menuAgentTools: AgentTool[] = [
     mode: "read",
     permission: { resource: "menus", action: "read" },
     description:
-      "列出菜单目录的名称、编码、路径和模块 id。只能解释目录。菜单三处（APP_MODULE_IDS、APP_MODULE_META、MODULE_MENU）和应用勾选是代码，这个工具改不了侧栏。",
+      "列出菜单目录的名称、编码、路径和模块 id。只能解释目录。侧栏菜单由 config/modules/<id>.json 经 pnpm modules:generate 生成，还需核对应用勾选与读权限；这个工具不修改模块声明或侧栏。",
     parameters: { type: "object", additionalProperties: false, properties: {} },
     schema,
     async run() {

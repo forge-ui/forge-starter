@@ -1,0 +1,46 @@
+{
+  "id": "menus",
+  "label": "菜单",
+  "order": 3,
+  "permissionResource": "menus",
+  "menu": {
+    "href": "/menus/",
+    "icon": "HamburgerMenuBoldDuotone",
+    "group": "main"
+  },
+  "knowledge": {
+    "summary": "菜单目录支持搜索、状态筛选、详情、新建、编辑和删除；可设置父级菜单、路径、排序和状态。",
+    "fields": "名称、唯一编码、路径、上级菜单、排序、启用/停用、说明。",
+    "rules": "路径需以/开头；排序为0–9999整数；内置菜单有保护限制；编码编辑时不可改。菜单目录记录不自动生成侧栏。侧栏可见还取决于代码模块登记、当前应用勾选和角色读取权限。",
+    "source": "components/menu-form-dialog.tsx"
+  },
+  "read": {
+    "service": "lib/menus/service.ts",
+    "export": "listMenus",
+    "fields": [
+      "id",
+      "name",
+      "code",
+      "path",
+      "parentId",
+      "sort",
+      "status",
+      "builtin",
+      "updatedAt"
+    ]
+  },
+  "entries": {
+    "create": true,
+    "detail": true,
+    "edit": true
+  },
+  "tools": [
+    {
+      "source": "lib/menus/agent.ts",
+      "export": "menuAgentTools"
+    }
+  ],
+  "draft": {
+    "adapter": "resource"
+  }
+}

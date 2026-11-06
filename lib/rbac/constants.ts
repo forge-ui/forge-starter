@@ -1,3 +1,5 @@
+import { MODULES, type RegisteredModuleId } from "@/config/modules.generated";
+
 export type RbacStatus = "active" | "disabled";
 
 export const RBAC_STATUS_META: Record<
@@ -8,27 +10,11 @@ export const RBAC_STATUS_META: Record<
   disabled: { label: "停用", color: "red" },
 };
 
-export const RBAC_RESOURCES = [
-  "dashboard",
-  "accounts",
-  "settings",
-  "roles",
-  "menus",
-  "permissions",
-  "models",
-] as const;
+export const RBAC_RESOURCES = MODULES.map(module => module.id);
 
-export type RbacResource = (typeof RBAC_RESOURCES)[number];
+export type RbacResource = RegisteredModuleId;
 
-export const RBAC_RESOURCE_META: Record<RbacResource, { label: string }> = {
-  dashboard: { label: "工作台" },
-  accounts: { label: "账号" },
-  settings: { label: "应用" },
-  roles: { label: "角色" },
-  menus: { label: "菜单" },
-  permissions: { label: "权限" },
-  models: { label: "模型" },
-};
+export const RBAC_RESOURCE_META = Object.fromEntries(MODULES.map(module => [module.id, { label: module.label.replace(/管理$|服务$/, "") }])) as Record<RbacResource, { label: string }>;
 
 export const RBAC_ACTIONS = ["read", "create", "update", "delete"] as const;
 

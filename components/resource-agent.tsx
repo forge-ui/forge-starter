@@ -1,5 +1,5 @@
 "use client";
-import { resourceFormDraft, type DraftResource } from "@/lib/agent/resource-fields";
+import { resourceFormDraft } from "@/lib/agent/resource-fields";
 import { decodeAppDraft } from "@/lib/agent/app-fields";
 import { useEffect, useRef, useState } from "react";
 import type { AgentFormFill } from "@/lib/agent/types";
@@ -34,7 +34,7 @@ export function useResourceAgent<T extends { id: string; updatedAt: string }>(in
     if (command.mode !== "create" && !row) throw new Error("目标不存在或已删除");
     if (row && command.expectedUpdatedAt !== row.updatedAt) throw new Error("记录已变化，请刷新后重新核对");
     if (input.resource === "settings") decodeAppDraft(command.fields);
-    else resourceFormDraft(input.resource as DraftResource, command.fields, {});
+    else resourceFormDraft(input.resource, command.fields, {});
     setFill(command);
     if (command.mode === "delete") input.remove(row!);
     else if (command.mode === "edit") input.edit(row!.id);

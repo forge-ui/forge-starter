@@ -5,7 +5,7 @@ export const appDraftSchema = z.object({
   kind: z.enum(["link", "external", "internal"]).optional(),
   href: z.string().max(2000).optional(), openMode: z.enum(["same_tab", "new_tab"]).optional(),
   authMode: z.enum(["none", "passthrough", "oidc", "platform"]).optional(),
-  modules: z.array(z.enum(APP_MODULE_IDS)).max(7).optional(),
+  modules: z.array(z.enum(APP_MODULE_IDS)).max(APP_MODULE_IDS.length).optional(),
 }).strict();
 export const localAppSchema = appDraftSchema.extend({ id: z.string().min(1).max(120), name: z.string().max(120), isCurrentProduct: z.boolean().optional() }).strict();
 export function decodeAppDraft(fields: Record<string, string>) { return appDraftSchema.parse(Object.fromEntries(Object.entries(fields).map(([key, value]) => [key, JSON.parse(value)]))); }

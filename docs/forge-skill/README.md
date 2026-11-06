@@ -1,5 +1,7 @@
 # 通用规范版本同步
 
+检查时，core 依赖为 `file:` / `link:` / `workspace:`（实际版本从已安装包读取），或精确版本高于副本版本，进入明确的“开发模式”：仍严格验证已有副本的清单和 SHA-256，但不因该版本差异使 `pnpm check` 失败，也不执行远端漂移检查。缺失/损坏副本、无效实际版本仍失败。请执行 `corepack pnpm sync:forge-skill --from <匹配当前 core 的已提交 Forge checkout> --ref <commit>`，或 `corepack pnpm sync:forge-skill --ref <匹配版本的 commit>`，同步并审查差异；兼容结论必须报告为「未验证」，不能写成兼容通过或已不兼容。例如本地 core 0.6.0 对副本 0.4.7，仅说明副本完整性已校验、允许开发检查继续，当前 core 兼容性和远端漂移均未验证。提示中的 `corepack pnpm sync:forge-skill --from <path> --ref <commit>` 要求 path 指向匹配当前 core 的已提交 Forge checkout；同步后仍须审查差异并运行项目检查，不能仅凭版本一致宣称兼容。精确正式版本与副本相同继续严格检查，低于副本仍失败；范围依赖不接受。同步写入本身始终要求源 core 与当前实际版本一致。
+
 唯一正文是 [主仓 forge-skill](https://github.com/forge-ui/forge/tree/main/skills/forge-skill)。Starter 的角色、宿主、菜单、权限、数据库与检查差异留在本仓，不另写通用规范。
 
 ```sh

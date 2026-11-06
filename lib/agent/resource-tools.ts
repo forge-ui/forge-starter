@@ -1,14 +1,15 @@
+import { MODULES } from "@/config/modules.generated";
+import { moduleReaders } from "@/lib/modules/server.generated";
 import { z } from "zod";
-import { listRoles } from "@/lib/roles/service";
-import { listMenus } from "@/lib/menus/service";
 import { listPermissions } from "@/lib/permissions/service";
 import { listAiModels } from "@/lib/models/service";
 import { APP_MODULE_META } from "@/config/apps";
 import { toolParameters } from "@/lib/semantic/schema";
 import { resourceDraftSchemas, encodeResourceFields, resourceFormDraft, type DraftResource } from "./resource-fields";
 import type { AgentTool, AgentFormFill } from "./types";
-const readers = { roles: listRoles, menus: listMenus, permissions: listPermissions, models: listAiModels };
-export const resourceAgentTools: AgentTool[] = Object.keys(readers).flatMap(key => {
+const readers = moduleReaders;
+export const resourceAgentTools: AgentTool[] = MODULES.filter(module => module.draft?.adapter === "resource").flatMap(module => {
+  const key = module.id;
   const resource = key as DraftResource;
   return (["create", "update", "delete"] as const).map((action): AgentTool => {
     const fields = resourceDraftSchemas[resource];

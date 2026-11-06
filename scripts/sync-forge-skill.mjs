@@ -68,7 +68,7 @@ async function filesAt(directory, prefix = "") {
 
 export async function verifySnapshot(directory, manifest, version) {
   if (manifest.schemaVersion !== 1 || manifest.repository !== REPOSITORY
-    || manifest.coreVersion !== version || !/^[a-f0-9]{40}$/.test(manifest.revision)
+    || !/^\d+\.\d+\.\d+$/.test(manifest.coreVersion) || manifest.coreVersion !== version || !/^[a-f0-9]{40}$/.test(manifest.revision)
     || typeof manifest.sourceRef !== "string" || !manifest.sourceRef
     || !manifest.files || typeof manifest.files !== "object" || Array.isArray(manifest.files)) {
     throw new Error("规范 manifest 无效或 core 版本漂移；重新执行 pnpm sync:forge-skill");
@@ -115,7 +115,9 @@ export async function fetchText(url, fetcher = fetch) {
 }
 
 export async function run({ root = ROOT, check = false, ref, from, fetcher = fetch, log = console.log } = {}) {
-  const version = (await json(join(root, "package.json"))).dependencies["@forge-ui-official/core"];
+  const dependency = (await json(join(root, "package.json"))).dependencies["@forge-ui-official/core"];
+  const localDependency = /^(file:|link:|workspace:)/.test(dependency);
+  const version = localDependency ? (await json(join(root, "node_modules/@forge-ui-official/core/package.json"))).version : dependency;
   if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error("规范同步要求精确 core 版本");
   const destination = join(root, "docs/forge-skill");
   let manifest;
@@ -123,6 +125,13 @@ export async function run({ root = ROOT, check = false, ref, from, fetcher = fet
     manifest = await json(join(destination, "manifest.json"));
   } catch (error) {
     if (error.code !== "ENOENT") throw error;
+  }
+  const newerVersion = manifest && /^\d+\.\d+\.\d+$/.test(manifest.coreVersion) && version.split(".").reduce((comparison, part, index) => comparison || Math.sign(Number(part) - Number(manifest.coreVersion.split(".")[index])), 0) > 0;
+  if (check && (localDependency || newerVersion)) {
+    if (!manifest) throw new Error("缺少版本化规范副本；先执行 pnpm sync:forge-skill");
+    await verifySnapshot(join(destination, "upstream"), manifest, manifest.coreVersion);
+    log(`开发模式 forge-skill：core ${dependency}（实际 ${version}），副本 ${manifest.coreVersion}；本地清单和 SHA256 已校验，兼容结论：未验证（不代表兼容，也不判定不兼容）；当前 core ${version} 与副本 ${manifest.coreVersion} 的版本差异仅允许开发检查继续，远端漂移检查未执行。请执行 corepack pnpm sync:forge-skill --from <path> --ref <commit>（path 为匹配 core ${version} 的已提交 Forge checkout），或 corepack pnpm sync:forge-skill --ref <匹配版本的 commit> 后审查差异。`);
+    return;
   }
   if (check && manifest) await verifySnapshot(join(destination, "upstream"), manifest, version);
   const local = from ? await checkoutSource(resolve(from), ref) : undefined;

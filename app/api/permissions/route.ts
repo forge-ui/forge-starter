@@ -1,18 +1,9 @@
 import { resourceWrite } from "@/lib/semantic/resource-write";
 import { OperationError } from "@/lib/semantic/operations";
-import { z } from "zod";
+import { createSchema as bodySchema } from "@/lib/permissions/input";
 import { jsonError, jsonOk } from "@/lib/auth/http";
 import { requirePermission } from "@/lib/rbac/access";
-import { RBAC_ACTIONS, RBAC_RESOURCES } from "@/lib/rbac/constants";
 import { createPermission, listPermissions } from "@/lib/permissions/service";
-
-const bodySchema = z.object({
-  name: z.string().min(1),
-  code: z.string().min(2),
-  resource: z.enum(RBAC_RESOURCES),
-  action: z.enum(RBAC_ACTIONS),
-  description: z.string().optional().default(""),
-});
 
 function dbUnavailable(error: unknown) {
   const message = error instanceof Error ? error.message : "";

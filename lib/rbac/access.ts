@@ -1,5 +1,7 @@
 import { eq } from "drizzle-orm";
 import { APP_MODULE_IDS, type AppModuleId } from "@/config/apps";
+import { MODULES } from "@/config/modules.generated";
+import type { ModuleDefinition } from "@/lib/modules/definition";
 import { getAuthMode } from "@/lib/auth/config";
 import { jsonError } from "@/lib/auth/http";
 import { requireSession, type SessionUser } from "@/lib/auth/session";
@@ -94,6 +96,19 @@ async function loadAccessFromDb(roleCode: string): Promise<AccessContext | null>
 }
 
 export async function resolveAccess(session: SessionUser): Promise<AccessContext> {
+  return withAuthenticatedAccess(await resolveRoleAccess(session));
+}
+
+export function withAuthenticatedAccess(access: AccessContext, modules: readonly ModuleDefinition[] = MODULES): AccessContext {
+  const authenticated = modules.filter(module => module.access === "authenticated");
+  return {
+    ...access,
+    permissionCodes: [...new Set([...access.permissionCodes, ...authenticated.map(module => `${module.permissionResource}:read`)])],
+    allowedModules: [...new Set([...access.allowedModules, ...authenticated.map(module => module.id as AppModuleId)])],
+  };
+}
+
+async function resolveRoleAccess(session: SessionUser): Promise<AccessContext> {
   const roleCode = roleCodeForSession(session);
   const fromDb = await loadAccessFromDb(roleCode);
   if (fromDb) return fromDb;

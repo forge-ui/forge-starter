@@ -15,6 +15,8 @@ description: >
 
 选型：`docs/page-roles.md`、`docs/module-template.md` §B。
 
+权限接线：默认模块仍需角色 `{module}:read` 与内部应用勾选。只有明确要求所有登录用户可见/可读才声明 `access: "authenticated"`，其读授权优先于角色与应用勾选，菜单、直链、API 和 Ask AI reader 统一生效；不扩匿名、行级数据或写权限。正式交付分别验无读角色、人工配置应用和写操作拒绝，不靠页面内临时拼菜单。
+
 ## When to use
 
 - 「加列表页」「做详情 UI」「看板页」  
@@ -23,7 +25,7 @@ description: >
 ## 禁止
 
 - 在本 skill 里从零加 schema/service（应先 new-module）  
-- 只改 `config/menu.tsx` 就声称已挂侧栏（必须写菜单三处）  
+- 只改 `config/menu.tsx` 就声称已挂侧栏（必须写manifest 派生菜单）  
 - 两行筛选 pills  
 - 侧栏塞「返回列表」  
 - 写死「默认全页详情」或「默认弹窗」  
@@ -109,14 +111,8 @@ description: >
 - 新建按钮 → form dialog  
 - 详情入口 → 名称/标题列的数据可点击，按已选详情形态打开全页或 `?id=` 弹窗；保留筛选上下文，支持键盘操作和可见焦点。对齐 accounts 的名称单元格，保持普通文字样式，不附加箭头。不要用带箭头的 `CellLink` 作为默认详情入口。
 - 操作列只放编辑、删除等真实业务动作；不要另放箭头/眼睛“查看详情”按钮。无其他动作时不生成操作列。
-- **菜单三处（缺一不可，侧栏才看得见）**  
-  1. `config/apps.ts`：`APP_MODULE_IDS` 加上新 id  
-  2. `config/apps.ts`：`APP_MODULE_META`（label + href）  
-  3. `config/menu.tsx`：`MODULE_MENU`（`BoldDuotone` `size={20}`）  
-  默认应用种子必须勾齐新 id（`DEFAULT_APP_ENTRIES` 用 `[...APP_MODULE_IDS]`，或把新 id 写进 `modules`）。  
-  `rbac_menus` **可选**：只是目录。只写目录、不进 `APP_MODULE_IDS`，侧栏仍看不见。  
-  加完后清浏览器 Local Storage 键 `forge-starter:app-registry`（或确认种子默认应用已勾齐）；同事旧勾选不会自动出现新项。  
-  业务页另加 `config/site.ts` `routeShells`（通常 `hideHeader: true`）。需要按角色藏菜单时再补 `RBAC_RESOURCES` + 种子 `:read`。  
+- **单一模块声明**：更新 config/modules/<id>.json 的菜单、知识和入口，运行 pnpm modules:generate。APP_MODULE_IDS / APP_MODULE_META / MODULE_MENU 自动派生；不手改三个导出。默认产品自动合并新模块，人工配置应用须显式勾选。rbac_menus 仍只是目录。
+  启用写动作前，pageAdapter 必须实现页面接收、共享 Zod、页面保存/删除确认和事务回执；仅有文件不能代替验收。页面角色、动效和完整规范审计要求不变。
   无 `{module}:read` 进页时壳层 `replace` 回工作台（`AppShell` + `moduleIdForPath`），别只藏侧栏或停在空态/403 列表。
 
 ### 表单弹窗
@@ -154,7 +150,7 @@ pnpm check   # typecheck + 规范绊线
 
 **浏览器**（必做）：
 
-1. 从侧栏点进列表（菜单三处已齐、默认应用勾齐；必要时清 `forge-starter:app-registry`）  
+1. 从侧栏点进列表（manifest 派生菜单已齐、默认应用勾齐；必要时清 `forge-starter:app-registry`）  
 2. 筛选只有一行  
 3. 新建 → 持久化（刷新还在）  
 4. 打开详情（弹窗或全页），主操作可用  
@@ -169,9 +165,9 @@ pnpm check   # typecheck + 规范绊线
 - 路由、菜单 label  
 - 详情形态 + 理由  
 - 对照样板：accounts（重）或 `/ref/detail-modal`（轻，暂无第二业务样板）  
-- 菜单三处：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用是否勾齐新 id；是否已清 `forge-starter:app-registry`  
+- manifest 派生菜单：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用是否勾齐新 id；是否已清 `forge-starter:app-registry`  
 - 无权限直链是否 `replace` 回工作台（不要只藏侧栏）  
 
-## 可选语义底座接入
+## 必做声明与按需写入适配
 
 已登记语义契约的模块按 `docs/agent-semantic-foundation.md` 使用 `useSemanticPage` 暴露白名单状态并实现页面动作适配器。加载、未保存表单和过期记录必须明确处理；页面接收 ACK 不等于数据保存成功。仍执行完整页面审计。
