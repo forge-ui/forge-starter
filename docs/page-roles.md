@@ -8,7 +8,7 @@
 - 重详情接 `accounts/[id]`；轻详情接 `/ref/detail-modal` + 本地 Modal + `?id=`，保留筛选上下文。暂无第二套完整业务轻详情样板。无全局默认，拿不准问用户。
 - 新业务页推荐 `PageTitleToolbar`；accounts 紧凑 h1 是合法现有范式，不为统一重写。`hideHeader: true` 时壳 `onBack` 不渲染。
 - 整域：`forge-starter-new-module` → `forge-starter-new-page` → `forge-starter-audit`；看板只需后两步。每步分别报告技术与浏览器结果。
-- 菜单三处、应用勾选和 RBAC 按 AGENTS；壳与页面动效按 [page-motion.md](page-motion.md)。
+- 模块 manifest 生成菜单、应用勾选和 RBAC 按 AGENTS；壳与页面动效按 [page-motion.md](page-motion.md)。
 
 ## Starter 可渲染参考页（不进菜单）
 

@@ -63,7 +63,7 @@
 | 工作台 | ecommerce-2 布局，指标接业务账号 |
 | 账号管理 | **重样板**：DataTable 列表 + Modal 新建编辑 + **全页详情** + `/api/accounts` |
 | 应用管理 | 应用列表 CRUD；内部应用多选菜单（`APP_MODULE_IDS`）；外链/外部系统认证占位 |
-| 角色 / 菜单 / 权限 | RBAC 目录：列表 + Modal；侧栏 = 菜单三处 ∩ 应用勾选 ∩ 角色 `:read`。种子角色见 `docs/setup.md`（demo 未识别用户名 = 超级管理员；local 公开注册固定 readonly） |
+| 角色 / 菜单 / 权限 | RBAC 目录：列表 + Modal；侧栏 = manifest 派生菜单 ∩ 应用勾选 ∩ 角色 `:read`。种子角色见 `docs/setup.md`（demo 未识别用户名 = 超级管理员；local 公开注册固定 readonly） |
 | 模型管理 | 左供应商 FolderNav + 右 ResourceCard（对照智能体工场 / `/ref/resource-workspace`）；表单/详情弹窗；Ask AI 优先用默认模型 |
 | Agent skills | `.agents/skills/*` |
 

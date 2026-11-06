@@ -15,7 +15,7 @@
 
 ## Starter 检查项
 
-- **M3** 🔴 新模块必须改**菜单三处**：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`（`config/apps.ts` + `config/menu.tsx`）。默认应用种子勾齐新 id。禁止只改 `menu.tsx`。`rbac_menus` 可选，只写目录不进 `APP_MODULE_IDS` 侧栏仍看不见。默认产品自动合并新模块；自建应用手动勾选，仅明确重置时清 `forge-starter:app-registry`。无 `{module}:read` 直链业务页必须壳层 `replace` 回工作台，禁止只藏侧栏或停在空态/403 列表。新路由需在 `config/site.ts` 的 `routeShells` 注册（业务页通常 `hideHeader: true`）。检查是否有页面绕开 config 在别处（layout、页面内）拼菜单。漏注册的典型症状：兜底壳页头与页内 h1 叠成两套页头。
+- **M3** 🔴 新模块必须声明 `config/modules/<id>.json` 并运行 `pnpm modules:generate`，自动派生 `APP_MODULE_IDS`、`APP_MODULE_META`、`MODULE_MENU`、权限资源、知识与服务端工具注册；禁止手改生成文件或只改 `menu.tsx`。用 `pnpm modules:check` 核对遗漏与漂移。默认应用种子勾齐新 id。`rbac_menus` 可选，只写目录不进 `APP_MODULE_IDS` 侧栏仍看不见。默认产品自动合并新模块；自建应用手动勾选，仅明确重置时清 `forge-starter:app-registry`。无 `{module}:read` 直链业务页必须壳层 `replace` 回工作台，禁止只藏侧栏或停在空态/403 列表。新路由需在 `config/site.ts` 的 `routeShells` 注册（业务页通常 `hideHeader: true`）。检查是否有页面绕开 config 在别处（layout、页面内）拼菜单。漏注册的典型症状：兜底壳页头与页内 h1 叠成两套页头。
 
 - **M6** 🔴 菜单 `href` 尾斜杠风格与样板一致（样板用 `"/accounts/"` 带尾斜杠）。
 
@@ -99,7 +99,7 @@
 - 2026-08-25：本审计只覆盖规范符合性，不覆盖功能正确性（NaN 边界、分页越界等逻辑 bug 属开发自测与 code review 范畴）。
 - 2026-09-02：Kit `@forge-ui-official/core@0.1.11` 已默认 soft。业务页状态列改回 `StatusBadge`；`StatusText` 弃用。权限/角色等类目仍用纯文本。
 - 2026-09-12：轻详情对照 `/ref/detail-modal` + `Modal` + `?id=`（**暂无第二业务样板**，不要指向已删的 approvals）。
-- 2026-09-12：新菜单必须写**菜单三处**（`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`）；默认应用勾齐新 id；`rbac_menus` 只是目录。加完清 `forge-starter:app-registry`。侧栏再按登录角色 `:read` 过滤。
+- 2026-09-12（已被 manifest 生成机制取代，不再执行）：新菜单曾要求手改**菜单三处**（`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`）；默认应用勾齐新 id；`rbac_menus` 只是目录。加完清 `forge-starter:app-registry`。侧栏再按登录角色 `:read` 过滤。
 - 2026-09-21：Ask AI 四条示范问题走 `POST /api/ask-ai`：有 `ASK_AI_LLM_API_KEY` 问模型，并带账号表快照；没密钥用本地规则。禁止请求体传 key。
 - 2026-09-21：Ask AI 演示改成四条中文问答，按问题选用 Agent 组件；禁止把 `/cases/agent` 英文原文整页塞进抽屉。
 - 2026-09-21：Ask AI 跟到 core `0.1.17`：Kit 自带全屏层与 `sessions` 栏。禁止再自研全视口层。

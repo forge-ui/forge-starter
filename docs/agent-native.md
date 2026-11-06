@@ -54,7 +54,7 @@ Ask AI 的运行时、业务适配器、知识来源、数据库迁移与测试�
 
 用户指定听用户；否则按内容；拿不准就问。  
 禁止 skill 写死「默认全页」或「默认弹窗」。  
-文件地图：`docs/module-template.md`。新菜单必须写**菜单三处**（`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`），默认产品合并新 id；自建应用手动勾选，不默认清 `forge-starter:app-registry`。无 `{module}:read` 直链业务页壳层 `replace` 回工作台，别只藏侧栏。见 `AGENTS.md`。别只改 `menu.tsx`。
+文件地图：`docs/module-template.md`。新菜单必须在 `config/modules/<id>.json` 声明并运行 `pnpm modules:generate`，自动派生 `APP_MODULE_IDS`、`APP_MODULE_META`、`MODULE_MENU`，禁止手改生成文件，默认产品合并新 id；自建应用手动勾选，不默认清 `forge-starter:app-registry`。无 `{module}:read` 直链业务页壳层 `replace` 回工作台，别只藏侧栏。见 `AGENTS.md`。别只改 `menu.tsx`。
 
 ## 可运行样板
 
@@ -90,6 +90,6 @@ Ask AI 的运行时、业务适配器、知识来源、数据库迁移与测试�
 
 ## 质量门禁
 
-通用方法与唯一清单见主仓 [forge-skill](https://github.com/forge-ui/forge/tree/main/skills/forge-skill)；本地适配与检查见 `docs/audit-checklist.md`。Starter 保留全站 toast、AppShell、菜单三处与权限边界。`pnpm check`、完整规范审计、浏览器主路径分别报告；未验不能宣称交付。
+通用方法与唯一清单见主仓 [forge-skill](https://github.com/forge-ui/forge/tree/main/skills/forge-skill)；本地适配与检查见 `docs/audit-checklist.md`。Starter 保留全站 toast、AppShell、manifest 生成菜单与权限边界。`pnpm check`、完整规范审计、浏览器主路径分别报告；未验不能宣称交付。
 
 本仓库胜负手：**Forge-only + 清晰 skill 边界 + 可抄样板**。

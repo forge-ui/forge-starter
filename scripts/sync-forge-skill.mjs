@@ -130,7 +130,7 @@ export async function run({ root = ROOT, check = false, ref, from, fetcher = fet
   if (check && (localDependency || newerVersion)) {
     if (!manifest) throw new Error("缺少版本化规范副本；先执行 pnpm sync:forge-skill");
     await verifySnapshot(join(destination, "upstream"), manifest, manifest.coreVersion);
-    log(`开发模式 forge-skill：core ${dependency}（实际 ${version}），副本 ${manifest.coreVersion}；本地清单和 SHA256 已校验，未验证当前 core 的规范兼容性及远端漂移。请执行 corepack pnpm sync:forge-skill --from <匹配 core ${version} 的已提交 Forge checkout> --ref <commit>，或 corepack pnpm sync:forge-skill --ref <匹配版本的 commit> 后审查差异。`);
+    log(`开发模式 forge-skill：core ${dependency}（实际 ${version}），副本 ${manifest.coreVersion}；本地清单和 SHA256 已校验，兼容结论：未验证（不代表兼容，也不判定不兼容）；当前 core ${version} 与副本 ${manifest.coreVersion} 的版本差异仅允许开发检查继续，远端漂移检查未执行。请执行 corepack pnpm sync:forge-skill --from <path> --ref <commit>（path 为匹配 core ${version} 的已提交 Forge checkout），或 corepack pnpm sync:forge-skill --ref <匹配版本的 commit> 后审查差异。`);
     return;
   }
   if (check && manifest) await verifySnapshot(join(destination, "upstream"), manifest, version);
