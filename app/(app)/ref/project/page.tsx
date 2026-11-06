@@ -12,7 +12,7 @@ import {
   CalendarMinimalisticLinear,
   Pen2Linear,
   UserPlusLinear,
-} from "solar-icon-set";
+} from "@forge-ui-official/core/icons";
 import {
   Avatar,
   AvatarGroup,

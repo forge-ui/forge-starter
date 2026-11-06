@@ -3,12 +3,11 @@
 import {
   HamburgerMenuBoldDuotone,
   HomeSmileBoldDuotone,
-  ProgrammingBoldDuotone,
   ShieldKeyholeBoldDuotone,
   ShieldUserBoldDuotone,
   UsersGroupTwoRoundedBoldDuotone,
   WidgetBoldDuotone,
-} from "solar-icon-set";
+} from "@forge-ui-official/core/icons";
 import type { AppLayoutMenuItem, AppLayoutProfile } from "@forge-ui-official/core";
 import {
   APP_MODULE_IDS,
@@ -45,7 +44,7 @@ const MODULE_MENU: Record<AppModuleId, AppLayoutMenuItem> = {
     href: "/permissions/",
   },
   models: {
-    icon: <ProgrammingBoldDuotone size={20} />,
+    icon: <WidgetBoldDuotone size={20} />,
     label: "模型服务",
     href: "/models/",
   },

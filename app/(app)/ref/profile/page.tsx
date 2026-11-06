@@ -6,7 +6,7 @@
  */
 
 import { useMemo, useState } from "react";
-import { PenLinear } from "solar-icon-set";
+import { PenLinear } from "@forge-ui-official/core/icons";
 import {
   Avatar,
   Button,

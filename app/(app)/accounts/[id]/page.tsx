@@ -4,7 +4,7 @@ import { useSemanticPage } from "@/components/semantic-page";
 
 import { use, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CopyLinear, PenLinear, TrashBinMinimalisticLinear } from "solar-icon-set";
+import { CopyLinear, PenLinear, TrashBinMinimalisticLinear } from "@forge-ui-official/core/icons";
 import {
   Avatar,
   Breadcrumbs,

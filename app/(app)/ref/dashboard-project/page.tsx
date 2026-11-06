@@ -12,7 +12,7 @@ import {
   FolderWithFilesBoldDuotone,
   LetterLinear,
   PhoneCallingLinear,
-} from "solar-icon-set";
+} from "@forge-ui-official/core/icons";
 import {
   Avatar,
   AvatarGroup,

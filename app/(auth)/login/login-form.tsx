@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, IconButton, StyledLink, TextField } from "@forge-ui-official/core";
-import { EyeLinear, EyeClosedLinear } from "solar-icon-set";
+import { EyeLinear, EyeClosedLinear } from "@forge-ui-official/core/icons";
 import { apiFetch, parseApiJson } from "@/lib/api/browser";
 import type { AuthMode } from "@/lib/auth/config";
 import { loginAction } from "./actions";

@@ -22,7 +22,7 @@
 
 ## 2. 设计原则
 
-1. **Forge-first**：只从 `@forge-ui-official/core` 取组件；颜色只用 `fg-*`；字色按 `--text-primary/muted/disabled` 分层（主文字黑，不是一律浅灰）；图标用 `solar-icon-set`。
+1. **Forge-first**：通用规范引用 [forge-skill](https://github.com/forge-ui/forge/tree/main/skills/forge-skill)；Starter 适配见 `docs/forge-components.md`。Solar 图标唯一入口 `@forge-ui-official/core/icons`。
 2. **Agent 友好**：第一开发界面是 Agent + skills；人读 `AGENTS.md`。
 3. **范例即文档**：`accounts` = 重详情样板；轻详情对照 `/ref/detail-modal` + 本仓 `Modal` + `?id=`。按内容选型。
 4. **轻量可扩展**：模块边界清晰，按业务逐步加域。
@@ -92,17 +92,12 @@
 
 下面是早期计划，不是现状。0.5 之后，角色 / 菜单 / 权限、模型服务和 Ask AI harness 已经在仓库里，不要再把它们写成下一期。
 
-| 版本 | 当时的目标 |
-|------|------------|
-| 0.3 | 认证 + Postgres + SMTP |
-| 0.4 | 账号 CRUD + ecommerce 模板对齐 |
-| 0.5 | Agent-native 定位 + skills + 文档合约 |
-| 0.6 的原计划 | 曾写「可选 RBAC」。这项已经落地，见上一节 |
+早期版本目标表已归档到 [history/product-version-plan.md](history/product-version-plan.md)，不作当前实施承诺。
 
 ## 6. 成功标准
 
 1. Clone 后能跑登录与后台壳，视觉明显是 Forge。
-2. Agent 能按 skill 新增一个业务模块且 typecheck 绿。
+2. Agent 能按 module → page → audit 新增业务模块，`pnpm check` 通过，规范审计与浏览器主路径分别有证据。
 3. 不引入第二套 UI 库。
 4. 人读本文与 `AGENTS.md` 能判断「做什么、不做什么」。
 

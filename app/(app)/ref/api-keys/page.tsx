@@ -6,7 +6,7 @@
  */
 
 import { useMemo, useState } from "react";
-import { CopyLinear, TrashBinTrashLinear } from "solar-icon-set";
+import { CopyLinear, TrashBinTrashLinear } from "@forge-ui-official/core/icons";
 import {
   Button,
   CellMuted,

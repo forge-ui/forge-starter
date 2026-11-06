@@ -1,49 +1,14 @@
-# 页面角色 → 官方 Template 对照表
+# Starter 页面角色与接线目录
 
-所有业务角色同时遵循 [页面切换与刷新动效](page-motion.md)：沿用 AppShell 自动接入，页面区块结构与导航方式仍须按 Q5 实测。
+通用角色、线框和模板标准唯一正文：[forge-skill](https://github.com/forge-ui/forge/tree/main/skills/forge-skill)。同步入口见 [forge-skill/README.md](forge-skill/README.md)，同步后读 `forge-skill/upstream/references/page-recommended-standard.md` 与 `page-design-dimensional.md`。模板为风格基准，Starter 业务页为接线参考，二者不是同一验收。
 
-写后台页时 **先定角色，再抄 template**。  
-权威：Forge monorepo `templates/` + 本表 + `docs/module-template.md`。
+## 选型与工作流
 
-## 模板源码
-
-```text
-../forge/src/app/templates/
-  (dashboards)/dashboards/
-  (dashboard)/ecommerce/
-  crm-template/
-  finance-template/
-  project-template/
-  micellaneous-template/
-  _shared/
-```
-
-## 角色
-
-| 角色 | 关键词 | 主结构 |
-|------|--------|--------|
-| **dashboard** | 工作台、指标、趋势 | 指标卡 + 图 + 次级列表；分栏用 Kit `Grid`（core `≥0.1.13`） |
-| **collection** | 列表、筛选 | Header + **一条**筛选/搜索工具带 + DataTable（Starter：`ButtonGroup`+搜索；官方：`PageTitleToolbar`+`Toolbar`） |
-| **form-modal** | 新建/编辑字段不多 | Modal 表单 |
-| **detail-modal** | 轻详情、短处理 | 列表上叠 Modal |
-| **detail** | 重详情、档案 | 主栏 + 侧栏 + Tab/时间线；主次栏用 `Grid`/`GridItem`（core `≥0.1.13`） |
-| **form-page** | 字段极多 | 页内长表单（少用） |
-| **resource-workspace** | 供应商/文件夹 + 资源卡 | 左 `FolderNav` + 右一条工具带 + `Grid`/`ResourceCard` |
-| **settings** | 资料、偏好 | 应用管理走 collection；资料/改密/系统偏好走头像菜单 form-modal |
-| **auth** | 登录注册 | `app/(auth)` |
-
-### detail-modal 与 detail
-
-两者都是合法详情角色，**无全局默认**。
-
-| | detail-modal | detail |
-|--|--------------|--------|
-| Starter 样板 | `/ref/detail-modal` + `Modal`（暂无第二业务样板） | `accounts/[id]` |
-| 何时倾向 | 字段少、处理完回列表 | 多区块/Tab/图/关联 |
-| 返回 | 关弹窗 | 页内 `←`/面包屑 |
-| 禁止 | 为「统一」硬弹窗重内容 | 轻内容硬全页；侧栏塞返回 |
-
-拿不准时问用户，不要在 skill 里写死某一种。
+- 先确认角色与一个主 Screen，再选择已交付 Blocks / Components；看板记录模板路径、比例、gap、区块尺寸和并排截图。未发布的 Panel/Blocks 标 FORGE-GAP 并询问，不虚构 import。
+- 重详情接 `accounts/[id]`；轻详情接 `/ref/detail-modal` + 本地 Modal + `?id=`，保留筛选上下文。暂无第二套完整业务轻详情样板。无全局默认，拿不准问用户。
+- 新业务页推荐 `PageTitleToolbar`；accounts 紧凑 h1 是合法现有范式，不为统一重写。`hideHeader: true` 时壳 `onBack` 不渲染。
+- 整域：`forge-starter-new-module` → `forge-starter-new-page` → `forge-starter-audit`；看板只需后两步。每步分别报告技术与浏览器结果。
+- 菜单三处、应用勾选和 RBAC 按 AGENTS；壳与页面动效按 [page-motion.md](page-motion.md)。
 
 ## Starter 可渲染参考页（不进菜单）
 
@@ -81,43 +46,7 @@
 | credits 积分账本 | `/ref/credits` | — |
 | billing 订阅 | `/ref/billing` | — |
 
-## 推荐对照
 
-| 角色 | 官方参考 | Starter 样板 |
-|------|----------|--------------|
-| dashboard | ecommerce-2、crm、analytics | `/dashboard` + `/ref/dashboard-*` |
-| collection | ecommerce/customers | `accounts` 列表 + `/ref/list-table`、`list-cards` |
-| resource-workspace | — | `/models` + `/ref/resource-workspace` |
-| form-modal | customers Add Modal | `account-form-dialog` |
-| detail-modal | 官网列表 view dialog | `/ref/detail-modal` + `Modal` + `?id=`（暂无第二业务样板） |
-| detail | customers/[id] | `accounts/[id]` |
-| settings | — | `settings/apps` + `settings-account-dialog` |
-| auth | finance/crm 登录 | `app/(auth)/*` |
+## 参考边界
 
-## Starter 铁律
-
-1. 只用 `@forge-ui-official/core` + 宿主 `components/ui/modal.tsx`  
-2. `color={siteConfig.accent}`  
-3. CRUD：collection + form-modal + **（detail-modal 或 detail）** + API  
-4. `hideHeader: true` 时壳 `onBack` **不渲染**  
-5. collection 筛选/搜索一条工具带，禁止双行 pills；页头可用 Starter 紧凑或 `PageTitleToolbar`，不要手搓
-6. 假按钮删掉或接真逻辑  
-7. 浏览器验收，不只 curl  
-
-## Agent 速查
-
-```text
-「xxx 管理」整域？
-  → forge-starter-new-module
-     选型详情形态（modal | page | 问用户）
-     单行筛选
-     浏览器验收
-看板 → new-page + dashboard
-设置 → settings
-登录 → app/(auth)
-```
-
-## 选型权威
-
-本表 + monorepo templates + Starter `accounts` + `/ref`。  
-不依赖仓库外设计插件。
+本目录只存 Starter 角色到路由的映射，完整目录与证据元数据见 [reference-pages.md](reference-pages.md)。不把 `/ref` 假数据展示当完整业务，不以 accounts 覆盖主仓 Screens 的视觉规则。

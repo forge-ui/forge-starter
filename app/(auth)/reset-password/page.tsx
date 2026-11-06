@@ -3,7 +3,7 @@
 import { Suspense, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button, IconButton, StyledLink, TextField } from "@forge-ui-official/core";
-import { EyeLinear, EyeClosedLinear } from "solar-icon-set";
+import { EyeLinear, EyeClosedLinear } from "@forge-ui-official/core/icons";
 
 function ResetPasswordForm() {
   const router = useRouter();

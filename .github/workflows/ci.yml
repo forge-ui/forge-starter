@@ -40,8 +40,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec next typegen
-      - run: pnpm typecheck
-      - run: pnpm audit:tripwire
+      - run: pnpm check
       - run: pnpm db:migrate
       - run: pnpm test
       - name: Demo HTTP workflows

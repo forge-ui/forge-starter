@@ -2,7 +2,8 @@
 name: forge-starter-new-module
 description: >
   Add backend only for a Forge Starter resource: types, Drizzle schema/service,
-  API routes, optional client store. Does NOT build list/detail UI — use
+  API routes. Client stores belong to new-page by default; exceptions require
+  explicit authorization. Does NOT build list/detail UI — use
   forge-starter-new-page after. Use when the user needs data + API for a new
   admin domain (orders, tags, notifications, etc.).
 ---
@@ -12,6 +13,7 @@ description: >
 **service + API**，不写页面。
 
 地图：`docs/module-template.md` §A。  
+通用规范入口：`docs/forge-skill/upstream/SKILL.md`；本 skill 只维护 Starter 后端装配。  
 **API 齐 ≠ 侧栏有。** 本步不挂应用模块。  
 UI 下一步：`forge-starter-new-page`（菜单三处）。
 
@@ -61,7 +63,7 @@ app/api/<res>/[id]/route.ts     # GET one, PATCH/DELETE/POST actions
 ```
 
 - `requireSession()`，未登录 401  
-- 进侧栏的模块（new-page 挂上之后）：`requirePermission("<res>", "read"|"create"|"update"|"delete")`（`lib/rbac/access.ts`），先 session 再角色权限；403 无权限  
+- 资源 API 独立执行 `requirePermission("<res>", "read"|"create"|"update"|"delete")`（`lib/rbac/access.ts`），先 session 再角色权限；403 无权限。菜单是否可见不改变认证、对象访问与动作权限要求。  
 - `jsonOk`、`jsonError`（`lib/auth/http.ts`）  
 - Zod 校 body  
 
@@ -92,10 +94,10 @@ lib/agent/registry.ts  # 把工具数组拼进 AGENT_TOOLS
 ### 6. Verify
 
 ```bash
-pnpm typecheck
-pnpm db:migrate   # 业务表必须 Postgres；demo 登录模式不能代替 DATABASE_URL
+corepack pnpm check
 ```
 
+- 数据库迁移前声明目标环境并确认授权，再运行 `corepack pnpm db:migrate`；开发库迭代才用 `db:push`。未获授权或数据库不可用时不执行迁移，报告未验证项与原因。
 - `AUTH_MODE=demo`：可不建 `users`，但 **CRUD API 仍要 DATABASE_URL**。  
 - 可用 curl + 登录 cookie 打 API；**完整 UI 留给 new-page 浏览器测**。
 

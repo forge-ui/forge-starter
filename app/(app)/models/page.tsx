@@ -11,9 +11,9 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   PenLinear,
-  RefreshCircleLinear,
+  RestartCircleLinear,
   TrashBinMinimalisticLinear,
-} from "solar-icon-set";
+} from "@forge-ui-official/core/icons";
 import {
   Breadcrumbs,
   PageTitleToolbar,
@@ -473,7 +473,7 @@ function ModelsPageContent() {
                             items={[
                               {
                                 label: probe?.state === "testing" ? "检测中…" : "测试连接",
-                                icon: <RefreshCircleLinear size={16} />,
+                                icon: <RestartCircleLinear size={16} />,
                                 onSelect: () => {
                                   if (probe?.state !== "testing") void retestOne(item.id);
                                 },

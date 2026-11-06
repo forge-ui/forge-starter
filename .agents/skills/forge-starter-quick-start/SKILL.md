@@ -10,6 +10,8 @@ description: >
 
 Bootstrap **branding + shell** only。不装支付/CMS/OAuth。
 
+通用规范只读 `docs/forge-skill/upstream/SKILL.md` 与 `references/audit-checklist.md`（后者相对 upstream）；Starter 接线看 `docs/forge-components.md`，不要维护第二份通用规则。
+
 ## When to use
 
 - 「新开一个后台」「改成某某系统」「quick start」「初始化项目」
@@ -40,10 +42,10 @@ Bootstrap **branding + shell** only。不装支付/CMS/OAuth。
 
 1. 复述 brief，列出将改文件。  
 2. 应用 allowlist。  
-3. `pnpm typecheck`。  
-4. 提示：`pnpm dev --port 3020` 看品牌与菜单。  
+3. `corepack pnpm check`，记录实际结果。  
+4. 先检查现有 dev server 与端口，复用当前 Chrome，实点品牌与菜单；未启动服务时再运行 `corepack pnpm dev --port <可用端口>`，不假设固定端口可用。  
 5. 若 brief 含业务模块 → 输出 **模块 backlog**（见下），并说明执行顺序：  
-   每个模块：`new-module` → `new-page`。  
+   每个模块：`new-module` → `new-page` → `forge-starter-audit`。品牌/壳涉及可见 UI 时也执行审计；quick-start 不是检查豁免。  
 6. 报告完成项 + backlog。
 
 ## 模块 backlog 格式（有业务 brief 时必出）
@@ -63,6 +65,6 @@ Bootstrap **branding + shell** only。不装支付/CMS/OAuth。
 
 - [ ] 侧栏/登录版权为新产品名  
 - [ ] accent 一致  
-- [ ] typecheck  
+- [ ] `corepack pnpm check` 与实际浏览器验证；可见 UI 变更完成审计，未执行项注明原因  
 - [ ] 未引入无关模块  
-- [ ] 有业务 brief 时已输出 backlog + module→page  
+- [ ] 有业务 brief 时已输出 backlog + module→page→audit  

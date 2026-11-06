@@ -14,7 +14,7 @@ import {
   TagBoldDuotone,
   VideocameraRecordLinear,
   WalletBoldDuotone,
-} from "solar-icon-set";
+} from "@forge-ui-official/core/icons";
 import {
   Button,
   CellText,
