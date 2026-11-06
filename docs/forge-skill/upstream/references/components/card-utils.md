@@ -1,6 +1,6 @@
 # card-utils
 
-自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/card-utils.tsx`；core **0.4.7**。
+自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/card-utils.tsx`；core **0.6.0**。
 默认值和运行行为以源码初始化为准；类型表不推测默认值。
 
 ## ALL_CARD_THEMES (value)
@@ -26,6 +26,12 @@ readonly CardTheme[]
 
 ```ts
 export type CardBadgeVariant = "default" | "greyBg" | "solid" | "opacity" | "white";
+```
+
+## CardDensity (type)
+
+```ts
+export type CardDensity = "default" | "compact";
 ```
 
 ## CardGlow (value)
@@ -241,7 +247,7 @@ export type LegacyCardTheme = "dark" | "orange";
 ## StatCardShell (value)
 
 ```ts
-({ title, value, trend, trendDirection, subtitle, theme, themeKey, size, icon, iconVariant, action, chartSlot, footerSlot, density, width, className, }: { title: string; value: ReactNode; trend?: string; trendDirection?: TrendDirection; subtitle?: string; theme: CardThemeConfig; themeKey?: CardTheme; size?: StatCardSize; icon?: ReactNode; iconVariant?: CardBadgeVariant; action?: ReactNode; chartSlot?: ReactNode; footerSlot?: ReactNode; density?: "default" | "compact"; width?: CardWidth; className?: string; }) => JSX.Element
+({ title, value, trend, trendDirection, subtitle, theme, themeKey, size, icon, iconVariant, action, chartSlot, footerSlot, density, width, className, }: { title: string; value: ReactNode; trend?: string; trendDirection?: TrendDirection; subtitle?: string; theme: CardThemeConfig; themeKey?: CardTheme; size?: StatCardSize; icon?: ReactNode; iconVariant?: CardBadgeVariant; action?: ReactNode; chartSlot?: ReactNode; footerSlot?: ReactNode; density?: CardDensity; width?: CardWidth; className?: string; }) => JSX.Element
 ```
 
 | 属性 | 必填 | 类型 | 说明 |
@@ -259,7 +265,7 @@ export type LegacyCardTheme = "dark" | "orange";
 | `action` | 否 | `ReactNode` |  |
 | `chartSlot` | 否 | `ReactNode` |  |
 | `footerSlot` | 否 | `ReactNode` |  |
-| `density` | 否 | `"default" \| "compact" \| undefined` |  |
+| `density` | 否 | `CardDensity \| undefined` |  |
 | `width` | 否 | `CardWidth \| undefined` | Use full to fill dashboard/grid columns. Use fixed only for Figma-size showcases. |
 | `className` | 否 | `string \| undefined` |  |
 

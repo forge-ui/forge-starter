@@ -1,6 +1,6 @@
 # 多维页面图方法
 
-本方法随 forge-skill 分发，不要求 ~/.codex/skills 或其他本机工具。先选真实同角色 Screen；用项目可用 SVG/图形工具画结构线框，另行截图验证实际 UI，二者不能替代。
+使用随本仓独立分发的 [dimensional-drawing](../../dimensional-drawing/SKILL.md) 画静态尺寸图；只有用户明确要求动画成片时才使用 [dimensional-drawing-motion](../../dimensional-drawing-motion/SKILL.md)。install-skill.sh 同时安装三者，不依赖固定本机路径。先选真实同角色 Screen；另行截图验证实际 UI，图纸不能替代运行验收。安装 skill 不自动执行 headless 依赖或下载浏览器。
 
 1. 标注角色、任务、模板源码/版本、视口、侧栏状态及净内容宽。
 2. 按外壳→区块→组件拆槽，标 FILL/FLEX/HUG，说明 padding、gap、宽高、滚动归属。操作先保留 HUG，正文取得非负剩余宽。

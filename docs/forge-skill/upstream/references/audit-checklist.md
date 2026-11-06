@@ -1,5 +1,12 @@
 # Forge 统一审计清单
 
+## Screen 元素保真
+
+- SF1：记录主对照 Screen 的源码版本、1440/375 截图与业务替换字段。逐项核对主题主卡、迷你图、图标/首字母头像、地图/旗帜、周期切换、指标行、tooltip、页头操作插槽，不得无理由省略。
+- SF2：每项写通过/违规/不适用/未验证与证据。使用 plain 或自定义 children/items 必须逐项说明省略原因，例如没有历史序列、没有导出权限、地区不对应国家。不得为了截图伪造趋势、国家或可点击但无作用的操作。
+- SF3：机械门禁运行 `pnpm blocks:check` 与 `pnpm test:interactions`：registry 与源码一致、默认迷你图/主题/图标/地图/图例、周期切换真实数据、受控选择、tooltip、插槽兼容。结构检查不替代主 Screen 并排截图和真实 hover/click。
+- SF4：修改共享 Block 后按基线全量重放模板截图并像素比对；画廊允许变化，模板不允许。表格另核 `flex` 预算、minWidth、valueKind 与表头同向，见 [DataTable 选型](component-selection/data-table.md)。
+
 编号底本：forge-starter/docs/audit-checklist.md；归属按 D.md 逐编号 G / G+S / S 审核。本清单只收通用规则及混合规则的通用部分，保留原编号，不重排。宿主路由、权限、存储、toast、数据库工程约定仍由宿主文档管理。
 
 每条结果：通过 / 违规 / 不适用（原因） / 未验证（缺少的环境或证据）。记录文件行号、版本、页面 URL、截图和动作；静态检查不能证明浏览器、业务或安全全面通过。
@@ -108,10 +115,11 @@
 
 ## T — 模板一致性
 
-- **T1**：声明主 Screen、源码版本与任务适配理由，Screen→Blocks→Components 分层；计划 Blocks 不作为已发布导出。
-- **T2**：同视口、相同侧栏、相同字体条件比较；依据页面规范分别核对 shell/section/Grid/卡内间距、轨道公式、图域与整卡高度。
+- **T1**：声明主 Screen、源码版本与任务适配理由，Screen→Blocks→Components 分层；Blocks 从 blocks/ 复制，不作为 core 导出；registry 依赖版本与发布状态分别核实。
+- **T2**：1440 与 375 两档逐个 Screen 保存重构前后截图及像素 diff；同视口、相同侧栏、相同字体、固定时间和样例数据条件比较；依据页面规范分别核对 shell/section/Grid/卡内间距、轨道公式、图域与整卡高度。
 - **T3**：模板圆角24px与 Token20px现状并存，不未经授权改全局 Token；有意偏差单独列出。
 - **T4**：内容组件核到子层，例如表格单元格、详情阅读组件、弹层关闭/焦点；仅 import 相同不算一致。
+- **T6**：Panel 变体与密度须由公开 API 设置，不恢复私有 density 覆盖；registry 每项可独立复制，blocks:check 通过；缺少截图必须标未验收。
 - **T5**：未核实的尺寸、触摸/读屏/软键盘、缺少后台的动作明确列未验证；公共缺口用 FORGE-GAP，等待用户决定。
 
 尺寸来源见 [页面规范](page-recommended-standard.md)，专项见 [内容](component-content-contracts.md)、[焦点](overlay-focus.md)、[动效](motion.md)。

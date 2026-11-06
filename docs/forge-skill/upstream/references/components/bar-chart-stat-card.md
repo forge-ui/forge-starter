@@ -1,6 +1,6 @@
 # bar-chart-stat-card
 
-自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/bar-chart-stat-card.tsx`；core **0.4.7**。
+自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/bar-chart-stat-card.tsx`；core **0.6.0**。
 默认值和运行行为以源码初始化为准；类型表不推测默认值。
 
 ## BarChartStatCard (value)
@@ -24,6 +24,12 @@
 | `width` | 否 | `CardWidth \| undefined` | Use full to fill dashboard/grid columns. Use fixed only for Figma-size showcases. |
 | `className` | 否 | `string \| undefined` |  |
 
+## BarChartStatCardProps (type)
+
+```ts
+export type BarChartStatCardProps = Parameters<typeof BarChartStatCard>[0];
+```
+
 ## BarColor (type)
 
 ```ts
@@ -36,3 +42,7 @@ export type BarColor = "purple" | "blue" | "green" | "red" | "orange" | "yellow"
 - 连续趋势 → `LineChartStatCard`
 - 完成度占比 → `WheelChartStatCard`
 - 多维图表 → 用 `charts/` 下的 `BarChart`
+
+## 看板密度
+
+看板使用 `density="compact"`，不要复制私有 `!important` 覆盖。省略 density 保持默认外观；完整九类卡片对照见 `/cases/dashboard-kit`。公开类型 `CardDensity` 与对应 `*Props` 可从 core 导入。

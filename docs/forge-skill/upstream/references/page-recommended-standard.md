@@ -129,13 +129,13 @@
 | finance-3主结构 | base1列；lg4轨道，左span1、右span3；列gap16px | `src/app/templates/(dashboards)/dashboards/finance-3/page.tsx:137`、`:139`、`:199` |
 | finance-3右区内嵌行 | 独立3轨道，2:1；不是整页再次2:1 | `src/app/templates/(dashboards)/dashboards/finance-3/page.tsx:251`、`:253`、`:277` |
 | 标题型图表/表格卡壳 | `rounded-3xl bg-white border border-fg-grey-200 p-4 flex flex-col gap-4`；即padding16、卡内gap16、圆角24px（默认换算） | `src/app/templates/(dashboards)/dashboards/analytics/page.tsx:203`、`:298`、`:317`；`src/app/templates/(dashboards)/dashboards/finance-3/page.tsx:201` |
-| compact KPI | padding16、内部gap12；模板还对字级/行高/子图高度做覆盖，不能只改padding就说同密度 | `src/app/templates/(dashboards)/dashboards/_shared/dashboard-density.ts:7` 至`:8` |
-| compact Balance/Image | Balance padding16/gap12；Image padding16/gap16 | `src/app/templates/(dashboards)/dashboards/_shared/dashboard-density.ts:10` 至`:14` |
-| compact ListGroup | header左右/上16；body左右/上下16，条目gap12 | `src/app/templates/(dashboards)/dashboards/_shared/dashboard-density.ts:18` 至`:19` |
-| compact Highlight特例 | `h-96`=384px，padding16/gap12；只适用该组件，不推广到所有卡 | `src/app/templates/(dashboards)/dashboards/_shared/dashboard-density.ts:16` |
-| analytics主图绘图区 | `heightClass="h-56"`=224px；不是整卡高度 | `src/app/templates/(dashboards)/dashboards/analytics/page.tsx:210`；`src/app/templates/(dashboards)/dashboards/_shared/figma-charts.tsx:117`、`:129` |
+| compact KPI | padding16、内部gap12；density="compact" 同时控制字级/行高/子图高度，不能只改padding就说同密度 | core 中对应组件的 density="compact" |
+| compact Balance/Image | Balance padding16/gap12；Image padding16/gap16 | core 中对应组件的 density="compact" |
+| compact ListGroup | header左右/上16；body左右/上下16，条目gap12 | core 中对应组件的 density="compact" |
+| compact Highlight特例 | `h-96`=384px，padding16/gap12；只适用该组件，不推广到所有卡 | core 中对应组件的 density="compact" |
+| analytics主图绘图区 | `heightClass="h-56"`=224px；不是整卡高度 | `src/app/templates/(dashboards)/dashboards/analytics/page.tsx:210`；`core/src/components/ui/charts/dashboard-charts.tsx:117`、`:129` |
 | finance-3上下柱图绘图区 | `heightClass="h-56"`=224px；标题/指标行另计 | `src/app/templates/(dashboards)/dashboards/finance-3/page.tsx:239` 至`:246` |
-| 主图纵轴槽 | 44px+剩余图域，轴与图gap12；图内还有pt-8等留量，不等于所有图都用44px轴 | `src/app/templates/(dashboards)/dashboards/_shared/figma-charts.tsx:129`、`:136` |
+| 主图纵轴槽 | 44px+剩余图域，轴与图gap12；图内还有pt-8等留量，不等于所有图都用44px轴 | `core/src/components/ui/charts/dashboard-charts.tsx:129`、`:136` |
 | 断点 | sm640、md768、lg1024、xl1280、2xl1536；均是视口断点，不是净内容宽 | `core/src/styles/tokens.css:615`、`:626`、`:637`、`:648`、`:659` |
 
 ### 3. 几何公式与线框标注
@@ -148,3 +148,11 @@
 - 图表卡高不指定一个“全站统一值”：整卡由上下padding、标题/指标/图例/绘图区及内部gap组成。224px只锁定对应图组件wrapper；文字换行、图例、提示层会影响整卡/可见区域。整卡实际高度未浏览器核实时标**未核实**。
 - 图内至少标出：外壳padding16/20、section gap20、Grid gap16、卡padding16、卡内gap12或16、图域224、响应式跨度。不要用一条“页面gap24”覆盖全部层级。
 - `--radius-card=20px` 与模板 `rounded-3xl=24px`并存：本草案记录模板24px现状，**不授权修改全局Token**。待Panel组件立项再决定模板兼容方式。
+
+### 已实现的看板组件与区块
+
+- 外壳：AppLayout；面板：Panel（dashboard/template），SurfaceCard 保持原 API。
+- 密度：StatCard、ProgressStatCard、LineChartStatCard、BarChartStatCard、WheelChartStatCard、BalanceCard、ImageStatCard、HighlightCard、ListGroup 使用 density="compact"；不再依赖模板 !important。默认密度不变。
+- 图表：ChartHeader、ChartMetricRow、GroupedBarChart、DivergingBarChart；目标：WalletGoalCard。
+- 17 类可复制 Block 的实现名、目录和支持边界见 [Blocks](blocks.md)，不要从 core import Block。
+- 以上为实现状态；前后像素一致须独立验收，当前环境未完成截图，不将尺寸公式当实测。
