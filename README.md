@@ -112,6 +112,7 @@ pnpm install && pnpm db:migrate && pnpm db:seed && pnpm dev
 | Ask AI harness | 任务可以暂停、恢复；人在页面上确认后才保存。见 [docs/ask-ai-harness.md](docs/ask-ai-harness.md) |
 | 应用管理 | 浏览器本地登记。外部认证是占位 |
 | Agent skills、`/ref` 参考页 | 参考页默认不进菜单。生产默认关闭 |
+| 从 OpenAPI 生成模块：`pnpm module:openapi` | 对接已有后端，只生成读取（类型、service、只读 API、菜单、Ask AI 读取）；写入要在页面阶段接 |
 
 没有审批流、支付、订阅、积分、通知中心、IM、多租户。
 

@@ -59,6 +59,7 @@ Bootstrap **branding + shell** only。不装支付/CMS/OAuth。
 ```
 
 详情形态：`accounts`（重）| `/ref/detail-modal`（轻）| 待确认。  
+用户给了 OpenAPI 时，backlog 直接用 `pnpm module:openapi <文件|URL>` 打印的清单（字段和页面角色来自接口），不要手猜。  
 组件选型提示用户/下一 agent 读：`docs/forge-components.md`。
 
 ## Checklist

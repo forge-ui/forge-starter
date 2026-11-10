@@ -35,6 +35,24 @@ components/<resource>-store.tsx   # 默认 new-page；仅显式授权时在后�
 
 访问策略默认省略 `access`：角色具有 `{module}:read` 且内部应用勾选模块才显示菜单，API 和 Ask AI 工具仍检查当前会话权限。确需所有登录用户可见、可读时，显式声明 `"access": "authenticated"`；它优先于角色读授权与内部应用勾选（包括人工配置应用），菜单、首页选择、壳层直链、`requirePermission(..., "read")` 与 Ask AI reader 使用同一读授权。匿名仍被 session 守卫拒绝，服务内的行级隔离与字段脱敏不变，create/update/delete 不会获得额外授权。禁止为解决普通模块漏勾选而随意扩大读取范围；脚手架默认不加此声明，其他 access 值校验失败。
 
+### 已有后端：从 OpenAPI 生成
+
+后端已经存在、只缺后台界面时，用接口描述生成只读模块：
+
+```bash
+pnpm module:openapi ./openapi.yaml            # 只打印模块清单：字段、页面角色、分页、写操作
+pnpm module:openapi ./openapi.yaml --yes --only orders,customers
+```
+
+每个带 GET 的集合路径（如 `/orders`）生成一个模块：`lib/<id>/types.ts`（来自响应 schema）、`lib/<id>/service.ts`（经 `lib/external-api/client.ts` 请求 `EXTERNAL_API_BASE_URL`，可选 `EXTERNAL_API_TOKEN` 作为 Bearer）、只读的 `app/api/<id>/route.ts` 与 `[id]/route.ts`、manifest 和页面骨架，并刷新注册，菜单与 Ask AI 读取立即可用。
+
+- 支持 OpenAPI 3.x 的 JSON/YAML、本地文件或 URL；`$ref`、`allOf`、常见响应包装（`items`、`data`、`rows` 等）会自动展开。
+- 嵌套路径（`/orders/{id}/lines`）、已存在的模块和找不到对象数组的接口会跳过并说明原因。
+- 名称含 password/token/secret 等的字段在 service 里就剔除，不进类型、API 响应和 Ask AI。
+- 只读默认第一页；分页参数、列表必填参数会在清单里提示。
+- 写操作只列在清单里，不生成。接入写入仍按下方「写入」要求在页面阶段完成确认、回执和读回。
+- 生成后用 `forge-starter-new-page` 按清单里的页面角色做列表、详情和表单。
+
 `pnpm module:new inventory 库存管理` 生成 manifest、共享输入 schema、service、GET API 与页面骨架并刷新注册；service 在 PostgreSQL 实现前明确报错，不提供假业务数据，也不启用写操作。已有模块只需新增 `config/modules/<id>.json`，执行 `pnpm modules:generate`；不要编辑 `*.generated.ts`。`pnpm typecheck` / `pnpm check` 拒绝缺声明、空知识、不声明读取能力或生成结果过期。
 
 读取声明为 `read: { service: "lib/inventory/service.ts", export: "listInventory", fields: ["id", "name", "updatedAt"] }`，函数返回记录数组，复用当前请求的会话；有行级隔离的模块必须在服务内部按当前会话过滤。`sensitiveFields` 可补充递归排除字段。确实不能读的模块使用 `read: { unavailable: "明确原因" }`。知识 `source` 指向真实源码页面；客户端目录只含声明，不包含服务或密钥。
