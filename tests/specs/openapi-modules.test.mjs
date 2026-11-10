@@ -50,3 +50,10 @@ test("generated modules are read-only and typed from the schema", () => {
   assert.deepEqual(manifest.entries, { create: false, detail: false, edit: false });
   assert.match(manifest.knowledge.rules, /第一页/);
 });
+
+test("a collection without any plain readable field is skipped before anything is written", () => {
+  const nested = { openapi: "3.0.0", paths: { "/blobs": { get: { responses: { 200: { content: { "application/json": { schema: { type: "array", items: { type: "object", properties: { meta: { type: "object" }, secretKey: { type: "string" } } } } } } } } } } } };
+  const result = planModules(nested, root);
+  assert.deepEqual(result.modules, []);
+  assert.match(result.skipped[0].reason, /普通字段/);
+});

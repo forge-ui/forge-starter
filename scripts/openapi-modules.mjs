@@ -4,7 +4,7 @@
 // Each collection path with GET becomes a module: types, a service that calls the backend at
 // EXTERNAL_API_BASE_URL, read-only API routes, a manifest (menu, knowledge, Ask AI reader) and a
 // page skeleton. Writes stay out: the plan lists them for forge-starter-new-page to wire with receipts.
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
 import { parse as parseYaml } from "yaml";
 import { generateModules, sensitive } from "./modules.mjs";
@@ -157,6 +157,10 @@ export function planModules(spec, root) {
     const createBody = entry.post?.requestBody ? resolveRef(spec, Object.values(resolveRef(spec, entry.post.requestBody).content ?? {})[0]?.schema) : null;
     const writes = [entry.post && "create", (itemEntry?.put || itemEntry?.patch) && "update", itemEntry?.delete && "delete"].filter(Boolean);
     const readFields = fields.filter(field => !sensitive(field.name) && !/Record<|\[\]|Array</.test(field.type)).slice(0, MAX_READ_FIELDS).map(field => field.name);
+    if (!readFields.length) {
+      skipped.push({ path, reason: "没有可供 Ask AI 读取的普通字段（全是嵌套对象、数组或敏感字段）" });
+      continue;
+    }
     modules.push({
       id,
       symbol: pascal(id),
@@ -335,9 +339,14 @@ export function renderFiles(plan) {
 }
 
 if (process.argv[1] && import.meta.url.endsWith("/" + basename(process.argv[1]))) {
-  const [source] = process.argv.slice(2).filter(arg => !arg.startsWith("--"));
-  const onlyIndex = process.argv.indexOf("--only");
-  const only = onlyIndex > 0 ? process.argv[onlyIndex + 1]?.split(",") : null;
+  const args = process.argv.slice(2);
+  const onlyIndex = args.indexOf("--only");
+  const only = onlyIndex >= 0 ? args[onlyIndex + 1]?.split(",").filter(Boolean) : null;
+  if (onlyIndex >= 0 && !only?.length) {
+    console.error("--only 后面要跟模块 id，用逗号分隔");
+    process.exit(1);
+  }
+  const [source] = args.filter((arg, index) => !arg.startsWith("--") && !(onlyIndex >= 0 && index === onlyIndex + 1));
   if (!source) {
     console.error("用法：pnpm module:openapi <openapi.yaml|openapi.json|URL> [--only id,id] [--yes]");
     process.exit(1);
@@ -359,11 +368,19 @@ if (process.argv[1] && import.meta.url.endsWith("/" + basename(process.argv[1]))
     const files = renderFiles(plan);
     if (!existsSync(resolve(root, CLIENT_PATH))) files[CLIENT_PATH] = CLIENT_SOURCE;
     for (const path of Object.keys(files)) if (existsSync(resolve(root, path))) throw new Error(`拒绝覆盖已有文件：${path}`);
-    for (const [path, content] of Object.entries(files)) {
-      mkdirSync(dirname(resolve(root, path)), { recursive: true });
-      writeFileSync(resolve(root, path), content, { flag: "wx" });
+    const written = [];
+    try {
+      for (const [path, content] of Object.entries(files)) {
+        mkdirSync(dirname(resolve(root, path)), { recursive: true });
+        writeFileSync(resolve(root, path), content, { flag: "wx" });
+        written.push(path);
+      }
+      for (const [path, content] of Object.entries(generateModules(root))) writeFileSync(resolve(root, path), content);
+    } catch (error) {
+      for (const path of written.reverse()) rmSync(resolve(root, path));
+      for (const module of plan.modules) for (const dir of [`lib/${module.id}`, `app/api/${module.id}`, `app/(app)/${module.id}`]) rmSync(resolve(root, dir), { recursive: true, force: true });
+      throw new Error(`生成失败，已撤回写入的文件：${error instanceof Error ? error.message : error}`);
     }
-    for (const [path, content] of Object.entries(generateModules(root))) writeFileSync(resolve(root, path), content);
     console.log(`已生成 ${plan.modules.length} 个只读模块并注册菜单、权限资源和 Ask AI 读取。在 .env 里设 EXTERNAL_API_BASE_URL（需要时加 EXTERNAL_API_TOKEN），再按上面的页面角色用 forge-starter-new-page 做页面。`);
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
