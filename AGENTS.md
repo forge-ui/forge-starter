@@ -111,6 +111,8 @@ docs/product.md agent-native.md setup.md module-template.md page-roles.md refere
 
 参考页索引：`/ref/` · 说明：`docs/reference-pages.md` · 生产开启：`SHOW_REF_PAGES=true`
 
+运行过 `pnpm simple` 的项目只保留 `/ref/detail-modal` 和 `/ref/resource-workspace`；其他 `/ref/<slug>` 打不开时，按 `docs/reference-pages.md` 的「精简后看哪里」列查 Forge Screen（MCP `get_screen`）或上游源码。
+
 ## 官方视觉对照
 
 视觉以主仓 Screens 为准；接线与角色目录统一见 `docs/page-roles.md`、`docs/reference-pages.md`。看板先选主 Screen，再选 Blocks / Components；未导出的区块不能虚构 import。
