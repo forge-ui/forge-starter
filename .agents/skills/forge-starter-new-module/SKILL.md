@@ -22,7 +22,12 @@ UI 下一步：`forge-starter-new-page`（manifest 派生菜单）。
 ## When to use
 
 - 「加 xxx 的数据和接口」「后端模块」「表 + API」
+- 「这是我们的 OpenAPI / Swagger，生成后台模块」
 - 人类说「加 xxx 管理」时的 **第一步**（第二步是 new-page）
+
+## 已有后端（OpenAPI）
+
+用户给了 OpenAPI 文件或地址、后端已经存在时，不建表：先 `pnpm module:openapi <文件|URL>` 把模块清单（字段、页面角色、分页、写操作、跳过原因）给用户确认，再 `--yes [--only id,id]` 生成只读模块，并提醒在 `.env` 设 `EXTERNAL_API_BASE_URL` / `EXTERNAL_API_TOKEN`。生成的页面只是骨架，按清单里的页面角色交给 new-page。写操作不要自己补 API，按 `docs/module-template.md` 的写入要求和页面一起做。
 
 ## 禁止
 

@@ -77,6 +77,8 @@ Skills 只维护 **`.agents/skills/`**。
 
 唯一来源是 `config/modules/<id>.json`。运行 `pnpm modules:generate` 自动派生 `APP_MODULE_IDS`、`APP_MODULE_META`、`MODULE_MENU`、权限资源、知识与服务端工具注册；不要再手改菜单三处或 `lib/agent/registry.ts`。`pnpm typecheck` / `pnpm check` 校验遗漏与漂移。
 
+后端已存在时用 `pnpm module:openapi <openapi.yaml|URL>`：先打印模块清单和页面角色，`--yes` 生成只读模块（外部接口 service + 只读 API + manifest），写入仍在页面阶段接。详见 `docs/module-template.md`。
+
 `pnpm module:new <id> [中文名称]` 生成并注册开发骨架；数据服务默认明确报未实现，不提供假 CRUD。后端与正式页面仍分阶段完成。声明必须提供知识与白名单 reader，或不可读原因；专用工具通过 `tools` 挂接。写草稿共用 API Zod，只有接好页面表单、If-Match、事务回执及读回验证后才能开启，绝不直接写库。
 
 默认产品自动合并新增模块；用户自建或显式配置的应用保留原勾选，需要在应用管理勾选。`rbac_menus` 只是目录，不会生成模块。

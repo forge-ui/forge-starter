@@ -1,0 +1,103 @@
+openapi: 3.0.3
+info: { title: Shop API, version: "1.0" }
+servers:
+  - url: http://127.0.0.1:4010/v1
+tags:
+  - name: 订单
+  - name: customers
+    description: 客户
+paths:
+  /orders:
+    get:
+      tags: [订单]
+      parameters:
+        - { name: page, in: query, schema: { type: integer } }
+        - { name: pageSize, in: query, schema: { type: integer } }
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total: { type: integer }
+                  items: { type: array, items: { $ref: "#/components/schemas/Order" } }
+    post:
+      tags: [订单]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OrderInput" }
+      responses: { "201": { description: created } }
+  /orders/{orderId}:
+    get:
+      parameters: [{ name: orderId, in: path, required: true, schema: { type: string } }]
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/Order" }
+    patch: { responses: { "200": { description: ok } } }
+    delete: { responses: { "204": { description: gone } } }
+  /orders/{orderId}/lines:
+    get:
+      responses:
+        "200": { description: ok, content: { application/json: { schema: { type: array, items: { type: object, properties: { sku: { type: string } } } } } } }
+  /customers:
+    get:
+      tags: [customers]
+      summary: 客户列表
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [id, name]
+                  properties:
+                    id: { type: integer }
+                    name: { type: string, description: 客户名称 }
+                    level: { type: string, enum: [vip, normal], nullable: true }
+                    tags: { type: array, items: { type: string } }
+  /accounts:
+    get:
+      responses:
+        "200": { description: ok, content: { application/json: { schema: { type: array, items: { type: object, properties: { id: { type: string } } } } } } }
+  /health:
+    get:
+      responses:
+        "200": { description: ok, content: { application/json: { schema: { type: object, properties: { status: { type: string } } } } } }
+components:
+  schemas:
+    Base:
+      type: object
+      required: [id]
+      properties:
+        id: { type: string, description: 订单号 }
+        createdAt: { type: string, format: date-time, description: 下单时间 }
+    Order:
+      allOf:
+        - $ref: "#/components/schemas/Base"
+        - type: object
+          required: [status, amount]
+          properties:
+            status: { type: string, enum: [pending, paid, shipped], description: 状态 }
+            amount: { type: number, description: 金额 }
+            customer: { $ref: "#/components/schemas/CustomerRef" }
+            apiToken: { type: string }
+    CustomerRef:
+      type: object
+      properties:
+        id: { type: string }
+    OrderInput:
+      type: object
+      properties:
+        amount: { type: number }
