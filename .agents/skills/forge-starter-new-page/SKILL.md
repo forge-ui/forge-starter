@@ -53,7 +53,7 @@ description: >
 
 ## Step 1 — 定角色与样板
 
-从用户描述确定。**先打开 `/ref/` 对照范式，再抄业务样板接真数据。** 下表只是 Starter 路由捷径；路由与角色目录以 `docs/reference-pages.md` 为准，通用选型以同步规范为准。
+从用户描述确定。**先打开 `/ref/` 对照范式，再抄业务样板接真数据。** 下表只是 Starter 路由捷径；路由与角色目录以 `docs/reference-pages.md` 为准，通用选型以同步规范为准。运行过 `pnpm simple` 的项目只保留 `/ref/detail-modal` 和 `/ref/resource-workspace`；其他 `/ref/<slug>` 打不开时，按 `docs/reference-pages.md` 的「精简后看哪里」列查 Forge Screen（MCP `get_screen`）或上游源码。
 
 | 角色 | 参考页（不进菜单） | 业务可运行样板 |
 |------|-------------------|----------------|

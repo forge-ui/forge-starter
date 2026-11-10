@@ -62,7 +62,9 @@ pnpm install && pnpm db:migrate && pnpm db:seed && pnpm dev
 
 本地打开 [http://localhost:3000](http://localhost:3000)。线上预览：[https://starter.forgeui.org/](https://starter.forgeui.org/)。
 
-更完整的环境变量、种子与排错见下方「快速开始」与 [docs/setup.md](docs/setup.md)。组件库：[forge-ui/forge](https://github.com/forge-ui/forge) · 官网：[forgeui.org](https://forgeui.org)。
+更完整的环境变量、种子与排错见下方「快速开始」与 [docs/setup.md](docs/setup.md)。
+
+不需要 `/ref` 下的 30 多个参考页时，运行 `pnpm simple` 预览、`pnpm simple --yes` 删除，只留编程助手要抄的两个样板，见 [docs/reference-pages.md](docs/reference-pages.md#精简模式)。组件库：[forge-ui/forge](https://github.com/forge-ui/forge) · 官网：[forgeui.org](https://forgeui.org)。
 
 ## 它解决谁的什么问题
 

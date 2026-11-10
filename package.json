@@ -19,6 +19,7 @@
     "modules:generate": "node scripts/generate-modules.mjs",
     "modules:check": "node scripts/generate-modules.mjs --check",
     "module:new": "node scripts/new-module.mjs",
+    "simple": "node scripts/simple.mjs",
     "typecheck": "node scripts/generate-modules.mjs --check && tsc --noEmit",
     "audit:tripwire": "node scripts/generate-modules.mjs --check && node scripts/audit-tripwire.mjs",
     "check": "pnpm typecheck && pnpm audit:tripwire && pnpm test:specs && pnpm check:forge-skill",
