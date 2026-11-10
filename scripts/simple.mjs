@@ -30,7 +30,9 @@ export function catalogWithout(source, removed) {
     if (ts.isVariableDeclaration(node) && node.name.getText(file) === "REF_PAGES" && node.initializer && ts.isArrayLiteralExpression(node.initializer)) {
       for (const element of node.initializer.elements) {
         const slug = ts.isObjectLiteralExpression(element) && element.properties.find(property => ts.isPropertyAssignment(property) && property.name.getText(file) === "slug");
-        if (slug && ts.isStringLiteral(slug.initializer) && removed.includes(slug.initializer.text)) ranges.push([element.getFullStart(), source.indexOf(",", element.getEnd()) + 1 || element.getEnd()]);
+        if (!slug || !ts.isStringLiteral(slug.initializer) || !removed.includes(slug.initializer.text)) continue;
+        const comma = source.slice(element.getEnd()).match(/^\s*,/);
+        ranges.push([element.getFullStart(), element.getEnd() + (comma ? comma[0].length : 0)]);
       }
     }
     ts.forEachChild(node, visit);
@@ -85,7 +87,13 @@ if (process.argv[1] && import.meta.url.endsWith("/" + basename(process.argv[1]))
     process.exit(0);
   }
   if (!process.argv.includes("--force")) {
-    const dirty = execFileSync("git", ["status", "--porcelain"], { cwd: root, encoding: "utf8" }).trim();
+    let dirty;
+    try {
+      dirty = execFileSync("git", ["status", "--porcelain"], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+    } catch {
+      console.error("这里不是 git 仓库，删错了无法恢复。先 git init 并提交一次，或加 --force。");
+      process.exit(1);
+    }
     if (dirty) {
       console.error("工作区有未提交的改动。先提交，删错了才能用 git 恢复；或加 --force。");
       process.exit(1);

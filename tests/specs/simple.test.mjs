@@ -28,3 +28,9 @@ test("docs point every reference page somewhere after simple mode", () => {
   const docs = readFileSync(resolve(root, "docs/reference-pages.md"), "utf8");
   for (const slug of planSimpleMode(root).removedPages) assert.match(docs, new RegExp("\\| `/ref/" + slug + "` \\|.*(Screen|forgeui\\.org|上游源码)"), slug);
 });
+
+test("removing the last catalog entry without a trailing comma leaves the rest of the file alone", () => {
+  const source = 'export const REF_PAGES = [\n  { slug: "a" },\n  { slug: "b" }\n];\n\nexport const other = [1, 2];\n';
+  assert.equal(catalogWithout(source, ["b"]), 'export const REF_PAGES = [\n  { slug: "a" },\n];\n\nexport const other = [1, 2];\n');
+  assert.equal(catalogWithout(source, ["a"]), 'export const REF_PAGES = [\n  { slug: "b" }\n];\n\nexport const other = [1, 2];\n');
+});
