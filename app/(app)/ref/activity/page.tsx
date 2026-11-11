@@ -36,7 +36,7 @@ export default function RefActivityPage() {
         activeIndex={tab}
         onChange={setTab}
       />
-      <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+      <div className="rounded-xl bg-background p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
         {groups.map(([group, items]) => (
           <HistoryGrouped
             key={group}

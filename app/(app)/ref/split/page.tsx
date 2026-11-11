@@ -24,7 +24,7 @@ export default function RefSplitPage() {
   return (
     <RefChrome meta={meta}>
       <div className="grid min-h-[480px] grid-cols-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
-        <div className="flex flex-col gap-3 rounded-xl bg-white p-4 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+        <div className="flex flex-col gap-3 rounded-xl bg-background p-4 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
           <TextField
             color={siteConfig.accent}
             value={search}
@@ -59,7 +59,7 @@ export default function RefSplitPage() {
           </ul>
         </div>
 
-        <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+        <div className="rounded-xl bg-background p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
           {active ? (
             <div className="flex flex-col gap-4">
               <div className="flex flex-wrap items-start justify-between gap-3">

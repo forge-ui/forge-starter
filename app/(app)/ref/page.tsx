@@ -36,7 +36,7 @@ export default function RefIndexPage() {
           <Link
             key={page.slug}
             href={refPath(page.slug)}
-            className="flex flex-col gap-3 rounded-2xl bg-white p-5 outline outline-1 outline-offset-[-1px] outline-fg-grey-200 transition hover:outline-fg-blue-200"
+            className="flex flex-col gap-3 rounded-2xl bg-background p-5 outline outline-1 outline-offset-[-1px] outline-fg-grey-200 transition hover:outline-fg-blue-200"
           >
             <div className="flex items-start justify-between gap-2">
               <h2 className="text-base font-semibold text-fg-black">{page.title}</h2>
@@ -52,7 +52,7 @@ export default function RefIndexPage() {
         ))}
       </div>
 
-      <div className="rounded-2xl bg-white p-5 text-sm text-fg-grey-600 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+      <div className="rounded-2xl bg-background p-5 text-sm text-fg-grey-600 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
         <p className="font-semibold text-fg-black">可运行业务样板（在菜单里）</p>
         <ul className="mt-2 list-inside list-disc space-y-1">
           <li>

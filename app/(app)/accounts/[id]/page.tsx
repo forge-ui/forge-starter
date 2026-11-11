@@ -173,10 +173,10 @@ export default function AccountDetailPage({
         {/* Profile structure from Forge project-template/members/[id]. */}
         <Grid gap={24} alignItems="start">
           <GridItem span={{ base: "full", xl: 4, "2xl": 3 }} className="flex min-w-0 flex-col gap-5">
-            <aside aria-label="账号档案" className="overflow-hidden rounded-card border border-fg-grey-200 bg-white">
+            <aside aria-label="账号档案" className="overflow-hidden rounded-card border border-fg-grey-200 bg-background">
               <div aria-hidden="true" className="h-24 bg-gradient-to-br from-fg-blue-100 via-fg-grey-50 to-fg-violet-100" />
               <div className="relative -mt-10 flex flex-col items-center px-5 pb-5 text-center">
-                <div className="rounded-full border-4 border-white bg-white"><Avatar src={account.avatarUrl} alt={account.name} size="xl" /></div>
+                <div className="rounded-full border-4 border-white bg-background"><Avatar src={account.avatarUrl} alt={account.name} size="xl" /></div>
                 <h2 className="mt-3 max-w-full break-words text-xl font-semibold text-fg-black">{account.name}</h2>
                 <p className="mt-1 max-w-full break-all text-sm text-fg-grey-700">@{account.username}</p>
                 <p className="mt-2 text-sm text-fg-grey-700">{account.department} · {account.role}</p>
@@ -210,7 +210,7 @@ export default function AccountDetailPage({
               <TabsContent activeKey={tab} ariaLabel={tab === 0 ? "账号概览" : "同部门账号"}>
               {tab === 0 ? (
                 <div className="flex flex-col gap-5" role="region" aria-label="账号概览">
-                  <section className="rounded-card border border-fg-grey-200 bg-white p-6">
+                  <section className="rounded-card border border-fg-grey-200 bg-background p-6">
                     <h2 className="mb-5 text-base font-semibold text-fg-black">基本资料</h2>
                     <Grid gap={24}>
                       <GridItem span={{ base: "full", sm: 6 }}><DescriptionItem label="姓名" content={account.name} /></GridItem>
@@ -230,7 +230,7 @@ export default function AccountDetailPage({
               ) : (
                 <section className="flex min-w-0 flex-col gap-4" aria-label="同部门账号">
                   <div><h2 className="text-base font-semibold text-fg-black">{account.department}的其他账号</h2><p className="mt-1 text-sm text-fg-grey-700">点击姓名查看账号档案。</p></div>
-                  {related.length ? <DataTable<AdminAccount> color={siteConfig.accent} columns={columns} rows={related} tableMinWidth={640} /> : <div className="rounded-card border border-fg-grey-200 bg-white px-6 py-12 text-center text-sm text-fg-grey-500">同部门暂无其他账号</div>}
+                  {related.length ? <DataTable<AdminAccount> color={siteConfig.accent} columns={columns} rows={related} tableMinWidth={640} /> : <div className="rounded-card border border-fg-grey-200 bg-background px-6 py-12 text-center text-sm text-fg-grey-500">同部门暂无其他账号</div>}
                 </section>
               )}
               </TabsContent>

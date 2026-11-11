@@ -45,7 +45,7 @@ export default function RefFormPage() {
         <Button color={siteConfig.accent}>保存线索</Button>
       </div>
 
-      <div className="rounded-[28px] bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200 sm:p-8">
+      <div className="rounded-[28px] bg-background p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200 sm:p-8">
         <h2 className="text-base font-semibold text-fg-black">新建线索（整页表单）</h2>
         <p className="mt-1 text-sm text-fg-grey-500">
           对齐 CRM leads/new：双列表单 + 底部说明 + 主操作。字段多为默认形态。

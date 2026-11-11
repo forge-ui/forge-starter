@@ -52,7 +52,7 @@ export default function RefDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
-        <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+        <div className="rounded-xl bg-background p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
           <h2 className="text-lg font-semibold text-fg-black">{record.title}</h2>
           <p className="mt-1 text-sm text-fg-grey-500">
             {record.subtitle} · 负责人 {record.owner} · {record.updated}
@@ -64,7 +64,7 @@ export default function RefDetailPage() {
             <Field label="说明" value={record.description} />
           </div>
         </div>
-        <aside className="self-start rounded-xl bg-white p-5 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+        <aside className="self-start rounded-xl bg-background p-5 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
           <h3 className="mb-1 text-base font-semibold text-fg-black">摘要</h3>
           <Field label="状态" value={status.label} />
           <Field label="负责人" value={record.owner} />

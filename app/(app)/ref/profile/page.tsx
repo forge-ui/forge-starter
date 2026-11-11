@@ -117,7 +117,7 @@ export default function RefProfilePage() {
 
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-[340px_minmax(0,1fr)]">
         {/* Left: personal card — members/[id] aside */}
-        <aside className="overflow-hidden rounded-[28px] bg-white outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+        <aside className="overflow-hidden rounded-[28px] bg-background outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
           <div className="h-28 bg-gradient-to-r from-fg-blue to-fg-blue-100" />
           <div className="-mt-10 flex flex-col items-center px-6 pb-6 text-center">
             <Avatar src={person.avatar} size="lg" />
@@ -193,7 +193,7 @@ export default function RefProfilePage() {
               getRowKey={(row) => row.id}
             />
           ) : (
-            <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+            <div className="rounded-xl bg-background p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
               <HistoryGrouped
                 title="近期动态"
                 color={siteConfig.accent}

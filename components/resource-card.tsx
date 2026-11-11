@@ -106,7 +106,7 @@ export function ResourceCard({
 
   return (
     <article
-      className={`flex h-full flex-col border border-fg-grey-200 bg-white ${
+      className={`flex h-full flex-col border border-fg-grey-200 bg-background ${
         compact ? "rounded-xl p-3" : "rounded-2xl p-4"
       } ${
         interactive

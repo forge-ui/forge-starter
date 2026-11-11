@@ -135,7 +135,7 @@ function progressColor(task: BoardTask): "green" | "red" | "yellow" {
 
 function TaskCard({ task, tone }: { task: BoardTask; tone: "grey" | "yellow" | "green" | "red" }) {
   return (
-    <article className="rounded-[24px] border border-fg-grey-200 bg-white p-5">
+    <article className="rounded-[24px] border border-fg-grey-200 bg-background p-5">
       <div className="flex items-start justify-between gap-2">
         <StatusBadge label={task.priority} color={priorityColor(task.priority)} />
         <Link

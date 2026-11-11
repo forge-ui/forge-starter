@@ -68,7 +68,7 @@ export default function RefFilesPage() {
             <button
               key={folder.id}
               type="button"
-              className="flex items-center gap-3 rounded-2xl bg-white p-4 text-left outline outline-1 outline-offset-[-1px] outline-fg-grey-200 hover:outline-fg-blue-200"
+              className="flex items-center gap-3 rounded-2xl bg-background p-4 text-left outline outline-1 outline-offset-[-1px] outline-fg-grey-200 hover:outline-fg-blue-200"
             >
               <FileTypeIcon fileName={`${folder.name}/`} />
               <div className="min-w-0">
@@ -96,7 +96,7 @@ export default function RefFilesPage() {
           ))}
         </div>
         {visibleFiles.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-fg-grey-200 bg-white py-12 text-center text-sm text-fg-grey-500">
+          <p className="rounded-2xl border border-dashed border-fg-grey-200 bg-background py-12 text-center text-sm text-fg-grey-500">
             无匹配文件
           </p>
         ) : null}

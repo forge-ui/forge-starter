@@ -59,7 +59,7 @@ function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[28px] border border-fg-grey-200 bg-white p-6">
+    <section className="rounded-[28px] border border-fg-grey-200 bg-background p-6">
       <div className="mb-5 flex items-center justify-between">
         <h3 className="text-lg font-semibold text-fg-black">{title}</h3>
         {action}
@@ -214,7 +214,7 @@ export default function RefProjectPage() {
                 <h3 className="mb-3 text-sm font-semibold text-fg-black">{col}</h3>
                 <Link
                   href="/ref/task/"
-                  className="block rounded-2xl border border-fg-grey-200 bg-white p-4 hover:border-fg-blue-200"
+                  className="block rounded-2xl border border-fg-grey-200 bg-background p-4 hover:border-fg-blue-200"
                 >
                   <StatusBadge
                     label={i === 3 ? "High" : i === 1 ? "Medium" : "Low"}
@@ -251,7 +251,7 @@ export default function RefProjectPage() {
           {project.members.map((m) => (
             <div
               key={m.name}
-              className="flex items-center justify-between rounded-[24px] border border-fg-grey-200 bg-white p-5"
+              className="flex items-center justify-between rounded-[24px] border border-fg-grey-200 bg-background p-5"
             >
               <div className="flex items-center gap-3">
                 <Avatar src={m.avatar} size="md" />

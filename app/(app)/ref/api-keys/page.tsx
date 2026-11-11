@@ -180,7 +180,7 @@ export default function RefApiKeysPage() {
             关闭后无法再次查看完整值（示意）。
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <code className="flex-1 rounded-xl bg-white px-3 py-2 font-mono text-sm text-fg-black outline outline-1 outline-fg-grey-200">
+            <code className="flex-1 rounded-xl bg-background px-3 py-2 font-mono text-sm text-fg-black outline outline-1 outline-fg-grey-200">
               {revealedKey}
             </code>
             <Button

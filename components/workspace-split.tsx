@@ -31,7 +31,7 @@ export function WorkspaceSplit({
   className?: string;
 }) {
   return (
-    <div className={`flex min-h-[32rem] flex-1 gap-0 overflow-hidden rounded-2xl border border-fg-grey-200 bg-white ${className}`.trim()}>
+    <div className={`flex min-h-[32rem] flex-1 gap-0 overflow-hidden rounded-2xl border border-fg-grey-200 bg-background ${className}`.trim()}>
       <aside
         className={`flex shrink-0 flex-col border-r border-fg-grey-200 bg-fg-grey-50/60 ${leftWidthClassName}`}
       >
@@ -69,7 +69,7 @@ export function FolderNav({
           <div
             key={folder.id}
             className={`flex items-center rounded-xl pr-1 transition ${
-              active ? "bg-fg-blue-50" : "hover:bg-white"
+              active ? "bg-fg-blue-50" : "hover:bg-background"
             }`}
           >
             <button
@@ -82,7 +82,7 @@ export function FolderNav({
               }`}
             >
               {folder.icon ? (
-                <span className="flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-md bg-white">
+                <span className="flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-md bg-background">
                   {folder.icon}
                 </span>
               ) : (

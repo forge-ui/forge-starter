@@ -325,7 +325,7 @@ function MenusPageContent() {
       </div>
 
       {error ? (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-[28px] border border-dashed border-fg-grey-200 bg-white py-16">
+        <div className="flex flex-col items-center justify-center gap-3 rounded-[28px] border border-dashed border-fg-grey-200 bg-background py-16">
           <p className="text-lg font-semibold text-fg-black">无法加载菜单</p>
           <p className="max-w-md text-center text-sm text-fg-grey-700">{error}</p>
           <Button color={siteConfig.accent} onClick={() => void refresh()}>
@@ -333,11 +333,11 @@ function MenusPageContent() {
           </Button>
         </div>
       ) : loading ? (
-        <div className="rounded-[28px] border border-fg-grey-200 bg-white py-16 text-center text-sm text-fg-grey-500">
+        <div className="rounded-[28px] border border-fg-grey-200 bg-background py-16 text-center text-sm text-fg-grey-500">
           加载中…
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-4 rounded-[28px] border border-dashed border-fg-grey-200 bg-white py-16">
+        <div className="flex flex-col items-center justify-center gap-4 rounded-[28px] border border-dashed border-fg-grey-200 bg-background py-16">
           <p className="text-lg font-semibold text-fg-black">
             {menus.length === 0 ? "暂无菜单" : "无匹配结果"}
           </p>
