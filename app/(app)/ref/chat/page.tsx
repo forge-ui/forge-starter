@@ -41,7 +41,7 @@ export default function RefChatPage() {
   return (
     <RefChrome meta={meta}>
       <div className="grid min-h-[640px] grid-cols-1 gap-4 xl:grid-cols-[300px_minmax(0,1fr)]">
-        <div className="flex flex-col overflow-hidden rounded-xl bg-white outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+        <div className="flex flex-col overflow-hidden rounded-xl bg-background outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
           <div className="border-b border-fg-grey-200 p-3">
             <TextField
               color={siteConfig.accent}
@@ -70,7 +70,7 @@ export default function RefChatPage() {
           </div>
         </div>
 
-        <div className="flex min-w-0 flex-col overflow-hidden rounded-xl bg-white outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+        <div className="flex min-w-0 flex-col overflow-hidden rounded-xl bg-background outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
           <div className="flex items-center justify-between gap-3 border-b border-fg-grey-200 px-4 py-3">
             <div className="flex items-center gap-3">
               <Avatar src={active.avatar} size="md" />

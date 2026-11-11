@@ -63,7 +63,7 @@ export default function RefInvoicePage() {
       </div>
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <section className="min-w-0 rounded-[28px] border border-fg-grey-200 bg-white p-6 sm:p-8">
+        <section className="min-w-0 rounded-[28px] border border-fg-grey-200 bg-background p-6 sm:p-8">
           <div className="flex flex-col justify-between gap-5 border-b border-fg-grey-200 pb-6 lg:flex-row lg:items-start">
             <div>
               <p className="text-sm font-medium text-fg-grey-500">Invoice Number</p>
@@ -113,7 +113,7 @@ export default function RefInvoicePage() {
           </div>
         </section>
 
-        <aside className="rounded-[28px] border border-fg-grey-200 bg-white p-6">
+        <aside className="rounded-[28px] border border-fg-grey-200 bg-background p-6">
           <p className="text-xs font-medium uppercase tracking-fg text-fg-grey-500">Payment schedule</p>
           <h3 className="mt-1 text-lg font-semibold text-fg-black">Invoice Summary</h3>
           <div className="mt-4">

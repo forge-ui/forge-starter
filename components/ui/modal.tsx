@@ -56,7 +56,7 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`forge-motion-surface flex max-h-[min(90vh,720px)] flex-col overflow-hidden rounded-card bg-white shadow-lg ${width} max-w-full ${className}`}
+        className={`forge-motion-surface flex max-h-[min(90vh,720px)] flex-col overflow-hidden rounded-card bg-background shadow-lg ${width} max-w-full ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
         {title ? (

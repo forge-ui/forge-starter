@@ -182,19 +182,19 @@ export default function RefCreditsPage() {
           </p>
         </div>
         <div className="grid grid-cols-2 gap-4 lg:col-span-2">
-          <div className="rounded-[24px] border border-fg-grey-200 bg-white p-5">
+          <div className="rounded-[24px] border border-fg-grey-200 bg-background p-5">
             <p className="text-xs text-fg-grey-500">本月发放</p>
             <p className="mt-2 text-2xl font-semibold text-fg-black">+2,700</p>
           </div>
-          <div className="rounded-[24px] border border-fg-grey-200 bg-white p-5">
+          <div className="rounded-[24px] border border-fg-grey-200 bg-background p-5">
             <p className="text-xs text-fg-grey-500">本月消耗</p>
             <p className="mt-2 text-2xl font-semibold text-fg-black">−160</p>
           </div>
-          <div className="rounded-[24px] border border-fg-grey-200 bg-white p-5">
+          <div className="rounded-[24px] border border-fg-grey-200 bg-background p-5">
             <p className="text-xs text-fg-grey-500">即将过期（7 日）</p>
             <p className="mt-2 text-2xl font-semibold text-amber-600">80</p>
           </div>
-          <div className="rounded-[24px] border border-fg-grey-200 bg-white p-5">
+          <div className="rounded-[24px] border border-fg-grey-200 bg-background p-5">
             <p className="text-xs text-fg-grey-500">活跃批次</p>
             <p className="mt-2 text-2xl font-semibold text-fg-black">3</p>
           </div>

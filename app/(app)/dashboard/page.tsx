@@ -183,7 +183,7 @@ export default function DashboardPage() {
 
       <Grid gap={24}>
         <GridItem span={{ base: "full", lg: 8 }}>
-        <div className="flex flex-col gap-5 rounded-3xl border border-fg-grey-200 bg-white p-6">
+        <div className="flex flex-col gap-5 rounded-3xl border border-fg-grey-200 bg-background p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h3 className="text-lg font-semibold text-fg-black">状态趋势</h3>
@@ -192,7 +192,7 @@ export default function DashboardPage() {
             <div className="inline-flex items-center gap-1 rounded-full bg-fg-grey-100 p-1 text-xs">
               <button type="button" className="px-3 py-1.5 text-fg-grey-500">日</button>
               <button type="button" className="px-3 py-1.5 text-fg-grey-500">周</button>
-              <button type="button" className="rounded-full bg-white px-3 py-1.5 text-fg-black shadow-sm">月</button>
+              <button type="button" className="rounded-full bg-background px-3 py-1.5 text-fg-black shadow-sm">月</button>
               <button type="button" className="px-3 py-1.5 text-fg-grey-500">年</button>
             </div>
           </div>
@@ -239,7 +239,7 @@ export default function DashboardPage() {
         </GridItem>
 
         <GridItem span={{ base: "full", lg: 4 }}>
-        <div className="flex flex-col gap-5 rounded-3xl border border-fg-grey-200 bg-white p-6">
+        <div className="flex flex-col gap-5 rounded-3xl border border-fg-grey-200 bg-background p-6">
           <div className="flex items-start justify-between">
             <div>
               <h3 className="text-lg font-semibold text-fg-black">状态占比</h3>
@@ -342,7 +342,7 @@ export default function DashboardPage() {
         />
       </Grid>
 
-      <div className="flex flex-col gap-5 rounded-3xl border border-fg-grey-200 bg-white p-6">
+      <div className="flex flex-col gap-5 rounded-3xl border border-fg-grey-200 bg-background p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h3 className="text-lg font-semibold text-fg-black">最近账号</h3>

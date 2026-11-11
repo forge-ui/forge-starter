@@ -142,7 +142,7 @@ export default function RefProductPage() {
             ].map(([k, v]) => (
               <div
                 key={k}
-                className="rounded-2xl bg-white p-4 outline outline-1 outline-offset-[-1px] outline-fg-grey-200"
+                className="rounded-2xl bg-background p-4 outline outline-1 outline-offset-[-1px] outline-fg-grey-200"
               >
                 <p className="text-xs text-fg-grey-500">{k}</p>
                 <p className="mt-1 text-lg font-semibold text-fg-black">{v}</p>
@@ -161,7 +161,7 @@ export default function RefProductPage() {
 
           <TabsContent activeKey={tab}>
           {tab === 0 ? (
-            <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+            <div className="rounded-xl bg-background p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
               <h3 className="text-base font-semibold text-fg-black">商品说明</h3>
               <p className="mt-3 text-sm leading-6 text-fg-grey-700">
                 多 Tab 产品详情范式：左侧媒体，右侧指标 + Tab（详情 / 订单 / 评价 / 留言）。
@@ -197,7 +197,7 @@ export default function RefProductPage() {
               {reviews.map((r) => (
                 <div
                   key={r.id}
-                  className="rounded-xl bg-white p-4 outline outline-1 outline-offset-[-1px] outline-fg-grey-200"
+                  className="rounded-xl bg-background p-4 outline outline-1 outline-offset-[-1px] outline-fg-grey-200"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-semibold text-fg-black">{r.customer}</p>
@@ -215,7 +215,7 @@ export default function RefProductPage() {
               {messages.map((m) => (
                 <div
                   key={m.id}
-                  className="flex items-start justify-between gap-3 rounded-xl bg-white p-4 outline outline-1 outline-offset-[-1px] outline-fg-grey-200"
+                  className="flex items-start justify-between gap-3 rounded-xl bg-background p-4 outline outline-1 outline-offset-[-1px] outline-fg-grey-200"
                 >
                   <div>
                     <p className="text-sm font-semibold text-fg-black">{m.customer}</p>

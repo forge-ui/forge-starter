@@ -157,7 +157,7 @@ export default function RefTicketsPage() {
 
       <div className="grid min-h-[560px] grid-cols-1 gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
         {/* Ticket list */}
-        <div className="flex flex-col overflow-hidden rounded-[24px] border border-fg-grey-200 bg-white">
+        <div className="flex flex-col overflow-hidden rounded-[24px] border border-fg-grey-200 bg-background">
           <div className="border-b border-fg-grey-100 px-4 py-3">
             <h3 className="text-sm font-semibold text-fg-black">工单列表</h3>
             <p className="text-xs text-fg-grey-500">用户侧 / 运营侧同一线程范式</p>
@@ -189,7 +189,7 @@ export default function RefTicketsPage() {
         </div>
 
         {/* Thread */}
-        <div className="flex min-w-0 flex-col overflow-hidden rounded-[24px] border border-fg-grey-200 bg-white">
+        <div className="flex min-w-0 flex-col overflow-hidden rounded-[24px] border border-fg-grey-200 bg-background">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-fg-grey-100 px-5 py-4">
             <div>
               <h3 className="text-base font-semibold text-fg-black">{active.title}</h3>

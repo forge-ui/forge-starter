@@ -7,7 +7,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   const year = new Date().getFullYear();
 
   return (
-    <div className="flex min-h-screen w-full items-stretch bg-white p-6">
+    <div className="flex min-h-screen w-full items-stretch bg-background p-6">
       <div className="relative hidden h-auto w-[640px] shrink-0 overflow-hidden rounded-2xl lg:block">
         <img
           src={asset("/images/hero.png")}

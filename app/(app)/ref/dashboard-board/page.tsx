@@ -82,7 +82,7 @@ export default function RefDashboardBoardPage() {
           chartColor="blue"
           width="full"
         />
-        <div className="rounded-xl bg-white p-4 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+        <div className="rounded-xl bg-background p-4 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
           <h3 className="mb-3 text-sm font-semibold text-fg-black">今日活动</h3>
           <ul className="flex flex-col gap-2">
             {REF_RECORDS.slice(0, 4).map((r) => (

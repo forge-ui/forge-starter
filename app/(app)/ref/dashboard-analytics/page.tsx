@@ -277,7 +277,7 @@ export default function RefDashboardAnalyticsPage() {
 
       {/* Statistic bars + Campaign goals */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="flex flex-col gap-4 rounded-3xl border border-fg-grey-200 bg-white p-4 lg:col-span-2">
+        <div className="flex flex-col gap-4 rounded-3xl border border-fg-grey-200 bg-background p-4 lg:col-span-2">
           <div>
             <h3 className="text-sm font-semibold text-fg-black">Statistic</h3>
             <p className="text-sm text-fg-grey-500">Income and expenses（分组柱示意）</p>
@@ -397,7 +397,7 @@ export default function RefDashboardAnalyticsPage() {
 
       {/* Dual tables */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="flex flex-col gap-4 rounded-3xl border border-fg-grey-200 bg-white p-4">
+        <div className="flex flex-col gap-4 rounded-3xl border border-fg-grey-200 bg-background p-4">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
               <h3 className="text-sm font-semibold text-fg-black">Top Referral Pages</h3>
@@ -415,7 +415,7 @@ export default function RefDashboardAnalyticsPage() {
           />
         </div>
 
-        <div className="flex flex-col gap-4 rounded-3xl border border-fg-grey-200 bg-white p-4">
+        <div className="flex flex-col gap-4 rounded-3xl border border-fg-grey-200 bg-background p-4">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
               <h3 className="text-sm font-semibold text-fg-black">Top Performing Pages</h3>

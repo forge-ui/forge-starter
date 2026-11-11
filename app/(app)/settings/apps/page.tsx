@@ -338,7 +338,7 @@ function SettingsAppsContent() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-4 rounded-[28px] border border-dashed border-fg-grey-200 bg-white py-16">
+        <div className="flex flex-col items-center justify-center gap-4 rounded-[28px] border border-dashed border-fg-grey-200 bg-background py-16">
           <p className="text-lg font-semibold text-fg-black">
             {apps.length === 0 ? "暂无应用" : "无匹配结果"}
           </p>

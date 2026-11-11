@@ -21,7 +21,7 @@ export default function RefFormModalPage() {
 
   return (
     <RefChrome meta={meta}>
-      <div className="flex flex-col items-start gap-4 rounded-xl bg-white p-8 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+      <div className="flex flex-col items-start gap-4 rounded-xl bg-background p-8 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
         <p className="text-sm text-fg-grey-600">
           字段不多时：列表页主按钮打开 Modal，不要整页表单。
         </p>

@@ -139,7 +139,7 @@ export default function RefBillingPage() {
   return (
     <RefChrome meta={meta}>
       {/* Current plan */}
-      <section className="rounded-[28px] border border-fg-grey-200 bg-white p-6 sm:p-8">
+      <section className="rounded-[28px] border border-fg-grey-200 bg-background p-6 sm:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <p className="text-xs font-medium uppercase tracking-fg text-fg-grey-500">

@@ -91,7 +91,7 @@ export default function RefPersonPage() {
   return (
     <RefChrome meta={meta}>
       {/* Header strip like CRM customer detail */}
-      <div className="flex flex-wrap items-start justify-between gap-4 rounded-[28px] bg-white p-5 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+      <div className="flex flex-wrap items-start justify-between gap-4 rounded-[28px] bg-background p-5 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
         <div className="flex min-w-0 items-center gap-4">
           <Avatar src={person.avatar} size="lg" />
           <div className="min-w-0">
@@ -129,7 +129,7 @@ export default function RefPersonPage() {
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[320px_minmax(0,1fr)]">
         {/* Left profile panel: Details / Address */}
-        <aside className="rounded-[28px] bg-white p-5 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+        <aside className="rounded-[28px] bg-background p-5 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
           <div className="mb-3 border-b border-fg-grey-200">
             <TabBar
               color={siteConfig.accent}
@@ -190,7 +190,7 @@ export default function RefPersonPage() {
           <div className="mt-4">
             <TabsContent activeKey={tab}>
           {tab === 0 ? (
-              <div className="rounded-xl bg-white p-5 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+              <div className="rounded-xl bg-background p-5 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
                 <HistoryGrouped
                   title="客户动态"
                   color={siteConfig.accent}
@@ -213,7 +213,7 @@ export default function RefPersonPage() {
             ) : null}
 
             {tab === 2 || tab === 3 ? (
-              <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+              <div className="rounded-xl bg-background p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
                 <p className="text-sm text-fg-grey-600">
                   {tab === 2 ? "通话" : "会议"}计划列表示意（可接日程/记录 API）。
                 </p>
@@ -236,7 +236,7 @@ export default function RefPersonPage() {
                 {["Contract.pdf", "NDA.docx", "Pricing.xlsx"].map((name) => (
                   <div
                     key={name}
-                    className="flex items-center justify-between rounded-xl bg-white px-4 py-3 outline outline-1 outline-offset-[-1px] outline-fg-grey-200"
+                    className="flex items-center justify-between rounded-xl bg-background px-4 py-3 outline outline-1 outline-offset-[-1px] outline-fg-grey-200"
                   >
                     <span className="text-sm font-medium text-fg-black">{name}</span>
                     <Button color={siteConfig.accent} variant="tertiary">
@@ -248,7 +248,7 @@ export default function RefPersonPage() {
             ) : null}
 
             {tab === 5 ? (
-              <div className="rounded-xl bg-white p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
+              <div className="rounded-xl bg-background p-6 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
                 <p className="text-sm leading-6 text-fg-grey-700">
                   客户要求按团队规模报价，优先演示权限与审批流。续约窗口在 Q3。
                 </p>
