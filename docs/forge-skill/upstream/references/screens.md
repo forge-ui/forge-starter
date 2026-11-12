@@ -28,11 +28,11 @@ corepack pnpm dev --hostname 127.0.0.1 --port 3219
 | project-1 | 项目进展与协作概览 | src/app/templates/(dashboards)/dashboards/project-1/page.tsx |
 | project-2 | 项目任务与资源概览 | src/app/templates/(dashboards)/dashboards/project-2/page.tsx |
 
-具体布局与尺寸见 [页面规范](page-recommended-standard.md)；区块抽取状态见 [Blocks](blocks.md)。
+具体布局与尺寸见 [页面规范](page-recommended-standard.md)；页面组件抽取状态见 [Blocks](blocks.md)。
 
 ## 实现分层
 
-十个页面已直接使用 AppLayout；卡壳用 Panel，区块从 blocks/ 复制。原 dashboard-density、DashboardShell、Figma 前缀图表与私有 WalletGoalCard 已删除；公共图表与密度 API 见 [Blocks](blocks.md)。
+十个页面已直接使用 AppLayout；卡壳用 Panel，页面组件从 blocks/ 复制。原 dashboard-density、DashboardShell、Figma 前缀图表与私有 WalletGoalCard 已删除；公共图表与密度 API 见 [Blocks](blocks.md)。
 
 这是源码迁移状态，不是截图验收结论：须逐页比较 1440 与 375 两档、同字体/侧栏/固定数据的前后截图，记录不同尺寸或有意差异，不能用 build 代替。
 

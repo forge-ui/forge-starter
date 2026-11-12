@@ -4,6 +4,9 @@
 /* Let Tailwind v4 scan the Forge dist so utility classes used inside core get generated. */
 @source "../node_modules/@forge-ui-official/core/dist";
 
+/* The logo is a single-color SVG loaded as an image, so it cannot follow currentColor. */
+[data-theme="dark"] .starter-logo { filter: invert(1); }
+
 /* Shared scrollbar treatment; core's hidden and Ask AI scrollbars keep priority. */
 @layer base {
   :where(html, body, body *):not(.fg-scrollbar-hidden) {
