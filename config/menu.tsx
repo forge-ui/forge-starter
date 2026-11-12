@@ -1,5 +1,6 @@
 "use client";
 
+import { SettingsBoldDuotone } from "@forge-ui-official/core/icons";
 import { moduleIcons } from "./module-icons.generated";
 import { MODULES } from "./modules.generated";
 import type { AppLayoutMenuItem, AppLayoutProfile } from "@forge-ui-official/core";
@@ -15,6 +16,9 @@ export const MODULE_MENU = Object.fromEntries(MODULES.map(module => {
   const Icon = moduleIcons[module.menu.icon as keyof typeof moduleIcons];
   return [module.id, { icon: <Icon size={20} />, label: module.label, href: module.menu.href }];
 })) as Record<AppModuleId, AppLayoutMenuItem>;
+
+// Personal preference, not a module: every signed-in user sees it and no permission guards it.
+export const APPEARANCE_MENU: AppLayoutMenuItem = { icon: <SettingsBoldDuotone size={20} />, label: "外观", href: "/settings/appearance/" };
 
 /** Default full product menu */
 export const menuItems: AppLayoutMenuItem[] = APP_MODULE_IDS.map((id) => MODULE_MENU[id]);
@@ -37,7 +41,7 @@ export function menuItemsForApp(
   }
 
   const allowed = new Set(allowedModules);
-  return ids.filter((id) => allowed.has(id)).map((id) => MODULE_MENU[id]);
+  return [...ids.filter((id) => allowed.has(id)).map((id) => MODULE_MENU[id]), APPEARANCE_MENU];
 }
 
 export const defaultProfile: AppLayoutProfile = {

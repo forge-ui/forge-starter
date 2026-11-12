@@ -19,6 +19,7 @@ export const routeShells: Record<string, RouteShell> = {
   ...Object.fromEntries(MODULES.map(module => [module.menu.href.replace(/\/$/, ""), { title: module.label, hideHeader: true }])),
   "/settings": { title: "设置", hideHeader: true },
   "/settings/apps": { title: "应用管理", hideHeader: true },
+  "/settings/appearance": { title: "外观", hideHeader: true },
   "/ref": { title: "页面参考库", hideHeader: true },
 };
 

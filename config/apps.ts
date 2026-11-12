@@ -37,7 +37,7 @@ export function moduleIdForPath(pathname: string): AppModuleId | null {
   const normalized =
     pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
   if (!normalized || normalized === "/ref" || normalized.startsWith("/ref/")) return null;
-  if (normalized === "/settings/profile" || normalized === "/settings/security" || normalized === "/settings/notifications") {
+  if (normalized === "/settings/profile" || normalized === "/settings/security" || normalized === "/settings/notifications" || normalized === "/settings/appearance") {
     return null;
   }
   const matches = APP_MODULE_IDS.filter((id) => {

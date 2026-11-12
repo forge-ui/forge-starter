@@ -255,7 +255,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div data-starter-shell>
         <AppLayout
           mode="light"
-          logo={<img src={asset("/images/forge-logo.svg")} alt="Forge" className="size-8" />}
+          logo={<img src={asset("/images/forge-logo.svg")} alt="Forge" className="starter-logo size-8" />}
           profilePosition="sidebar"
           accent={siteConfig.accent}
           appName={activeApp.name}

@@ -24,7 +24,7 @@
 |---|---|---|
 | 基础表单填写区上限 | 640px，实际宽为 min(可用宽, 640px) | 限制长视线与字段过宽；外层页面可继续填满，不要求所有卡片等宽 |
 | 分组表单/详情主阅读区上限 | 960px，实际宽不超过可用宽 | 容纳相关短字段与描述组；大表、附件预览可独立用满内容区 |
-| 页面区块间距 | 24px；窄空间可用16px | 区别于字段内部间距；不与已有外壳 padding 叠加成双份留白 |
+| 页面组件间距 | 24px；窄空间可用16px | 区别于字段内部间距；不与已有外壳 padding 叠加成双份留白 |
 | 独立字段间距 / 业务组间距 | 16px / 24px | 通过节奏表达关联层次；组件内标签、错误间距沿组件契约 |
 | 两列字段间距 / 单列最小预算 | 24px / 280px | 为标签、输入、说明保留基础空间；280仅为起点，长字段可要求更宽 |
 | 左右标签变体 | 初始标签预算120px，标签与值间距16px | 只用于短而稳定的同组标签；允许多行，不强行省略；更长标签优先改上标签 |
@@ -120,7 +120,7 @@
 | 层级/部位 | 基线 / 响应式规则 | 源码出处 |
 |---|---|---|
 | 页面外壳内容padding | base `p-4`=16px；sm起 `p-5`=20px；页面不再叠一份 | `core/src/components/layouts/app-layout.tsx:863` |
-| 看板区块纵向间距 | 外层 `flex flex-col gap-5`=20px | `src/app/templates/(dashboards)/dashboards/analytics/page.tsx:183`；`src/app/templates/(dashboards)/dashboards/finance-3/page.tsx:135` |
+| 看板页面组件纵向间距 | 外层 `flex flex-col gap-5`=20px | `src/app/templates/(dashboards)/dashboards/analytics/page.tsx:183`；`src/app/templates/(dashboards)/dashboards/finance-3/page.tsx:135` |
 | Grid内部行/列gap | 默认16px，不继承section的20px | `core/src/components/layouts/grid.tsx:43`；analytics的Grid未显式改gap，见`:194`、`:202`、`:238`、`:297` |
 | KPI行 | base1列、sm2列、lg4等分；卡 `width="full"`、size=wide | `src/app/templates/(dashboards)/dashboards/analytics/page.tsx:194` 至`:198` |
 | 主图+辅助块 | base依DOM顺序全宽堆叠；lg默认12轨道中的8:4 | `src/app/templates/(dashboards)/dashboards/analytics/page.tsx:202`、`:203`、`:214` |
@@ -128,7 +128,7 @@
 | 底部两列 | base1列；lg2等分 | `src/app/templates/(dashboards)/dashboards/analytics/page.tsx:297` |
 | finance-3主结构 | base1列；lg4轨道，左span1、右span3；列gap16px | `src/app/templates/(dashboards)/dashboards/finance-3/page.tsx:137`、`:139`、`:199` |
 | finance-3右区内嵌行 | 独立3轨道，2:1；不是整页再次2:1 | `src/app/templates/(dashboards)/dashboards/finance-3/page.tsx:251`、`:253`、`:277` |
-| 标题型图表/表格卡壳 | `rounded-3xl bg-white border border-fg-grey-200 p-4 flex flex-col gap-4`；即padding16、卡内gap16、圆角24px（默认换算） | `src/app/templates/(dashboards)/dashboards/analytics/page.tsx:203`、`:298`、`:317`；`src/app/templates/(dashboards)/dashboards/finance-3/page.tsx:201` |
+| 标题型图表/表格卡壳 | `rounded-3xl bg-background border border-fg-grey-200 p-4 flex flex-col gap-4`；即padding16、卡内gap16、圆角24px（默认换算） | `src/app/templates/(dashboards)/dashboards/analytics/page.tsx:203`、`:298`、`:317`；`src/app/templates/(dashboards)/dashboards/finance-3/page.tsx:201` |
 | compact KPI | padding16、内部gap12；density="compact" 同时控制字级/行高/子图高度，不能只改padding就说同密度 | core 中对应组件的 density="compact" |
 | compact Balance/Image | Balance padding16/gap12；Image padding16/gap16 | core 中对应组件的 density="compact" |
 | compact ListGroup | header左右/上16；body左右/上下16，条目gap12 | core 中对应组件的 density="compact" |
@@ -149,7 +149,7 @@
 - 图内至少标出：外壳padding16/20、section gap20、Grid gap16、卡padding16、卡内gap12或16、图域224、响应式跨度。不要用一条“页面gap24”覆盖全部层级。
 - `--radius-card=20px` 与模板 `rounded-3xl=24px`并存：本草案记录模板24px现状，**不授权修改全局Token**。待Panel组件立项再决定模板兼容方式。
 
-### 已实现的看板组件与区块
+### 已实现的看板组件与页面组件
 
 - 外壳：AppLayout；面板：Panel（dashboard/template），SurfaceCard 保持原 API。
 - 密度：StatCard、ProgressStatCard、LineChartStatCard、BarChartStatCard、WheelChartStatCard、BalanceCard、ImageStatCard、HighlightCard、ListGroup 使用 density="compact"；不再依赖模板 !important。默认密度不变。

@@ -7,9 +7,15 @@ description: 使用 Forge / forge-ui 设计与实现看板、后台、管理系�
 
 ## 唯一入口与阅读顺序
 
+可选检索入口：[MCP 接入](https://forgeui.org/docs/mcp)、[使用指南](https://forgeui.org/guides) 与 [llms.txt](https://forgeui.org/llms.txt)。MCP 地址为 `https://forgeui.org/api/mcp`；只读数据辅助选型，不替代本 skill 规范正文。
+
 唯一通用入口是本文件 `forge-skill/SKILL.md`，不同时拼读全局安装版与项目同步版。优先级：用户指定的版本/checkout > starter 已校验的 `docs/forge-skill/upstream/SKILL.md` > 全局安装的 forge-skill。项目内没有同步副本时才用全局版；版本不符应先同步并核对 manifest，不能静默混用。
 
 在 starter 内先读该仓 AGENTS.md 与本任务对应的 quick-start / new-module / new-page，然后读项目 `docs/forge-skill/upstream/SKILL.md`；依次读 Screens → 主对照 Screen 源码 → Blocks 配方及单项 Props → 所用 Components 契约 → audit-checklist。全局 skill 在 starter 中仅负责找到并转入这一入口；starter 的路由、RBAC、数据与工程规则仍以 starter 专用 skill 为准。
+
+## 先读项目
+
+动手前运行 `node <skill目录>/scripts/project-info.mjs <项目根目录>`：它报告已装的 core 版本与本 skill 描述的版本是否一致、Next/React/Tailwind 版本、是否 forge-starter、项目里已有的页面组件和 AGENTS.md / DESIGN.md / MCP 配置。版本不一致时以项目 node_modules 里的类型为准；已有页面组件优先复用。
 
 ## 先确定范围
 
@@ -18,7 +24,7 @@ description: 使用 Forge / forge-ui 设计与实现看板、后台、管理系�
 ## Screen → Blocks → Components
 
 1. **Screen**：先选同角色、同业务密度的真实模板，记录源码路径与版本。看板必须从 [10 个 Screen](references/screens.md) 起步，不从四张指标卡自由拼页。
-2. **Blocks**：复用模板中职责明确的区块；[区块目录](references/blocks.md) 列出 17 类已实现的可复制源码（blocks/ 与 public/r/），不是 core 导出；发布状态和截图验收另行核实。
+2. **Blocks**：复用模板中职责明确的页面组件；[页面组件目录](references/blocks.md) 列出 70 个可复制源码（blocks/ 与 public/r/），覆盖看板首屏、AI 与智能体、数据列表、详情页、表单、协作、财务、设置与认证；不是 core 导出，按需复制进项目后自行维护。
 3. **Components**：使用安装版本真实导出与 Props；查看 [生成 API](references/components/button.md) 和 [组件选型](references/component-recommended-standard.md)。不要猜测组件、图标、密度或交互参数。
 
 缺失能力记录 **FORGE-GAP**：业务用途、已查组件与版本、缺口、影响、候选方案。标记并询问用户，不自行手搓公共原语或改 core。
@@ -41,6 +47,6 @@ description: 使用 Forge / forge-ui 设计与实现看板、后台、管理系�
 
 ## 交付前
 
-按 [统一审计清单](references/audit-checklist.md) 逐条记录通过、违规、不适用或未验证及证据。跑项目已有 typecheck、lint、测试和文档自检；需要数据库、浏览器、读屏器或实机而未执行的检查明确列出原因。不得把构建通过当视觉/真实操作验收。
+先跑页面检查：MCP 的 `check_code`，或在项目根目录运行 `curl -fsSL https://forgeui.org/forge-check.mjs -o forge-check.mjs && node forge-check.mjs src`；错误全部修完，警告逐条确认。再按 [统一审计清单](references/audit-checklist.md) 逐条记录通过、违规、不适用或未验证及证据。跑项目已有 typecheck、lint、测试和文档自检；需要数据库、浏览器、读屏器或实机而未执行的检查明确列出原因。不得把构建通过当视觉/真实操作验收。
 
 接入专项：[Ask AI 宿主契约](references/ask-ai-host-contract.md)、[交互接入边界](references/interaction-adoption.md)。

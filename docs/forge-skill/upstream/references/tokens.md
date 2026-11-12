@@ -160,7 +160,16 @@ Always prefer these over primitives when the meaning matches.
 | `--focus` | `fg-blue` | focus ring |
 | `--hover` | `fg-grey-100` | hover background |
 
-Dark theme overrides these via `[data-theme="dark"]` — toggle by setting that attribute on a parent element.
+## Dark mode
+
+Set `data-theme="dark"` on `<html>` (or on any container; a nested `data-theme="light"` restores light). Dark mode redefines the grey, black and color primitives, so `bg-fg-grey-*`, `text-fg-black` and `text-fg-grey-*` keep working without changes.
+
+- Surfaces (cards, panels, inputs, popovers): `bg-background`. Page background: `bg-fg-grey-50` or `bg-surface`. Do not use `bg-white` / `bg-fg-white` for surfaces — they stay white in dark.
+- Keep `bg-white` only for things that must stay white on a colored fill (switch knob, dot inside a checked radio, white pill on a colored sidebar).
+- `bg-fg-black` fills (dark buttons, tooltips, black cards) stay dark in dark mode via `--fg-black-fill`, so white text on them is fine. `text-fg-black` flips to the light ink.
+- Colored text (`text-fg-blue`, `text-fg-green`…) switches to a lighter shade automatically; `bg-fg-*-50/100/200` tints become dark tints; 700–900 text steps become light.
+- In CSS, never hard-code `#fff` / `white` as a background; use `var(--background)`. Mixing a tint: `color-mix(in srgb, var(--fg-blue) 8%, var(--background))`.
+- Brand themes from forgeui.org/docs/theme include the matching dark scale.
 
 ## Shape + elevation
 
