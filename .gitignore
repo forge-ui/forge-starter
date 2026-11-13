@@ -7,9 +7,8 @@ node_modules
 out
 
 # env
-.env
-.env.local
-.env.*.local
+.env*
+!.env.example
 
 # drizzle
 drizzle/meta
