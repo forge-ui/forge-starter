@@ -15,19 +15,17 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  ASK_AI_FS_LAYER_ATTR,
-  AskAi,
   Button,
-  ChatInputBar,
+  PromptSuggestions,
   type ChatInputBarQuickAction,
   type ChatInputBarSendContext,
-  type AskAiProps,
   type AskAiRequest,
   type AskAiSessionItem,
 } from "@forge-ui-official/core";
+import { StarsLinear } from "@forge-ui-official/core/icons";
+import { AgentPanel } from "@forge-ui-official/agent";
 import { shellForPath, siteConfig } from "@/config/site";
 import {
   ASK_AI_LANDING_TITLE,
@@ -39,7 +37,6 @@ import {
   createAskAiSession,
   fetchAskAiRuntime,
   fetchAskAiRuns,
-  filterAskAiSessions,
   pickAskAiModelId,
   askAiReplayDelivery,
   isCurrentAskAiRequest,
@@ -57,7 +54,6 @@ import {
 } from "@/lib/ask-ai";
 import { AskAiFormStateProvider } from "@/components/ask-ai-form";
 import { AskAiTranscript } from "@/components/ask-ai-transcript";
-import { AskAiScrollArea } from "@/components/ask-ai-scroll-area";
 import {
   AGENT_PAGE_DONE_EVENT,
   AGENT_TASK_CHANGED_EVENT,
@@ -91,27 +87,8 @@ function turnId() {
 }
 
 
-const AskAiPlaceContext = createContext<(slot: HTMLElement | null, releasing?: HTMLElement | null) => void>(
-  () => {},
-);
-
-function createAskAiMountNode() {
-  const el = document.createElement("div");
-  el.setAttribute("data-ask-ai-mount", "");
-  el.className = "inline-flex shrink-0 items-center";
-  return el;
-}
-
-function placeAskAiMount(
-  mount: HTMLElement | null,
-  slot: HTMLElement | null,
-  host: HTMLElement | null,
-) {
-  if (!mount) return;
-  const target = slot ?? host;
-  if (!target) return;
-  if (mount.parentElement !== target) target.appendChild(mount);
-}
+/** The assistant is one Forge Agent panel per app shell; page headers only hold the button that opens it. */
+const AskAiOpenContext = createContext<{ open: boolean; setOpen: (open: boolean) => void }>({ open: false, setOpen: () => {} });
 
 export function AskAiProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -119,12 +96,9 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
   const committedPath = useRef(pathname);
   useLayoutEffect(() => { committedPath.current = pathname; }, [pathname]);
   const shell = useMemo(() => shellForPath(pathname), [pathname]);
-  const hostRef = useRef<HTMLDivElement>(null);
-  const slotRef = useRef<HTMLElement | null>(null);
-  const [mountNode, setMountNode] = useState<HTMLElement | null>(null);
+  const [open, setOpen] = useState(false);
   const [sessions, setSessions] = useState<AskAiSessionItem[]>([{ id: "new", title: "新对话" }]);
   const [currentSessionId, setCurrentSessionId] = useState("new");
-  const [searchQuery, setSearchQuery] = useState("");
   const [draft, setDraft] = useState("");
   const attachmentInput = useRef<HTMLInputElement>(null);
   const [attachment, setAttachment] = useState<{ name: string; text: string } | null>(null);
@@ -144,8 +118,6 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     } catch (error) { toast.error(error instanceof Error ? error.message : "读取附件失败"); }
     finally { setReadingAttachment(false); }
   }, []);
-  const [fullscreen, setFullscreen] = useState(false);
-  const [docked, setDocked] = useState(false);
   const [turnsBySession, setTurnsBySession] = useState<Record<string, AskAiTurn[]>>({});
   const [spentIntents, setSpentIntents] = useState<string[]>([]);
   const [confirmingIntent, setConfirmingIntent] = useState<string | null>(null);
@@ -181,10 +153,6 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     setModelId((current) => pickAskAiModelId(current, next));
   }, []);
 
-  const visibleSessions = useMemo(
-    () => filterAskAiSessions(sessions, searchQuery),
-    [sessions, searchQuery],
-  );
 
   const restoreSessions = useCallback(async (initial = false, deferWhileBusy = false) => {
     const saved = await fetchAskAiRuns();
@@ -669,7 +637,6 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     const hasInput = (id: string) =>
       (turnsRef.current[id] ?? []).some((turn) => turn.question.trim().length > 0);
     if (!hasInput(currentSessionIdRef.current)) {
-      setSearchQuery("");
       return;
     }
     settleSessionPlayback(currentSessionIdRef.current);
@@ -677,7 +644,6 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     if (existingEmpty) {
       currentSessionIdRef.current = existingEmpty.id;
       setCurrentSessionId(existingEmpty.id);
-      setSearchQuery("");
       setDraft("");
       return;
     }
@@ -686,7 +652,6 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     setSessions((prev) => [next, ...prev].slice(0, 20));
     setCurrentSessionId(next.id);
     setAttachment(null);
-    setSearchQuery("");
     setDraft("");
     void fetchAskAiRuntime(pathname).then(next => { if (committedPath.current === pathname) applyRuntime(next); });
   }, [applyRuntime, pathname, settleSessionPlayback]);
@@ -696,207 +661,129 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
     currentSessionIdRef.current = id;
     setCurrentSessionId(id);
     setAttachment(null);
-    setSearchQuery("");
   }, [settleSessionPlayback]);
 
   const turns = turnsBySession[currentSessionId] ?? [];
   const hasChat = turns.length > 0;
   const responseRunning = busy || turns.some(turn => askAiDeliveryPlaying(turn.delivery));
 
-  const value = useMemo<AskAiProps>(
-    () => ({
-      color: siteConfig.accent,
-      panelMode: "responsive",
-      onDockedChange: setDocked,
-      headerLayout: "session",
-      landingDescription: `可以围绕${shell.title}查询信息、梳理数据，或协助处理操作。`,
-      fullscreen,
-      onFullscreenChange: setFullscreen,
-      suggestions: runtime?.suggestions ?? ASK_AI_SUGGESTIONS,
-      placeholder: ASK_AI_PLACEHOLDER,
-      landingTitle: runtime?.suggestions?.length === 0 ? "你想处理什么？" : ASK_AI_LANDING_TITLE,
-      sessions: visibleSessions,
-      currentSessionId,
-      searchQuery,
-      onSearchQueryChange: setSearchQuery,
-      hasConversation: hasChat,
-      messages: hasChat ? (
-        <AskAiScrollArea embedded={fullscreen} sessionId={currentSessionId} followKey={turns.at(-1)?.id}>
-          <AskAiTranscript
-            turns={turns}
-            runtime={runtime}
-            spentIntents={spentIntents}
-            confirmingIntent={confirmingIntent}
-            onAsk={askFromHost}
-            onConfirm={confirmIntent}
-            onReply={replyToHarness}
-            onPresented={onPresented}
-            busy={busy}
-          />
-        </AskAiScrollArea>
-      ) : undefined,
-      composer: (
-        <div
-          data-accent={siteConfig.accent}
-          className={fullscreen ? "@container w-full min-w-0 max-w-full" : "@container w-full min-w-0 max-w-full shrink-0 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3"}
-        >
-          {restoreError ? <div className="mb-2 flex flex-wrap items-center gap-2"><p className="text-xs text-fg-grey-700">{restoreError}</p><Button color={siteConfig.accent} variant="tertiary" disabled={restoring} onClick={() => { setRestoring(true); void restoreSessions().catch(error => setRestoreError(error instanceof Error ? error.message : "恢复失败")).finally(() => setRestoring(false)); }}>重试恢复</Button></div> : null}
-          <input ref={attachmentInput} type="file" accept=".txt,.md,.csv,.json" hidden aria-label="选择文本附件"
-            onChange={(event) => { const file = event.currentTarget.files?.[0]; event.currentTarget.value = ""; void readAttachment(file); }} />
-          {attachment ? <div className="mb-2 flex min-w-0 items-center gap-2"><span className="min-w-0 truncate text-xs text-fg-black">附件：{attachment.name}</span><Button color={siteConfig.accent} variant="tertiary" size="sm" disabled={busy} onClick={() => setAttachment(null)}>移除附件</Button></div> : null}
-          <ChatInputBar toolsMenuLabel="添加内容" onAttach={() => attachmentInput.current?.click()} sourcesLabel="来源" commandsLabel="指令" connectedLabel="已连接" attachLabel="添加附件" dictateLabel="语音输入"
-            key={currentSessionId}
-            quickActions={ASK_AI_QUICK_ACTIONS}
-            sources={runtime?.sources ?? []} removeSourceLabel="移除对象"
-            quickActionsLabel="快捷操作"
-            removeQuickActionLabel="移除操作"
-            defaultQuickActionsOpen
-            className="starter-ask-compact w-full min-w-0 max-w-full"
-            multiline
-            sendOnEnter
-            clearOnSend={false}
-            hasMessages={hasChat}
-            value={draft}
-            onChange={setDraft}
-            onSend={sendComposer}
-            status={responseRunning ? "running" : "idle"}
-            onStop={stopResponse}
-            sendLabel="发送"
-            stopLabel="停止生成"
-            stoppingLabel="正在停止"
-            disabled={busy || restoring || readingAttachment}
-            color={siteConfig.accent}
-            placeholder=""
-            models={askAiPromptModels(runtime)}
-            modelMenuLabel="选择模型"
-            model={modelId}
-            onModelChange={(id) => {
-              setModelId(id);
-              writeStoredAskAiModelId(id);
-            }}
-          />
-        </div>
-      ),
-      onNewSession: startNewSession,
-      onSelectSession: selectSession,
-      onSend,
-    }),
-    [
-      askFromHost,
-      sendComposer,
-      attachment,
-      readAttachment,
-      readingAttachment,
-      busy,
-      confirmingIntent,
-      confirmIntent,
-      currentSessionId,
-      draft,
-      fullscreen,
-      hasChat,
-      modelId,
-      onPresented,
-      onSend,
-      replyToHarness,
-      restoreError,
-      restoreSessions,
-      restoring,
-      responseRunning,
-      stopResponse,
-      pathname,
-      runtime,
-      searchQuery,
-      selectSession,
-      shell.title,
-      spentIntents,
-      startNewSession,
-      turns,
-      visibleSessions,
-    ],
-  );
+  const followKey = `${turns.length}:${turns.at(-1)?.result?.text.length ?? 0}:${turns.at(-1)?.pending ? 1 : 0}`;
 
-  useLayoutEffect(() => {
-    const el = createAskAiMountNode();
-    setMountNode(el);
-    return () => {
-      el.remove();
-      setMountNode(null);
-    };
-  }, []);
-
-  const place = useCallback(
-    (slot: HTMLElement | null, releasing?: HTMLElement | null) => {
-      if (releasing) {
-        if (slotRef.current === releasing) {
-          slotRef.current = null;
-          placeAskAiMount(mountNode, null, hostRef.current);
-        }
-        return;
-      }
-      slotRef.current = slot;
-      placeAskAiMount(mountNode, slot, hostRef.current);
-    },
-    [mountNode],
-  );
-
-  useLayoutEffect(() => {
-    place(slotRef.current);
-  }, [place]);
-
+  // Links inside answers navigate in place instead of reloading the app.
   useEffect(() => {
+    if (!open) return;
     function onClick(event: MouseEvent) {
       if (event.defaultPrevented || event.button !== 0) return;
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      const trigger = mountNode?.querySelector<HTMLButtonElement>('button[aria-label="Ask AI"]');
-      const fullscreen = document.querySelector(`[${ASK_AI_FS_LAYER_ATTR}]`);
-      if (trigger?.getAttribute("aria-expanded") !== "true" && !fullscreen) return;
-      const target = event.target as HTMLElement | null;
-      const link = target?.closest?.(`dialog[data-ask-ai-panel] a[href], [${ASK_AI_FS_LAYER_ATTR}] a[href]`);
-      if (!link) return;
-      const href = link.getAttribute("href")?.trim();
+      const link = (event.target as HTMLElement | null)?.closest?.('[data-forge-agent="panel"] a[href]');
+      const href = link?.getAttribute("href")?.trim();
       if (!href || !href.startsWith("/")) return;
       event.preventDefault();
       router.push(href, { scroll: false });
     }
     document.addEventListener("click", onClick);
     return () => document.removeEventListener("click", onClick);
-  }, [mountNode, router]);
+  }, [open, router]);
 
   return (
-    <AskAiPlaceContext.Provider value={place}>
-      {/* Keep the existing AppLayout gutter and scrolling; reserve space only for the Kit's docked panel. */}
-      <div data-starter-ask-layout style={{ paddingRight: docked ? 460 : 0 }}>{children}</div>
-      {/* Kit AskAi 无受控 open。portal 到稳定 mount，换页只挪触发器，本轮对话保住。 */}
-      <div data-ask-ai-host ref={hostRef} className="hidden" />
-      {mountNode ? createPortal(<AskAiFormStateProvider><AskAi {...value} /></AskAiFormStateProvider>, mountNode) : null}
-    </AskAiPlaceContext.Provider>
+    <AskAiOpenContext.Provider value={{ open, setOpen }}>
+      {children}
+      <AskAiFormStateProvider>
+        <div data-accent={siteConfig.accent} className="contents">
+          <AgentPanel
+            title="Forge Agent"
+            open={open}
+            onOpenChange={setOpen}
+            launcher={false}
+            followKey={followKey}
+            onNewChat={startNewSession}
+            sessions={sessions.filter(session => (turnsBySession[session.id] ?? []).length > 0)}
+            currentSessionId={currentSessionId}
+            onSelectSession={selectSession}
+            empty={(
+              <div className="flex flex-col gap-3 pt-2">
+                <p className="text-[15px] font-semibold leading-6 text-fg-black">{runtime?.suggestions?.length === 0 ? "你想处理什么？" : ASK_AI_LANDING_TITLE}</p>
+                <p className="text-[13px] leading-5 text-fg-grey-700">可以围绕{shell.title}查询信息、梳理数据，或协助处理操作。</p>
+                <PromptSuggestions size="sm" suggestions={runtime?.suggestions ?? ASK_AI_SUGGESTIONS} onSelect={askFromHost} />
+              </div>
+            )}
+            notice={(
+              <>
+                {restoreError ? <div className="mb-2 flex flex-wrap items-center gap-2"><p className="text-xs text-fg-grey-700">{restoreError}</p><Button color={siteConfig.accent} variant="tertiary" size="sm" disabled={restoring} onClick={() => { setRestoring(true); void restoreSessions().catch(error => setRestoreError(error instanceof Error ? error.message : "恢复失败")).finally(() => setRestoring(false)); }}>重试恢复</Button></div> : null}
+                <input ref={attachmentInput} type="file" accept=".txt,.md,.csv,.json" hidden aria-label="选择文本附件"
+                  onChange={(event) => { const file = event.currentTarget.files?.[0]; event.currentTarget.value = ""; void readAttachment(file); }} />
+                {attachment ? <div className="mb-2 flex min-w-0 items-center gap-2"><span className="min-w-0 truncate text-xs text-fg-black">附件：{attachment.name}</span><Button color={siteConfig.accent} variant="tertiary" size="sm" disabled={busy} onClick={() => setAttachment(null)}>移除附件</Button></div> : null}
+              </>
+            )}
+            composer={{
+              toolsMenuLabel: "添加内容",
+              showAttachment: true,
+              onAttach: () => attachmentInput.current?.click(),
+              sourcesLabel: "来源",
+              commandsLabel: "指令",
+              connectedLabel: "已连接",
+              attachLabel: "添加附件",
+              quickActions: ASK_AI_QUICK_ACTIONS,
+              sources: runtime?.sources ?? [],
+              removeSourceLabel: "移除对象",
+              quickActionsLabel: "快捷操作",
+              removeQuickActionLabel: "移除操作",
+              clearOnSend: false,
+              hasMessages: hasChat,
+              value: draft,
+              onChange: setDraft,
+              onSend: sendComposer,
+              status: responseRunning ? "running" : "idle",
+              onStop: stopResponse,
+              stopLabel: "停止生成",
+              stoppingLabel: "正在停止",
+              disabled: busy || restoring || readingAttachment,
+              color: siteConfig.accent,
+              placeholder: ASK_AI_PLACEHOLDER,
+              models: askAiPromptModels(runtime),
+              modelMenuLabel: "选择模型",
+              model: modelId,
+              onModelChange: (id: string) => {
+                setModelId(id);
+                writeStoredAskAiModelId(id);
+              },
+            }}
+          >
+            {hasChat ? (
+              <AskAiTranscript
+                turns={turns}
+                runtime={runtime}
+                spentIntents={spentIntents}
+                confirmingIntent={confirmingIntent}
+                onAsk={askFromHost}
+                onConfirm={confirmIntent}
+                onReply={replyToHarness}
+                onPresented={onPresented}
+                busy={busy}
+              />
+            ) : undefined}
+          </AgentPanel>
+        </div>
+      </AskAiFormStateProvider>
+    </AskAiOpenContext.Provider>
   );
 }
 
-/** 页头槽：把唯一 Kit 触发器挂进来，自己不另开抽屉。 */
+/** Page header slot: the button that opens the Forge Agent panel. */
 export function AskAiEntry({ className }: { className?: string }) {
-  const place = useContext(AskAiPlaceContext);
-  const slotRef = useRef<HTMLDivElement>(null);
-  const placeRef = useRef(place);
-  placeRef.current = place;
-
-  useLayoutEffect(() => {
-    place(slotRef.current);
-  }, [place]);
-
-  useLayoutEffect(() => {
-    const slot = slotRef.current;
-    return () => {
-      placeRef.current(null, slot);
-    };
-  }, []);
-
+  const { open, setOpen } = useContext(AskAiOpenContext);
   return (
-    <div
-      ref={slotRef}
-      data-ask-ai-slot
-      className={["inline-flex shrink-0 items-center", className].filter(Boolean).join(" ")}
-    />
+    <button
+      type="button"
+      aria-label="Ask AI"
+      aria-expanded={open}
+      onClick={() => setOpen(!open)}
+      data-accent={siteConfig.accent}
+      className={["inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-accent px-3.5 text-sm font-semibold text-white transition hover:brightness-110", className].filter(Boolean).join(" ")}
+    >
+      <StarsLinear size={16} />
+      Forge Agent
+    </button>
   );
 }
 

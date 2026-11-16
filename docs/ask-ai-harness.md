@@ -1,5 +1,7 @@
 # Ask AI Harness v1
 
+> 2026-11：Ask AI 升级为 Forge Agent。运行时（engine、types、progress）移入 `@forge-ui-official/agent/harness`，Starter 的 `lib/harness` 只保留适配器与 Postgres 存储；助手面板换成 Forge Agent 的 `AgentPanel`，选择、确认单和步骤分别用 `ChoiceCard`、`ConfirmCard`、`RunProgress`。协议、接口和测试不变。
+
 Starter 是唯一开发、设计和验收基准。通用核心先在 Starter 验证，再把同一版本接入数据集 `main`、`yiliao` 的业务适配器。
 
 ## 架构决定
@@ -28,14 +30,14 @@ flowchart TD
 
 | 边界 | 接口与责任 |
 | --- | --- |
-| `types.ts / engine.ts` | JSON 协议、8 步上限、90 秒截止、会话版本 CAS、暂停与结构化回复；不引用 Next、Drizzle、账号、模型 SDK 或 Forge |
+| `types.ts / engine.ts`（现由 `@forge-ui-official/agent/harness` 提供，本地文件只转出） | JSON 协议、8 步上限、90 秒截止、会话版本 CAS、暂停与结构化回复；不引用 Next、Drizzle、账号、模型 SDK 或 Forge |
 | `model.next` | 统一消息和工具调用；模型 ID、服务地址和密钥由服务端模型适配器解析 |
 | `capabilities.list/invoke` | 读取、页面操作、写入提案三个效果；权限、参数与记录校验留在业务适配器 |
 | `context.resolve` | 当前页、允许的结构化业务契约和检索事实；不是授权来源 |
 | `TaskStore` | 创建、归属查询、CAS 更新、最近 20 个会话；`postgres-store.ts` 是可替换实现 |
 | `operations.retire` | 新目标或取消使待执行提案失效；实际写库由现有页面 API 事务完成 |
 | `presentation.finalize` | 持久化模型标签、建议等应用展示数据；核心不理解 UI block |
-| `AskAiHarness` | 仅渲染协议：候选、指定目标、取消、状态与处理记录；账号表单仍是业务组件 |
+| `AskAiHarness` | 用 Forge Agent 的 `ChoiceCard` 仅渲染协议：候选、指定目标、取消、状态与处理记录；账号表单仍是业务组件 |
 
 不引入额外 agent 框架或向量库依赖。端口允许以后更换模型、存储或检索实现，当前规模下可以直接审查状态转移和 SQL 事务。
 

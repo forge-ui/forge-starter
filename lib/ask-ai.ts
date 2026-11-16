@@ -100,12 +100,6 @@ export function titleAskAiSession(title: string) {
   return next.slice(0, 24) || "新对话";
 }
 
-export function filterAskAiSessions(sessions: AskAiSessionItem[], query: string) {
-  const needle = query.trim().toLowerCase();
-  if (!needle) return sessions;
-  return sessions.filter((item) => item.title.toLowerCase().includes(needle));
-}
-
 export function askAiLandingCopy(status: AskAiRuntimeStatus | null) {
   if (!status) return "正在确认可用模型…";
   if (status.suggestions?.length === 0) return "当前页面暂无快捷建议，可以直接描述你要了解或处理的目标。";
