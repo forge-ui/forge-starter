@@ -17,7 +17,7 @@ description: >
 **API 齐 ≠ 侧栏有。** 本步不挂应用模块。  
 UI 下一步：`forge-starter-new-page`（manifest 派生菜单）。
 
-访问策略默认不声明 `access`，保留角色读授权与内部应用勾选交集。只有明确要求所有登录用户可见/可读才加 `access: "authenticated"`：它优先于角色读授权与内部应用勾选，API / Ask AI reader 同步获得 read，但匿名、行级隔离、脱敏与写权限不变。详见 `docs/module-template.md`；不得用它绕过普通模块配置遗漏。
+访问策略默认不声明 `access`，保留角色读授权与内部应用勾选交集。只有明确要求所有登录用户可见/可读才加 `access: "authenticated"`：它优先于角色读授权与内部应用勾选，API / Forge Agent reader 同步获得 read，但匿名、行级隔离、脱敏与写权限不变。详见 `docs/module-template.md`；不得用它绕过普通模块配置遗漏。
 
 ## When to use
 
@@ -82,7 +82,7 @@ app/api/<res>/[id]/route.ts     # GET one, PATCH/DELETE/POST actions
 Client store（`components/<res>-store.tsx` + layout Provider）归 **new-page、UI 层**。  
 本步只保证 REST API 可被 `fetch` 调用。
 
-### 5. Ask AI 声明（必做）
+### 5. Forge Agent 声明（必做）
 
 创建 config/modules/<id>.json：知识 summary/fields/rules/source、权限资源、菜单入口与读取服务/导出名/字段白名单；不可读必须说明原因。运行 pnpm modules:generate，不再手写 SYSTEM_FEATURES 或拼接 lib/agent/registry.ts。专用工具通过 manifest.tools 挂接。读取复用当前会话并递归剔除敏感字段。
 
@@ -105,7 +105,7 @@ corepack pnpm check
 告诉用户：
 
 - 表名、API 路径与方法  
-- Ask AI 自动登记的工具：工具 id，以及哪些是写入（需确认）  
+- Forge Agent 自动登记的工具：工具 id，以及哪些是写入（需确认）  
 - **声明齐 ≠ UI 完成。** 页面与真实持久化仍需独立验收。  
 - **下一步**：`forge-starter-new-page`（store + 列表/表单/详情 UI，并挂应用模块）  
   - manifest 派生菜单：`APP_MODULE_IDS` + `APP_MODULE_META` + `MODULE_MENU`；默认应用种子勾齐新 id  

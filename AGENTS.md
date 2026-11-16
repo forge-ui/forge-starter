@@ -52,7 +52,7 @@ docs/forge-components.md
 
 - Modal：core 0.4.7 已导出 `Modal` / `Drawer`；Starter 既有表单沿用 `components/ui/modal.tsx`，不表示 core 缺能力
 - 操作 Toast：core 已导出 `ToastProvider` / `useToast`；Starter 沿用既有全局宿主 → `lib/toast.ts` + `components/ui/toast-provider.tsx`（已挂 AppShell）
-- **Ask AI**：Kit `AskAi`（core `≥0.1.17`）。业务页默认 `hideHeader: true`，`AppLayout.askAi` 不会出现。壳层 `AskAiProvider` 保活唯一实例，页头右侧用 `PageTitleActions` / `AskAiEntry`。composer 用 `ChatInputBar`（宽栏，抽屉里必须垫 gutter + `min-w-0`，核心自定义 composer 不带默认 `p-4`）；回复是几组中文示范问答（`AskAiTranscript`），按问题选用 Agent 组件，不要整页铺 `/cases/agent` 英文死 demo。`onSend` 打 `POST /api/ask-ai`：`modelId` 对应模型管理里启用的条目；没有可用模型再看 `ASK_AI_LLM_*`，都没有用本地规则。已接模型时只调用由模块 manifest 自动登记的工具（`config/modules/<id>.json`）；通用读取复用现有服务，敏感字段递归剔除，专用工具通过 manifest 挂接，按当前用户权限过滤。读立即执行；写入和删除先出确认单，确认后把字段填进页面表单或打开页面上的删除确认，由页面自己的保存逻辑处理，不直接写库。页面保存或删除成功后，同一会话继续原请求里还没做的查询或导出。不读仓库源码，不生成页面。新增模块必须有 manifest；缺声明或知识/读取说明时检查失败。密钥只放服务端，禁止请求体传 `apiKey`。组件对照仍看 `/ref/agent`。全屏、会话栏走 Kit props，禁止自研抽屉或全视口层。
+- **Forge Agent**（原 Forge Agent）：面板用 `@forge-ui-official/agent` 的 `AgentPanel`，运行时用 `@forge-ui-official/agent/harness`。壳层 `AskAiProvider` 保活唯一实例，页头右侧用 `PageTitleActions` / `AskAiEntry`（打开面板的按钮）。选择、确认单、步骤用 `ChoiceCard`、`ConfirmCard`、`RunProgress`；代操作页面时用 `takeOverPage` 显示指针并锁定页面。composer 是面板里的 `ChatInputBar`；回复是几组中文示范问答（`AskAiTranscript`），按问题选用 Agent 组件，不要整页铺 `/cases/agent` 英文死 demo。`onSend` 打 `POST /api/ask-ai`：`modelId` 对应模型管理里启用的条目；没有可用模型再看 `ASK_AI_LLM_*`，都没有用本地规则。已接模型时只调用由模块 manifest 自动登记的工具（`config/modules/<id>.json`）；通用读取复用现有服务，敏感字段递归剔除，专用工具通过 manifest 挂接，按当前用户权限过滤。读立即执行；写入和删除先出确认单，确认后把字段填进页面表单或打开页面上的删除确认，由页面自己的保存逻辑处理，不直接写库。页面保存或删除成功后，同一会话继续原请求里还没做的查询或导出。不读仓库源码，不生成页面。新增模块必须有 manifest；缺声明或知识/读取说明时检查失败。密钥只放服务端，禁止请求体传 `apiKey`。组件对照仍看 `/ref/agent`。历史会话走面板的历史按钮，禁止自研抽屉或全视口层。
 - **Checklist**：Kit `Checklist` / `ChecklistItem`（对照 `/ref/checklist`，任务页禁止手搓 Checkbox 行）。core `0.1.18` 起随包导出。  
 - 资源工作台：`WorkspaceSplit` + `FolderNav` + `ResourceCard`（见 `/ref/resource-workspace`）  
 - 时间格式：`lib/format/datetime.ts`（客户端安全，勿塞 next/headers）  
@@ -66,7 +66,7 @@ docs/forge-components.md
 | `forge-starter-new-module` | 新业务数据与接口 | **只** schema + service + API（+ 可选 store） |
 | `forge-starter-new-page` | 列表、详情、看板 UI | **只** 页面 + 菜单；对照样板选型 |
 | `forge-starter-audit` | 页面写完/改完后的规范审计（**必跑**） | 只审计与修复规范违规；不重构业务逻辑 |
-| `hairline-create` | 按业务含义生成自定义交互线稿 | 先独立 HTML 视觉确认，再接入；不默认添加到 Ask AI；遵循现有 Chrome 复用规则 |
+| `hairline-create` | 按业务含义生成自定义交互线稿 | 先独立 HTML 视觉确认，再接入；不默认添加到 Forge Agent；遵循现有 Chrome 复用规则 |
 
 路径：`.agents/skills/<name>/SKILL.md`（canonical）。  
 Skills 只维护 **`.agents/skills/`**。
@@ -84,7 +84,7 @@ Skills 只维护 **`.agents/skills/`**。
 默认产品自动合并新增模块；用户自建或显式配置的应用保留原勾选，需要在应用管理勾选。`rbac_menus` 只是目录，不会生成模块。
 
 默认侧栏实际可见 = manifest 派生菜单 ∩ 当前应用勾选 ∩ 登录角色 `{module}:read`。
-显式声明 `access: "authenticated"` 的模块对所有登录用户开放读权限，在内部应用中不受角色读授权与应用勾选限制；菜单、直链、API 和 Ask AI reader 统一生效。不放开匿名访问、行级隔离或写权限。未声明的模块仍遵循默认交集；无有效读权限时直链由壳层 `replace` 回工作台。
+显式声明 `access: "authenticated"` 的模块对所有登录用户开放读权限，在内部应用中不受角色读授权与应用勾选限制；菜单、直链、API 和 Forge Agent reader 统一生效。不放开匿名访问、行级隔离或写权限。未声明的模块仍遵循默认交集；无有效读权限时直链由壳层 `replace` 回工作台。
 
 ## 仓库地图
 

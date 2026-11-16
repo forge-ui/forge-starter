@@ -1,6 +1,6 @@
 # Cloudflare Workers 部署
 
-本项目通过 OpenNext 部署完整 Next.js 服务到 Workers。账号 CRUD、登录和 Ask AI 仍使用 PostgreSQL；Cloudflare D1 不兼容本项目的数据库约定。
+本项目通过 OpenNext 部署完整 Next.js 服务到 Workers。账号 CRUD、登录和 Forge Agent 仍使用 PostgreSQL；Cloudflare D1 不兼容本项目的数据库约定。
 
 ## 构建和预览
 
@@ -29,7 +29,7 @@ pnpm preview:cloudflare
 
 正式域名为 `starter.forgeui.org`，已在 `wrangler.jsonc` 声明 Workers Custom Domain。根域名 `forgeui.org` 保留原网站。以下切换步骤已完成。
 
-1. 在 Workers 临时域名验证登录、CRUD、刷新持久化、权限和 Ask AI。
+1. 在 Workers 临时域名验证登录、CRUD、刷新持久化、权限和 Forge Agent。
 2. 保存 GitHub Pages 设置及原 DNS 记录，给 Worker 添加该自定义域名，并替换原 GitHub CNAME。
 3. 验证 HTTPS、自定义域名、静态资源和深链刷新。
 4. 新站验证通过后禁用 `forge-ui/forge-starter` 的 GitHub Pages。

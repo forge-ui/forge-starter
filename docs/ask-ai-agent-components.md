@@ -1,15 +1,15 @@
-# Ask AI Agent 组件接入
+# Forge Agent Agent 组件接入
 
 真实对话通过已登记的 `assistant.present` 只读工具输出有界 JSON 消息块，前端从 core 导入组件。工具受 `dashboard:read` 过滤；模块数据仍必须使用该模块授权工具查询。呈现工具不能写库、执行代码、任意导航或创建确认凭证。
 
 | Core 组件 | 真实入口与交互 |
 | --- | --- |
-| AskAi / PromptBar | 壳、会话、模型选择、发送 |
+| AgentPanel（@forge-ui-official/agent）+ ChatInputBar | 面板、历史会话、模型选择、发送 |
 | StreamingAnswer | 正文、消息末尾 follow-ups |
 | ThinkingTrace | 当前对话展示方案不挂载此组件；真实处理事件仍由 Harness 保存，参考页保留组件对照 |
 | ToolChips | 任务状态下方的调用、失败与回执；diff 的建议增删数量（ToolDiffChip 是类型，不是独立组件） |
-| AgentTaskRows | `harness.tasks` 提供真实步骤及状态，在回答展示完成后显示；等待补充、等待页面确认、取消使用对应 StatusBadge，不伪装为执行完成 |
-| ApprovalCard | ask_user / respond(question) 的 multiple=true 多选，选择结果通过 optionIds 校验后继续同一任务 |
+| RunProgress（@forge-ui-official/agent） | `harness.tasks` 提供真实步骤及状态，在回答展示完成后显示；等待补充、等待页面确认、取消使用对应 StatusBadge，不伪装为执行完成 |
+| ChoiceCard（@forge-ui-official/agent） | ask_user / respond(question) 的单选、多选与填写，选择结果通过 optionIds 校验后继续同一任务 |
 | Checklist / ChecklistItem | checklist 消息：逐项自查、独立核对勾选、提交结果继续对话；状态按消息保存在当前浏览器 |
 | RecommendationCard | recommendation 消息：主建议和替代建议均发送相应问题 |
 | InsightCards | insights 消息：切换分析卡并追问；支持查询数值生成趋势、柱形、占比图；历史卡仍可浏览，发送入口停用 |

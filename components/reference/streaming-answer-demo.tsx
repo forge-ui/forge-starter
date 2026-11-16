@@ -159,7 +159,7 @@ export function StreamingAnswerDemo() {
   return (
     <div className="flex min-w-0 flex-col gap-5" data-streaming-demo data-streaming-demo-phase={phase}>
       <p className="text-sm leading-6 text-fg-grey-700">
-        演示数据。分块、中途停顿和停止都由本页模拟，不是模型输出。产品里的 Ask AI 在完整 JSON 返回后渐显；这里用 status 演示累计文本。
+        演示数据。分块、中途停顿和停止都由本页模拟，不是模型输出。产品里的 Forge Agent 在完整 JSON 返回后渐显；这里用 status 演示累计文本。
       </p>
       <div className="flex flex-wrap items-center gap-3">
         <ButtonGroup

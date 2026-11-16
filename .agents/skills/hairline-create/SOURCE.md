@@ -10,4 +10,4 @@
 - 来源下载量、星标和外部用户评价未作为信任依据；未核验。
 - 修改：SKILL.md 增加 Forge 约定；look.md 更新浏览器流程；look.mjs 增加显式隔离浏览器 gate，移除系统 Chrome launch；保留 kernel.js、bench.html 和静态校验器原样。
 - 验证：两个示例均 build + validate 通过；look.mjs 语法检查通过；无浏览器配置时退出 2，未安装依赖或启动浏览器。
-- 结论：经本地适配可纳入项目，默认先独立图形视觉确认，不自动修改 Ask AI 或业务页。
+- 结论：经本地适配可纳入项目，默认先独立图形视觉确认，不自动修改 Forge Agent 或业务页。

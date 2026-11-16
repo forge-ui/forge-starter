@@ -301,7 +301,7 @@ function ModelsPageContent() {
         {deleteTarget ? (
           <ConfirmationDialog
             title={`删除模型「${deleteTarget.name}」？`}
-            description="删除后不可恢复。Ask AI 将不再使用这条配置。"
+            description="删除后不可恢复。Forge Agent 将不再使用这条配置。"
             color="red"
             icon={<TrashBinMinimalisticLinear size={32} color="var(--fg-red-500)" />}
             confirmLabel={deleting ? "删除中…" : "确认"}

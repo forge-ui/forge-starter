@@ -15,7 +15,7 @@ description: >
 
 选型：`docs/page-roles.md`、`docs/module-template.md` §B。
 
-权限接线：默认模块仍需角色 `{module}:read` 与内部应用勾选。只有明确要求所有登录用户可见/可读才声明 `access: "authenticated"`，其读授权优先于角色与应用勾选，菜单、直链、API 和 Ask AI reader 统一生效；不扩匿名、行级数据或写权限。正式交付分别验无读角色、人工配置应用和写操作拒绝，不靠页面内临时拼菜单。
+权限接线：默认模块仍需角色 `{module}:read` 与内部应用勾选。只有明确要求所有登录用户可见/可读才声明 `access: "authenticated"`，其读授权优先于角色与应用勾选，菜单、直链、API 和 Forge Agent reader 统一生效；不扩匿名、行级数据或写权限。正式交付分别验无读角色、人工配置应用和写操作拒绝，不靠页面内临时拼菜单。
 
 ## When to use
 
@@ -68,7 +68,7 @@ description: >
 | product 多 Tab | `/ref/product` | — |
 | calendar | `/ref/calendar` | — |
 | chat | `/ref/chat` | — |
-| agent | `/ref/agent` | Ask AI 示范问答（按问题选用 Agent 组件，不整页丢英文 case） |
+| agent | `/ref/agent` | Forge Agent 示范问答（按问题选用 Agent 组件，不整页丢英文 case） |
 | checklist | `/ref/checklist` | `/ref/task` 清单（Kit `Checklist`，禁止手搓 Checkbox 行） |
 | files | `/ref/files` | — |
 | split 主从 | `/ref/split` | — |
@@ -107,7 +107,7 @@ description: >
 ### 列表
 
 - `app/(app)/<res>/page.tsx`  
-- Header + **一条**筛选/搜索工具带 + DataTable + 空态。业务页头统一用 Kit `PageTitleToolbar`（查 `/cases/toolbar`）；`breadcrumbs` 放 Kit `Breadcrumbs`，`actions` 放 `ToolbarActions` + 本仓 `AskAiEntry` + 主操作 `Button`，不另封装页标题组件。当前预设 API 无入口插槽，为保留全局助手实例采用仍受支持的组合接口。工具带任选：`ButtonGroup`+`TextField`，或 `Toolbar`+`ToolbarSearchInput`。禁止手搓页头/搜索。卡片列表的列用 `Grid`/`GridItem`（core `≥0.1.13`，查 `/cases/grid`），不要 Tailwind `grid-cols-*`。名称列用 `CellText`/`text-fg-black`，不要把主文字写成 `text-fg-grey-500`。Ask AI 用本仓槽位，不要传 `AppLayout.askAi`（`hideHeader` 下不渲染），不要浮钮或自研抽屉/全屏层（core `≥0.1.17` 已带）。
+- Header + **一条**筛选/搜索工具带 + DataTable + 空态。业务页头统一用 Kit `PageTitleToolbar`（查 `/cases/toolbar`）；`breadcrumbs` 放 Kit `Breadcrumbs`，`actions` 放 `ToolbarActions` + 本仓 `AskAiEntry` + 主操作 `Button`，不另封装页标题组件。当前预设 API 无入口插槽，为保留全局助手实例采用仍受支持的组合接口。工具带任选：`ButtonGroup`+`TextField`，或 `Toolbar`+`ToolbarSearchInput`。禁止手搓页头/搜索。卡片列表的列用 `Grid`/`GridItem`（core `≥0.1.13`，查 `/cases/grid`），不要 Tailwind `grid-cols-*`。名称列用 `CellText`/`text-fg-black`，不要把主文字写成 `text-fg-grey-500`。Forge Agent 用本仓槽位，不要传 `AppLayout.askAi`（`hideHeader` 下不渲染），不要浮钮或自研抽屉/全屏层（core `≥0.1.17` 已带）。
 - 新建按钮 → form dialog  
 - 详情入口 → 名称/标题列的数据可点击，按已选详情形态打开全页或 `?id=` 弹窗；保留筛选上下文，支持键盘操作和可见焦点。对齐 accounts 的名称单元格，保持普通文字样式，不附加箭头。不要用带箭头的 `CellLink` 作为默认详情入口。
 - 操作列只放编辑、删除等真实业务动作；不要另放箭头/眼睛“查看详情”按钮。无其他动作时不生成操作列。

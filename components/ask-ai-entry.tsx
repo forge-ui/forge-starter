@@ -785,7 +785,7 @@ export function AskAiEntry({ className }: { className?: string }) {
   return (
     <button
       type="button"
-      aria-label="Ask AI"
+      aria-label="Forge Agent"
       aria-expanded={open}
       onClick={() => setOpen(!open)}
       data-accent={siteConfig.accent}
@@ -797,7 +797,7 @@ export function AskAiEntry({ className }: { className?: string }) {
   );
 }
 
-/** A 紧凑页头右侧：Ask AI + 主操作。 */
+/** A 紧凑页头右侧：Forge Agent + 主操作。 */
 export function PageTitleActions({ children }: { children?: ReactNode }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
