@@ -26,6 +26,7 @@ import {
 } from "@forge-ui-official/core";
 import { StarsLinear } from "@forge-ui-official/core/icons";
 import { AgentPanel } from "@forge-ui-official/agent";
+import { withPageTakeover } from "@/components/agent-takeover";
 import { shellForPath, siteConfig } from "@/config/site";
 import {
   ASK_AI_LANDING_TITLE,
@@ -79,6 +80,8 @@ function historyFromTurns(turns: AskAiTurn[]) {
   }
   return messages.slice(-8);
 }
+
+const FILL_LABELS: Record<string, string> = { create: "打开新建表单并填写", edit: "打开记录并填写修改", delete: "打开删除确认", open: "打开记录", filter: "设置筛选", probe: "打开表单" };
 
 function turnId() {
   return typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -373,11 +376,12 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
       }
       if (!stillCurrent()) return abandon();
       if (result.navigation) {
-        result.text = await executeAgentNavigation(result.navigation, {
+        const navigation = result.navigation;
+        result.text = await withPageTakeover(`打开${navigation.label}`, () => executeAgentNavigation(navigation, {
           push: (href) => router.push(href, { scroll: false }),
           getPath: () => committedPath.current,
           signal: controller.signal,
-        });
+        }), { onStop: () => controller.abort() });
         if (!stillCurrent()) return abandon();
         toast.success(result.text);
       }
@@ -386,12 +390,15 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
         if (["create", "edit", "delete", "probe"].includes(result.fill.mode)) {
           queueAgentContinuation({ sessionId, question: message, mode: result.fill.mode, operationId: result.fill.operationId, modelId: modelIdRef.current });
         }
-        const accepted = waitForPageAction(result.fill.commandId!);
-        queueAgentFormFill(result.fill);
-        const target = result.fill.href.endsWith("/") ? result.fill.href : `${result.fill.href}/`;
-        const here = committedPath.current.endsWith("/") ? committedPath.current : `${committedPath.current}/`;
-        if (result.fill.href && here !== target) router.push(target, { scroll: false });
-        await accepted;
+        const fill = result.fill;
+        await withPageTakeover(FILL_LABELS[fill.mode], async () => {
+          const accepted = waitForPageAction(fill.commandId!);
+          queueAgentFormFill(fill);
+          const target = fill.href.endsWith("/") ? fill.href : `${fill.href}/`;
+          const here = committedPath.current.endsWith("/") ? committedPath.current : `${committedPath.current}/`;
+          if (fill.href && here !== target) router.push(target, { scroll: false });
+          await accepted;
+        }, { onStop: () => controller.abort(), form: !["open", "filter"].includes(fill.mode) });
         if (!stillCurrent()) return abandon();
         result.text = ["open", "filter"].includes(result.fill.mode) ? "页面已更新" : "已带入页面，请核对后确认";
         toast.success(result.text);
@@ -586,12 +593,15 @@ export function AskAiProvider({ children }: { children: ReactNode }) {
               modelId: modelIdRef.current,
             });
           }
-          const accepted = waitForPageAction(result.fill.commandId!);
-          queueAgentFormFill(result.fill);
-          const target = result.fill.href.endsWith("/") ? result.fill.href : `${result.fill.href}/`;
-          const here = pathname.endsWith("/") ? pathname : `${pathname}/`;
-          if (result.fill.href && here !== target) router.push(target);
-          await accepted;
+          const fill = result.fill;
+          await withPageTakeover(FILL_LABELS[fill.mode], async () => {
+            const accepted = waitForPageAction(fill.commandId!);
+            queueAgentFormFill(fill);
+            const target = fill.href.endsWith("/") ? fill.href : `${fill.href}/`;
+            const here = pathname.endsWith("/") ? pathname : `${pathname}/`;
+            if (fill.href && here !== target) router.push(target);
+            await accepted;
+          }, { onStop: () => controller.abort(), form: !["open", "filter"].includes(fill.mode) });
           if (!isCurrentAskAiRequest(activeRequest.current, ticket)) return false;
           result.text = result.fill.mode === "delete"
               ? "已打开页面上的删除确认"
