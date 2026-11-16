@@ -5,6 +5,7 @@ import { isPresentationBlock } from "@/lib/agent/presentation";
 import { AskAiForm, type ConfirmFormIntent } from "./ask-ai-form";
 import { AskAiHarness, askAiToolReceipt, type ReplyToHarness } from "./ask-ai-harness";
 import { useState } from "react";
+import { ConfirmCard, RunProgress } from "@forge-ui-official/agent";
 import { isAgentTaskRow } from "@/lib/ask-ai-progress";
 import { useRouter } from "next/navigation";
 import {
@@ -80,7 +81,7 @@ export function AskAiTranscript({
       ) : null}
       {landing ? (
         <div className="flex flex-col gap-5">
-          <StreamingAnswer sourcesLabel="来源" followUpsLabel="后续问题" {...bindAskAiAnswer(askAiLandingCopy(runtime ?? null))} />
+          <StreamingAnswer size="sm" sourcesLabel="来源" followUpsLabel="后续问题" {...bindAskAiAnswer(askAiLandingCopy(runtime ?? null))} />
           <SuggestionPrompts items={suggestions} onAsk={onAsk} />
         </div>
       ) : (
@@ -141,11 +142,12 @@ function AskAiTurnView({
   const showAnswer = Boolean(answer.text) && !waitingOnTrace && !(latest && result?.harness?.pending?.kind === "question");
 
   return (
-    <div className="flex flex-col gap-5" data-ask-ai-turn={turn.id} data-ask-ai-delivery={answer.kind === "answer" ? answer.delivery.mode : "prompt"} data-ask-ai-chrome={chromeReady ? "ready" : "waiting"}>
+    <div className="flex flex-col gap-3" data-ask-ai-turn={turn.id} data-ask-ai-delivery={answer.kind === "answer" ? answer.delivery.mode : "prompt"} data-ask-ai-chrome={chromeReady ? "ready" : "waiting"}>
       <ChatBubble type="sent" color={siteConfig.accent} className="w-full" content={turn.question} />
       {waitingOnTrace ? <p role="status" className="text-sm text-fg-grey-700">正在回复…</p> : null}
-      {businessTasks.length > 1 ? <AgentTaskRows statusLabels={{ running: "进行中", failed: "失败", completed: "已完成" }} tasks={businessTasks} /> : null}
-      {receipt ? <ToolChips className="[&>button_svg]:transition-transform [&>button:last-child_svg]:-rotate-90" items={receipt.items} summary={receipt.summary} /> : null}
+      {businessTasks.length > 1 ? <RunProgress steps={businessTasks.map(task => ({ id: task.id, title: task.title, status: task.status, meta: task.meta }))} /> : null}
+      {/* The step list already covers the tool calls; the receipt shows only when there is no list. */}
+      {receipt && businessTasks.length <= 1 ? <ToolChips size="sm" className="[&>button_svg]:transition-transform [&>button:last-child_svg]:-rotate-90" items={receipt.items} summary={receipt.summary} /> : null}
       {showAnswer ? (
         answer.kind === "prompt" ? (
           <p className="text-[15px] leading-7 text-fg-black">{answer.text}</p>
@@ -184,7 +186,7 @@ function AskAiTurnView({
         return (
           <fieldset key={`choice-${index}`} aria-label={block.title} disabled={followUpsDisabled}
             className="m-0 min-w-0 border-0 p-0 disabled:opacity-50">
-            <StreamingAnswer sourcesLabel="来源"
+            <StreamingAnswer size="sm" sourcesLabel="来源"
               text=""
               followUpsLabel={block.title}
               followUps={options.map(option => option.label)}
@@ -232,7 +234,7 @@ function AskAiAnswerText({
 }) {
   const notify = delivery.mode === "replay" || (delivery.mode === "incremental" && delivery.status === "complete");
   return (
-    <StreamingAnswer sourcesLabel="来源" followUpsLabel="后续问题"
+    <StreamingAnswer size="sm" sourcesLabel="来源" followUpsLabel="后续问题"
       key={turnId}
       {...bindAskAiAnswer(text, delivery)}
       onDone={notify && onPresented ? () => onPresented(turnId) : undefined}
@@ -283,20 +285,20 @@ function AgentBlockView({
     );
   }
   if (block.type === "confirm") {
+    // The body lists the draft as「字段：值」lines; anything else stays as a note above them.
+    const lines = block.body.split("\n").map(line => line.trim()).filter(Boolean);
+    const fields = lines.flatMap(line => { const match = line.match(/^([^：:]{1,8})[：:]\s*(.*)$/); return match ? [{ label: match[1], after: match[2] }] : []; });
+    const note = lines.filter(line => !/^([^：:]{1,8})[：:]/.test(line)).join(" ");
     return (
-      <div className="flex flex-col gap-3">
-        <p className="text-sm font-semibold text-fg-black">{block.title}</p>
-        <p className="whitespace-pre-wrap text-sm leading-6 text-fg-grey-700">{block.body}</p>
-        <div>
-          <Button
-            color={siteConfig.accent}
-            disabled={disabled || spent || confirming}
-            onClick={() => { if (!disabled && !spent && !confirming) void onConfirm(block.intent); }}
-          >
-            {spent ? "已填入" : confirming ? "正在打开页面…" : block.actionLabel || "填入页面表单"}
-          </Button>
-        </div>
-      </div>
+      <ConfirmCard
+        title={block.title}
+        body={note || undefined}
+        fields={fields}
+        confirmLabel={block.actionLabel || "填入页面表单"}
+        state={spent ? "done" : confirming ? "working" : "pending"}
+        result="已填入页面，请在页面上核对并保存"
+        onConfirm={disabled ? undefined : () => void onConfirm(block.intent)}
+      />
     );
   }
   return <DownloadBlock block={block} />;

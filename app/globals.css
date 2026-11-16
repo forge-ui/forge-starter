@@ -3,6 +3,7 @@
 
 /* Let Tailwind v4 scan the Forge dist so utility classes used inside core get generated. */
 @source "../node_modules/@forge-ui-official/core/dist";
+@source "../node_modules/@forge-ui-official/agent/dist";
 
 /* The logo is a single-color SVG loaded as an image, so it cannot follow currentColor. */
 [data-theme="dark"] .starter-logo { filter: invert(1); }
