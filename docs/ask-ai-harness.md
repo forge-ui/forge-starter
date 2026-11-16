@@ -1,6 +1,6 @@
-# Ask AI Harness v1
+# Forge Agent Harness v1
 
-> 2026-11：Ask AI 升级为 Forge Agent。运行时（engine、types、progress）移入 `@forge-ui-official/agent/harness`，Starter 的 `lib/harness` 只保留适配器与 Postgres 存储；助手面板换成 Forge Agent 的 `AgentPanel`，选择、确认单和步骤分别用 `ChoiceCard`、`ConfirmCard`、`RunProgress`。协议、接口和测试不变。
+> 2026-11：Forge Agent 升级为 Forge Agent。运行时（engine、types、progress）移入 `@forge-ui-official/agent/harness`，Starter 的 `lib/harness` 只保留适配器与 Postgres 存储；助手面板换成 Forge Agent 的 `AgentPanel`，选择、确认单和步骤分别用 `ChoiceCard`、`ConfirmCard`、`RunProgress`。协议、接口和测试不变。
 
 Starter 是唯一开发、设计和验收基准。通用核心先在 Starter 验证，再把同一版本接入数据集 `main`、`yiliao` 的业务适配器。
 
@@ -10,7 +10,7 @@ Starter 是唯一开发、设计和验收基准。通用核心先在 Starter 验
 
 ```mermaid
 flowchart TD
-  UI[Forge AskAi / 表单 / 选择器] --> API[认证 API]
+  UI[Forge Agent 面板 / 表单 / 选择器] --> API[认证 API]
   API --> H[通用 Harness 状态机]
   H --> M[ModelPort]
   H --> K[Context / KnowledgePort]
@@ -93,7 +93,7 @@ flowchart TD
 
 `pnpm modules:generate` 更新浏览器安全目录与独立服务端注册表；`pnpm typecheck`、`pnpm check` 拒绝未登记模块、空知识、缺少 reader/不可读理由或生成漂移。通用 reader 先校验当前用户会话与读取权限，再调用已有服务，按白名单与敏感字段黑名单递归裁剪。专用工具保留原语义。
 
-通用写草稿使用 manifest.draft 的共享 Zod、字段及动作白名单；必须声明真实页面适配器，不生成直接写库工具。确认单、页面保存、If-Match、事务回执和保存后读回仍各自生效。骨架默认不开启写入，未完成业务服务时明确报错。按用户配置 Ask AI 权限（工场 access.ts）不在本轮范围。
+通用写草稿使用 manifest.draft 的共享 Zod、字段及动作白名单；必须声明真实页面适配器，不生成直接写库工具。确认单、页面保存、If-Match、事务回执和保存后读回仍各自生效。骨架默认不开启写入，未完成业务服务时明确报错。按用户配置 Forge Agent 权限（工场 access.ts）不在本轮范围。
 
 ## 接入一个新业务
 

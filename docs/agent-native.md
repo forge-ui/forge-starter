@@ -4,7 +4,7 @@ Coding Agent 是第一开发界面，专注 **Forge 管理后台**：skills 拆�
 
 人怎么把项目跑起来：[`docs/setup.md`](setup.md)。产品范围：[`docs/product.md`](product.md)。合约：[`AGENTS.md`](../AGENTS.md)。
 
-Ask AI 的运行时、业务适配器、知识来源、数据库迁移与测试协议见 [`docs/ask-ai-harness.md`](ask-ai-harness.md)。跨平台能力先在 Starter 验证，再接入业务适配器；不要把资源规则写进通用 `lib/harness/engine.ts`。
+Forge Agent 的运行时、业务适配器、知识来源、数据库迁移与测试协议见 [`docs/ask-ai-harness.md`](ask-ai-harness.md)。跨平台能力先在 Starter 验证，再接入业务适配器；不要把资源规则写进通用 `lib/harness/engine.ts`。
 
 ## 核心做法
 
@@ -60,7 +60,7 @@ Ask AI 的运行时、业务适配器、知识来源、数据库迁移与测试�
 
 | 路径 | 形态 |
 |------|------|
-| `/accounts` · `/accounts/[id]` | 列表 + 弹窗表单 + **全页详情**（重样板）；页头右侧 Kit Ask AI |
+| `/accounts` · `/accounts/[id]` | 列表 + 弹窗表单 + **全页详情**（重样板）；页头右侧 Kit Forge Agent |
 | `/dashboard` | 工作台 |
 | `/settings/apps` | 应用管理（collection）；资料/改密/系统偏好在头像菜单弹窗 |
 | `/ref/` | 布局参考画廊（真路由，开发默认开、默认不进侧栏） |

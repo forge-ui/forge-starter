@@ -5,7 +5,7 @@
 ## 自动继承范围
 
 - 新页面沿用已有业务 layout / `AppShell`，无需逐页导入 `PageTransition` 或复制 CSS。
-- `AppLayout` 和侧栏保持常驻；只有正文 `children` 放入 `PageTransition`。禁止给整个壳按 pathname 设置 key，或把侧栏、全站 Toast、Ask AI 宿主一起包进动效。
+- `AppLayout` 和侧栏保持常驻；只有正文 `children` 放入 `PageTransition`。禁止给整个壳按 pathname 设置 key，或把侧栏、全站 Toast、Forge Agent 宿主一起包进动效。
 - 页面首次挂载、刷新、pathname 改变时自动进入。普通同源业务链接的无修饰键左键点击，会先淡出再导航。
 - 同 pathname 的 query/hash 变化不触发整页重入；筛选、分页和弹窗深链应继续保留原交互，不得为了动效强制整页重挂载。
 - `router.push/replace()`、浏览器前进/后退目前只继承 pathname 改变后的进入动效，不保证离场淡出；不要在交付说明中宣称所有导航方式均有离场效果。

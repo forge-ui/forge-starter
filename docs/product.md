@@ -58,13 +58,13 @@
 
 | 模块 | 状态 |
 |------|------|
-| App Shell | `AppLayout`；应用切换器；隐藏未实现的通知/消息 widget；Kit **Ask AI**（页头右侧；四条示范问题读当前页/账号表，输入栏选模型管理里启用的模型） |
+| App Shell | `AppLayout`；应用切换器；隐藏未实现的通知/消息 widget；Kit **Forge Agent**（页头右侧；四条示范问题读当前页/账号表，输入栏选模型管理里启用的模型） |
 | 认证 | 登录、注册、找回、重置、profile 改资料改密 |
 | 工作台 | ecommerce-2 布局，指标接业务账号 |
 | 账号管理 | **重样板**：DataTable 列表 + Modal 新建编辑 + **全页详情** + `/api/accounts` |
 | 应用管理 | 应用列表 CRUD；内部应用多选菜单（`APP_MODULE_IDS`）；外链/外部系统认证占位 |
 | 角色 / 菜单 / 权限 | RBAC 目录：列表 + Modal；侧栏 = manifest 派生菜单 ∩ 应用勾选 ∩ 角色 `:read`。种子角色见 `docs/setup.md`（demo 未识别用户名 = 超级管理员；local 公开注册固定 readonly） |
-| 模型管理 | 左供应商 FolderNav + 右 ResourceCard（对照智能体工场 / `/ref/resource-workspace`）；表单/详情弹窗；Ask AI 优先用默认模型 |
+| 模型管理 | 左供应商 FolderNav + 右 ResourceCard（对照智能体工场 / `/ref/resource-workspace`）；表单/详情弹窗；Forge Agent 优先用默认模型 |
 | Agent skills | `.agents/skills/*` |
 
 ### 4.1 数据边界
@@ -74,7 +74,7 @@
 | 登录用户 | Postgres `users` | 认证 |
 | 业务账号 | Postgres `admin_accounts` | 账号管理 CRUD 样板 |
 | 角色 / 权限 / 菜单 | Postgres `rbac_roles` · `rbac_permissions` · `rbac_menus` | RBAC 目录；侧栏 = 模块白名单 ∩ 应用勾选 ∩ 角色 `:read` |
-| 大模型 | Postgres `ai_models` | 供应商凭证（Key 只存服务端、列表掩码）；Ask AI 默认模型 |
+| 大模型 | Postgres `ai_models` | 供应商凭证（Key 只存服务端、列表掩码）；Forge Agent 默认模型 |
 | 登录用户角色 | `users.role_code`（local）；demo 按用户名映射种子角色 | 侧栏可见模块 |
 | 应用注册表 | localStorage `forge-starter:app-registry` | 侧栏应用切换（非登录库） |
 
@@ -90,7 +90,7 @@
 
 当前版本以 `package.json` 为准，是 **0.8.0**。更新记录见仓库根目录的 `CHANGELOG.md`。
 
-下面是早期计划，不是现状。0.5 之后，角色 / 菜单 / 权限、模型服务和 Ask AI harness 已经在仓库里，不要再把它们写成下一期。
+下面是早期计划，不是现状。0.5 之后，角色 / 菜单 / 权限、模型服务和 Forge Agent harness 已经在仓库里，不要再把它们写成下一期。
 
 早期版本目标表已归档到 [history/product-version-plan.md](history/product-version-plan.md)，不作当前实施承诺。
 

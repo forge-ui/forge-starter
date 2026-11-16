@@ -62,7 +62,8 @@ export function AskAiForm({ block, question, draftKey, disabled = false, onConfi
       const accepted = await onConfirm(payload.intent, question);
       setState(accepted ? "done" : "editing");
       drafts?.set(draftKey, { values, state: accepted ? "done" : "editing", notesOpen });
-      if (accepted) document.querySelector<HTMLButtonElement>('button[aria-label="关闭 Ask AI"]')?.click();
+      // Below 1024px the panel covers the page; close it so the filled form shows.
+      if (accepted && !matchMedia("(min-width: 1024px)").matches) document.querySelector<HTMLButtonElement>('[data-forge-agent="panel"] button[aria-label="关闭"]')?.click();
     } catch (error) {
       if (!mounted.current) return;
       setState("editing");

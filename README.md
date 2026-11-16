@@ -83,7 +83,7 @@ pnpm install && pnpm db:migrate && pnpm db:seed && pnpm dev
 - 想换成 MUI、Ant Design 或一整套 shadcn 的项目。这里缺的能力记成 `FORGE-GAP`，不要悄悄手搓一套
 - 还没准备数据库就想做完整的增删改查。`AUTH_MODE=demo` 只是登录不查用户表，业务表照样要 Postgres
 - 需要开箱的 OAuth、SSO、审批流、订阅计费或消息中心
-- 希望 Ask AI 自己改数据库。它能查、能提议；真正写入要回到页面原来的保存
+- 希望 Forge Agent 自己改数据库。它能查、能提议；真正写入要回到页面原来的保存
 
 ## 取舍
 
@@ -94,7 +94,7 @@ pnpm install && pnpm db:migrate && pnpm db:seed && pnpm dev
 - **密钥至少 32 位。** 开发时 demo 可以不写，用的是仓库里那把内置演示密钥。写了但不够长，不会再悄悄退回去。
 - **应用切换存在浏览器本地。** 外部系统的认证方式只是占位，不是真 SSO。
 - **RBAC 是目录加一个角色字段，不是完整的身份系统。** 有角色、菜单、权限三个页面。侧栏能不能看见，要同时满足菜单配置、当前应用勾选，以及角色的 `:read`。没有把登录用户拖进角色的界面。`local` 模式下公开注册固定是只读，管理员要改 `users.role_code`。demo 里对得上的用户名走种子角色，其余用户名是超级管理员，方便试用，不要把它当成安全边界。
-- **Ask AI 不会自己写库。** 读可以马上做。写入和删除先出确认，再填进页面自己的表单或删除确认。没接模型时，几条示范问题用本地规则回答。它不读仓库源码，也不生成页面。
+- **Forge Agent 不会自己写库。** 读可以马上做。写入和删除先出确认，再填进页面自己的表单或删除确认。没接模型时，几条示范问题用本地规则回答。它不读仓库源码，也不生成页面。
 - **结构变更有两条路。** 新环境、CI 和生产用 `pnpm db:migrate`。开发时对着自己的库改 schema，可以用 `pnpm db:push`，它不写迁移记录，生产默认拒绝执行。
 - **没有 ESLint。** 提交前的机器检查是 `pnpm check`：TypeScript、规范绊线、规范脚本自检与通用规范漂移检查。离线会明确跳过远端检查，不代表完整通过；机器检查不代替页面审计。
 
@@ -108,11 +108,11 @@ pnpm install && pnpm db:migrate && pnpm db:seed && pnpm dev
 | 工作台，指标接的是业务账号 | 不是一份可配置的报表产品 |
 | 账号管理：列表、表单弹窗、全页详情 | 样板。登录用户在 `users`，业务账号在 `admin_accounts`，不要混 |
 | 角色、菜单、权限 | 见上面的取舍。菜单目录本身进不了侧栏 |
-| 模型服务：供应商列表加模型卡片 | 密钥只留在服务端。Ask AI 优先用这里启用的模型，没有再用 `ASK_AI_LLM_*` |
-| Ask AI harness | 任务可以暂停、恢复；人在页面上确认后才保存。见 [docs/ask-ai-harness.md](docs/ask-ai-harness.md) |
+| 模型服务：供应商列表加模型卡片 | 密钥只留在服务端。Forge Agent 优先用这里启用的模型，没有再用 `ASK_AI_LLM_*` |
+| Forge Agent harness | 任务可以暂停、恢复；人在页面上确认后才保存。见 [docs/ask-ai-harness.md](docs/ask-ai-harness.md) |
 | 应用管理 | 浏览器本地登记。外部认证是占位 |
 | Agent skills、`/ref` 参考页 | 参考页默认不进菜单。生产默认关闭 |
-| 从 OpenAPI 生成模块：`pnpm module:openapi` | 对接已有后端，只生成读取（类型、service、只读 API、菜单、Ask AI 读取）；写入要在页面阶段接 |
+| 从 OpenAPI 生成模块：`pnpm module:openapi` | 对接已有后端，只生成读取（类型、service、只读 API、菜单、Forge Agent 读取）；写入要在页面阶段接 |
 
 没有审批流、支付、订阅、积分、通知中心、IM、多租户。
 

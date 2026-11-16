@@ -137,7 +137,7 @@ export function getStarterKnowledge(buildId: string = APPLICATION_BUILD_ID, modu
     capabilityIds: [`${module.id}.navigate`], source: { path: module.knowledge.source },
     nextSteps: [{ label: `打开${module.label}`, question: `打开${module.label}页面`, capabilityIds: [`${module.id}.navigate`] }],
   }));
-  inventory.push({ id: "personal.features", title: "个人资料、安全、系统设置和Ask AI", summary: PERSONAL_FEATURES, keywords: ["个人", "资料", "密码", "登录", "注册", "找回", "通知", "系统设置", "Ask AI", "附件", "会话"], capabilityIds: ["dashboard.navigate"], source: { path: "components/settings-account-dialog.tsx" } });
+  inventory.push({ id: "personal.features", title: "个人资料、安全、系统设置和Forge Agent", summary: PERSONAL_FEATURES, keywords: ["个人", "资料", "密码", "登录", "注册", "找回", "通知", "系统设置", "Forge Agent", "附件", "会话"], capabilityIds: ["dashboard.navigate"], source: { path: "components/settings-account-dialog.tsx" } });
   return [...definitions, ...inventory].map((definition) => ({
     ...definition,
     platformId: STARTER_PLATFORM_ID,

@@ -114,7 +114,7 @@ export function readContinuation(): AgentContinuation | null {
   }
 }
 
-/** 页面自己的保存或删除成功后，让同一条 Ask AI 会话继续未做完的查询或导出。 */
+/** 页面自己的保存或删除成功后，让同一条 Forge Agent 会话继续未做完的查询或导出。 */
 export function notifyAgentPageDone(mode: AgentFormFill["mode"], receipt?: Receipt) {
   const pending = readContinuation();
   if (!pending || pending.mode !== mode || typeof window === "undefined") return;

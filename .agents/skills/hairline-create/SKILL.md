@@ -14,10 +14,10 @@ Every file named below is in this skill's folder. The figure and the page are wr
 
 ## Forge Starter 项目约定（优先于下文上游流程）
 
-- 本 Skill 默认可发现，按需使用：用户提出自定义交互线稿、业务隐喻或插画设计时使用；不自动给每个页面或 Ask AI 加图形。
+- 本 Skill 默认可发现，按需使用：用户提出自定义交互线稿、业务隐喻或插画设计时使用；不自动给每个页面或 Forge Agent 加图形。
 - 图形必须表达明确含义：先说明业务对象、图形隐喻和交互作用。静止状态也应能读懂，不能靠悬停或文案解释一堆无意义节点。
 - 用户已经给定对象与手势、或授权自行选型时直接执行；否则按上游概念步骤提供选项。
-- 先生成独立 HTML 供视觉确认。未确认前，不修改业务页、菜单或正式 Ask AI。产物放在任务专用原型目录，不覆盖已有文件。
+- 先生成独立 HTML 供视觉确认。未确认前，不修改业务页、菜单或正式 Forge Agent。产物放在任务专用原型目录，不覆盖已有文件。
 - 已确认图形接入页面时遵循 Forge 组件与审计规范：颜色映射 `fg-*` token，保留可访问说明与必要键盘操作，支持减弱动效和卸载清理；真实业务状态由真实数据驱动，模拟交互明确标注。Hairline 不自动替代 Solar 操作/菜单图标。
 - 默认用 `build.mjs` + `validate.mjs` 后，在现有 Chrome 会话用已安装插件或 Chrome DevTools MCP 检查 `look.md` 八种视图；本项目不默认运行上游自动浏览器流程。
 - `look.mjs` 已适配：未显式设置 `HAIRLINE_LOOK_BROWSER` 时不会安装包或启动浏览器。需要隔离测试时，仅设置为 bundled Chromium / Chrome for Testing 二进制，禁止系统 Google Chrome；完成后关闭独立浏览器并清理临时 profile。脚本使用的可选依赖为 npm `playwright-core@1`，仅隔离模式首次运行会装到缓存，不进入项目依赖。

@@ -88,16 +88,16 @@ RBAC 初始角色与授权由 `pnpm db:seed` 显式创建；已有角色授权�
 | `SMTP_SECURE` | 默认 `false` |
 | `SMTP_USER` / `SMTP_PASS` | 可选 |
 | `SMTP_FROM` | 发件人显示名 |
-| `ASK_AI_LLM_API_KEY` | 模型表为空时的 Ask AI 回退密钥；优先用模型管理里启用的条目。密钥不要放进前端 |
+| `ASK_AI_LLM_API_KEY` | 模型表为空时的 Forge Agent 回退密钥；优先用模型管理里启用的条目。密钥不要放进前端 |
 | `ASK_AI_LLM_PROVIDER` | 默认 `dashscope`（OpenAI 兼容） |
 | `ASK_AI_LLM_MODEL` | 回退模型 ID，默认使用供应商预设（百炼为 `qwen-plus`，Grok 为 `grok-4.7`） |
 | `ASK_AI_LLM_BASE_URL` | 可选，覆盖供应商默认地址 |
 
-只支持标准 SMTP，没有云邮件 SaaS SDK。Ask AI 优先走模型管理，其次服务端 `ASK_AI_LLM_*`，请求体带 `apiKey` 会被拒绝。
+只支持标准 SMTP，没有云邮件 SaaS SDK。Forge Agent 优先走模型管理，其次服务端 `ASK_AI_LLM_*`，请求体带 `apiKey` 会被拒绝。
 
 ### Grok 接入
 
-在「模型服务」新建模型，供应商选择 **xAI / Grok**，填写服务端 API Key。默认模型为 `grok-4.7`，调用地址为 `https://api.x.ai/v1`；模型 ID 和调用地址均可按账号可用模型或 OpenAI 兼容代理修改。保存后可执行连通性测试，启用后可在 Ask AI 中选择。
+在「模型服务」新建模型，供应商选择 **xAI / Grok**，填写服务端 API Key。默认模型为 `grok-4.7`，调用地址为 `https://api.x.ai/v1`；模型 ID 和调用地址均可按账号可用模型或 OpenAI 兼容代理修改。保存后可执行连通性测试，启用后可在 Forge Agent 中选择。
 
 环境变量接入可设置 `ASK_AI_LLM_PROVIDER=xai`（也支持 `grok`、`x.ai`），并填写 `ASK_AI_LLM_API_KEY`。省略模型 ID 和地址时使用上述预设；已有 `ASK_AI_LLM_MODEL` / `ASK_AI_LLM_BASE_URL` 会优先覆盖预设。模型表为空时导入与无库回退使用相同供应商默认值。
 

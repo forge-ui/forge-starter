@@ -29,11 +29,11 @@ components/<resource>-store.tsx   # 默认 new-page；仅显式授权时在后�
 - session 守卫、`jsonOk`/`jsonError`、Zod、中文错误  
 - **不**在此 skill 里规定详情全页或弹窗  
 - **API 齐 ≠ 页面已完成**；模块 manifest 自动生成菜单，正式 UI 由 new-page 实现
-- Ask AI 知识与读取从 manifest 自动登记，不读仓库源码。reader 复用现有列表服务并使用当前会话权限；可读字段白名单之外及 password/apiKey/secret/token/credential 等字段递归剔除。专用工具可选。写工具仍只提供确认单与页面草稿，不直接写库；页面保存成功后继续原请求。
+- Forge Agent 知识与读取从 manifest 自动登记，不读仓库源码。reader 复用现有列表服务并使用当前会话权限；可读字段白名单之外及 password/apiKey/secret/token/credential 等字段递归剔除。专用工具可选。写工具仍只提供确认单与页面草稿，不直接写库；页面保存成功后继续原请求。
 
 ### 声明与生成
 
-访问策略默认省略 `access`：角色具有 `{module}:read` 且内部应用勾选模块才显示菜单，API 和 Ask AI 工具仍检查当前会话权限。确需所有登录用户可见、可读时，显式声明 `"access": "authenticated"`；它优先于角色读授权与内部应用勾选（包括人工配置应用），菜单、首页选择、壳层直链、`requirePermission(..., "read")` 与 Ask AI reader 使用同一读授权。匿名仍被 session 守卫拒绝，服务内的行级隔离与字段脱敏不变，create/update/delete 不会获得额外授权。禁止为解决普通模块漏勾选而随意扩大读取范围；脚手架默认不加此声明，其他 access 值校验失败。
+访问策略默认省略 `access`：角色具有 `{module}:read` 且内部应用勾选模块才显示菜单，API 和 Forge Agent 工具仍检查当前会话权限。确需所有登录用户可见、可读时，显式声明 `"access": "authenticated"`；它优先于角色读授权与内部应用勾选（包括人工配置应用），菜单、首页选择、壳层直链、`requirePermission(..., "read")` 与 Forge Agent reader 使用同一读授权。匿名仍被 session 守卫拒绝，服务内的行级隔离与字段脱敏不变，create/update/delete 不会获得额外授权。禁止为解决普通模块漏勾选而随意扩大读取范围；脚手架默认不加此声明，其他 access 值校验失败。
 
 ### 已有后端：从 OpenAPI 生成
 
@@ -44,11 +44,11 @@ pnpm module:openapi ./openapi.yaml            # 只打印模块清单：字段�
 pnpm module:openapi ./openapi.yaml --yes --only orders,customers
 ```
 
-每个带 GET 的集合路径（如 `/orders`）生成一个模块：`lib/<id>/types.ts`（来自响应 schema）、`lib/<id>/service.ts`（经 `lib/external-api/client.ts` 请求 `EXTERNAL_API_BASE_URL`，可选 `EXTERNAL_API_TOKEN` 作为 Bearer）、只读的 `app/api/<id>/route.ts` 与 `[id]/route.ts`、manifest 和页面骨架，并刷新注册，菜单与 Ask AI 读取立即可用。
+每个带 GET 的集合路径（如 `/orders`）生成一个模块：`lib/<id>/types.ts`（来自响应 schema）、`lib/<id>/service.ts`（经 `lib/external-api/client.ts` 请求 `EXTERNAL_API_BASE_URL`，可选 `EXTERNAL_API_TOKEN` 作为 Bearer）、只读的 `app/api/<id>/route.ts` 与 `[id]/route.ts`、manifest 和页面骨架，并刷新注册，菜单与 Forge Agent 读取立即可用。
 
 - 支持 OpenAPI 3.x 的 JSON/YAML、本地文件或 URL；`$ref`、`allOf`、常见响应包装（`items`、`data`、`rows` 等）会自动展开。
 - 嵌套路径（`/orders/{id}/lines`）、已存在的模块和找不到对象数组的接口会跳过并说明原因。
-- 名称含 password/token/secret 等的字段在 service 里就剔除，不进类型、API 响应和 Ask AI。
+- 名称含 password/token/secret 等的字段在 service 里就剔除，不进类型、API 响应和 Forge Agent。
 - 只读默认第一页；分页参数、列表必填参数会在清单里提示。
 - 写操作只列在清单里，不生成。接入写入仍按下方「写入」要求在页面阶段完成确认、回执和读回。
 - 生成后用 `forge-starter-new-page` 按清单里的页面角色做列表、详情和表单。

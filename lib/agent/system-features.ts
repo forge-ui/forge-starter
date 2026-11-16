@@ -4,7 +4,7 @@ import { APP_MODULE_IDS, APP_MODULE_META, type AppModuleId } from "@/config/apps
 /** Product facts, not execution authority. Keep alongside the pages they describe. */
 export const SYSTEM_FEATURES = Object.fromEntries(MODULES.map(module => [module.id, module.knowledge])) as Record<AppModuleId, { summary: string; fields: string; rules: string; source: string }>;
 
-export const PERSONAL_FEATURES = "头像菜单提供编辑资料（显示名、邮箱，用户名只读）、修改密码（当前密码和新密码，仅本人在安全表单输入）、系统设置（通知偏好，保存在当前浏览器）。登录支持用户名或邮箱加密码、注册、SMTP邮件找回/重置密码、退出登录。业务账号管理与登录身份分开，助手不得索要密码、验证码或重置令牌。Ask AI 支持新建/历史对话、全屏、模型选择、业务快捷卡片、文本附件与已授权工具；没有登记的通知中心、支付、完整IM或SSO不属于已实现功能。";
+export const PERSONAL_FEATURES = "头像菜单提供编辑资料（显示名、邮箱，用户名只读）、修改密码（当前密码和新密码，仅本人在安全表单输入）、系统设置（通知偏好，保存在当前浏览器）。登录支持用户名或邮箱加密码、注册、SMTP邮件找回/重置密码、退出登录。业务账号管理与登录身份分开，助手不得索要密码、验证码或重置令牌。Forge Agent 支持新建/历史对话、全屏、模型选择、业务快捷卡片、文本附件与已授权工具；没有登记的通知中心、支付、完整IM或SSO不属于已实现功能。";
 
 /** Always inject a compact inventory, independently of relevance retrieval. */
 export function systemFeatureContext(allowedToolIds: readonly string[]) {

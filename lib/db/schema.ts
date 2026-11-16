@@ -131,7 +131,7 @@ export const rbacMenus = pgTable(
   (table) => [uniqueIndex("rbac_menus_code_uidx").on(table.code)],
 );
 
-/** Platform model catalog — OpenAI-compatible credentials for Ask AI. */
+/** Platform model catalog — OpenAI-compatible credentials for Forge Agent. */
 export const aiModels = pgTable(
   "ai_models",
   {

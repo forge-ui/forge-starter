@@ -259,7 +259,7 @@ export function ModelFormDialog({
             width="100%"
             options={[
               { value: "no", label: "否" },
-              { value: "yes", label: "是（Ask AI 优先用这条）" },
+              { value: "yes", label: "是（Forge Agent 优先用这条）" },
             ]}
             value={form.isDefault}
             onChange={(v) => setField("isDefault", v === "yes" ? "yes" : "no")}

@@ -20,7 +20,7 @@
 | 选组件、对视觉 | [forge-components.md](forge-components.md) |
 | 页面做完，要按规范查 | [audit-checklist.md](audit-checklist.md) |
 | 看布局参考 | [reference-pages.md](reference-pages.md)，开发环境打开 `/ref/` |
-| 接 Ask AI 的任务和确认 | [ask-ai-harness.md](ask-ai-harness.md)、[ask-ai-agent-components.md](ask-ai-agent-components.md) |
+| 接 Forge Agent 的任务和确认 | [ask-ai-harness.md](ask-ai-harness.md)、[ask-ai-agent-components.md](ask-ai-agent-components.md) |
 | 让助手理解业务字段和动作 | [agent-semantic-foundation.md](agent-semantic-foundation.md) |
 | 部署到 Workers | [cloudflare.md](cloudflare.md) |
 

@@ -28,7 +28,7 @@
 | split | `/ref/split` | — |
 | calendar | `/ref/calendar` | — |
 | chat | `/ref/chat` | — |
-| agent | `/ref/agent` | Ask AI 示范问答 |
+| agent | `/ref/agent` | Forge Agent 示范问答 |
 | checklist | `/ref/checklist` | `/ref/task` 清单 |
 | files | `/ref/files` | — |
 | settings | `/ref/settings` | `settings/apps` + 头像菜单弹窗 |
