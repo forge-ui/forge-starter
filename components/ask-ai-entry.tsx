@@ -789,9 +789,10 @@ export function AskAiEntry({ className }: { className?: string }) {
       aria-expanded={open}
       onClick={() => setOpen(!open)}
       data-accent={siteConfig.accent}
-      className={["inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-accent px-3.5 text-sm font-semibold text-white transition hover:brightness-110", className].filter(Boolean).join(" ")}
+      // Outlined with an accent sparkle, so it never reads as the page's own primary action.
+      className={["inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-fg-grey-200 bg-background px-3.5 text-sm font-semibold text-fg-black transition hover:border-accent hover:bg-fg-grey-50 aria-expanded:border-accent", className].filter(Boolean).join(" ")}
     >
-      <StarsLinear size={16} />
+      <StarsLinear size={16} color="var(--accent)" />
       Forge Agent
     </button>
   );
