@@ -100,8 +100,6 @@ pnpm install && pnpm db:migrate && pnpm db:seed && pnpm dev
 
 ## 现在仓库里实际有什么
 
-上一版 README 写过「没有 RBAC」。角色、菜单、权限和 `lib/rbac` 已经在仓库里，那句话作废。
-
 | 有 | 边界 |
 | --- | --- |
 | 登录、注册、找回、重置；个人资料和改密 | 无 OAuth、社交登录 |
@@ -109,12 +107,17 @@ pnpm install && pnpm db:migrate && pnpm db:seed && pnpm dev
 | 账号管理：列表、表单弹窗、全页详情 | 样板。登录用户在 `users`，业务账号在 `admin_accounts`，不要混 |
 | 角色、菜单、权限 | 见上面的取舍。菜单目录本身进不了侧栏 |
 | 模型服务：供应商列表加模型卡片 | 密钥只留在服务端。Forge Agent 优先用这里启用的模型，没有再用 `ASK_AI_LLM_*` |
-| Forge Agent harness | 任务可以暂停、恢复；人在页面上确认后才保存。见 [docs/ask-ai-harness.md](docs/ask-ai-harness.md) |
+| Forge Agent（基于 `@forge-ui-official/agent`） | 右上角入口。能查数据、打开页面、填表，操作过程在页面上看得见；保存和删除要人在页面上确认；任务可以暂停、恢复。见 [docs/ask-ai-harness.md](docs/ask-ai-harness.md) |
+| 外观：浅色、深色、跟随系统 | 存在浏览器本地，不跟账号走 |
 | 应用管理 | 浏览器本地登记。外部认证是占位 |
 | Agent skills、`/ref` 参考页 | 参考页默认不进菜单。生产默认关闭 |
 | 从 OpenAPI 生成模块：`pnpm module:openapi` | 对接已有后端，只生成读取（类型、service、只读 API、菜单、Forge Agent 读取）；写入要在页面阶段接 |
 
 没有审批流、支付、订阅、积分、通知中心、IM、多租户。
+
+<p align="center">
+  <img src="docs/assets/readme-dark.png" alt="深色模式下的账号管理列表：状态筛选、头像、角色、部门和状态标签" width="920" />
+</p>
 
 ## 快速开始
 
