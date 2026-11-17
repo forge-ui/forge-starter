@@ -116,6 +116,10 @@ pnpm install && pnpm db:migrate && pnpm db:seed && pnpm dev
 没有审批流、支付、订阅、积分、通知中心、IM、多租户。
 
 <p align="center">
+  <img src="docs/assets/readme-agent.png" alt="权限页右侧打开 Forge Agent：调用查询权限工具后，列出所有删除类权限的名称和编码" width="920" />
+</p>
+
+<p align="center">
   <img src="docs/assets/readme-dark.png" alt="深色模式下的账号管理列表：状态筛选、头像、角色、部门和状态标签" width="920" />
 </p>
 
