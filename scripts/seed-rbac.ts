@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { initializeRbacDefaults } from "../lib/rbac/seed";
 
 initializeRbacDefaults().then(() => process.exit(0)).catch(() => {
