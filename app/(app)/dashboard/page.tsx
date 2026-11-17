@@ -63,6 +63,8 @@ export default function DashboardPage() {
   const disabled = countsByStatus.disabled ?? 0;
   const pending = countsByStatus.pending ?? 0;
   const locked = countsByStatus.locked ?? 0;
+  // BubbleChart prints value as the label, so hand it whole percentages.
+  const percentOf = (count: number) => Math.round((count / Math.max(total, 1)) * 100);
 
   const roleRows = useMemo(() => {
     const map = new Map<string, number>();
@@ -254,10 +256,10 @@ export default function DashboardPage() {
             accent="blue"
             height={240}
             bubbles={[
-              { value: Math.max((active / Math.max(total, 1)) * 100, 8), label: `${Math.round((active / Math.max(total, 1)) * 100)}%`, color: "bg-fg-blue-500" },
-              { value: Math.max((disabled / Math.max(total, 1)) * 100, 6), label: `${Math.round((disabled / Math.max(total, 1)) * 100)}%`, color: "bg-fg-yellow-400" },
-              { value: Math.max((pending / Math.max(total, 1)) * 100, 4), label: `${Math.round((pending / Math.max(total, 1)) * 100)}%`, color: "bg-fg-cyan-500" },
-              { value: Math.max((locked / Math.max(total, 1)) * 100, 2), label: `${Math.round((locked / Math.max(total, 1)) * 100)}%`, color: "bg-fg-red-500" },
+              { value: percentOf(active), color: "bg-fg-blue-500" },
+              { value: percentOf(disabled), color: "bg-fg-yellow-400" },
+              { value: percentOf(pending), color: "bg-fg-cyan-500" },
+              { value: percentOf(locked), color: "bg-fg-red-500" },
             ]}
           />
           <div className="grid grid-cols-2 gap-2 text-xs text-fg-grey-700">
