@@ -789,10 +789,12 @@ export function AskAiEntry({ className }: { className?: string }) {
       aria-expanded={open}
       onClick={() => setOpen(!open)}
       data-accent={siteConfig.accent}
-      className={["inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-accent px-3.5 text-sm font-semibold text-white transition hover:brightness-110", className].filter(Boolean).join(" ")}
+      // Same size as the core Ask AI trigger it replaces; a gradient outline marks it as the assistant,
+      // distinct from the page's filled primary action.
+      className={["inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-full border-[1.5px] border-transparent px-3 text-sm font-semibold text-fg-black transition-shadow [background:linear-gradient(var(--color-background),var(--color-background))_padding-box,linear-gradient(120deg,var(--fg-blue-500),var(--fg-cyan-500),var(--fg-green-500))_border-box] hover:shadow-[0_4px_16px_-6px_var(--fg-cyan-500)] aria-expanded:shadow-[0_4px_16px_-6px_var(--fg-blue-500)] md:px-4", className].filter(Boolean).join(" ")}
     >
-      <StarsLinear size={16} />
-      Forge Agent
+      <StarsLinear size={20} color="var(--fg-blue-500)" />
+      <span className="hidden whitespace-nowrap md:inline">Forge Agent</span>
     </button>
   );
 }
