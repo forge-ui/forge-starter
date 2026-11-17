@@ -56,11 +56,7 @@ export function isAccountRole(value: string): value is AccountRole {
   return (ACCOUNT_ROLES as string[]).includes(value);
 }
 
-const monthLabels = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
-
+/** Same 2026/09/28 style as roles, menus, permissions and models. */
 export function formatAccountDate(date: Date) {
-  return `${String(date.getDate()).padStart(2, "0")} ${monthLabels[date.getMonth()]} ${date.getFullYear()}`;
+  return date.toLocaleDateString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" });
 }
