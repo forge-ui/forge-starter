@@ -10,11 +10,11 @@ import { isAgentTaskRow } from "@/lib/ask-ai-progress";
 import { useRouter } from "next/navigation";
 import {
   AgentDiffTable,
+  AgentMessage,
   AgentFlowchart,
   AgentTaskRows,
   Button,
   CellText,
-  ChatBubble,
   CommandSearch,
   DataTable,
   Grid,
@@ -143,8 +143,8 @@ function AskAiTurnView({
 
   return (
     <div className="flex flex-col gap-3" data-ask-ai-turn={turn.id} data-ask-ai-delivery={answer.kind === "answer" ? answer.delivery.mode : "prompt"} data-ask-ai-chrome={chromeReady ? "ready" : "waiting"}>
-      <ChatBubble type="sent" color={siteConfig.accent} className="w-full" content={turn.question} />
-      {waitingOnTrace ? <p role="status" className="text-sm text-fg-grey-700">正在回复…</p> : null}
+      <AgentMessage role="user">{turn.question}</AgentMessage>
+      {waitingOnTrace ? <p role="status" className="text-[13px] font-medium leading-5 text-fg-grey-700"><span className="forge-shimmer">思考中…</span></p> : null}
       {businessTasks.length > 1 ? <RunProgress steps={businessTasks.map(task => ({ id: task.id, title: task.title, status: task.status, meta: task.meta }))} /> : null}
       {/* The step list already covers the tool calls; the receipt shows only when there is no list. */}
       {receipt && businessTasks.length <= 1 ? <ToolChips size="sm" className="[&>button_svg]:transition-transform [&>button:last-child_svg]:-rotate-90" items={receipt.items} summary={receipt.summary} /> : null}
