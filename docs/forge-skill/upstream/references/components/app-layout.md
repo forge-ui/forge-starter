@@ -1,12 +1,12 @@
 # app-layout
 
-自动生成；请勿编辑 API 部分。来源：`core/src/components/layouts/app-layout.tsx`；core **0.8.0**。
+自动生成；请勿编辑 API 部分。来源：`core/src/components/layouts/app-layout.tsx`；core **0.9.0**。
 默认值和运行行为以源码初始化为准；类型表不推测默认值。
 
 ## AppLayout (value)
 
 ```ts
-({ motion, mode, profilePosition, accent, children, logo, logoText, appName, appIcon, appSubtitle, apps, onAppChange, teamName: legacyTeamName, teamAvatar: legacyTeamAvatar, teamMemberCount, teamSubtitle: legacyTeamSubtitle, menuSectionLabel, favoriteSectionLabel, teams: legacyTeams, menuItems, favoriteItems, menuSections, profile, notifications, messages, language, defaultLanguage, onLanguageChange, searchPlaceholder, topbarLeftMode, topbarAccent, pageTitle, breadcrumbs, pageHeaderVariant, askAi, onBack, primaryAction, secondaryAction, showDatePicker, showKebab, showFavorite, hideHeader, sidebarSlot, sidebarWidth, collapsedSidebarWidth, defaultSidebarCollapsed, hideSidebarWidgets, teamLabels, showTeamActions, }: AppLayoutProps) => JSX.Element
+({ motion, mode, profilePosition, accent, children, logo, logoText, appName, appIcon, appSubtitle, apps, onAppChange, teamName: legacyTeamName, teamAvatar: legacyTeamAvatar, teamMemberCount, teamSubtitle: legacyTeamSubtitle, menuSectionLabel, favoriteSectionLabel, teams: legacyTeams, menuItems, favoriteItems, menuSections, profile, profileMenuItems, notifications, messages, language, defaultLanguage, onLanguageChange, searchPlaceholder, topbarLeftMode, topbarAccent, pageTitle, breadcrumbs, pageHeaderVariant, askAi, onBack, primaryAction, secondaryAction, showDatePicker, showKebab, showFavorite, hideHeader, sidebarSlot, sidebarWidth, collapsedSidebarWidth, defaultSidebarCollapsed, hideSidebarWidgets, teamLabels, showTeamActions, }: AppLayoutProps) => JSX.Element
 ```
 
 | 属性 | 必填 | 类型 | 说明 |
@@ -34,6 +34,7 @@
 | `favoriteItems` | 否 | `AppLayoutMenuItem[] \| undefined` |  |
 | `menuSections` | 否 | `AppLayoutMenuSection[] \| undefined` | 按顺序渲染的侧栏分组。传入后忽略旧的菜单项和分组标题；sidebarSlot 优先级更高。 |
 | `profile` | 否 | `AppLayoutProfile \| undefined` |  |
+| `profileMenuItems` | 否 | `ProfileMenuItem[] \| undefined` | Entries of the profile menu (edit profile, appearance, sign out…). Without it the menu shows placeholder entries. |
 | `notifications` | 否 | `number \| undefined` |  |
 | `messages` | 否 | `number \| undefined` |  |
 | `language` | 否 | `LanguageCode \| undefined` |  |
@@ -128,6 +129,12 @@ export interface AppLayoutProfile {
 }
 ```
 
+## AppLayoutProfileMenuItem (type)
+
+```ts
+export type AppLayoutProfileMenuItem = ProfileMenuItem;
+```
+
 ## AppLayoutProfilePosition (type)
 
 ```ts
@@ -169,6 +176,8 @@ export interface AppLayoutProps {
   /** 按顺序渲染的侧栏分组。传入后忽略旧的菜单项和分组标题；sidebarSlot 优先级更高。 */
   menuSections?: AppLayoutMenuSection[];
   profile?: AppLayoutProfile;
+  /** Entries of the profile menu (edit profile, appearance, sign out…). Without it the menu shows placeholder entries. */
+  profileMenuItems?: AppLayoutProfileMenuItem[];
   notifications?: number;
   messages?: number;
   language?: AppLayoutLanguage;

@@ -1,12 +1,12 @@
 # streaming-answer
 
-自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/agent/streaming-answer.tsx`；core **0.8.0**。
+自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/agent/streaming-answer.tsx`；core **0.9.0**。
 默认值和运行行为以源码初始化为准；类型表不推测默认值。
 
 ## StreamingAnswer (value)
 
 ```ts
-({ text, locale, streaming, status, format, animation, duration, motion, sources, sourcesLabel, followUps, followUpsLabel, onFollowUp, onDone, className, }: StreamingAnswerProps) => JSX.Element
+({ text, locale, streaming, status, format, animation, size, duration, motion, sources, sourcesLabel, followUps, followUpsLabel, onFollowUp, onDone, className, }: StreamingAnswerProps) => JSX.Element
 ```
 
 | 属性 | 必填 | 类型 | 说明 |
@@ -17,6 +17,7 @@
 | `status` | 否 | `StreamingAnswerStatus \| undefined` | Transport state. Complete drains the display buffer; stopped freezes it. |
 | `format` | 否 | `"plain" \| "markdown" \| undefined` | Plain preserves literal text and whitespace; Markdown is opt-in. |
 | `animation` | 否 | `"fade" \| "blur" \| undefined` |  |
+| `size` | 否 | `"md" \| "sm" \| undefined` | sm suits side panels and other narrow columns: 14px text and tighter block spacing. |
 | `duration` | 否 | `number \| undefined` | Fade duration in milliseconds; zero shows incoming content immediately. |
 | `motion` | 否 | `MotionPreference \| undefined` |  |
 | `sources` | 否 | `StreamingSource[] \| undefined` |  |
@@ -40,6 +41,8 @@ export type StreamingAnswerProps = {
   /** Plain preserves literal text and whitespace; Markdown is opt-in. */
   format?: "plain" | "markdown";
   animation?: "fade" | "blur";
+  /** sm suits side panels and other narrow columns: 14px text and tighter block spacing. */
+  size?: "md" | "sm";
   /** Fade duration in milliseconds; zero shows incoming content immediately. */
   duration?: number;
   motion?: MotionPreference;
@@ -69,3 +72,10 @@ export type StreamingSource = {
   href?: string;
 };
 ```
+
+## 选型
+
+- 模型回答正文（Markdown、逐段淡入、来源、追问）→ `StreamingAnswer`，AI SDK 消息用 `AgentParts`
+
+不要用：
+- 每句要回到出处 → `CitedAnswer`

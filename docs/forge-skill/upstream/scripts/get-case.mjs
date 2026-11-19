@@ -61,7 +61,7 @@ async function main() {
       console.log(`\n# ========================================================`);
       console.log(`# Case example: ${name.toLowerCase()}`);
       console.log(`# Source: ${rel}`);
-      console.log(`# Live: https://forgeui.org/cases/${name.toLowerCase()}/`);
+      console.log(`# Live: https://www.forgeui.org/cases/${name.toLowerCase()}/`);
       console.log(`# ========================================================\n`);
       console.log(src);
     } catch (err) {
