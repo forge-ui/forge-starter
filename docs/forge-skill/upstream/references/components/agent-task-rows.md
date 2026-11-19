@@ -1,6 +1,6 @@
 # agent-task-rows
 
-自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/agent/agent-task-rows.tsx`；core **0.8.0**。
+自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/agent/agent-task-rows.tsx`；core **0.9.0**。
 默认值和运行行为以源码初始化为准；类型表不推测默认值。
 
 ## AgentTask (type)
@@ -44,3 +44,11 @@ export type AgentTaskChild = {
 ```ts
 export type AgentTaskStatus = "running" | "failed" | "completed";
 ```
+
+## 选型
+
+- 回复里列几项任务及状态 → `AgentTaskRows`
+
+不要用：
+- 后台任务管理 → `AgentInbox`
+- 多步执行进度 → `AgentTrail`

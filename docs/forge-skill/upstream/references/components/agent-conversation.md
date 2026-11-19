@@ -1,6 +1,6 @@
 # agent-conversation
 
-自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/agent/agent-conversation.tsx`；core **0.8.0**。
+自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/agent/agent-conversation.tsx`；core **0.9.0**。
 默认值和运行行为以源码初始化为准；类型表不推测默认值。
 
 ## AgentMessage (value)
@@ -119,7 +119,7 @@ export type ConversationProps = {
 ## MessageActions (value)
 
 ```ts
-({ copyText, onRetry, onFeedback, feedback: controlled, locale, labels, className }: MessageActionsProps) => JSX.Element
+({ copyText, onRetry, onFeedback, feedback: controlled, versions, onEdit, feedbackReasons, onFeedbackReason, locale, labels, className }: MessageActionsProps) => JSX.Element
 ```
 
 | 属性 | 必填 | 类型 | 说明 |
@@ -128,8 +128,12 @@ export type ConversationProps = {
 | `onRetry` | 否 | `(() => void) \| undefined` |  |
 | `onFeedback` | 否 | `((value: MessageFeedback) => void) \| undefined` |  |
 | `feedback` | 否 | `MessageFeedback \| undefined` |  |
+| `versions` | 否 | `{ current: number; total: number; onChange: (index: number) => void; } \| undefined` | Regenerated replies: shows "2/3" with previous and next. `current` is 0-based. |
+| `onEdit` | 否 | `(() => void) \| undefined` | Edit and resend; usually on the user's message. |
+| `feedbackReasons` | 否 | `string[] \| undefined` | Offered after a thumbs down, e.g. ["没回答问题", "数据不对", "太长"]. |
+| `onFeedbackReason` | 否 | `((reason: string) => void) \| undefined` |  |
 | `locale` | 否 | `Locale \| undefined` |  |
-| `labels` | 否 | `Partial<Record<"copy" \| "up" \| "down" \| "copied" \| "retry", string>> \| undefined` |  |
+| `labels` | 否 | `Partial<Record<"next" \| "previous" \| "copy" \| "up" \| "down" \| "copied" \| "retry" \| "edit", string>> \| undefined` |  |
 | `className` | 否 | `string \| undefined` |  |
 
 ## MessageActionsProps (type)
@@ -141,8 +145,15 @@ export type MessageActionsProps = {
   onRetry?: () => void;
   onFeedback?: (value: MessageFeedback) => void;
   feedback?: MessageFeedback;
+  /** Regenerated replies: shows "2/3" with previous and next. `current` is 0-based. */
+  versions?: { current: number; total: number; onChange: (index: number) => void };
+  /** Edit and resend; usually on the user's message. */
+  onEdit?: () => void;
+  /** Offered after a thumbs down, e.g. ["没回答问题", "数据不对", "太长"]. */
+  feedbackReasons?: string[];
+  onFeedbackReason?: (reason: string) => void;
   locale?: Locale;
-  labels?: Partial<Record<"copy" | "copied" | "retry" | "up" | "down", string>>;
+  labels?: Partial<Record<"copy" | "copied" | "retry" | "up" | "down" | "edit" | "previous" | "next", string>>;
   className?: string;
 };
 ```
@@ -156,7 +167,7 @@ export type MessageFeedback = "up" | "down" | null;
 ## PromptSuggestions (value)
 
 ```ts
-({ suggestions, onSelect, label, className }: PromptSuggestionsProps) => JSX.Element | null
+({ suggestions, onSelect, label, size, className }: PromptSuggestionsProps) => JSX.Element | null
 ```
 
 | 属性 | 必填 | 类型 | 说明 |
@@ -164,6 +175,7 @@ export type MessageFeedback = "up" | "down" | null;
 | `suggestions` | 是 | `string[]` |  |
 | `onSelect` | 是 | `(text: string, index: number) => void` |  |
 | `label` | 否 | `string \| undefined` |  |
+| `size` | 否 | `"md" \| "sm" \| undefined` |  |
 | `className` | 否 | `string \| undefined` |  |
 
 ## PromptSuggestionsProps (type)
@@ -173,6 +185,14 @@ export type PromptSuggestionsProps = {
   suggestions: string[];
   onSelect: (text: string, index: number) => void;
   label?: string;
+  size?: "md" | "sm";
   className?: string;
 };
 ```
+
+## 选型
+
+- 消息滚动区（跟随最新、回到最新）→ `Conversation`；一轮消息 → `AgentMessage`；回复下的操作 → `MessageActions`；推荐提问 → `PromptSuggestions`；生成的文件 → `ArtifactCard`
+
+不要用：
+- 人和人的聊天 → `ChatBubble`

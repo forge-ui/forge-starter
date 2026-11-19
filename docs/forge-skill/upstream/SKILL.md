@@ -7,7 +7,7 @@ description: 使用 Forge / forge-ui 设计与实现看板、后台、管理系�
 
 ## 唯一入口与阅读顺序
 
-可选检索入口：[MCP 接入](https://forgeui.org/docs/mcp)、[使用指南](https://forgeui.org/guides) 与 [llms.txt](https://forgeui.org/llms.txt)。MCP 地址为 `https://forgeui.org/api/mcp`；只读数据辅助选型，不替代本 skill 规范正文。
+可选检索入口：[MCP 接入](https://www.forgeui.org/docs/mcp)、[使用指南](https://www.forgeui.org/guides) 与 [llms.txt](https://www.forgeui.org/llms.txt)。MCP 地址为 `https://www.forgeui.org/api/mcp`；只读数据辅助选型，不替代本 skill 规范正文。
 
 唯一通用入口是本文件 `forge-skill/SKILL.md`，不同时拼读全局安装版与项目同步版。优先级：用户指定的版本/checkout > starter 已校验的 `docs/forge-skill/upstream/SKILL.md` > 全局安装的 forge-skill。项目内没有同步副本时才用全局版；版本不符应先同步并核对 manifest，不能静默混用。
 
@@ -47,6 +47,6 @@ description: 使用 Forge / forge-ui 设计与实现看板、后台、管理系�
 
 ## 交付前
 
-先跑页面检查：MCP 的 `check_code`，或在项目根目录运行 `curl -fsSL https://forgeui.org/forge-check.mjs -o forge-check.mjs && node forge-check.mjs src`；错误全部修完，警告逐条确认。再按 [统一审计清单](references/audit-checklist.md) 逐条记录通过、违规、不适用或未验证及证据。跑项目已有 typecheck、lint、测试和文档自检；需要数据库、浏览器、读屏器或实机而未执行的检查明确列出原因。不得把构建通过当视觉/真实操作验收。
+先跑页面检查：MCP 的 `check_code`，或在项目根目录运行 `curl -fsSL https://www.forgeui.org/forge-check.mjs -o forge-check.mjs && node forge-check.mjs src`；错误全部修完，警告逐条确认。再按 [统一审计清单](references/audit-checklist.md) 逐条记录通过、违规、不适用或未验证及证据。跑项目已有 typecheck、lint、测试和文档自检；需要数据库、浏览器、读屏器或实机而未执行的检查明确列出原因。不得把构建通过当视觉/真实操作验收。
 
 接入专项：[Ask AI 宿主契约](references/ask-ai-host-contract.md)、[交互接入边界](references/interaction-adoption.md)。

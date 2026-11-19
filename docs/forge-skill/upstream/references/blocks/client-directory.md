@@ -4,7 +4,7 @@
 
 由源码类型生成；继承的 DOM 属性一并列出。默认值与插槽优先级见 registry 内源码。
 
-依赖：core ^0.8.0；组件：Avatar、Button、ButtonGroup、CellImageText、CellMuted、CellText、DataTable、IconButton、Panel、PlusIcon、ToolbarSearchInput、cn。
+依赖：core ^0.9.0；组件：Avatar、Button、ButtonGroup、CellImageText、CellMuted、CellText、DataTable、IconButton、Panel、PlusIcon、ToolbarSearchInput、cn。
 
 ## 最小可用示例
 

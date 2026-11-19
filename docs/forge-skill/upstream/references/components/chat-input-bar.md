@@ -1,6 +1,6 @@
 # chat-input-bar
 
-自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/chat-input-bar.tsx`；core **0.8.0**。
+自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/chat-input-bar.tsx`；core **0.9.0**。
 默认值和运行行为以源码初始化为准；类型表不推测默认值。
 
 ## ChatInputBar (value)
@@ -129,6 +129,7 @@ export type ComposerSource = {
 
 ## 选型
 
-- 聊天页底部 → `ChatInputBar`
+- 聊天页、智能体面板底部的现成输入框（快捷卡片、@ 提及、/ 命令、模型、权限、语音）→ `ChatInputBar`
+- 要自己排布输入框的部件 → `Composer` + `ComposerInput` / `ComposerToolbar` / `ComposerSend`
 - 评论输入 → 用 `TextArea` + 自定义 Submit
 - 搜索输入 → `ToolbarSearchInput`

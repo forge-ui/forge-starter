@@ -1,12 +1,12 @@
 # approval-card
 
-自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/agent/approval-card.tsx`；core **0.8.0**。
+自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/agent/approval-card.tsx`；core **0.9.0**。
 默认值和运行行为以源码初始化为准；类型表不推测默认值。
 
 ## ApprovalCard (value)
 
 ```ts
-({ questions, locale, skipLabel, skipSubmitLabel, continueLabel, sendLabel, sentLabel, onSubmitted, previousQuestionLabel, nextQuestionLabel, className, }: { questions: ApprovalQuestion[]; locale?: "zh" | "en"; skipLabel?: string; skipSubmitLabel?: string; continueLabel?: string; sendLabel?: string; sentLabel?: string; onSubmitted?: (answers: Record<string, string[]>) => void; previousQuestionLabel?: string; nextQuestionLabel?: string; className?: string; }) => JSX.Element | null
+({ questions, locale, skipLabel, skipSubmitLabel, continueLabel, sendLabel, sentLabel, onSubmitted, previousQuestionLabel, nextQuestionLabel, className, }: { questions: ApprovalQuestion[]; locale?: "zh" | "en"; skipLabel?: string; skipSubmitLabel?: string; continueLabel?: string; sendLabel?: string; sentLabel?: string; onSubmitted?: (answers: Record<string, string[]>) => void; previousQuestionLabel?: string; nextQuestionLabel?: string; className?: string; }) => JSX.Element
 ```
 
 | 属性 | 必填 | 类型 | 说明 |
@@ -33,3 +33,10 @@ export type ApprovalQuestion = {
   options: { id: string; label: string }[];
 };
 ```
+
+## 选型
+
+- 已有 ApprovalQuestion 数据 → `ApprovalCard`（内部即 Question）
+
+不要用：
+- 新代码 → `Question`

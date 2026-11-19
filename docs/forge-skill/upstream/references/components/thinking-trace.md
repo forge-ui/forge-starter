@@ -1,6 +1,6 @@
 # thinking-trace
 
-自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/agent/thinking-trace.tsx`；core **0.8.0**。
+自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/agent/thinking-trace.tsx`；core **0.9.0**。
 默认值和运行行为以源码初始化为准；类型表不推测默认值。
 
 ## ThinkingRow (type)
@@ -41,3 +41,10 @@ export type ThinkingRow = {
 ```ts
 export type ThinkingVariant = "steps" | "reasoning" | "search" | "coding";
 ```
+
+## 选型
+
+- 营销页、空状态里自己逐条播放的思考过程 → `ThinkingTrace`（内部用 Reasoning 渲染）
+
+不要用：
+- 接真实模型 → `Reasoning`，状态由宿主驱动

@@ -68,7 +68,7 @@ const info = {
 
 const notes = [];
 if (!info.hasPackageJson) notes.push("没有找到 package.json：确认当前目录是项目根目录。");
-else if (!info.forge.declared) notes.push("项目还没装 Forge：pnpm add @forge-ui-official/core，并按 https://forgeui.org/docs/quick-start 接入样式。");
+else if (!info.forge.declared) notes.push("项目还没装 Forge：pnpm add @forge-ui-official/core，并按 https://www.forgeui.org/docs/quick-start 接入样式。");
 if (info.forge.installed && info.forge.documentedBySkill && info.forge.installed !== info.forge.documentedBySkill) {
   const [installedMajor, installedMinor] = major(info.forge.installed) ?? [];
   const [skillMajor, skillMinor] = major(info.forge.documentedBySkill) ?? [];
@@ -80,8 +80,8 @@ if (info.framework.react && (major(info.framework.react)?.[0] ?? 0) < 19) notes.
 if (info.framework.tailwind && (major(info.framework.tailwind)?.[0] ?? 0) < 4) notes.push("Forge 需要 Tailwind v4。");
 if (info.starter) notes.push("这是 forge-starter 项目：路由、权限和数据接入按该仓的 AGENTS.md 与 starter skill 执行。");
 if (info.copiedBlocks.length) notes.push(`项目里已有页面组件：${info.copiedBlocks.join("、")}。新页面优先复用或对齐它们的写法。`);
-if (!info.agentFiles.includes("DESIGN.md")) notes.push("项目根目录没有 DESIGN.md，可运行 curl -fsSL https://forgeui.org/setup.sh | bash -s -- --scope project --design 补上。");
-if (info.shadcnRegistries && !Object.values(info.shadcnRegistries).some(url => String(url).includes("forgeui.org"))) notes.push('components.json 的 registries 里可以加上 "@forge": "https://forgeui.org/r/{name}.json"，之后用 npx shadcn add @forge/<name> 安装页面组件。');
+if (!info.agentFiles.includes("DESIGN.md")) notes.push("项目根目录没有 DESIGN.md，可运行 curl -fsSL https://www.forgeui.org/setup.sh | bash -s -- --scope project --design 补上。");
+if (info.shadcnRegistries && !Object.values(info.shadcnRegistries).some(url => String(url).includes("forgeui.org"))) notes.push('components.json 的 registries 里可以加上 "@forge": "https://www.forgeui.org/r/{name}.json"，之后用 npx shadcn add @forge/<name> 安装页面组件。');
 
 if (json) process.stdout.write(JSON.stringify({ ...info, notes }, null, 2) + "\n");
 else {
