@@ -159,7 +159,7 @@ export default function RefTaskPage() {
             {activities.map((item) => (
               <div key={item.title + item.time} className="border-b border-fg-grey-100 py-3 last:border-0">
                 <div className="flex items-start justify-between gap-3">
-                  <h4 className="text-sm font-semibold text-fg-black">{item.title}</h4>
+                  <h4 className="text-sm font-medium text-fg-black">{item.title}</h4>
                   <span className="shrink-0 text-xs text-fg-grey-500">{item.time}</span>
                 </div>
                 <p className="mt-1 text-sm text-fg-grey-700">{item.body}</p>

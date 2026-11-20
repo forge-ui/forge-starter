@@ -75,7 +75,7 @@ export default function RefChatPage() {
             <div className="flex items-center gap-3">
               <Avatar src={active.avatar} size="md" />
               <div>
-                <p className="text-sm font-semibold text-fg-black">{active.name}</p>
+                <p className="text-sm font-medium text-fg-black">{active.name}</p>
                 <p className="text-xs font-medium text-fg-green">
                   {active.team ? "12 人在线" : active.online ? "在线" : "离线"}
                 </p>

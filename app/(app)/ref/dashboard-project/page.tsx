@@ -217,7 +217,7 @@ export default function RefDashboardProjectPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="flex flex-col gap-4 rounded-3xl border border-fg-grey-200 bg-background p-4 lg:col-span-2">
           <div>
-            <h3 className="text-sm font-semibold text-fg-black">Statistic</h3>
+            <h3 className="text-sm font-medium text-fg-black">Statistic</h3>
             <p className="text-sm text-fg-grey-500">Project throughput (示意柱)</p>
           </div>
           <div className="flex items-end gap-1.5" style={{ height: 180 }}>
@@ -236,7 +236,7 @@ export default function RefDashboardProjectPage() {
         <div className="flex flex-col gap-4 rounded-3xl border border-fg-grey-200 bg-background p-4">
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-fg-black">All Project</h3>
+              <h3 className="text-sm font-medium text-fg-black">All Project</h3>
               <p className="text-sm text-fg-grey-500">Based on status</p>
             </div>
             <KebabMenu accent={siteConfig.accent} items={[{ label: "Refresh", onSelect: () => {} }]} />
@@ -281,7 +281,7 @@ export default function RefDashboardProjectPage() {
         <div className="flex flex-col gap-3 rounded-3xl border border-fg-grey-200 bg-background p-4 lg:col-span-2">
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-fg-black">Daily Activity</h3>
+              <h3 className="text-sm font-medium text-fg-black">Daily Activity</h3>
               <p className="text-sm text-fg-grey-500">Today&apos;s schedule</p>
             </div>
             <KebabMenu accent={siteConfig.accent} items={[{ label: "View all", onSelect: () => {} }]} />
@@ -335,7 +335,7 @@ export default function RefDashboardProjectPage() {
         <div className="flex flex-col gap-4 rounded-3xl border border-fg-grey-200 bg-background p-4 lg:col-span-2">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
-              <h3 className="text-sm font-semibold text-fg-black">Projects</h3>
+              <h3 className="text-sm font-medium text-fg-black">Projects</h3>
               <p className="text-sm text-fg-grey-500">Recent projects</p>
             </div>
             <Button color={siteConfig.accent} size="sm">
@@ -367,7 +367,7 @@ export default function RefDashboardProjectPage() {
                       size="md"
                     />
                     <div>
-                      <div className="text-sm font-semibold text-fg-black">{m.name}</div>
+                      <div className="text-sm font-medium text-fg-black">{m.name}</div>
                       <div className="text-xs text-fg-grey-500">{m.role}</div>
                     </div>
                   </div>

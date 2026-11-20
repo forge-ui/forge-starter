@@ -145,7 +145,7 @@ export default function RefProjectPage() {
                 <div key={m.name} className="flex items-center gap-3">
                   <Avatar src={m.avatar} size="md" />
                   <div>
-                    <div className="text-sm font-semibold text-fg-black">{m.name}</div>
+                    <div className="text-sm font-medium text-fg-black">{m.name}</div>
                     <div className="text-xs text-fg-grey-500">{m.role}</div>
                   </div>
                 </div>
@@ -176,7 +176,7 @@ export default function RefProjectPage() {
                   <Avatar src={m.avatar} size="md" />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <h4 className="text-sm font-semibold text-fg-black">{m.name}</h4>
+                      <h4 className="text-sm font-medium text-fg-black">{m.name}</h4>
                       <span className="text-xs text-fg-grey-500">
                         {index === 0 ? "25 Jan 08:30" : "23 Jan 14:00"}
                       </span>
@@ -211,7 +211,7 @@ export default function RefProjectPage() {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             {["To Do", "In Progress", "Done", "Blocked"].map((col, i) => (
               <section key={col} className="rounded-2xl border border-fg-grey-200 bg-fg-grey-50 p-4">
-                <h3 className="mb-3 text-sm font-semibold text-fg-black">{col}</h3>
+                <h3 className="mb-3 text-sm font-medium text-fg-black">{col}</h3>
                 <Link
                   href="/ref/task/"
                   className="block rounded-2xl border border-fg-grey-200 bg-background p-4 hover:border-fg-blue-200"
@@ -220,7 +220,7 @@ export default function RefProjectPage() {
                     label={i === 3 ? "High" : i === 1 ? "Medium" : "Low"}
                     color={i === 3 ? "red" : i === 1 ? "yellow" : "green"}
                   />
-                  <p className="mt-3 text-sm font-semibold text-fg-black">
+                  <p className="mt-3 text-sm font-medium text-fg-black">
                     {i === 0 ? "Content inventory" : i === 1 ? "Homepage Wireframe" : i === 2 ? "Kickoff deck" : "Legal copy"}
                   </p>
                   <div className="mt-3">
@@ -256,7 +256,7 @@ export default function RefProjectPage() {
               <div className="flex items-center gap-3">
                 <Avatar src={m.avatar} size="md" />
                 <div>
-                  <div className="text-sm font-semibold text-fg-black">{m.name}</div>
+                  <div className="text-sm font-medium text-fg-black">{m.name}</div>
                   <div className="text-xs text-fg-grey-500">{m.role}</div>
                 </div>
               </div>

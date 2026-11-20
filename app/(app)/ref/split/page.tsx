@@ -44,7 +44,7 @@ export default function RefSplitPage() {
                       on ? "bg-fg-blue-50 outline outline-1 outline-fg-blue-200" : "hover:bg-fg-grey-50"
                     }`}
                   >
-                    <span className="truncate text-sm font-semibold text-fg-black">{row.title}</span>
+                    <span className="truncate text-sm font-medium text-fg-black">{row.title}</span>
                     <span className="flex items-center justify-between gap-2 text-xs text-fg-grey-500">
                       <span>{row.owner}</span>
                       <StatusBadge

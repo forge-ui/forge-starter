@@ -35,7 +35,7 @@ export default function RefDetailModalPage() {
             className="flex h-10 min-w-0 flex-col justify-center text-left"
             onClick={() => setOpenId(row.id)}
           >
-            <span className="truncate text-sm font-semibold text-fg-black">{row.title}</span>
+            <span className="truncate text-sm font-medium text-fg-black">{row.title}</span>
             <span className="text-xs text-fg-grey-500">{row.owner}</span>
           </button>
         ),

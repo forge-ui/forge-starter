@@ -159,7 +159,7 @@ export default function RefTicketsPage() {
         {/* Ticket list */}
         <div className="flex flex-col overflow-hidden rounded-[24px] border border-fg-grey-200 bg-background">
           <div className="border-b border-fg-grey-100 px-4 py-3">
-            <h3 className="text-sm font-semibold text-fg-black">工单列表</h3>
+            <h3 className="text-sm font-medium text-fg-black">工单列表</h3>
             <p className="text-xs text-fg-grey-500">用户侧 / 运营侧同一线程范式</p>
           </div>
           <div className="flex flex-col gap-1 p-2">
@@ -175,7 +175,7 @@ export default function RefTicketsPage() {
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <span className="text-sm font-semibold text-fg-black">{t.title}</span>
+                  <span className="text-sm font-medium text-fg-black">{t.title}</span>
                   <StatusBadge
                     label={statusMeta[t.status].label}
                     color={statusMeta[t.status].color}
@@ -222,7 +222,7 @@ export default function RefTicketsPage() {
                   }`}
                 >
                   <div className="mb-1 flex items-center justify-between gap-3">
-                    <span className="text-xs font-semibold text-fg-black">{m.author}</span>
+                    <span className="text-xs font-medium text-fg-black">{m.author}</span>
                     <span className="text-[11px] text-fg-grey-400">{m.time}</span>
                   </div>
                   <p className="text-sm leading-6 text-fg-grey-700">{m.content}</p>

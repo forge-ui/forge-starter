@@ -35,7 +35,7 @@ export function WorkspaceSplit({
       <aside
         className={`flex shrink-0 flex-col border-r border-fg-grey-200 bg-fg-grey-50/60 ${leftWidthClassName}`}
       >
-        <div className="px-4 pb-2 pt-4 text-sm font-semibold text-fg-black">
+        <div className="px-4 pb-2 pt-4 text-sm font-medium text-fg-black">
           {leftTitle}
         </div>
         <div className="flex-1 overflow-auto px-2 pb-4">{left}</div>

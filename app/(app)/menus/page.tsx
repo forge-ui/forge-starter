@@ -154,7 +154,7 @@ function MenusPageContent() {
             className="flex h-10 min-w-0 flex-col justify-center text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fg-grey-300"
             onClick={() => openDetail(row.id)}
           >
-            <span className="truncate text-sm font-semibold text-fg-black">
+            <span className="truncate text-sm font-medium text-fg-black">
               {row.parentName ? `${row.parentName} / ${row.name}` : row.name}
             </span>
             <span className="text-xs text-fg-grey-700">{row.path}</span>

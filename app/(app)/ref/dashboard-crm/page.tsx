@@ -216,7 +216,7 @@ export default function RefDashboardCrmPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="flex flex-col gap-4 rounded-3xl border border-fg-grey-200 bg-background p-4 lg:col-span-2">
           <div>
-            <h3 className="text-sm font-semibold text-fg-black">Average Sales</h3>
+            <h3 className="text-sm font-medium text-fg-black">Average Sales</h3>
             <p className="text-sm text-fg-grey-500">Income trend (示意柱，无 Figma 私有图组件)</p>
           </div>
           <div className="flex items-end gap-1.5" style={{ height: 180 }}>
@@ -236,7 +236,7 @@ export default function RefDashboardCrmPage() {
         <div className="flex flex-col gap-3 rounded-3xl border border-fg-grey-200 bg-background p-4">
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-fg-black">Success Rate</h3>
+              <h3 className="text-sm font-medium text-fg-black">Success Rate</h3>
               <p className="text-sm text-fg-grey-500">Conversion rate</p>
             </div>
             <KebabMenu accent={siteConfig.accent} items={[{ label: "Refresh", onSelect: () => {} }]} />
@@ -269,7 +269,7 @@ export default function RefDashboardCrmPage() {
         <div className="flex flex-col gap-4 rounded-3xl border border-fg-grey-200 bg-background p-4 lg:col-span-2">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
-              <h3 className="text-sm font-semibold text-fg-black">Recent Leads</h3>
+              <h3 className="text-sm font-medium text-fg-black">Recent Leads</h3>
               <p className="text-sm text-fg-grey-500">Recent leads</p>
             </div>
             <Button color={siteConfig.accent} size="sm">

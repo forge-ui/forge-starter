@@ -1,6 +1,6 @@
 # toolbar
 
-自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/toolbar.tsx`；core **0.9.0**。
+自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/toolbar.tsx`；core **0.10.0**。
 默认值和运行行为以源码初始化为准；类型表不推测默认值。
 
 ## PageTitleToolbar (value)
@@ -13,7 +13,7 @@
 |---|---|---|---|
 | `variant` | 否 | `"overview" \| "collection" \| "detail" \| "action" \| undefined` |  |
 | `subtitle` | 否 | `string \| undefined` |  |
-| `askAi` | 否 | `AskAiProps \| undefined` | Optional Ask AI action, with the same configuration as PageHeader. |
+| `askAi` | 否 | `AskAiProps \| undefined` | Optional Forge Agent entry, with the same configuration as PageHeader. |
 | `title` | 是 | `string` |  |
 
 ## PageTitleToolbarAction (type)

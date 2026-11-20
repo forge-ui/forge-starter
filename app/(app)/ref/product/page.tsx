@@ -200,7 +200,7 @@ export default function RefProductPage() {
                   className="rounded-xl bg-background p-4 outline outline-1 outline-offset-[-1px] outline-fg-grey-200"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-semibold text-fg-black">{r.customer}</p>
+                    <p className="text-sm font-medium text-fg-black">{r.customer}</p>
                     <span className="text-xs text-fg-grey-500">{r.date}</span>
                   </div>
                   <p className="mt-1 text-xs text-fg-yellow-600">评分 {r.rating}/5</p>
@@ -218,7 +218,7 @@ export default function RefProductPage() {
                   className="flex items-start justify-between gap-3 rounded-xl bg-background p-4 outline outline-1 outline-offset-[-1px] outline-fg-grey-200"
                 >
                   <div>
-                    <p className="text-sm font-semibold text-fg-black">{m.customer}</p>
+                    <p className="text-sm font-medium text-fg-black">{m.customer}</p>
                     <p className="mt-1 text-sm text-fg-grey-700">{m.message}</p>
                   </div>
                   <span className="shrink-0 text-xs text-fg-grey-500">{m.date}</span>

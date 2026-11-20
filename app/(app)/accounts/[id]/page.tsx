@@ -183,7 +183,7 @@ export default function AccountDetailPage({
               </div>
               <div className="flex flex-col gap-5 border-t border-fg-grey-200 p-5">
                 <DescriptionItem label="账号状态" content={<StatusBadge label={meta.label} color={meta.color} />} />
-                <h3 className="text-sm font-semibold text-fg-black">联系方式</h3>
+                <h3 className="text-sm font-medium text-fg-black">联系方式</h3>
                 <DescriptionItem label="邮箱" content={<span className="break-all">{account.email || "未填写"}</span>} actions={<IconButton variant="ghost" shape="square" size="sm" aria-label="复制邮箱" disabled={!account.email} onClick={() => copyValue("邮箱", account.email)}><CopyLinear size={14} /></IconButton>} />
                 <DescriptionItem label="手机" content={account.phone || "未填写"} actions={<IconButton variant="ghost" shape="square" size="sm" aria-label="复制手机" disabled={!account.phone} onClick={() => copyValue("手机", account.phone)}><CopyLinear size={14} /></IconButton>} />
               </div>

@@ -4,6 +4,13 @@
 
 ## Unreleased
 
+### 排版
+
+- 升级 `@forge-ui-official/core` 到 0.10.0：正文字体换成 Inter，字距归零，黑和灰改为中性色，14px 及以下不再用粗体，表格和侧栏更紧凑。
+- 根布局改为加载 `@fontsource-variable/inter` 并设置 `--font-inter`，去掉 `<html>` 上的 `antialiased`。
+- 业务页和参考页里 14px 及以下的半粗、粗体统一为 medium。
+- 同步 forge-skill 到 core 0.10.0 对应版本。
+
 ### 深色模式
 
 - 升级 `@forge-ui-official/core` 到 0.8.0：深色模式、弹窗里菜单被遮挡的修复，以及智能体对话组件（0.7.0）。

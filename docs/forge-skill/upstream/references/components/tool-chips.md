@@ -1,6 +1,6 @@
 # tool-chips
 
-自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/agent/tool-chips.tsx`；core **0.9.0**。
+自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/agent/tool-chips.tsx`；core **0.10.0**。
 默认值和运行行为以源码初始化为准；类型表不推测默认值。
 
 ## ToolChipDetail (type)
@@ -61,6 +61,8 @@ export type ToolDiffChip = {
   del?: number;
 };
 ```
+
+> 已废弃：新代码用 `ToolCallGroup` + `ToolCall`；下个大版本删除。
 
 ## 选型
 

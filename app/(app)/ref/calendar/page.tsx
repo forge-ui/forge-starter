@@ -79,14 +79,14 @@ export default function RefCalendarPage() {
                   <p className="mt-1 text-sm text-fg-grey-500">周一 12 Aug · 09:00–10:00</p>
                 </div>
               </div>
-              <p className="mt-4 text-sm font-semibold text-fg-black">说明</p>
+              <p className="mt-4 text-sm font-medium text-fg-black">说明</p>
               <p className="mt-1 text-sm leading-6 text-fg-grey-600">
                 对照 micellaneous calendar：主区 FullCalendar，可选右侧/浮层详情。
               </p>
               <Button className="mt-4" color={siteConfig.accent}>
                 加入会议
               </Button>
-              <p className="mt-5 text-sm font-semibold text-fg-black">参与人</p>
+              <p className="mt-5 text-sm font-medium text-fg-black">参与人</p>
               <div className="mt-2 flex flex-col gap-2">
                 {guests.map((name) => (
                   <div key={name} className="flex items-center gap-2">

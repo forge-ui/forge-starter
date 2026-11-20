@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
-import "@fontsource-variable/manrope";
+import "@fontsource-variable/inter";
 import "@fontsource-variable/plus-jakarta-sans";
 import { siteConfig } from "@/config/site";
 import { themeBootScript } from "@/lib/theme";
@@ -12,13 +12,13 @@ export const metadata: Metadata = {
 };
 
 const fontVariables = {
-  "--font-manrope": "'Manrope Variable', system-ui, sans-serif",
+  "--font-inter": "'Inter Variable', system-ui, sans-serif",
   "--font-plus-jakarta-sans": "'Plus Jakarta Sans Variable', system-ui, sans-serif",
 } as CSSProperties;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="zh-CN" data-accent={siteConfig.accent} className="h-full antialiased" style={fontVariables} suppressHydrationWarning>
+    <html lang="zh-CN" data-accent={siteConfig.accent} className="h-full" style={fontVariables} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>
