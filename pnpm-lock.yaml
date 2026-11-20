@@ -16,10 +16,10 @@ importers:
         version: 5.2.8
       '@forge-ui-official/agent':
         specifier: 0.5.0
-        version: 0.5.0(@forge-ui-official/core@0.10.0(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+        version: 0.5.0(@forge-ui-official/core@0.10.1(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@forge-ui-official/core':
-        specifier: 0.10.0
-        version: 0.10.0(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4)
+        specifier: 0.10.1
+        version: 0.10.1(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4)
       '@opennextjs/cloudflare':
         specifier: 1.20.6
         version: 1.20.6(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(wrangler@4.142.0(@types/node@22.19.17))
@@ -1053,8 +1053,8 @@ packages:
       react: '>=19'
       react-dom: '>=19'
 
-  '@forge-ui-official/core@0.10.0':
-    resolution: {integrity: sha512-xFFxCPt1jp3PEAfy7u8xL3gB5w/On8g3IPgVenT5E4W2ZRKbwVpmj7fwD3mVNyxWg8vT7yneLCbWDYz8gB3LhA==}
+  '@forge-ui-official/core@0.10.1':
+    resolution: {integrity: sha512-lcP07G+cSveIIlHaKqrul9BA8wjosUh9AxuLaflL6bSAKfgMpe/CLmvmukl850joQLmeLS374GmmpCwDY90EOg==}
     peerDependencies:
       '@solar-icons/react': ^2.3.2
       next: '>=15'
@@ -4174,17 +4174,17 @@ snapshots:
 
   '@fontsource-variable/plus-jakarta-sans@5.2.8': {}
 
-  '@forge-ui-official/agent@0.5.0(@forge-ui-official/core@0.10.0(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)':
+  '@forge-ui-official/agent@0.5.0(@forge-ui-official/core@0.10.1(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)':
     dependencies:
       '@ai-sdk/openai-compatible': 3.0.92(zod@4.4.3)
       '@ai-sdk/react': 4.0.177(react@19.2.5)(zod@4.4.3)
-      '@forge-ui-official/core': 0.10.0(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4)
+      '@forge-ui-official/core': 0.10.1(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4)
       ai: 7.0.173(zod@4.4.3)
       react: 19.2.5
       react-dom: 19.2.5(react@19.2.5)
       zod: 4.4.3
 
-  '@forge-ui-official/core@0.10.0(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4)':
+  '@forge-ui-official/core@0.10.1(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4)':
     dependencies:
       '@solar-icons/react': 2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       motion: 14.1.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)

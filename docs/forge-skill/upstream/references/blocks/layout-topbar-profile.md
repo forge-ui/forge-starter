@@ -4,7 +4,7 @@
 
 由源码类型生成；继承的 DOM 属性一并列出。默认值与插槽优先级见 registry 内源码。
 
-依赖：core ^0.10.0；组件：AppLayout、Breadcrumbs、Button、DataTable、PageTitleToolbar、StatCard、StatusBadge。
+依赖：core ^0.10.1；组件：AppLayout、Breadcrumbs、Button、DataTable、PageTitleToolbar、StatCard、StatusBadge。
 
 ## 最小可用示例
 

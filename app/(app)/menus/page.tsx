@@ -147,7 +147,7 @@ function MenusPageContent() {
       {
         key: "name",
         header: "菜单",
-        flex: true,
+        width: "w-[32%]",
         render: (row) => (
           <button
             type="button"
@@ -194,6 +194,7 @@ function MenusPageContent() {
         key: "actions",
         header: "操作",
         width: "w-24",
+        align: "right",
         render: (row) => (
           <div className="flex h-10 items-center justify-end gap-2">
             <IconButton

@@ -157,7 +157,7 @@ function PermissionsPageContent() {
       {
         key: "name",
         header: "权限",
-        flex: true,
+        width: "w-[32%]",
         render: (row) => (
           <button
             type="button"
@@ -197,6 +197,7 @@ function PermissionsPageContent() {
         key: "actions",
         header: "操作",
         width: "w-24",
+        align: "right",
         render: (row) => (
           <div className="flex h-10 items-center justify-end gap-2">
             <IconButton

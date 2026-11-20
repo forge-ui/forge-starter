@@ -146,7 +146,7 @@ function RolesPageContent() {
       {
         key: "name",
         header: "角色",
-        flex: true,
+        width: "w-[32%]",
         render: (row) => (
           <button
             type="button"
@@ -185,6 +185,7 @@ function RolesPageContent() {
         key: "actions",
         header: "操作",
         width: "w-24",
+        align: "right",
         render: (row) => (
           <div className="flex h-10 items-center justify-end gap-2">
             <IconButton
