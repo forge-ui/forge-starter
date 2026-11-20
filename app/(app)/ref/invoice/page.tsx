@@ -81,14 +81,14 @@ export default function RefInvoicePage() {
                   size="md"
                 />
                 <div>
-                  <p className="text-sm font-semibold text-fg-black">John Bushmill</p>
+                  <p className="text-sm font-medium text-fg-black">John Bushmill</p>
                   <p className="text-xs font-medium text-fg-grey-500">johnb@mail.com</p>
                 </div>
               </div>
             </div>
             <div className="rounded-[20px] border border-fg-grey-200 p-5">
               <p className="text-xs font-medium uppercase tracking-fg text-fg-grey-500">Pay From</p>
-              <p className="mt-4 text-sm font-semibold text-fg-black">Forge Starter Team</p>
+              <p className="mt-4 text-sm font-medium text-fg-black">Forge Starter Team</p>
               <p className="mt-1 text-xs font-medium text-fg-grey-500">finance@example.com</p>
             </div>
           </div>
@@ -107,7 +107,7 @@ export default function RefInvoicePage() {
             <FieldLine label="Tax" value="$232.00" />
             <FieldLine label="Discount" value="$0.00" />
             <div className="flex items-center justify-between pt-4">
-              <span className="text-sm font-semibold text-fg-black">Total</span>
+              <span className="text-sm font-medium text-fg-black">Total</span>
               <span className="text-2xl font-semibold text-fg-black">$2,552.00</span>
             </div>
           </div>

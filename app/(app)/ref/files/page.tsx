@@ -62,7 +62,7 @@ export default function RefFilesPage() {
       </div>
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold text-fg-black">文件夹</h2>
+        <h2 className="mb-3 text-sm font-medium text-fg-black">文件夹</h2>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {visibleFolders.map((folder) => (
             <button
@@ -72,7 +72,7 @@ export default function RefFilesPage() {
             >
               <FileTypeIcon fileName={`${folder.name}/`} />
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-fg-black">{folder.name}</p>
+                <p className="truncate text-sm font-medium text-fg-black">{folder.name}</p>
                 <p className="text-xs text-fg-grey-500">{folder.meta}</p>
               </div>
             </button>
@@ -81,7 +81,7 @@ export default function RefFilesPage() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold text-fg-black">文件</h2>
+        <h2 className="mb-3 text-sm font-medium text-fg-black">文件</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {visibleFiles.map((file) => (
             <FileCard

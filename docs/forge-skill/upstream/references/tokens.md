@@ -93,32 +93,32 @@ The 7 color families plus grey and white share the same 10-shade scale. Aliases 
 | 900 | `#1C575A` |
 
 ### Black (alias `--fg-black`)
-⚠ `fg-black-500` is `#000A19`, not pure `#000`. The whole scale is a cool near-black range for text + deep backgrounds.
+⚠ `fg-black-500` is `#1F1F1F`, not pure `#000`. The whole scale is a neutral near-black range for text + deep backgrounds.
 
 | Shade | Hex |
 |---|---|
-| 50 | `#E6E7E8` |
-| 100 | `#B0B3B8` |
-| 200 | `#8A8E95` |
-| 300 | `#545B65` |
-| 400 | `#333B47` |
-| **500** | `#000A19` |
-| 600 | `#000917` |
-| 700 | `#000712` |
-| 800 | `#00060E` |
-| 900 | `#00040B` |
+| 50 | `#E9E9E9` |
+| 100 | `#BABABA` |
+| 200 | `#989898` |
+| 300 | `#696969` |
+| 400 | `#4C4C4C` |
+| **500** | `#1F1F1F` |
+| 600 | `#1C1C1C` |
+| 700 | `#161616` |
+| 800 | `#111111` |
+| 900 | `#0D0D0D` |
 
 ### Grey
 | Shade | Hex |
 |---|---|
 | 50 | `#FAFAFA` |
-| 100 | `#EBEBEB` |
-| 200 | `#E1E1E1` |
+| 100 | `#F5F5F5` |
+| 200 | `#E5E5E5` |
 | 300 | `#D3D3D3` |
 | 400 | `#CACACA` |
 | 500 | `#BDBDBD` |
 | 600 | `#ACACAC` |
-| 700 | `#868686` |
+| 700 | `#737373` |
 | 800 | `#686868` |
 | 900 | `#4F4F4F` |
 
@@ -185,13 +185,13 @@ Set `data-theme="dark"` on `<html>` (or on any container; a nested `data-theme="
 
 | Token | Value |
 |---|---|
-| `--font-sans` | Manrope (body) |
+| `--font-sans` | Inter (body) |
 | `--font-display` | Plus Jakarta Sans (headings) |
 | `--text-display-l` | `28px` |
 | `--text-2xs` | `10px` |
-| `--tracking-fg` | `0.5px` (standard letter-spacing for Forge) |
+| `--tracking-fg` | `0px` (kept so existing `tracking-fg` classes stay valid) |
 
-Tailwind utility for the standard letter-spacing: `tracking-fg`.
+`tracking-fg` no longer adds spacing; new code can leave it out.
 
 ## 中文应用约定
 

@@ -8,18 +8,18 @@ importers:
 
   .:
     dependencies:
-      '@fontsource-variable/manrope':
+      '@fontsource-variable/inter':
         specifier: ^5.2.8
-        version: 5.2.8
+        version: 5.3.0
       '@fontsource-variable/plus-jakarta-sans':
         specifier: ^5.2.8
         version: 5.2.8
       '@forge-ui-official/agent':
         specifier: 0.5.0
-        version: 0.5.0(@forge-ui-official/core@0.9.0(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+        version: 0.5.0(@forge-ui-official/core@0.10.1(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@forge-ui-official/core':
-        specifier: 0.9.0
-        version: 0.9.0(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4)
+        specifier: 0.10.1
+        version: 0.10.1(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4)
       '@opennextjs/cloudflare':
         specifier: 1.20.6
         version: 1.20.6(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(wrangler@4.142.0(@types/node@22.19.17))
@@ -1040,8 +1040,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@fontsource-variable/manrope@5.2.8':
-    resolution: {integrity: sha512-nc9lOuCRz73UHnovDE2bwXUdghE2SEOc7Aii0qGe3CLyE03W1a7VnY5Z6euRiapiKbCkGS+eXbY3s/kvWeGeSw==}
+  '@fontsource-variable/inter@5.3.0':
+    resolution: {integrity: sha512-OupL48va4JNofb97w6NYeF9S7W/kHNKM0Er8Dem5nqi4jeOLrVJDoE8tZEpnMJmtkvNbB1EIPPwHcdkF6b1oUA==}
 
   '@fontsource-variable/plus-jakarta-sans@5.2.8':
     resolution: {integrity: sha512-iQecBizIdZxezODNHzOn4SvvRMrZL/S8k4MEXGDynCmUrImVW0VmX+tIAMqnADwH4haXlHSXqMgU6+kcfBQJdw==}
@@ -1053,8 +1053,8 @@ packages:
       react: '>=19'
       react-dom: '>=19'
 
-  '@forge-ui-official/core@0.9.0':
-    resolution: {integrity: sha512-FAtsnVu0Ui2oIhroDXMmQbc9Ew7uJmHr1f9TiRedLWIrMdWwbk4C4F74NJZf/ZRBIWVqvjS2quC1QyCqTinrIg==}
+  '@forge-ui-official/core@0.10.1':
+    resolution: {integrity: sha512-lcP07G+cSveIIlHaKqrul9BA8wjosUh9AxuLaflL6bSAKfgMpe/CLmvmukl850joQLmeLS374GmmpCwDY90EOg==}
     peerDependencies:
       '@solar-icons/react': ^2.3.2
       next: '>=15'
@@ -4170,21 +4170,21 @@ snapshots:
   '@esbuild/win32-x64@0.28.1':
     optional: true
 
-  '@fontsource-variable/manrope@5.2.8': {}
+  '@fontsource-variable/inter@5.3.0': {}
 
   '@fontsource-variable/plus-jakarta-sans@5.2.8': {}
 
-  '@forge-ui-official/agent@0.5.0(@forge-ui-official/core@0.9.0(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)':
+  '@forge-ui-official/agent@0.5.0(@forge-ui-official/core@0.10.1(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)':
     dependencies:
       '@ai-sdk/openai-compatible': 3.0.92(zod@4.4.3)
       '@ai-sdk/react': 4.0.177(react@19.2.5)(zod@4.4.3)
-      '@forge-ui-official/core': 0.9.0(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4)
+      '@forge-ui-official/core': 0.10.1(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4)
       ai: 7.0.173(zod@4.4.3)
       react: 19.2.5
       react-dom: 19.2.5(react@19.2.5)
       zod: 4.4.3
 
-  '@forge-ui-official/core@0.9.0(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4)':
+  '@forge-ui-official/core@0.10.1(@solar-icons/react@2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(next@16.3.6(@types/node@22.19.17)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(tailwindcss@4.2.4)':
     dependencies:
       '@solar-icons/react': 2.3.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       motion: 14.1.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)

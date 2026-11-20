@@ -156,7 +156,7 @@ function SettingsAppsContent() {
         // Avoid CellText (flex-1) beside badges — it shoves badges to the cell edge.
         render: (row) => (
           <button type="button" onClick={() => openDetail(row.id)} className="flex h-10 min-w-0 max-w-full flex-col justify-center gap-0.5 text-left focus-visible:outline-2 focus-visible:outline-offset-2">
-            <span className="truncate text-sm font-semibold leading-5 tracking-fg text-fg-black">
+            <span className="truncate text-sm font-medium leading-5 tracking-fg text-fg-black">
               {row.name}
             </span>
             <span className="truncate text-xs leading-4 text-fg-grey-700">

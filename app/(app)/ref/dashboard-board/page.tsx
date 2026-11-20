@@ -26,7 +26,7 @@ const columns: ColumnDef<RefRecord>[] = [
     flex: true,
     render: (row) => (
       <div className="flex h-10 flex-col justify-center">
-        <span className="text-sm font-semibold text-fg-black">{row.title}</span>
+        <span className="text-sm font-medium text-fg-black">{row.title}</span>
         <span className="text-xs text-fg-grey-500">{row.owner}</span>
       </div>
     ),
@@ -83,14 +83,14 @@ export default function RefDashboardBoardPage() {
           width="full"
         />
         <div className="rounded-xl bg-background p-4 outline outline-1 outline-offset-[-1px] outline-fg-grey-200">
-          <h3 className="mb-3 text-sm font-semibold text-fg-black">今日活动</h3>
+          <h3 className="mb-3 text-sm font-medium text-fg-black">今日活动</h3>
           <ul className="flex flex-col gap-2">
             {REF_RECORDS.slice(0, 4).map((r) => (
               <li
                 key={r.id}
                 className="rounded-xl border border-fg-grey-100 px-3 py-2.5"
               >
-                <p className="text-sm font-semibold text-fg-black">{r.title}</p>
+                <p className="text-sm font-medium text-fg-black">{r.title}</p>
                 <p className="text-xs text-fg-grey-500">
                   {r.owner} · {r.updated}
                 </p>

@@ -279,7 +279,7 @@ export default function RefDashboardAnalyticsPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="flex flex-col gap-4 rounded-3xl border border-fg-grey-200 bg-background p-4 lg:col-span-2">
           <div>
-            <h3 className="text-sm font-semibold text-fg-black">Statistic</h3>
+            <h3 className="text-sm font-medium text-fg-black">Statistic</h3>
             <p className="text-sm text-fg-grey-500">Income and expenses（分组柱示意）</p>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-xs">
@@ -322,10 +322,10 @@ export default function RefDashboardAnalyticsPage() {
                 <div key={c.title} className="rounded-2xl border border-fg-grey-200 p-4">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <div className="text-sm font-semibold text-fg-black">{c.title}</div>
+                      <div className="text-sm font-medium text-fg-black">{c.title}</div>
                       <div className="text-xs text-fg-grey-500">{c.date}</div>
                     </div>
-                    <div className="text-sm font-semibold text-fg-black">{c.amount}</div>
+                    <div className="text-sm font-medium text-fg-black">{c.amount}</div>
                   </div>
                   <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-fg-grey-100">
                     <div className={`h-full rounded-full ${c.color}`} style={{ width: `${c.progress}%` }} />
@@ -400,7 +400,7 @@ export default function RefDashboardAnalyticsPage() {
         <div className="flex flex-col gap-4 rounded-3xl border border-fg-grey-200 bg-background p-4">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
-              <h3 className="text-sm font-semibold text-fg-black">Top Referral Pages</h3>
+              <h3 className="text-sm font-medium text-fg-black">Top Referral Pages</h3>
               <p className="text-sm text-fg-grey-500">Based on session</p>
             </div>
             <Button size="sm" color={siteConfig.accent} iconLeft={<DocumentBoldDuotone size={14} />}>
@@ -418,7 +418,7 @@ export default function RefDashboardAnalyticsPage() {
         <div className="flex flex-col gap-4 rounded-3xl border border-fg-grey-200 bg-background p-4">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
-              <h3 className="text-sm font-semibold text-fg-black">Top Performing Pages</h3>
+              <h3 className="text-sm font-medium text-fg-black">Top Performing Pages</h3>
               <p className="text-sm text-fg-grey-500">Based on clicks</p>
             </div>
             <Button size="sm" color={siteConfig.accent} iconLeft={<DocumentBoldDuotone size={14} />}>

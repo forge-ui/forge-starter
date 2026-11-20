@@ -113,7 +113,7 @@ export default function RefCreditsPage() {
         flex: true,
         render: (row) => (
           <div className="flex h-10 flex-col justify-center">
-            <span className="font-mono text-xs font-semibold text-fg-black">{row.no}</span>
+            <span className="font-mono text-xs font-medium text-fg-black">{row.no}</span>
             <span className="text-xs text-fg-grey-500">{row.description}</span>
           </div>
         ),
@@ -141,7 +141,7 @@ export default function RefCreditsPage() {
         width: "w-24",
         render: (row) => (
           <span
-            className={`text-sm font-semibold ${
+            className={`text-sm font-medium ${
               row.amount > 0 ? "text-emerald-600" : "text-fg-red"
             }`}
           >

@@ -84,7 +84,7 @@ export default function RefProfilePage() {
         flex: true,
         render: (row) => (
           <div className="flex h-10 flex-col justify-center">
-            <span className="text-sm font-semibold text-fg-black">{row.name}</span>
+            <span className="text-sm font-medium text-fg-black">{row.name}</span>
             <span className="text-xs text-fg-grey-500">{row.meta}</span>
           </div>
         ),

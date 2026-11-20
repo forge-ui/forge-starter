@@ -1,6 +1,6 @@
 # info-row
 
-自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/info-row.tsx`；core **0.9.0**。
+自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/info-row.tsx`；core **0.10.1**。
 默认值和运行行为以源码初始化为准；类型表不推测默认值。
 
 ## InfoRow (value)

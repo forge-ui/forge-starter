@@ -1,4 +1,4 @@
-# Ask AI 宿主接入契约
+# Forge Agent 宿主接入契约
 
 适用当前 core 的 AskAi；API 以[生成参考](components/ask-ai.md)为准。以下是源码静态核对，不代替浏览器、辅助技术或业务后端验收。历史来源：[全屏布局记录](../../../docs/archive/ask-ai-fullscreen-layout.md)、[面板变更记录](../../../docs/archive/changes/2026-10-16-ask-ai-panel.md)。
 

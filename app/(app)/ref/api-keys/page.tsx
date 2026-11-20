@@ -74,7 +74,7 @@ export default function RefApiKeysPage() {
         flex: true,
         render: (row) => (
           <div className="flex h-10 flex-col justify-center">
-            <span className="text-sm font-semibold text-fg-black">{row.title}</span>
+            <span className="text-sm font-medium text-fg-black">{row.title}</span>
             <span className="font-mono text-xs text-fg-grey-500">{row.prefix}</span>
           </div>
         ),
@@ -175,7 +175,7 @@ export default function RefApiKeysPage() {
 
       {revealedKey ? (
         <div className="rounded-[24px] border border-amber-200 bg-amber-50 p-5">
-          <p className="text-sm font-semibold text-fg-black">请立即复制密钥</p>
+          <p className="text-sm font-medium text-fg-black">请立即复制密钥</p>
           <p className="mt-1 text-xs text-fg-grey-600">
             关闭后无法再次查看完整值（示意）。
           </p>

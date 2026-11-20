@@ -249,6 +249,7 @@ function AccountsPageContent() {
         key: "actions",
         header: "操作",
         width: "w-24",
+        align: "right",
         render: (row) => (
           <div className="flex h-10 items-center justify-end gap-2">
             <IconButton

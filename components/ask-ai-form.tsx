@@ -73,7 +73,7 @@ export function AskAiForm({ block, question, draftKey, disabled = false, onConfi
 
   if (state === "done" || state === "cancelled") return (
     <div className="flex flex-col gap-2">
-      <p className="text-sm font-semibold text-fg-black">新建账号 · {values.username || "未填写用户名"}</p>
+      <p className="text-sm font-medium text-fg-black">新建账号 · {values.username || "未填写用户名"}</p>
       <p role="status" className="text-sm text-fg-grey-700">{state === "done" ? "这份草稿已带入页面，后续结果见下方消息。" : "已取消这份草稿。"}</p>
       {state === "cancelled" && !block.harness ? <div><Button color={siteConfig.accent} variant="tertiary" disabled={disabled} onClick={() => { if (!disabled) setState("editing"); }}>继续填写</Button></div> : null}
     </div>
@@ -82,7 +82,7 @@ export function AskAiForm({ block, question, draftKey, disabled = false, onConfi
   return (
     <form ref={root} aria-label="对话内新建账号" noValidate onSubmit={event => { event.preventDefault(); void submit(); }} className="flex min-w-0 flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <h3 className="text-sm font-semibold text-fg-black">新建账号</h3>
+        <h3 className="text-sm font-medium text-fg-black">新建账号</h3>
         <p className="text-sm text-fg-grey-700">补齐以下信息；备注选填。账号将在页面确认保存后创建。</p>
       </div>
       <Grid columns={2} gap={12}>

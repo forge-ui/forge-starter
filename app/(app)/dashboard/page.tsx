@@ -306,7 +306,7 @@ export default function DashboardPage() {
                     <img src={p.avatarUrl} alt="" className="size-full object-cover" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-semibold text-fg-black">{p.name}</div>
+                    <div className="truncate text-sm font-medium text-fg-black">{p.name}</div>
                     <div className="text-xs text-fg-grey-500">{p.email}</div>
                   </div>
                   <div className="text-right text-xs text-fg-green">

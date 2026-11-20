@@ -60,7 +60,7 @@ export default function RefListTablePage() {
         flex: true,
         render: (row) => (
           <div className="flex h-10 min-w-0 flex-col justify-center">
-            <span className="truncate text-sm font-semibold text-fg-black">{row.title}</span>
+            <span className="truncate text-sm font-medium text-fg-black">{row.title}</span>
             <span className="truncate text-xs text-fg-grey-500">
               {row.subtitle} · {row.owner}
             </span>

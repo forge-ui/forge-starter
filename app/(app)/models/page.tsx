@@ -75,7 +75,7 @@ function ProviderIcon({
   const name = provider?.name ?? providerId;
   return (
     <span
-      className={`flex shrink-0 items-center justify-center rounded-lg bg-fg-blue-50 text-xs font-semibold text-fg-blue-700 ${className}`}
+      className={`flex shrink-0 items-center justify-center rounded-lg bg-fg-blue-50 text-xs font-medium text-fg-blue-700 ${className}`}
     >
       {name.slice(0, 1)}
     </span>

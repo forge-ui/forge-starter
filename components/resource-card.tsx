@@ -53,7 +53,7 @@ export function ResourceCard({
       <div className={`flex items-start ${compact ? "gap-2.5" : "gap-3"}`}>
         <div className={chipClass}>
           {icon ?? (
-            <span className={`${compact ? "text-xs" : "text-sm"} font-semibold`}>
+            <span className={`${compact ? "text-xs" : "text-sm"} font-medium`}>
               {title.slice(0, 1)}
             </span>
           )}

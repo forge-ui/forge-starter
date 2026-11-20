@@ -101,7 +101,7 @@ export default function RefBillingPage() {
         flex: true,
         render: (row) => (
           <div className="flex h-10 flex-col justify-center">
-            <span className="font-mono text-xs font-semibold text-fg-black">{row.no}</span>
+            <span className="font-mono text-xs font-medium text-fg-black">{row.no}</span>
             <span className="text-xs text-fg-grey-500">{row.plan} · {row.interval}</span>
           </div>
         ),
@@ -158,19 +158,19 @@ export default function RefBillingPage() {
             <dl className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
               <div>
                 <dt className="text-xs text-fg-grey-500">周期</dt>
-                <dd className="mt-1 text-sm font-semibold text-fg-black">Monthly</dd>
+                <dd className="mt-1 text-sm font-medium text-fg-black">Monthly</dd>
               </div>
               <div>
                 <dt className="text-xs text-fg-grey-500">本期开始</dt>
-                <dd className="mt-1 text-sm font-semibold text-fg-black">06 Aug 2026</dd>
+                <dd className="mt-1 text-sm font-medium text-fg-black">06 Aug 2026</dd>
               </div>
               <div>
                 <dt className="text-xs text-fg-grey-500">本期结束</dt>
-                <dd className="mt-1 text-sm font-semibold text-fg-black">06 Sep 2026</dd>
+                <dd className="mt-1 text-sm font-medium text-fg-black">06 Sep 2026</dd>
               </div>
               <div>
                 <dt className="text-xs text-fg-grey-500">支付渠道</dt>
-                <dd className="mt-1 text-sm font-semibold text-fg-black">Stripe</dd>
+                <dd className="mt-1 text-sm font-medium text-fg-black">Stripe</dd>
               </div>
             </dl>
           </div>

@@ -19,7 +19,7 @@ export function AskAiPresentation({ block, disabled, onAsk, storageKey }: {
   const interactive = (content: React.ReactNode) => <fieldset disabled={disabled} className="m-0 min-w-0 border-0 p-0 disabled:opacity-50">{content}</fieldset>;
   switch (data.type) {
     case "table": return <div className="flex min-w-0 flex-col gap-2">
-      <h3 className="text-sm font-semibold text-fg-black">{data.title}</h3>
+      <h3 className="text-sm font-medium text-fg-black">{data.title}</h3>
       <div className="min-w-0 overflow-x-auto"><DataTable color={siteConfig.accent}
         columns={(data.columns ?? []).map(column => ({ key: column.key, header: column.label, width: `${Math.max(12, Math.floor(100 / Math.max(1, data.columns?.length ?? 1)))}%`, render: (row: Record<string, string>) => <CellText>{row[column.key] ?? ""}</CellText> }))}
         rows={data.rows ?? []} getRowKey={(_row, index) => String(index)} /></div>
@@ -67,7 +67,7 @@ function UserChecklist({ block, storageKey, disabled, onAsk }: {
     try { localStorage.setItem(key, JSON.stringify(ids)); } catch { /* Keep in-memory progress. */ }
   }
   return <fieldset disabled={disabled || !loaded} className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0 disabled:opacity-50">
-    <legend className="mb-2 text-sm font-semibold text-fg-black">{block.title}</legend>
+    <legend className="mb-2 text-sm font-medium text-fg-black">{block.title}</legend>
     <p className="text-xs text-fg-grey-700">用户自查清单，勾选不会执行业务操作。</p>
     <Checklist color={siteConfig.accent} size="sm" tasks={block.tasks.map(task => ({ ...task, done: checked.includes(task.id) }))}
       onTasksChange={tasks => update(tasks.filter(task => task.done).map(task => task.id))} />
