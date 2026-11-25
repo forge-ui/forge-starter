@@ -1,6 +1,6 @@
 # progress-card
 
-自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/progress-card.tsx`；core **0.11.4**。
+自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/progress-card.tsx`；core **0.11.5**。
 默认值和运行行为以源码初始化为准；类型表不推测默认值。
 
 ## ProgressCard (value)

@@ -140,7 +140,7 @@ description: >
 
 ### 删除确认
 
-- 独立确认直接用受控 `ConfirmationDialog` 的 `open` / `onOpenChange`，无需再套 Modal；省略 `open` 的内联卡模式才需要已有宿主。accounts 现有内联方式可保留，不做无关重构。  
+- 删除等确认一律给 `ConfirmationDialog` 传 `open`（可选 `onOpenChange`），由它自带的 AlertDialog 承载：点遮罩不关闭，Esc 和取消都走 `onCancel`。不要再套 Modal 或手写 `fixed inset-0` 遮罩；省略 `open` 的内联卡只用于嵌在页面内容里的场景。  
 
 ## Step 3 — Verify
 

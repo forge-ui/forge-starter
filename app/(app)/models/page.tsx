@@ -2,8 +2,6 @@
 import { useResourceAgent } from "@/components/resource-agent";
 import { notifyAgentPageDone } from "@/lib/agent/fill";
 
-import { Modal } from "@/components/ui/modal";
-
 import { matchesModel } from "@/lib/models/filter";
 import { useSemanticPage } from "@/components/semantic-page";
 
@@ -293,44 +291,37 @@ function ModelsPageContent() {
         onEdit={openEdit}
       />
 
-      <Modal open={deleteTarget != null} onClose={() => {
-              if (deleting) return;
+      <ConfirmationDialog
+        open={deleteTarget != null}
+        title={`删除模型「${deleteTarget?.name ?? ""}」？`}
+        description="删除后不可恢复。Forge Agent 将不再使用这条配置。"
+        color="red"
+        icon={<TrashBinMinimalisticLinear size={32} color="var(--fg-red-500)" />}
+        confirmLabel={deleting ? "删除中…" : "确认"}
+        cancelLabel="取消"
+        onCancel={() => {
+          if (deleting) return;
+          agent.clear();
+          setDeleteTarget(null);
+        }}
+        onConfirm={() => {
+          if (deleting || !deleteTarget) return;
+          setDeleting(true);
+          void deleteModel(deleteTarget.id, { operationId: agent.fill?.operationId, key: crypto.randomUUID(), updatedAt: agent.fill?.expectedUpdatedAt ?? deleteTarget.updatedAt })
+            .then((receipt) => {
+              if (agent.fill) notifyAgentPageDone("delete", receipt);
+              agent.clear(false);
+              toast.success("模型已删除");
               agent.clear();
-              setDeleteTarget(null);
-            }} overlayClassName="z-[70]">
-        {deleteTarget ? (
-          <ConfirmationDialog
-            title={`删除模型「${deleteTarget.name}」？`}
-            description="删除后不可恢复。Forge Agent 将不再使用这条配置。"
-            color="red"
-            icon={<TrashBinMinimalisticLinear size={32} color="var(--fg-red-500)" />}
-            confirmLabel={deleting ? "删除中…" : "确认"}
-            cancelLabel="取消"
-            onCancel={() => {
-              if (deleting) return;
-              agent.clear();
-              setDeleteTarget(null);
-            }}
-            onConfirm={() => {
-              if (deleting) return;
-              setDeleting(true);
-              void deleteModel(deleteTarget.id, { operationId: agent.fill?.operationId, key: crypto.randomUUID(), updatedAt: agent.fill?.expectedUpdatedAt ?? deleteTarget.updatedAt })
-                .then((receipt) => {
-                  if (agent.fill) notifyAgentPageDone("delete", receipt);
-                  agent.clear(false);
-                  toast.success("模型已删除");
-                  agent.clear();
-              setDeleteTarget(null);
-                  if (detailId === deleteTarget.id) closeDetail();
-                })
-                .catch((err: unknown) => {
-                  toast.error(err instanceof Error ? err.message : "删除模型失败");
-                })
-                .finally(() => setDeleting(false));
-            }}
-          />
-        ) : null}
-      </Modal>
+          setDeleteTarget(null);
+              if (detailId === deleteTarget.id) closeDetail();
+            })
+            .catch((err: unknown) => {
+              toast.error(err instanceof Error ? err.message : "删除模型失败");
+            })
+            .finally(() => setDeleting(false));
+        }}
+      />
 
       <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-hidden">
         <PageTitleToolbar

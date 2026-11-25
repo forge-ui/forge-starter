@@ -30,7 +30,6 @@ import { useAccountsStore } from "@/components/accounts-store";
 import { AskAiEntry } from "@/components/ask-ai-entry";
 import { AccountFormDialog } from "@/components/account-form-dialog";
 import { useAccess } from "@/components/access-store";
-import { Modal } from "@/components/ui/modal";
 import {
   ACCOUNT_STATUS_META,
   type AccountStatus,
@@ -111,32 +110,31 @@ export default function AccountDetailPage({
         goToDetailOnCreate={false}
       />
 
-      <Modal open={confirmDelete} onClose={() => { if (!deleting) setConfirmDelete(false); }}>
-          <ConfirmationDialog
-            title="删除账号？"
-            description={`确定删除「${account.name}」？此操作将从数据库移除，不可撤销。`}
-            color="red"
-            icon={<TrashBinMinimalisticLinear size={32} color="#EA580C" />}
-            confirmLabel={deleting ? "删除中…" : "删除"}
-            cancelLabel="取消"
-            onCancel={() => {
-              if (!deleting) setConfirmDelete(false);
-            }}
-            onConfirm={() => {
-              if (deleting) return;
-              setDeleting(true);
-              void deleteAccount(account.id, { revision: account.revision })
-                .then(() => {
-                  toast.success("账号已删除");
-                  router.push(listHref);
-                })
-                .catch((error: unknown) => {
-                  toast.error(error instanceof Error ? error.message : "删除失败");
-                  setDeleting(false);
-                });
-            }}
-          />
-      </Modal>
+      <ConfirmationDialog
+        open={confirmDelete}
+        title="删除账号？"
+        description={`确定删除「${account.name}」？此操作将从数据库移除，不可撤销。`}
+        color="red"
+        icon={<TrashBinMinimalisticLinear size={32} color="#EA580C" />}
+        confirmLabel={deleting ? "删除中…" : "删除"}
+        cancelLabel="取消"
+        onCancel={() => {
+          if (!deleting) setConfirmDelete(false);
+        }}
+        onConfirm={() => {
+          if (deleting) return;
+          setDeleting(true);
+          void deleteAccount(account.id, { revision: account.revision })
+            .then(() => {
+              toast.success("账号已删除");
+              router.push(listHref);
+            })
+            .catch((error: unknown) => {
+              toast.error(error instanceof Error ? error.message : "删除失败");
+              setDeleting(false);
+            });
+        }}
+      />
 
       <div className="flex flex-col gap-6">
         <PageTitleToolbar
