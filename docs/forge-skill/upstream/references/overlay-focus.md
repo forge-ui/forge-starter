@@ -2,7 +2,7 @@
 
 提炼自已采纳 batch1-rules-addendum 与 tooltip-group-timing-contract；适用性仍需核对安装版本与宿主组合。
 
-- 原生 dialog 内的 KebabMenu portal 留在所属 dialog；普通页面挂普通宿主，不能靠更高 z-index 修原生 top-layer。
+- Modal、Drawer、ConfirmationDialog 和所有菜单、浮层都基于 Base UI，弹层挂到 body 并按打开顺序叠放；弹窗里的菜单不用特殊处理。不要把 Forge 弹层放进宿主自己的原生 `<dialog>.showModal()` 里，原生模态会让外面的弹层不可操作。
 - Escape 先关闭最上层活动子层，再由宿主处理父层；不能靠 stopPropagation 掩盖多层关闭。
 - 选择或 Escape 后返回仍存在的 trigger；外点尊重新焦点。选择后开启子 Modal/导航则由新目标接管，不强抢旧 trigger。受控 open 由宿主确认回写，拒绝关闭后仍可再次操作。
 - 标题可换行，关闭控件不收缩；正常 body 单滚，头尾超预算时整层单滚；宽代码和表格只在所属区域横滚，不藏关闭按钮。菜单外边预算8px、通知/个人/团队/应用面板16px是采用契约，需按当前实现核对。

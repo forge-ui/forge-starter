@@ -1,12 +1,12 @@
 # meter-chart
 
-自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/charts/meter-chart.tsx`；core **0.10.1**。
+自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/charts/meter-chart.tsx`；core **0.11.4**。
 默认值和运行行为以源码初始化为准；类型表不推测默认值。
 
 ## MeterChart (value)
 
 ```ts
-({ segments, accent, trend, trendDirection, subtitle, height, }: MeterChartProps) => JSX.Element
+({ segments, accent, trend, trendDirection, subtitle, height, ariaLabel, }: MeterChartProps) => JSX.Element
 ```
 
 | 属性 | 必填 | 类型 | 说明 |
@@ -17,3 +17,4 @@
 | `trendDirection` | 否 | `"up" \| "down" \| undefined` |  |
 | `subtitle` | 否 | `string \| undefined` |  |
 | `height` | 否 | `string \| undefined` | Meter bar height class. Default h-24 (96px) per figma. |
+| `ariaLabel` | 否 | `string \| undefined` | Accessible name; defaults to `subtitle`. |

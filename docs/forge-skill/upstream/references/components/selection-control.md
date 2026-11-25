@@ -1,12 +1,12 @@
 # selection-control
 
-自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/forms/selection-control.tsx`；core **0.10.1**。
+自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/forms/selection-control.tsx`；core **0.11.4**。
 默认值和运行行为以源码初始化为准；类型表不推测默认值。
 
 ## CheckboxWithLabel (value)
 
 ```ts
-({ checked, motion, onChange, label, color, checkboxPosition, icon, avatar, dotColor, disabled, className, }: { checked?: boolean; motion?: MotionPreference; onChange?: (checked: boolean) => void; label: string; color?: ControlColor; checkboxPosition?: "left" | "right"; icon?: ReactNode; avatar?: string; dotColor?: string; disabled?: boolean; className?: string; }) => JSX.Element
+({ checked, motion, onChange, label, color, checkboxPosition, icon, avatar, dotColor, disabled, name, value, className, }: { checked?: boolean; motion?: MotionPreference; onChange?: (checked: boolean) => void; name?: string; value?: string; label: string; color?: ControlColor; checkboxPosition?: "left" | "right"; icon?: ReactNode; avatar?: string; dotColor?: string; disabled?: boolean; className?: string; }) => JSX.Element
 ```
 
 | 属性 | 必填 | 类型 | 说明 |
@@ -14,6 +14,8 @@
 | `checked` | 否 | `boolean \| undefined` |  |
 | `motion` | 否 | `MotionPreference \| undefined` |  |
 | `onChange` | 否 | `((checked: boolean) => void) \| undefined` |  |
+| `name` | 否 | `string \| undefined` | Form field name; submits `value` (default "on") when checked. |
+| `value` | 否 | `string \| undefined` |  |
 | `label` | 是 | `string` |  |
 | `color` | 否 | `FormAccentColor \| undefined` |  |
 | `checkboxPosition` | 否 | `"left" \| "right" \| undefined` |  |
@@ -64,7 +66,7 @@ export type ControlColor = FormAccentColor;
 ## Toggle (value)
 
 ```ts
-({ checked, defaultChecked, motion, onChange, color, disabled, size, ariaLabel, draggable, thumbIcon, }: ToggleProps) => JSX.Element
+({ checked, defaultChecked, motion, onChange, color, disabled, size, ariaLabel, draggable, thumbIcon, name, value, }: ToggleProps) => JSX.Element
 ```
 
 | 属性 | 必填 | 类型 | 说明 |
@@ -79,6 +81,8 @@ export type ControlColor = FormAccentColor;
 | `ariaLabel` | 否 | `string \| undefined` |  |
 | `draggable` | 否 | `boolean \| undefined` | Allow dragging the thumb; clicking and keyboard activation remain available. |
 | `thumbIcon` | 否 | `ReactNode` |  |
+| `name` | 否 | `string \| undefined` | Form field name; submits `value` (default "on") when on. |
+| `value` | 否 | `string \| undefined` |  |
 
 ## ToggleProps (type)
 
@@ -96,5 +100,8 @@ export type ToggleProps = {
   /** Allow dragging the thumb; clicking and keyboard activation remain available. */
   draggable?: boolean;
   thumbIcon?: ReactNode;
+  /** Form field name; submits `value` (default "on") when on. */
+  name?: string;
+  value?: string;
 };
 ```

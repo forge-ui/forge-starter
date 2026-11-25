@@ -1,6 +1,6 @@
 # grid
 
-自动生成；请勿编辑 API 部分。来源：`core/src/components/layouts/grid.tsx`；core **0.10.1**。
+自动生成；请勿编辑 API 部分。来源：`core/src/components/layouts/grid.tsx`；core **0.11.4**。
 默认值和运行行为以源码初始化为准；类型表不推测默认值。
 
 ## Grid (value)
@@ -15,7 +15,7 @@
 | `gap` | 否 | `GridResponsive<GridGap> \| undefined` | Pixel presets, not Tailwind spacing units. |
 | `rowGap` | 否 | `GridResponsive<GridGap> \| undefined` |  |
 | `columnGap` | 否 | `GridResponsive<GridGap> \| undefined` |  |
-| `alignItems` | 否 | `"center" \| "start" \| "end" \| "stretch" \| "baseline" \| undefined` |  |
+| `alignItems` | 否 | `"start" \| "center" \| "end" \| "stretch" \| "baseline" \| undefined` |  |
 | `ref` | 否 | `Ref<HTMLDivElement> \| undefined` | Allows getting a ref to the component instance. Once the component unmounts, React will set `ref.current` to `null` (or call the ref with `null` if you passed a callback ref). |
 | `key` | 否 | `Key \| null \| undefined` |  |
 | `defaultChecked` | 否 | `boolean \| undefined` |  |

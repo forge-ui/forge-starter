@@ -1,20 +1,24 @@
 # checkbox
 
-自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/checkbox.tsx`；core **0.10.1**。
+自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/checkbox.tsx`；core **0.11.4**。
 默认值和运行行为以源码初始化为准；类型表不推测默认值。
 
 ## Checkbox (value)
 
 ```ts
-({ checked, color, onChange, disabled, motion, className, onClick, "aria-label": ariaLabel, ...props }: { checked?: boolean; color?: CheckboxColor; onChange?: (checked: boolean) => void; motion?: MotionPreference; } & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "color" | "onChange" | "type">) => JSX.Element
+({ checked, indeterminate, color, onChange, disabled, motion, name, value, required, className, onClick, "aria-label": ariaLabel, ...props }: { checked?: boolean; indeterminate?: boolean; color?: CheckboxColor; onChange?: (checked: boolean) => void; motion?: MotionPreference; name?: string; value?: string; required?: boolean; } & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "color" | "onChange" | "type" | "value" | "name">) => JSX.Element
 ```
 
 | 属性 | 必填 | 类型 | 说明 |
 |---|---|---|---|
 | `checked` | 否 | `boolean \| undefined` |  |
+| `indeterminate` | 否 | `boolean \| undefined` | Partially selected state; shown as a dash and announced as "mixed". |
 | `color` | 否 | `"purple" \| "blue" \| "orange" \| "green" \| "black" \| "red" \| undefined` |  |
 | `onChange` | 否 | `((checked: boolean) => void) \| undefined` |  |
 | `motion` | 否 | `MotionPreference \| undefined` |  |
+| `name` | 否 | `string \| undefined` | Form field name; the checkbox submits `value` (default "on") when checked. |
+| `value` | 否 | `string \| undefined` |  |
+| `required` | 否 | `boolean \| undefined` |  |
 | `disabled` | 否 | `boolean \| undefined` |  |
 | `form` | 否 | `string \| undefined` |  |
 | `formAction` | 否 | `string \| ((formData: FormData) => void \| Promise<void>) \| undefined` |  |
@@ -22,8 +26,6 @@
 | `formMethod` | 否 | `string \| undefined` |  |
 | `formNoValidate` | 否 | `boolean \| undefined` |  |
 | `formTarget` | 否 | `string \| undefined` |  |
-| `name` | 否 | `string \| undefined` |  |
-| `value` | 否 | `string \| number \| readonly string[] \| undefined` |  |
 | `defaultChecked` | 否 | `boolean \| undefined` |  |
 | `defaultValue` | 否 | `string \| number \| readonly string[] \| undefined` |  |
 | `suppressContentEditableWarning` | 否 | `boolean \| undefined` |  |
@@ -310,15 +312,19 @@ export type CheckboxColor = keyof typeof checkboxColors;
 ## CheckboxControl (value)
 
 ```ts
-({ checked, color, onChange, disabled, motion, className, onClick, "aria-label": ariaLabel, ...props }: { checked?: boolean; color?: CheckboxColor; onChange?: (checked: boolean) => void; motion?: MotionPreference; } & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "color" | "onChange" | "type">) => JSX.Element
+({ checked, indeterminate, color, onChange, disabled, motion, name, value, required, className, onClick, "aria-label": ariaLabel, ...props }: { checked?: boolean; indeterminate?: boolean; color?: CheckboxColor; onChange?: (checked: boolean) => void; motion?: MotionPreference; name?: string; value?: string; required?: boolean; } & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "color" | "onChange" | "type" | "value" | "name">) => JSX.Element
 ```
 
 | 属性 | 必填 | 类型 | 说明 |
 |---|---|---|---|
 | `checked` | 否 | `boolean \| undefined` |  |
+| `indeterminate` | 否 | `boolean \| undefined` | Partially selected state; shown as a dash and announced as "mixed". |
 | `color` | 否 | `"purple" \| "blue" \| "orange" \| "green" \| "black" \| "red" \| undefined` |  |
 | `onChange` | 否 | `((checked: boolean) => void) \| undefined` |  |
 | `motion` | 否 | `MotionPreference \| undefined` |  |
+| `name` | 否 | `string \| undefined` | Form field name; the checkbox submits `value` (default "on") when checked. |
+| `value` | 否 | `string \| undefined` |  |
+| `required` | 否 | `boolean \| undefined` |  |
 | `disabled` | 否 | `boolean \| undefined` |  |
 | `form` | 否 | `string \| undefined` |  |
 | `formAction` | 否 | `string \| ((formData: FormData) => void \| Promise<void>) \| undefined` |  |
@@ -326,8 +332,6 @@ export type CheckboxColor = keyof typeof checkboxColors;
 | `formMethod` | 否 | `string \| undefined` |  |
 | `formNoValidate` | 否 | `boolean \| undefined` |  |
 | `formTarget` | 否 | `string \| undefined` |  |
-| `name` | 否 | `string \| undefined` |  |
-| `value` | 否 | `string \| number \| readonly string[] \| undefined` |  |
 | `defaultChecked` | 否 | `boolean \| undefined` |  |
 | `defaultValue` | 否 | `string \| number \| readonly string[] \| undefined` |  |
 | `suppressContentEditableWarning` | 否 | `boolean \| undefined` |  |

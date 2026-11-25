@@ -4,6 +4,11 @@
 
 ## Unreleased
 
+### 交互底层
+
+- 升级 `@forge-ui-official/core` 到 0.11.4：弹窗、下拉、菜单、提示、通知等交互换成 Base UI 内核，外观和用法不变。删除等确认弹窗点外面不再关闭。
+- 同步 forge-skill 到 core 0.11.4 对应版本。
+
 ### 排版
 
 - 升级 `@forge-ui-official/core` 到 0.10.1：正文字体换成 Inter，字距归零，黑和灰改为中性色，14px 及以下不再用粗体。布局不变。

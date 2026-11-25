@@ -1,6 +1,6 @@
 # data-table
 
-自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/data-table.tsx`；core **0.10.1**。
+自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/data-table.tsx`；core **0.11.4**。
 默认值和运行行为以源码初始化为准；类型表不推测默认值。
 
 ## CellActionKey (type)
@@ -205,16 +205,10 @@ export type CellLinkColor = keyof typeof cellLinkColors;
 | `title` | 是 | `string` |  |
 | `subtitle` | 否 | `string \| undefined` |  |
 
-## ColumnDef (type)
-
-```ts
-export type ColumnDef<T> = ColumnDefBase<T> & ColumnDefAlign;
-```
-
 ## DataTable (value)
 
 ```ts
-<T>({ title, subtitle, badge, columns, rows, headerActions, color, showCheckbox, checkboxColor, selectedRowKeys, onSelectedRowKeysChange, selectedRows, onSelectRow, onSelectAll, onSort, sortColumnKey, sortDirection, getRowKey, emptyState, footerLeft, footerRight, showPagination, currentPage, totalPages, onPageChange, paginationLabel, tableMinWidth, className, }: DataTableProps<T>) => JSX.Element
+<T>({ title, subtitle, badge, columns, rows, headerActions, color, showCheckbox, checkboxColor, selectedRowKeys, onSelectedRowKeysChange, selectedRows, onSelectRow, onSelectAll, onSort, sortColumnKey, sortDirection, getRowKey, emptyState, footerLeft, footerRight, showPagination, currentPage, totalPages, onPageChange, paginationLabel, tableMinWidth, loading, maxHeight, expandable, getRowChildren, expandedRowKeys, defaultExpandedRowKeys, onExpandedRowKeysChange, columnSettings, hiddenColumnKeys, onHiddenColumnKeysChange, bulkActions, virtualized, pageSize, pageSizeOptions, onPageSizeChange, showQuickJumper, className, }: DataTableProps<T>) => JSX.Element
 ```
 
 | 属性 | 必填 | 类型 | 说明 |
@@ -246,6 +240,22 @@ export type ColumnDef<T> = ColumnDefBase<T> & ColumnDefAlign;
 | `onPageChange` | 否 | `((page: number) => void) \| undefined` |  |
 | `paginationLabel` | 否 | `string \| undefined` |  |
 | `tableMinWidth` | 否 | `Property.MinWidth<string \| number> \| undefined` | Minimum width of the table content. Overflow stays inside the component. |
+| `loading` | 否 | `boolean \| undefined` | Shows skeleton rows when empty, otherwise a spinner over the current rows. |
+| `maxHeight` | 否 | `string \| number \| undefined` | Fixed body height (e.g. 480 or "60vh"); the header stays put while rows scroll. |
+| `expandable` | 否 | `{ render: (row: T, rowIndex: number) => ReactNode; rowExpandable?: ((row: T) => boolean) \| undefined; } \| undefined` | Extra content under a row, toggled by a chevron column. |
+| `getRowChildren` | 否 | `((row: T) => T[] \| undefined) \| undefined` | Nested rows (tree table); the first column gets the expand toggle and indentation. |
+| `expandedRowKeys` | 否 | `ReadonlySet<Key> \| undefined` | Expanded rows for `expandable` and tree rows. Uncontrolled when omitted. |
+| `defaultExpandedRowKeys` | 否 | `Iterable<Key> \| undefined` |  |
+| `onExpandedRowKeysChange` | 否 | `((keys: Set<Key>) => void) \| undefined` |  |
+| `columnSettings` | 否 | `boolean \| undefined` | Adds a column settings menu to the header. |
+| `hiddenColumnKeys` | 否 | `ReadonlySet<string> \| undefined` |  |
+| `onHiddenColumnKeysChange` | 否 | `((keys: Set<string>) => void) \| undefined` |  |
+| `bulkActions` | 否 | `((selectedKeys: Set<Key>) => ReactNode) \| undefined` | Actions for the selected rows, shown in a bar above the table while something is selected. |
+| `virtualized` | 否 | `{ rowHeight: number; overscan?: number; } \| undefined` | Render only the visible rows. Needs `maxHeight`; ignored with expandable or tree rows. |
+| `pageSize` | 否 | `number \| undefined` | Rows per page selector in the footer. |
+| `pageSizeOptions` | 否 | `number[] \| undefined` |  |
+| `onPageSizeChange` | 否 | `((size: number) => void) \| undefined` |  |
+| `showQuickJumper` | 否 | `boolean \| undefined` | Adds a "go to page" field next to the pagination. |
 | `className` | 否 | `string \| undefined` |  |
 
 ## DataTableColor (type)
@@ -289,6 +299,35 @@ export type DataTableProps<T> = {
   paginationLabel?: string;
   /** Minimum width of the table content. Overflow stays inside the component. */
   tableMinWidth?: CSSProperties["minWidth"];
+  /** Shows skeleton rows when empty, otherwise a spinner over the current rows. */
+  loading?: boolean;
+  /** Fixed body height (e.g. 480 or "60vh"); the header stays put while rows scroll. */
+  maxHeight?: number | string;
+  /** Extra content under a row, toggled by a chevron column. */
+  expandable?: {
+    render: (row: T, rowIndex: number) => ReactNode;
+    rowExpandable?: (row: T) => boolean;
+  };
+  /** Nested rows (tree table); the first column gets the expand toggle and indentation. */
+  getRowChildren?: (row: T) => T[] | undefined;
+  /** Expanded rows for `expandable` and tree rows. Uncontrolled when omitted. */
+  expandedRowKeys?: ReadonlySet<Key>;
+  defaultExpandedRowKeys?: Iterable<Key>;
+  onExpandedRowKeysChange?: (keys: Set<Key>) => void;
+  /** Adds a column settings menu to the header. */
+  columnSettings?: boolean;
+  hiddenColumnKeys?: ReadonlySet<string>;
+  onHiddenColumnKeysChange?: (keys: Set<string>) => void;
+  /** Actions for the selected rows, shown in a bar above the table while something is selected. */
+  bulkActions?: (selectedKeys: Set<Key>) => ReactNode;
+  /** Render only the visible rows. Needs `maxHeight`; ignored with expandable or tree rows. */
+  virtualized?: { rowHeight: number; overscan?: number };
+  /** Rows per page selector in the footer. */
+  pageSize?: number;
+  pageSizeOptions?: number[];
+  onPageSizeChange?: (size: number) => void;
+  /** Adds a "go to page" field next to the pagination. */
+  showQuickJumper?: boolean;
   className?: string;
 };
 ```
@@ -296,7 +335,7 @@ export type DataTableProps<T> = {
 ## FullWidthTable (value)
 
 ```ts
-<T>({ title, subtitle, badge, columns, rows, headerActions, color, showCheckbox, checkboxColor, selectedRowKeys, onSelectedRowKeysChange, selectedRows, onSelectRow, onSelectAll, onSort, sortColumnKey, sortDirection, getRowKey, emptyState, footerLeft, footerRight, showPagination, currentPage, totalPages, onPageChange, paginationLabel, tableMinWidth, showRowCount, rowCountOptions, currentRowCount, onRowCountChange, totalRows, className, }: FullWidthTableProps<T>) => JSX.Element
+<T>({ title, subtitle, badge, columns, rows, headerActions, color, showCheckbox, checkboxColor, selectedRowKeys, onSelectedRowKeysChange, selectedRows, onSelectRow, onSelectAll, onSort, sortColumnKey, sortDirection, getRowKey, emptyState, footerLeft, footerRight, showPagination, currentPage, totalPages, onPageChange, paginationLabel, tableMinWidth, showRowCount, rowCountOptions, currentRowCount, onRowCountChange, totalRows, loading, maxHeight, expandable, getRowChildren, expandedRowKeys, defaultExpandedRowKeys, onExpandedRowKeysChange, columnSettings, hiddenColumnKeys, onHiddenColumnKeysChange, bulkActions, virtualized, pageSize, pageSizeOptions, onPageSizeChange, showQuickJumper, className, }: FullWidthTableProps<T>) => JSX.Element
 ```
 
 | 属性 | 必填 | 类型 | 说明 |
@@ -328,6 +367,22 @@ export type DataTableProps<T> = {
 | `onPageChange` | 否 | `((page: number) => void) \| undefined` |  |
 | `paginationLabel` | 否 | `string \| undefined` |  |
 | `tableMinWidth` | 否 | `Property.MinWidth<string \| number> \| undefined` | Minimum width of the table content. Overflow stays inside the component. |
+| `loading` | 否 | `boolean \| undefined` | Shows skeleton rows when empty, otherwise a spinner over the current rows. |
+| `maxHeight` | 否 | `string \| number \| undefined` | Fixed body height (e.g. 480 or "60vh"); the header stays put while rows scroll. |
+| `expandable` | 否 | `{ render: (row: T, rowIndex: number) => ReactNode; rowExpandable?: ((row: T) => boolean) \| undefined; } \| undefined` | Extra content under a row, toggled by a chevron column. |
+| `getRowChildren` | 否 | `((row: T) => T[] \| undefined) \| undefined` | Nested rows (tree table); the first column gets the expand toggle and indentation. |
+| `expandedRowKeys` | 否 | `ReadonlySet<Key> \| undefined` | Expanded rows for `expandable` and tree rows. Uncontrolled when omitted. |
+| `defaultExpandedRowKeys` | 否 | `Iterable<Key> \| undefined` |  |
+| `onExpandedRowKeysChange` | 否 | `((keys: Set<Key>) => void) \| undefined` |  |
+| `columnSettings` | 否 | `boolean \| undefined` | Adds a column settings menu to the header. |
+| `hiddenColumnKeys` | 否 | `ReadonlySet<string> \| undefined` |  |
+| `onHiddenColumnKeysChange` | 否 | `((keys: Set<string>) => void) \| undefined` |  |
+| `bulkActions` | 否 | `((selectedKeys: Set<Key>) => ReactNode) \| undefined` | Actions for the selected rows, shown in a bar above the table while something is selected. |
+| `virtualized` | 否 | `{ rowHeight: number; overscan?: number; } \| undefined` | Render only the visible rows. Needs `maxHeight`; ignored with expandable or tree rows. |
+| `pageSize` | 否 | `number \| undefined` | Rows per page selector in the footer. |
+| `pageSizeOptions` | 否 | `number[] \| undefined` |  |
+| `onPageSizeChange` | 否 | `((size: number) => void) \| undefined` |  |
+| `showQuickJumper` | 否 | `boolean \| undefined` | Adds a "go to page" field next to the pagination. |
 | `className` | 否 | `string \| undefined` |  |
 | `showRowCount` | 否 | `boolean \| undefined` |  |
 | `rowCountOptions` | 否 | `number[] \| undefined` |  |
@@ -370,19 +425,6 @@ export type ProgressBadgeColor = keyof typeof progressBadgeColors;
 ```ts
 export type ProgressBarColor = ProgressColor;
 ```
-
-## resolveTableColumnAlign (value)
-
-```ts
-<T>(column: Pick<ColumnDef<T>, "key" | "valueKind" | "align" | "alignOverrideReason">) => TableColumnAlign
-```
-
-| 属性 | 必填 | 类型 | 说明 |
-|---|---|---|---|
-| `key` | 是 | `string` |  |
-| `valueKind` | 否 | `"number" \| "identifier" \| undefined` | 省略或 identifier：标识与普通文本，默认左对齐。列头与内容同向。 金额、数量、单价、百分比及同类可比较数值。省略 align 即右对齐。 |
-| `align` | 否 | `TableColumnAlign \| undefined` | 数字列离开默认右对齐。必须同时填写非空 `alignOverrideReason`。 漏写原因会在运行时警告，并标上 `data-forge-align-violation`。 |
-| `alignOverrideReason` | 否 | `string \| undefined` | 标识列一般不需要。数字列禁止用这个字段代替 `valueKind: "number"`。 |
 
 ## StatusBadge (value)
 
@@ -454,18 +496,6 @@ export type TableCellProps = {
 
 ```ts
 export type TableCellVariant = "header" | "body";
-```
-
-## TableColumnAlign (type)
-
-```ts
-export type TableColumnAlign = "left" | "right";
-```
-
-## TableValueKind (type)
-
-```ts
-export type TableValueKind = "number" | "identifier";
 ```
 
 ## 选型

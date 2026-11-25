@@ -39,7 +39,7 @@ description: 使用 Forge / forge-ui 设计与实现看板、后台、管理系�
 
 ## 采用规则
 
-- [页面规范](references/page-recommended-standard.md) 定布局与看板几何；[Grid](references/layout-grid.md) 定 API 和固定/比例列边界；[多维图方法](references/page-design-dimensional.md) 可随包使用，不依赖本机其他 skill。
+- [页面规范](references/page-recommended-standard.md) 定布局与看板几何，对应结构线稿见 [线稿图集](https://www.forgeui.org/docs/design-atlas)；[Grid](references/layout-grid.md) 定 API 和固定/比例列边界；[多维图方法](references/page-design-dimensional.md) 可随包使用，不依赖本机其他 skill。
 - 组件来自 `@forge-ui-official/core`，图标来自 `@forge-ui-official/core/icons`。AppLayout 标识使用 `appName`；不要使用已弃用 teamName 或不存在的 FormField。
 - 默认 accent/focus 为 blue，purple/black 仅为可选主题。7 个色族加 grey/white；token `fg-violet` 对应组件颜色 `"purple"`，见 [Tokens](references/tokens.md)。
 - 状态默认 soft StatusBadge，分类/角色普通文字；一张表通常最多一个状态胶囊列，见 [状态表达](references/status-presentation.md)。
