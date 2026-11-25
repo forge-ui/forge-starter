@@ -1,6 +1,6 @@
 # icon-trigger
 
-自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/icon-trigger.tsx`；core **0.10.1**。
+自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/icon-trigger.tsx`；core **0.11.3**。
 默认值和运行行为以源码初始化为准；类型表不推测默认值。
 
 ## IconTrigger (value)
@@ -25,7 +25,7 @@
 | `panel` | 否 | `IconTriggerPanel` | Optional panel. `ReactNode` or `(close) => ReactNode` so inner elements can close it. |
 | `panelPlacement` | 否 | `IconTriggerPanelPlacement \| undefined` |  |
 | `initialFocus` | 否 | `false \| "first" \| "selected" \| undefined` |  |
-| `panelAlign` | 否 | `"center" \| "start" \| "end" \| undefined` |  |
+| `panelAlign` | 否 | `"start" \| "center" \| "end" \| undefined` |  |
 
 ## IconTriggerAccent (type)
 
