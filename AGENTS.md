@@ -24,7 +24,7 @@ Coding Agent 是第一开发界面：skills 拆开后端与页面，`accounts` �
 8. **`AUTH_MODE=demo` 只绕过登录用户库，不提供业务持久化。** 任何 CRUD（accounts/新模块）都需要 `DATABASE_URL`。新环境和生产用 `pnpm db:migrate`；`pnpm db:push` 只对开发库。不要写「无 Postgres 也能做完整业务 CRUD」。
 9. **后端与页面分开做**：先 module（数据+API），再 page（UI）。不要一条指令无脑抄 accounts 全套且写死详情形态。  
 10. 详情 **无全局默认**：重 → `accounts` 全页；轻 → `/ref/detail-modal` + 本仓 `Modal` + `?id=`（**暂无第二业务样板**）；拿不准问用户。
-13. `ConfirmationDialog` 支持受控 `open` / `onOpenChange`，独立确认直接使用，无需再套 Modal；省略 `open` 时是内联卡，才需要已有宿主。accounts 既有内联模式可保留，不做无关重构。
+13. 确认弹窗一律给 `ConfirmationDialog` 传 `open`（可选 `onOpenChange`），由它自带的 AlertDialog 承载：点遮罩不关闭，必须明确选择；Esc 和取消都会调 `onCancel`。不要再套 Modal 或手写遮罩；省略 `open` 的内联卡只用于嵌在页面内容里的场景。
 14. 侧栏/摘要卡禁止塞「返回列表」；`hideHeader: true` 时壳 `onBack` 不渲染。  
 16. **操作反馈用全站 toast**，禁止页面内嵌「创建成功」绿条：`import { toast } from "@/lib/toast"` → `toast.success/error/info(...)`。宿主已在 `AppShell`。  
 17. 交付：`pnpm check`（typecheck + 规范绊线）；改 UI 后 **浏览器点主路径**（禁止只 curl）。

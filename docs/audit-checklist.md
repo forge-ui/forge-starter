@@ -10,7 +10,7 @@
 - **V3 / M2** Solar 统一从 `@forge-ui-official/core/icons` 导入；Starter 侧栏保持 `BoldDuotone`、`size={20}`。支持 `color` 和 `currentColor`（含 className 继承），不得沿用旧库的 className 禁法。
 - **H6** 检查实际 JSX 与所选壳上下文，不能因注释或未使用 import 判违规；不能证明场景时列待复核。
 - **V7** h1 主标题不用 `text-fg-grey-300/400/500/600`；正文、label、caption 按主清单的语义层级审查，机械检查仅覆盖标题子集。
-- **C1 / C8** core 0.4.7 已导出 Modal、Drawer、ToastProvider/useToast。独立 ConfirmationDialog 使用受控 open/onOpenChange；已有内联确认继续复用本地 Modal，不再二次包受控 Dialog。
+- **C1 / C8** core 0.4.7 已导出 Modal、Drawer、ToastProvider/useToast。确认弹窗必须给 ConfirmationDialog 传 open 使用自带 AlertDialog（点遮罩不关闭）；套 Modal 或手写 `fixed inset-0` 遮罩判违规。
 - **V6** 保留 Starter 的语义状态默认 soft StatusBadge；分类/角色为纯文字，一张表最多一列状态胶囊。
 
 ## Starter 检查项

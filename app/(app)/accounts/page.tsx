@@ -1,7 +1,5 @@
 "use client";
 
-import { Modal } from "@/components/ui/modal";
-
 import { useSemanticPage } from "@/components/semantic-page";
 import { matchesAccount } from "@/lib/accounts/filter";
 
@@ -294,48 +292,39 @@ function AccountsPageContent() {
         }}
       />
 
-      <Modal open={deleteTarget != null} onClose={() => {
-              if (deleting) return;
-              if (agentMode === "delete" && agentFill?.operationId) abandonAgentContinuation(agentFill.operationId);
+      <ConfirmationDialog
+        open={deleteTarget != null}
+        title="删除账号？"
+        description={`确定删除「${deleteTarget?.name ?? ""}」？此操作将从数据库移除，不可撤销。`}
+        color="red"
+        icon={<TrashBinMinimalisticLinear size={32} color="#EA580C" />}
+        confirmLabel={deleting ? "删除中…" : "删除"}
+        cancelLabel="取消"
+        onCancel={() => {
+          if (deleting) return;
+          if (agentMode === "delete" && agentFill?.operationId) abandonAgentContinuation(agentFill.operationId);
+          setAgentMode(null);
+          setAgentFill(null);
+          setDeleteTarget(null);
+        }}
+        onConfirm={() => {
+          if (deleting || !deleteTarget) return;
+          setDeleting(true);
+          const fromAgent = agentMode === "delete";
+          void deleteAccount(deleteTarget.id, { revision: deleteTarget.revision, operationId: agentFill?.operationId, key: agentFill?.operationId ?? deleteTarget.id })
+            .then((receipt) => {
+              toast.success("账号已删除");
+              if (fromAgent) notifyAgentPageDone("delete", receipt);
               setAgentMode(null);
               setAgentFill(null);
               setDeleteTarget(null);
-            }}>
-        {deleteTarget ? (
-          <ConfirmationDialog
-            title="删除账号？"
-            description={`确定删除「${deleteTarget.name}」？此操作将从数据库移除，不可撤销。`}
-            color="red"
-            icon={<TrashBinMinimalisticLinear size={32} color="#EA580C" />}
-            confirmLabel={deleting ? "删除中…" : "删除"}
-            cancelLabel="取消"
-            onCancel={() => {
-              if (deleting) return;
-              if (agentMode === "delete" && agentFill?.operationId) abandonAgentContinuation(agentFill.operationId);
-              setAgentMode(null);
-              setAgentFill(null);
-              setDeleteTarget(null);
-            }}
-            onConfirm={() => {
-              if (deleting) return;
-              setDeleting(true);
-              const fromAgent = agentMode === "delete";
-              void deleteAccount(deleteTarget.id, { revision: deleteTarget.revision, operationId: agentFill?.operationId, key: agentFill?.operationId ?? deleteTarget.id })
-                .then((receipt) => {
-                  toast.success("账号已删除");
-                  if (fromAgent) notifyAgentPageDone("delete", receipt);
-                  setAgentMode(null);
-                  setAgentFill(null);
-                  setDeleteTarget(null);
-                })
-                .catch((err: unknown) => {
-                  toast.error(err instanceof Error ? err.message : "删除失败");
-                })
-                .finally(() => setDeleting(false));
-            }}
-          />
-        ) : null}
-      </Modal>
+            })
+            .catch((err: unknown) => {
+              toast.error(err instanceof Error ? err.message : "删除失败");
+            })
+            .finally(() => setDeleting(false));
+        }}
+      />
 
       <PageTitleToolbar
         title="账号管理"

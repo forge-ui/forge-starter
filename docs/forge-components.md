@@ -11,7 +11,7 @@
 | 页面壳 | 复用 `components/app-shell.tsx`；业务控件 `color={siteConfig.accent}` |
 | 图标 | Solar，唯一入口 `@forge-ui-official/core/icons` |
 | 表单与轻详情 | 既有 `components/ui/modal.tsx`；轻详情以 `?id=` 保留筛选上下文 |
-| 删除确认 | core `ConfirmationDialog` 受控 `open` / `onOpenChange` 独立使用；省略 open 的内联模式才需要已有 Modal 宿主 |
+| 删除确认 | core `ConfirmationDialog` 传 `open`（可选 `onOpenChange`）自带弹窗，点遮罩不关闭；不再套 Modal 或手写遮罩 |
 | 资源台 | `WorkspaceSplit` / `FolderNav` / `ResourceCard` 是本仓适配，不是 core 根导出 |
 | 时间 | `lib/format/datetime.ts`，客户端安全 |
 

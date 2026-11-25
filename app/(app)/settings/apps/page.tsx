@@ -8,7 +8,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { AppDetailDialog } from "@/components/app-detail-dialog";
 import { useAccess } from "@/components/access-store";
 import { toast } from "@/lib/toast";
-import { Modal } from "@/components/ui/modal";
 
 /**
  * 应用管理 — collection CRUD (list + header action + modal form)
@@ -270,20 +269,17 @@ function SettingsAppsContent() {
         onSaved={(id) => { refresh(); openDetail(id); }}
       />
 
-      <Modal open={deleteTarget != null} onClose={() => { agent.clear(); setDeleteTarget(null); }}>
-        {deleteTarget ? (
-          <ConfirmationDialog
-            title="删除应用？"
-            description={`确定删除「${deleteTarget.name}」？将从侧栏应用切换器中移除。`}
-            color="red"
-            icon={<TrashBinMinimalisticLinear size={32} color="var(--fg-red-500)" />}
-            confirmLabel="删除"
-            cancelLabel="取消"
-            onCancel={() => { agent.clear(); setDeleteTarget(null); }}
-            onConfirm={confirmDelete}
-          />
-        ) : null}
-      </Modal>
+      <ConfirmationDialog
+        open={deleteTarget != null}
+        title="删除应用？"
+        description={`确定删除「${deleteTarget?.name ?? ""}」？将从侧栏应用切换器中移除。`}
+        color="red"
+        icon={<TrashBinMinimalisticLinear size={32} color="var(--fg-red-500)" />}
+        confirmLabel="删除"
+        cancelLabel="取消"
+        onCancel={() => { agent.clear(); setDeleteTarget(null); }}
+        onConfirm={confirmDelete}
+      />
 
       <PageTitleToolbar
         title="应用管理"

@@ -3,8 +3,6 @@ import { useSemanticPage } from "@/components/semantic-page";
 import { useResourceAgent } from "@/components/resource-agent";
 import { notifyAgentPageDone } from "@/lib/agent/fill";
 
-import { Modal } from "@/components/ui/modal";
-
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -239,44 +237,37 @@ function MenusPageContent() {
         onEdit={openEdit}
       />
 
-      <Modal open={deleteTarget != null} onClose={() => {
-              if (deleting) return;
+      <ConfirmationDialog
+        open={deleteTarget != null}
+        title="删除菜单？"
+        description={`确定删除「${deleteTarget?.name ?? ""}」？内置侧栏不会因此增减条目。`}
+        color="red"
+        icon={<TrashBinMinimalisticLinear size={32} color="var(--fg-red-500)" />}
+        confirmLabel={deleting ? "删除中…" : "删除"}
+        cancelLabel="取消"
+        onCancel={() => {
+          if (deleting) return;
+          agent.clear();
+          setDeleteTarget(null);
+        }}
+        onConfirm={() => {
+          if (deleting || !deleteTarget) return;
+          setDeleting(true);
+          void deleteMenu(deleteTarget.id, { operationId: agent.fill?.operationId, key: crypto.randomUUID(), updatedAt: agent.fill?.expectedUpdatedAt ?? deleteTarget.updatedAt })
+            .then((receipt) => {
+              if (agent.fill) notifyAgentPageDone("delete", receipt);
+              agent.clear(false);
+              toast.success("菜单已删除");
               agent.clear();
-              setDeleteTarget(null);
-            }}>
-        {deleteTarget ? (
-          <ConfirmationDialog
-            title="删除菜单？"
-            description={`确定删除「${deleteTarget.name}」？内置侧栏不会因此增减条目。`}
-            color="red"
-            icon={<TrashBinMinimalisticLinear size={32} color="var(--fg-red-500)" />}
-            confirmLabel={deleting ? "删除中…" : "删除"}
-            cancelLabel="取消"
-            onCancel={() => {
-              if (deleting) return;
-              agent.clear();
-              setDeleteTarget(null);
-            }}
-            onConfirm={() => {
-              if (deleting) return;
-              setDeleting(true);
-              void deleteMenu(deleteTarget.id, { operationId: agent.fill?.operationId, key: crypto.randomUUID(), updatedAt: agent.fill?.expectedUpdatedAt ?? deleteTarget.updatedAt })
-                .then((receipt) => {
-                  if (agent.fill) notifyAgentPageDone("delete", receipt);
-                  agent.clear(false);
-                  toast.success("菜单已删除");
-                  agent.clear();
-              setDeleteTarget(null);
-                  if (detailId === deleteTarget.id) closeDetail();
-                })
-                .catch((err: unknown) => {
-                  toast.error(err instanceof Error ? err.message : "删除失败");
-                })
-                .finally(() => setDeleting(false));
-            }}
-          />
-        ) : null}
-      </Modal>
+          setDeleteTarget(null);
+              if (detailId === deleteTarget.id) closeDetail();
+            })
+            .catch((err: unknown) => {
+              toast.error(err instanceof Error ? err.message : "删除失败");
+            })
+            .finally(() => setDeleting(false));
+        }}
+      />
 
       <PageTitleToolbar
         title="菜单"

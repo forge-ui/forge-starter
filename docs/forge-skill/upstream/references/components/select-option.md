@@ -1,6 +1,6 @@
 # select-option
 
-自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/forms/select-option.tsx`；core **0.11.4**。
+自动生成；请勿编辑 API 部分。来源：`core/src/components/ui/forms/select-option.tsx`；core **0.11.5**。
 默认值和运行行为以源码初始化为准；类型表不推测默认值。
 
 ## SelectOption (value)
@@ -24,6 +24,7 @@
 | `width` | 否 | `string \| undefined` | Trigger width. Defaults: single=200px, multiple=248px. Accepts any CSS width (e.g. "320px", "100%"). |
 | `className` | 否 | `string \| undefined` |  |
 | `headerAction` | 否 | `ReactNode` |  |
+| `emptyLabel` | 否 | `string \| undefined` | Shown in the open list when there are no options yet (e.g. a field that depends on another). |
 | `value` | 否 | `string \| string[] \| undefined` |  |
 | `onChange` | 否 | `((value: string) => void) \| ((value: string[]) => void) \| undefined` |  |
 
